@@ -77,7 +77,7 @@
 	
 		  <div class="row">
 			<div class="col-8 col-xl-8">
-				<select name="product" id="product" onchange=add_to_cart(this) class="form-select" tabindex="1">
+				<select name="product" id="product" onchange=add_to_cart(this) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
 						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode";
@@ -105,7 +105,7 @@
 				</select>
 			</div>
 			<div class="col-4 col-xl-4">
-				<button id="removeCart" class="btn btn-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Request</button>
+				<button id="removeCart" class="btn btn-grd btn-grd-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Request</button>
 			</div>
 		</div>
     </div>
@@ -132,7 +132,7 @@
 			<div class="box-footer text-center">
 					<div class="loader" id="loader1" style="display:none"></div>
 
-                    <button type="submit" name="btnSubmit" value="SAVE" class="btn btn-lg btn-block btn-success pull-right">Submit Request</button>
+                    <button type="submit" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5">Submit Request</button>
 					
 					
                   </div>

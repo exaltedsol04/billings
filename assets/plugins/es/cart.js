@@ -1,5 +1,4 @@
 let ShoppingCart = document.getElementById("shopping-cart");
-let ShoppingList = document.getElementById("shopping-list");
 let totalAmountShow = document.getElementById("total_amount_show");
 /**
  * ! Basket to hold all the selected items
@@ -73,7 +72,6 @@ let add_to_cart = () => {
   localStorage.setItem("data", JSON.stringify(basket));
   setTimeout(function () {
 	generateCartItems();
-	generateListItems();
   }, 500);
 };
 
@@ -128,8 +126,8 @@ let generateCartItems = () => {
 				  </td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}</td>
 				  <td class="text-center">₹ ${price}</td>						  
-				  <td class="text-center">₹ ${(qty * price).toFixed(2)}
-					<i style="cursor:pointer; margin-left:5px" onclick="removeItem(${id})" class="fa fa-trash-o text-red" title="Remove Item"></i>
+				  <td class="text-center">₹ ${(qty * price).toFixed(2)}</td>
+				  <td class="text-center"><i style="cursor:pointer;" onclick="removeItem(${id})" class="material-icons-outlined text-danger">close</i>
 				  </td>
 				</tr>`;
 						
@@ -143,60 +141,12 @@ let generateCartItems = () => {
    $('#removeCart, #loader').hide();
    let progress = 0;
     ShoppingCart.innerHTML = `<tr>
-						  <td colspan="4" class="text-center">Cart is Empty</td>
+						  <td colspan="5" class="text-center">Cart is Empty</td>
     </td></tr>`;
   }
   
 };
 
-let generateListItems = () => {
-	
-  if (basket.length !== 0) {
-    return (ShoppingList.innerHTML = basket
-      .map((x) => {
-        let { id, item, qty, price, name, pimage } = x;
-
-		$('#loader').hide();
-		let progress = 0;
-		$('#removeCart').show();
-       // let search = shopItemsData.find((x) => x.id === id) || [];
-
-        return `<div class="col-md-3">
-					<div class="box box-primary" style="margin-top: 5px; border:1px solid #3c8dbc">
-						<div class="box-body" style="padding: 2px;">
-							<div class="row">
-								<div class="col-md-12">
-									<img src="${pimage}" width="100%">
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-md-12 text-center" style="margin-top: 5px; white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
-									${name}
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-md-12" style="margin-top: 5px;">
-									<button type="button" name="btnCart" value="SAVE" class="btn btn-primary btn-block" onclick="increment(${id})">+ Add to Cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>`;
-						
-						
-      })
-      .join(""));
-  } else {
-   
-   //totalAmountShow.innerHTML = "";
-   $('#removeCart, #loader').hide();
-   let progress = 0;
-    ShoppingList.innerHTML = `Add your product`;
-  }
-  
-};
-
-generateListItems();
 generateCartItems();
 
 /**
@@ -247,7 +197,6 @@ let decrement = (id) => {
   localStorage.setItem("data", JSON.stringify(basket));
   setTimeout(function () {
 	generateCartItems();
-	generateListItems();
   }, 500);
 };
 
@@ -279,7 +228,6 @@ let removeItem = (id) => {
   calculation();
   setTimeout(function () {
 	generateCartItems();
-	generateListItems();
   }, 500);
   //generateCartItems();
   TotalAmount();
@@ -322,7 +270,6 @@ let clearCart = () => {
   basket = [];
   setTimeout(function () {
 	generateCartItems();
-	generateListItems();
   }, 500);
   //generateCartItems();
   calculation();
