@@ -165,54 +165,51 @@
 		
 		
 		
-function printBarcode(ID) {
+		function printBarcode(ID) {
 
-    // Open new tab
-    let printWindow = window.open('', '_blank');
+			// Open new tab
+			let printWindow = window.open('', '_blank');
 
-    // HTML for print page
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Print Barcode</title>
-            <style>
-                body {
-                    margin: 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                }
-            </style>
-        </head>
-        <body>
-            <svg id="barcode"></svg>
+			// HTML for print page
+			printWindow.document.write(`
+				<html>
+				<head>
+					<title>Print Barcode</title>
+					<style>
+						body {
+							margin: 0;
+							display: flex;
+							justify-content: center;
+							align-items: center;
+							height: 100vh;
+						}
+					</style>
+				</head>
+				<body>
+					<svg id="barcode"></svg>
 
-            <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
-            <script>
-                JsBarcode("#barcode", "${ID}", {
-                    format: "CODE128",
-                    displayValue: true,
-                    height: 60,
-                    width: 2,
-                    fontSize: 14
-                });
+					<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+					<script>
+						JsBarcode("#barcode", "${ID}", {
+							format: "CODE128",
+							displayValue: true,
+							height: 60,
+							width: 2,
+							fontSize: 14
+						});
 
-                setTimeout(function () {
-                    window.print();
-                    window.close();
-                }, 300);
-            <\/script>
-        </body>
-        </html>
-    `);
+						setTimeout(function () {
+							window.print();
+							window.close();
+						}, 300);
+					<\/script>
+				</body>
+				</html>
+			`);
 
-    printWindow.document.close();
-}
-
-
-
-	</script>
+			printWindow.document.close();
+		}
+</script>
 
 
 </body>
