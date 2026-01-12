@@ -10919,27 +10919,4 @@ textarea.form-control-lg {
 	
 }
 
-/*@media print {
-
-   
-    body * {
-        visibility: hidden;
-    }
-
-    
-    #printBarcodeArea,
-    #printBarcodeArea * {
-        visibility: visible;
-    }
-
-    
-    #printBarcodeArea {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-    }
-}*/
-
 /*# sourceMappingURL=bootstrap.min.css.map */
