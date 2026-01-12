@@ -363,5 +363,14 @@
 			$date2 = $date1[2].'-'.$date1[1].'-'.$date1[0];
 			return $date2;
 		}
+		function explode_name($name='')
+		{
+			if (strpos($name, '*|*') !== false) {
+				list($english, $hindi) = explode('*|*', $name, 2);
+
+				return trim($english) . '<br>' . trim($hindi);
+			}
+			return trim($name);
+		}
 	}
 ?>
