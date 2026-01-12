@@ -167,10 +167,7 @@
 		
 		function printBarcode(ID) {
 
-			// Open new tab
 			let printWindow = window.open('', '_blank');
-
-			// HTML for print page
 			printWindow.document.write(`
 				<html>
 				<head>
