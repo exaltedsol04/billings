@@ -31,7 +31,7 @@
 
 			
 	//Domain URL
-	define("FOLDER_PATH", "bl/");
+	define("FOLDER_PATH", "billings/");
 	define("DOMAIN_NAME", "http://".$_SERVER['HTTP_HOST']."/".FOLDER_PATH);
 	define("SITE_URL", DOMAIN_NAME."");
 
