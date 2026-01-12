@@ -126,8 +126,8 @@ let generateCartItems = () => {
 				  </td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}</td>
 				  <td class="text-center">₹ ${price}</td>						  
-				  <td class="text-center">₹ ${(qty * price).toFixed(2)}
-					<i style="cursor:pointer; margin-left:5px" onclick="removeItem(${id})" class="fa fa-trash-o text-red" title="Remove Item"></i>
+				  <td class="text-center">₹ ${(qty * price).toFixed(2)}</td>
+				  <td class="text-center"><i style="cursor:pointer;" onclick="removeItem(${id})" class="material-icons-outlined text-danger">close</i>
 				  </td>
 				</tr>`;
 						
@@ -141,7 +141,7 @@ let generateCartItems = () => {
    $('#removeCart, #loader').hide();
    let progress = 0;
     ShoppingCart.innerHTML = `<tr>
-						  <td colspan="4" class="text-center">Cart is Empty</td>
+						  <td colspan="5" class="text-center">Cart is Empty</td>
     </td></tr>`;
   }
   

@@ -105,7 +105,7 @@
 				</select>
 			</div>
 			<div class="col-4 col-xl-4">
-				<button id="removeCart" class="btn btn-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Request</button>
+				<button id="removeCart" class="btn btn-grd btn-grd-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Request</button>
 			</div>
 		</div>
     </div>
@@ -132,7 +132,7 @@
 			<div class="box-footer text-center">
 					<div class="loader" id="loader1" style="display:none"></div>
 
-                    <button type="submit" name="btnSubmit" value="SAVE" class="btn btn-lg btn-block btn-success pull-right">Submit Request</button>
+                    <button type="submit" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5">Submit Request</button>
 					
 					
                   </div>

@@ -107,7 +107,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 				</select>
 			</div>
 			<div class="col-md-2">
-				 <button id="removeCart" class="btn btn-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Cart</button>
+				 <button id="removeCart" class="btn btn-grd btn-grd-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Cart</button>
 			</div>
 		</div>
         </div>
@@ -143,6 +143,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 					  <th>Product</th>
 					  <th class="text-center">Price</th>
 					  <th class="text-center">Total Price</th>
+					  <th class="text-center">Remove</th>
 					</tr>
 				  </thead>
 				  <tbody id="shopping-cart">
@@ -156,7 +157,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 				<div class="loader" id="loader1" style="display:none"></div>
 				
 				
-				<button type="submit" name="btnUser" value="SAVE" class="btn btn-lg btn-block btn-success pull-right">PAY</button>
+				<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right">PAY</button>
 				
 				
 			</div>
