@@ -148,7 +148,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="8" class="text-center">No record found.</div>
+										<td colspan="8" class="text-center">No record found.
 										</td>
 									  </tr>
 						<?PHP
@@ -252,7 +252,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="8" class="text-center">No record found.</div>
+										<td colspan="8" class="text-center">No record found.
 										</td>
 									  </tr>
 						<?PHP
