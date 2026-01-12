@@ -77,7 +77,7 @@
 	
 		  <div class="row">
 			<div class="col-8 col-xl-8">
-				<select name="product" id="product" onchange=add_to_cart(this) class="form-select" tabindex="1">
+				<select name="product" id="product" onchange=add_to_cart(this) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
 						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode";

@@ -43,10 +43,10 @@
 	<!--plugins-->
 	<!--<script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>-->
 	<script src="assets/plugins/metismenu/metisMenu.min.js"></script>
-	<?php if($page=='products.php' || $page=='invoices.php' || $page=='purchases.php' || $page=='purchase-request.php') {  ?>
+	<?php if($page=='products.php' || $page=='invoices.php' || $page=='purchases.php' || $page=='purchase-request.php' || $page=='cart.php') {  ?>
 		<script src="assets/plugins/datatable/js/jquery.dataTables.min.js"></script>
 		<script src="assets/plugins/datatable/js/dataTables.bootstrap5.min.js"></script>
-	<?php } if($page=='purchase-request.php') {  ?>
+	<?php } if($page=='purchase-request.php' || $page=='cart.php') {  ?>
 		<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 		<script src="assets/plugins/select2/js/select2-custom.js"></script>
 	<?php } ?>
@@ -118,7 +118,7 @@
 	$(function () {
 		<?php if($page=='purchases.php') {  ?>
 		$('[data-bs-toggle="tooltip"]').tooltip();
-		<?php } if($page=='products.php' || $page=='invoices.php' || $page=='purchases.php' || $page=='purchase-request.php') {  ?>
+		<?php } if($page=='products.php' || $page=='invoices.php' || $page=='purchases.php' || $page=='purchase-request.php' || $page=='cart.php') {  ?>
 		
 			var table = $('#example2').DataTable( {
 				lengthChange: false,
