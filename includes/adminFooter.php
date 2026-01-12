@@ -8,9 +8,8 @@
       <p class="mb-0">Copyright © <?PHP echo date('Y'); ?> <a href="<?php echo SITE_URL; ?>"><?php echo SITE_TITLE; ?></a>. All right reserved.</p>
     </footer>
     <!--top footer-->
-	<?php if($page=='purchases.php') {  ?>	
 	<!-----------modal for delete--->
-	
+	<?php if($page=='purchases.php') {  ?>	
 	
 	<div class="modal fade" id="confirmDelete">
 	  <div class="modal-dialog modal-dialog-centered">
@@ -33,10 +32,9 @@
 		  </div>
 		</div>
 	  </div>
-	</div>
-				
-	<!--  MODAL FOR delete--->
+	</div>	
 	<?php } ?>
+	<!--  MODAL FOR delete--->
 	<!--bootstrap js-->
 	<script src="assets/js/bootstrap.bundle.min.js"></script>
 
@@ -48,7 +46,7 @@
 	<?php if($page=='products.php' || $page=='invoices.php' || $page=='purchases.php' || $page=='purchase-request.php') {  ?>
 		<script src="assets/plugins/datatable/js/jquery.dataTables.min.js"></script>
 		<script src="assets/plugins/datatable/js/dataTables.bootstrap5.min.js"></script>
-	<?php if($page=='purchase-request.php') {  ?>
+	<?php } if($page=='purchase-request.php') {  ?>
 		<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 		<script src="assets/plugins/select2/js/select2-custom.js"></script>
 	<?php } ?>
@@ -156,132 +154,5 @@
 				.appendTo( '#example1_wrapper .col-md-6:eq(0)' );
 		<?php } ?>
 	});
-		/*$(".select2").select2();
-		$('#table1, #table2').DataTable({
-			'responsive'	: true,
-			"sScrollX"		: true,
-			'paging'      	: true,
-			'lengthChange'	: true,
-			'searching'   	: true,
-			'ordering'    	: false,
-			'info'        	: true,
-			'autoWidth'   	: false  
-		});
-		$('#example1').DataTable({
-			"sScrollX": true,
-			'paging'      : true,
-			'lengthChange': true,
-			'searching'   : false,
-			'ordering'    : false,
-			'info'        : true,
-			'autoWidth'   : false  
-		});*/
-    /*$('#example2').DataTable({
-	  "sScrollX": true,
-      'paging'      : true,
-      'lengthChange': true,
-      'searching'   : true,
-      'ordering'    : false,
-      'info'        : true,
-      'autoWidth'   : false
-    })
-    $('#example3').DataTable({
-		"sScrollX": true,
-      'paging'      : false,
-      'lengthChange': true,
-      'searching'   : false,
-      'ordering'    : false,
-      'info'        : false,
-      'autoWidth'   : false
-    })
-    $('#example4').DataTable({
-		"sScrollX": true,
-      'paging'      : false,
-      'lengthChange': true,
-      'searching'   : true,
-      'ordering'    : false,
-      'info'        : false,
-      'autoWidth'   : false
-    })
-  })
-   //Date picker
-    $('#datepicker,#supply_date').datepicker({
-	  dateFormat: "dd/mm/yy",
-	  changeYear: true,
-	  changeMonth: true,
-	  onSelect: function() {
-		  $(this).focus();
-	  }
-    })
-
-	$(document).ready(function() {
-		$('#dateFrom').val('<?php echo isset($_POST['dateFrom']) ? $_POST['dateFrom'] : ''; ?>');
-		$('#dateTo').val('<?php echo isset($_POST['dateTo']) ? $_POST['dateTo'] : ''; ?>');
-	});
-	$('#dateFrom').datepicker({
-		dateFormat: "dd/mm/yy",
-		changeYear: true,
-		changeMonth: true,
-		onSelect: function (date) {
-			var date2 = $('#dateFrom').datepicker('getDate');
-			date2.setDate(date2.getDate());
-			$('#dateTo').datepicker('setDate', date2);
-			$('#dateTo').datepicker('option', 'minDate', date2);
-		}
-    });
-	$('#dateTo').datepicker({
-		dateFormat: "dd/mm/yy",
-		changeYear: true,
-		changeMonth: true
-    });
-	//start for delete record
-	$(document).on("click", ".delModal", function () {
-        var rowId = $(this).data('id');
-        $(".modal-body #rowId").val( rowId );
-        $('#delModal').modal('show');
-    });*/
-	<?php if($page=='products.php333') {  ?>	
-    $(document).on("click", "#delRow", function () {
-        var rowId = $("#rowId").val();
-        var res = rowId.split("-");
-        var id  = res[0];
-        var c  = res[1];
-        var t  = res[2];
-        $.ajax({
-            type: "POST",
-            url: "ajax.php",
-            data:{
-                action: 'delete_more_material',
-                id: id,
-                table: t
-            },
-            success: function(d){
-                if(d!='') {
-                    $("#dataRow" + c).remove();
-                    $("#msg").html(d);
-					
-					var sum = 0;
-					$(".total_amount").each(function(){
-						sum += +$(this).val();
-					});
-					$("#tot_amt").html(sum.toFixed(2));
-                }
-            }
-        });
-        $('#delModal').modal('hide');
-    });
-	<?php } ?>
-    //end for delete record
-	//FOR SELECT2 AUTO FOCUS START	
-		/*$(document).on('focus', '.select2', function (e) {
-			if (e.originalEvent) {
-				var s2element = $(this).siblings('select');
-				s2element.select2('open');
-				// Set focus back to select2 element on closing.
-				s2element.on('select2:closing', function (e) {
-					s2element.select2('focus');
-			   });
-			}
-		}); */
-	//FOR SELECT2 AUTO FOCUS END
+	
 </script>

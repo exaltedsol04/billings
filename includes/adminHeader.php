@@ -1,5 +1,7 @@
 <?PHP
 	$page = basename($_SERVER["PHP_SELF"]);
+	
+	//echo $page;die;
 ?>
 <!doctype html>
 <html lang="en" data-bs-theme="semi-dark">
