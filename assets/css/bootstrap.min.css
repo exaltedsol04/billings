@@ -10896,5 +10896,50 @@ textarea.form-control-lg {
 	.d-print-none {
 		display: none!important
 	}
+	
+	
+	
+	/* Activate ONLY when body has class */
+    body.print-barcode-mode * {
+        visibility: hidden;
+    }
+
+    body.print-barcode-mode .print-barcode-only,
+    body.print-barcode-mode .print-barcode-only * {
+        visibility: visible;
+    }
+
+    body.print-barcode-mode .print-barcode-only {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+    }
+	
 }
+
+/*@media print {
+
+   
+    body * {
+        visibility: hidden;
+    }
+
+    
+    #printBarcodeArea,
+    #printBarcodeArea * {
+        visibility: visible;
+    }
+
+    
+    #printBarcodeArea {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+    }
+}*/
+
 /*# sourceMappingURL=bootstrap.min.css.map */

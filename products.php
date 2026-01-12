@@ -111,7 +111,7 @@
     </div>
   </main>
   <!--end main wrapper-->
-  <div class="modal fade" id="barcodeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <!--<div class="modal fade" id="barcodeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -126,7 +126,12 @@
 			</div>
 		</div>
 	</div>
+</div>-->
+<div id="printBarcodeArea" class="print-barcode-only">
+    <svg id="barcode"></svg>
 </div>
+
+
 <!--end main wrapper-->
 	<!-- ######### FOOTER START ############### -->
 		<?PHP include_once("includes/adminFooter.php"); ?>
@@ -135,8 +140,8 @@
 
   <!--plugins-->
 	<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-		<script type="text/javascript">
-		function printBarcode(ID) {
+	<script type="text/javascript">
+		function printBarcode_ss(ID) {
 			//alert(ID);
 			$('#barcodeModal').modal("show");
 			JsBarcode("#barcode", ID, {
@@ -146,8 +151,48 @@
 				fontSize: 14
 			});
 		};
+		
+	
+		function printBarcode_dd(ID) {
 
-		</script>
+			document.getElementById('barcode').innerHTML = '';
+
+			JsBarcode("#barcode", ID, {
+				format: "CODE128",
+				displayValue: true,
+				height: 60,
+				fontSize: 14
+			});
+
+			setTimeout(function () {
+				window.print();
+			}, 300);
+		}
+		
+		function printBarcode(ID) {
+
+			// Enable barcode-only print mode
+			document.body.classList.add('print-barcode-mode');
+
+			document.getElementById('barcode').innerHTML = '';
+
+			JsBarcode("#barcode", ID, {
+				format: "CODE128",
+				displayValue: true,
+				height: 60,
+				fontSize: 14
+			});
+
+			setTimeout(function () {
+				window.print();
+
+				// Disable after printing
+				document.body.classList.remove('print-barcode-mode');
+			}, 300);
+		}
+
+
+	</script>
 
 
 </body>
