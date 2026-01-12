@@ -3,13 +3,13 @@
 	$pageAccessRoleIds = [1];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
-
+	
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
 		<?PHP include_once("includes/adminHeader.php"); ?>
 	<!-- ######### HEADER END ############### -->
-      
+     
 	<!-- ######### HEADER START ############### -->
 		<?PHP include_once("includes/adminMenu.php"); ?>
 	<!-- ######### HEADER END ############### -->
@@ -80,7 +80,7 @@
 											  <tr id="dataRow<?php echo($selectValue->id);?>">
 												<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
 												<td><?PHP echo $selectValue->barcode; ?></td>
-												<td><?PHP echo $selectValue->name; ?></td>
+												<td><?PHP echo $general_cls_call->explode_name($selectValue->name); ?></td>
 												<td><?PHP echo $selectValue->stock.' '.$selectValue->type; ?></td>
 												<td><?PHP echo $selectValue->measurement; ?></td>
 												<td class="text-center">
