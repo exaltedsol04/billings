@@ -55,22 +55,19 @@
 								</thead>
 								<tbody>
 									<?php
-									$sqlQuery = $general_cls_call->select_query("*", POS_ORDERS, " WHERE 1", array(), 2);
+									$sqlQuery = $general_cls_call->select_query("id, invoice_date, name, total_sale, payment", INVOICE, " WHERE 1", array(), 2);
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
 										foreach($sqlQuery as $selectValue)
-										{
-											$customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' => $selectValue->pos_user_id], 1);
-
-											$pos_order_item = $general_cls_call->select_query("*", POS_ORDERS_ITEMS, "WHERE pos_order_id=:pos_order_id", [':pos_order_id' => $selectValue->id], 1);											
+										{	
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>">
 										<td><?PHP echo $selectValue->id; ?></td>
-										<td><?PHP echo date('j M Y g:i A', strtotime($selectValue->created_at)); ?></td>
-										<td><?PHP echo $customer->name; ?></td>
-										<td><?PHP echo $pos_order_item->total_price; ?></td>
-										<td><?PHP echo 'N/A'; ?></td>
+										<td><?PHP echo $selectValue->invoice_date; ?></td>
+										<td><?PHP echo $selectValue->name; ?></td>
+										<td><?PHP echo $selectValue->total_sale; ?></td>
+										<td><?PHP echo $selectValue->payment; ?></td>
 									  </tr>
 										<?PHP
 												$i++;

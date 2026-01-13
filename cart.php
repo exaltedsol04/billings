@@ -87,12 +87,6 @@
 				
 				$sucMsg="Data has been submitted successfully";
 				
-				/*if($last_insert_id) {
-					echo "<script src='bower_components/jquery/dist/jquery.min.js'></script><script src='dist/js/cart.js'></script><script>
-					alert(1);
-						clearCart();
-					</script>";
-				}*/
 			}
 			
 			/*if ($last_insert_id) {
