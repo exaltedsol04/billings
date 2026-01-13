@@ -45,12 +45,13 @@
 										<td></td>
 										<td></td>
 									</tr>
-								  <tr>
-									<th>Invoice Id</th>
-									<th>Date Time</th>
+								  <tr class="text-center">
+									<th style="width:100px">Invoice Id</th>
 									<th>Customer Name</th>
+									<th>Mobile</th>
+									<th>Date Time</th>
 									<th>Total Sale</th>
-									<th>Payment</th>
+									<!--<th>Payment</th>-->
 								  </tr>
 								</thead>
 								<tbody>
@@ -65,12 +66,13 @@
 
 											$pos_order_item = $general_cls_call->select_query("*", POS_ORDERS_ITEMS, "WHERE pos_order_id=:pos_order_id", [':pos_order_id' => $selectValue->id], 1);											
 									?>
-									  <tr id="dataRow<?php echo($selectValue->id);?>">
-										<td><?PHP echo $selectValue->id; ?></td>
-										<td><?PHP echo date('j M Y g:i A', strtotime($selectValue->created_at)); ?></td>
+									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
+										<td style="width:100px">#<?PHP echo $selectValue->id; ?></td>
 										<td><?PHP echo $customer->name; ?></td>
-										<td><?PHP echo $pos_order_item->total_price; ?></td>
-										<td><?PHP echo 'N/A'; ?></td>
+										<td><?PHP echo $customer->mobile; ?></td>
+										<td><?PHP echo date('j M Y g:i A', strtotime($selectValue->created_at)); ?></td>
+										<td>₹<?PHP echo $pos_order_item->total_price; ?></td>
+										<!--<td><?PHP echo $pos_order_item->total_price; ?></td>-->
 									  </tr>
 										<?PHP
 												$i++;
