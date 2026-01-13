@@ -118,13 +118,14 @@ let generateCartItems = () => {
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default btn-qty" style="cursor:pointer" onclick="decrement(${id})">−</button>
 						</span>
-						<input type="text" class="form-control text-center qty-input" value="${qty}" min="1" id="qty_${id}">
+						<input type="text" class="form-control text-center qty-input" value="${qty}" min="1" id="qty_${id}" name="qty[]">
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default btn-qty" style="cursor:pointer" onclick="increment(${id})" >+</button>
 						</span>
 					</div>
 				  </td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}</td>
+				  <input type="hidden" value="${id}" name="product_variant_id[]">
 				  <td class="text-center">₹ ${price}</td>						  
 				  <td class="text-center">₹ ${(qty * price).toFixed(2)}</td>
 				  <td class="text-center"><i style="cursor:pointer;" onclick="removeItem(${id})" class="material-icons-outlined text-danger">close</i>
@@ -254,6 +255,7 @@ let TotalAmount = () => {
     return (totalAmountShow.innerHTML = `<tr>
 						  <td colspan="3">Sum</td>
 						  <td id="cartAmount" class="cartAmount text-center">₹ ${amount.toFixed(2)}</td>
+						  <input type="hidden" name="cart_total_amt" value="${amount.toFixed(2)}">
 						</tr>`);
   } else return;
 };

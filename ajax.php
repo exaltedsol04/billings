@@ -37,8 +37,6 @@
 		
 		case "productbarcord":
 			$barcode = $_POST['barcode'];
-			//echo $barcode;die;
-			
 			$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, PV.stock_unit_id ,p.name, p.image, p.barcode";
 						$tables = PRODUCT_VARIANTS . " pv
 						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
@@ -75,6 +73,24 @@
 			}
 			//echo "<pre>";print_r($productArr);die;
 			echo json_encode($productArr);
+		break;
+		
+		case "userdetails":
+		
+			$mobile = $_POST['phone'];
+			$user_details = $general_cls_call->select_query("id, name, country_code, mobile", USERS, "WHERE mobile=:mobile", array(':mobile'=>$mobile), 1);
+			//echo "<pre>";print_r($user_details);die;
+			$userArray = [];
+			if(!empty($user_details))
+			{
+				$userArray[] = [
+					'id' => $user_details->id,
+					'name' => $user_details->name,
+					'mobile' => $user_details->mobile,
+				];
+			}
+			echo json_encode($userArray);
+			
 		break;
     }
 ?>

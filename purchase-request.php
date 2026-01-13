@@ -8,7 +8,7 @@
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnSubmit'])) && $_POST['btnSubmit'] === "SAVE")
 	{	
 		extract($_POST);
-		
+		//echo "<pre>";print_r($product_variant_id);die;
 		if(!empty($product_variant_id))
 		{
 			foreach($product_variant_id as $k=>$val) {
@@ -97,7 +97,7 @@
 									$imagePath = IMG_PATH . 'noImg.jpg';
 								}*/
 					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$arr->name.'@@@'.$arr->product_id; ?>"><?PHP echo $arr->name.' ('.$arr->stock.' '.$arr->type.')'; ?></option>
+								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id; ?>"><?PHP echo $general_cls_call->cart_product_name($arr->name).' ('.$arr->stock.' '.$arr->type.')'; ?></option>
 					<?PHP
 							}
 						}
@@ -192,7 +192,7 @@
 					?>
                       <tr id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $arr->barcode; ?></td>
-						<td><?PHP echo $arr->name; ?></td>
+						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
 						<td><?PHP echo $arr->measurement; ?></td>
 						<td class="text-center"><?PHP echo $arr->status == 1 ? '<span class="text-success">Approved</span>' : '<span class="text-danger">Pending</span>' ; ?></td>

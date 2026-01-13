@@ -8,7 +8,7 @@
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
 	{	
 		extract($_POST);
-		if($txtUsername!='')
+		/*if($txtUsername!='')
 		{
 			if($txtNewPassword==$txtConfirmPassword)
 			{
@@ -33,6 +33,72 @@
 		else
 		{
 			$erMsg = "Please enter your username.";
+		}*/
+		
+		if(!empty($product_variant_id))
+		{
+			//echo "<pre>";print_r($product_variant_id);die;
+			//echo $supplier_hidden_id . '---' .$_SESSION['USER_ID'] .'---'. $cart_total_amt;die;
+			$sellers_details = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 1);
+			$store_id = $sellers_details->admin_id;
+			
+			$field = "pos_user_id, user_id, store_id, total_amount, discount_amount, discount_percentage, payment_method, created_at, updated_at";
+			$value = ":pos_user_id, :user_id, :store_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :created_at, :updated_at";
+			
+			$addExecute=array(
+				':pos_user_id'			=> $general_cls_call->specialhtmlremover($supplier_hidden_id),
+				':user_id'				=> $_SESSION['USER_ID'],
+				':store_id'				=> $general_cls_call->specialhtmlremover($store_id),
+				':total_amount'			=> $general_cls_call->specialhtmlremover($cart_total_amt),
+				':discount_amount'			=> '',
+				':discount_percentage'		=> '',
+				':payment_method'		=> '',
+				':created_at'			=> date("Y-m-d H:i:s"),
+				':updated_at'			=> date("Y-m-d H:i:s")
+			);
+			
+			$last_insert_id = $general_cls_call->insert_query(POS_ORDERS, $field, $value, $addExecute);
+			//echo $last_insert_id; die;
+			foreach($product_variant_id as $k=>$val) {
+				
+				
+				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $val), 1);
+				//echo "<pre>";print_r($product_variant_dtls);die;
+				$product_id = $product_variant_dtls->product_id;
+				
+				$unit_price = $product_variant_dtls->discounted_price;
+				$total_price = $qty[$k] * $unit_price;
+				
+				$field = "pos_order_id, product_id, product_variant_id, quantity, unit_price, total_price, created_at, updated_at";
+				$value = ":pos_order_id, :product_id, :product_variant_id, :quantity, :unit_price, :total_price, :created_at, :updated_at";
+				
+				
+				$addExecute=array(
+					':pos_order_id'			=> $general_cls_call->specialhtmlremover($last_insert_id),
+					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
+					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
+					':quantity'				=> $general_cls_call->specialhtmlremover($qty[$k]),
+					':unit_price'			=> $general_cls_call->specialhtmlremover($unit_price),
+					':total_price'			=> $general_cls_call->specialhtmlremover($total_price),
+					':created_at'			=> date("Y-m-d H:i:s"),
+					':updated_at'			=> date("Y-m-d H:i:s")
+				);
+				$general_cls_call->insert_query(POS_ORDERS_ITEMS, $field, $value, $addExecute);
+				
+				$sucMsg="Data has been submitted successfully";
+				
+				/*if($last_insert_id) {
+					echo "<script src='bower_components/jquery/dist/jquery.min.js'></script><script src='dist/js/cart.js'></script><script>
+					alert(1);
+						clearCart();
+					</script>";
+				}*/
+			}
+			
+			/*if ($last_insert_id) {
+				header("Location: print_cart_invoice?order_id=".$last_insert_id);
+				exit;
+			}*/
 		}
 	}
 /*=========== ACCOUNT SETTINGS END ===========*/
@@ -92,7 +158,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 			<div class="col-md-5">
 				<input type="text" class="form-control" name="barcode" id="barcode" oninput="getProducts(this.value)" placeholder="Barcode">
 			</div>
-			<div class="col-md-5">
+			<!--<div class="col-md-5">
 				<select name="supplier_id" id="supplier_id" class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
@@ -108,7 +174,12 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 						}
 					?>
 				</select>
+			</div>-->
+			<div class="col-md-5">
+				<input type="text" class="form-control" id="supplier_id" name="supplier_id" placeholder="Mobile No" oninput="user_details(this.value)">
+				<div id="user_suggestions" class="list-group position-absolute w-100" style="z-index:1000;"></div>
 			</div>
+			
 			<div class="col-md-2">
 				 <button id="removeCart" class="btn btn-grd btn-grd-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Cart</button>
 			</div>
@@ -162,7 +233,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 				
 				<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right">PAY</button>
 				
-				
+				<input type="hidden" id="supplier_hidden_id" name="supplier_hidden_id">
 			</div>
         </div>
         </form>
@@ -239,12 +310,23 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 	<!-- ######### FOOTER END ############### -->
 	<script src="assets/plugins/es/cart.js"></script>
 	
+   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
   </body>
 </html>
 
 <script>
-
+$(document).ready(function(){
+	<?php if (!empty($last_insert_id)) { ?>
+        var order_id = <?= (int)$last_insert_id ?>;
+		clearCart();
+        window.open(
+            "<?= SITE_URL ?>print_cart_invoice?order_id=" + order_id,
+            "_blank"
+        );
+    <?php } ?>
+});
 
 function getProducts(val)
 {
@@ -270,10 +352,8 @@ function getProducts(val)
 					data[0].name + '@@@' +
 					data[0].image;
 					//var parameter = data[0].id + '@@@' + data[0].discounted_price + '@@@' + data[0].name + '@@@' + data[0].imagePath;
-					alert(parameter);
 					//add_to_cart(parameter);
 					
-					// 🔥 Load cart.js dynamically IF not loaded
 					if (typeof add_to_cart !== 'function') {
 
 						$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/cart.js")
@@ -332,5 +412,37 @@ function getProducts(val)
 			   
 			}
 		});
+}
+function user_details(val)
+{
+	var datapost = 'action=userdetails&phone='+val;
+		$.ajax({
+			type: "POST",
+			url: "<?PHP echo SITE_URL; ?>ajax",
+			data: datapost,
+			success: function(response){
+				var result = JSON.parse(response);
+				//alert(data[0].id);alert(data[0].name);alert(data[0].mobile);
+				//var list = data[0].mobile + ' '+ data[0].name;
+				var html = '';
+				//alert(result.length);
+				if (result.length > 0) {
+					$.each(result, function (i, user) {
+						html += '<a href="javascript:;" class="list-group-item list-group-item-action" ' + 'onclick="selectUser(\'' + user.mobile + '\', \'' + user.name + '\', ' + user.id + ')">' +user.mobile + ' (' + user.name + ')' +'</a>';
+					});
+					$('#user_suggestions').html(html).show();
+				} else {
+					$('#user_suggestions').hide();
+				}
+			}
+		});
+}
+
+function selectUser(mobile, name, id) {
+    $('#supplier_id').val(mobile + ' ( ' + name + ')' );
+    $('#user_suggestions').hide();
+
+    // optional hidden field
+    $('#supplier_hidden_id').val(id);
 }
 </script>
