@@ -35,6 +35,46 @@
 			}
 		break;
 		
-		
+		case "productbarcord":
+			$barcode = $_POST['barcode'];
+			//echo $barcode;die;
+			
+			$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, PV.stock_unit_id ,p.name, p.image, p.barcode";
+						$tables = PRODUCT_VARIANTS . " pv
+						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
+						$where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";
+						$params = [];
+						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+			//echo "<pre>";print_r($sqlQuery);die;
+			$productArr = [];
+
+			foreach ($sqlQuery as $val) {
+				$imagePath = MAIN_SERVER_PATH . $val->image;
+				if (!empty($val->image) && file_exists($imagePath)) {
+					$imagePath = MAIN_SERVER_PATH . $val->image;
+				} else {
+					$imagePath = IMG_PATH . 'noImg.jpg';
+				}
+				
+				// get unit 
+				$stock_unit_id = $general_cls_call->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$val->stock_unit_id), 1);
+				
+				$productArr[] = [
+					'id'               => $val->id,
+					'product_id'       => $val->product_id,
+					'type'             => $val->type,
+					'stock'            => $val->stock,
+					'measurement'      => $val->measurement,
+					'discounted_price' => $val->discounted_price,
+					'name'             => $general_cls_call->cart_product_name($val->name),
+					'image'            => $val->image,
+					'barcode'          => $val->barcode,
+					'imagePath'        => $imagePath,
+					'stock_unit_id'          => $stock_unit_id->name,
+				];
+			}
+			//echo "<pre>";print_r($productArr);die;
+			echo json_encode($productArr);
+		break;
     }
 ?>

@@ -25,6 +25,7 @@ let add_to_cart = () => {
 	let productId = myArray[3];
 	let qty = 1;
 	let search = purchaseBasket.find((x) => x.id === selectedItem);
+	//alert('ok');
 
   if (search === undefined) {
     purchaseBasket.push({

@@ -36,15 +36,15 @@ let progress_bar = () => {
     }, 2);*/ // speed (lower = faster)
 };
 
-let add_to_cart = () => {
-	
+//let add_to_cart = () => {
+function add_to_cart(product) {	
 	$("#loader").show();
 	
 	progress_bar();
     
+	//alert('ok');
 	
-	
-	let product = $("#product").val();
+	//let product = $("#product").val();
 	const myArray = product.split("@@@");
 	let selectedItem = parseInt(myArray[0]);
 	let productPrice = myArray[1];

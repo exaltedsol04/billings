@@ -7,4 +7,5 @@
 	define("INVOICE",  TABLE_PREFIX."invoice");
 	define("USERS",  TABLE_PREFIX."users");
 	define("PURCHASE_REQUESTS",  TABLE_PREFIX."purchase_requests");
+	define("UNITS",  TABLE_PREFIX."units");
 ?>

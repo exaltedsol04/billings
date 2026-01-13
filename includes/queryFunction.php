@@ -146,7 +146,6 @@
 		{
 			$query_string = "SELECT $fields FROM $tables $where";
 			$query = $this->db->prepare($query_string);
-
 			foreach ($data_array as $key => $value) {
 				$data_array[$key] = stripslashes($value);
 			}
@@ -369,6 +368,16 @@
 				list($english, $hindi) = explode('*|*', $name, 2);
 
 				return trim($english) . '<br>' . trim($hindi);
+			}
+			return trim($name);
+		}
+		
+		function cart_product_name($name='')
+		{
+			if (strpos($name, '*|*') !== false) {
+				list($english, $hindi) = explode('*|*', $name, 2);
+
+				return trim($english) . ' (' . trim($hindi) .')';
 			}
 			return trim($name);
 		}

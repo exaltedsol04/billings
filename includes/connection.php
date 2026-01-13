@@ -36,7 +36,8 @@
 	define("SITE_URL", DOMAIN_NAME."");
 
 	define("IMAGE_FOLDER", "images/");
-	define("IMG_PATH", DOMAIN_NAME."dist/img/");
+	//define("IMG_PATH", DOMAIN_NAME."dist/img/");
+	define("IMG_PATH", DOMAIN_NAME."assets/images/");
 	define("IMAGE_PATH", DOMAIN_NAME."dist/images/");
 
 
