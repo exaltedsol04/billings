@@ -39,7 +39,7 @@ let progress_bar = () => {
 //let add_to_cart = () => {
 function add_to_cart(product) {	
 	$("#loader").show();
-	
+	$('#err_empty_cart').text('');
 	progress_bar();
     
 	$('#product-modal').modal('hide');
@@ -134,6 +134,8 @@ let generateCartItems = () => {
 						
       })
       .join(""));
+	  
+	  
   } else {
    // ShoppingCart.innerHTML = "";
    totalAmountShow.innerHTML = "";

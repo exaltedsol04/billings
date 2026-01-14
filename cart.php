@@ -153,6 +153,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 			</div>-->
 			<div class="col-md-5">
 				<input type="text" class="form-control" name="barcode" id="barcode" oninput="getProducts(this.value)" placeholder="Barcode">
+				<span id="err_empty_cart" class="text-danger"></span>
 			</div>
 			<!--<div class="col-md-5">
 				<select name="supplier_id" id="supplier_id" class="form-select select2-dropdown" tabindex="1">
@@ -224,6 +225,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 				</table>
 				  
 			</div>
+			
 			<input type="hidden" name="payment_method" id="payment_method">
 			<div class="box-footer text-center">
 				<div class="loader" id="loader1" style="display:none"></div>
@@ -484,6 +486,7 @@ function cart_pay()
 	
 	if(typeof cartData === 'undefined')
 	{
+		$('#err_empty_cart').text('Please select barcode and add item');
 		return false;
 	}
 	
