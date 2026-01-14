@@ -249,49 +249,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
                         </a>
                       </div>
                       <div class="modal-body">
-					  <span id="show-products"></span>
-                        <!--<div class="row row-cols-1 row-cols-lg-2">
-						
-                          <div class="col">
-                            <div class="card rounded-4">
-                              <div class="card-body">
-                                <img src="assets/images/gallery/01.png" class="img-fluid rounded-4" alt="">
-                                <div class="mt-3">
-                                  <h5 class="mb-0 fw-bold product-short-title">Syndrona</h5>
-                                  <p class="mb-0 product-short-name">Color Printed Kurta</p>
-                                  <div class="product-price d-flex align-items-center gap-2 mt-2">
-                                    <div class="h6 fw-bold">$458</div>
-                                    <div class="h6 fw-light text-secondary text-decoration-line-through">$2089</div>
-                                    <div class="h6 fw-bold text-danger">(70% off)</div>
-                                  </div>
-                                </div>
-                                <div class="d-grid mt-2">
-                                  <a href="javascript:;" class="btn btn-grd-danger rounded-4">Buy Now</a>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div class="col">
-                            <div class="card rounded-4">
-                              <div class="card-body">
-                                <img src="assets/images/gallery/03.png" class="img-fluid rounded-4" alt="">
-                                <div class="mt-3">
-                                  <h5 class="mb-0 fw-bold product-short-title">Syndrona</h5>
-                                  <p class="mb-0 product-short-name">Color Printed Kurta</p>
-                                  <div class="product-price d-flex align-items-center gap-2 mt-2">
-                                    <div class="h6 fw-bold">$458</div>
-                                    <div class="h6 fw-light text-secondary text-decoration-line-through">$2089</div>
-                                    <div class="h6 fw-bold text-danger">(70% off)</div>
-                                  </div>
-                                </div>
-                                <div class="d-grid mt-2">
-                                  <a href="javascript:;" class="btn btn-grd btn-grd-warning rounded-4">Buy Now</a>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>--><!--end row-->
+							<span id="show-products"></span>
                       </div>
                       <div class="modal-footer border-top-0">
                         <button type="button" class="btn btn-grd btn-grd-danger rounded-0"
@@ -330,7 +288,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 											<span class="text-danger" id="err_p_method"></span>
 										</div>
 
-										<button type="button" class="btn btn-grd-danger rounded-4 px-5" onclick="pay_now()">
+										<button type="button" class="btn btn-grd btn-grd-primary px-5" onclick="pay_now()">
 											Pay Now
 										</button>
 										</span>
@@ -499,11 +457,33 @@ function selectUser(mobile, name, id) {
 function cart_pay()
 {
 	//cart-list-form
+	var items = localStorage.getItem("data", JSON.stringify(basket));
+	if (items) {
+		var data = JSON.parse(items);
+		if (data.length > 0) {
+			var cartData = data[0].id;
+		}
+	}
+	
+	//alert(cartData);
 	var supplier_id = $('#supplier_id').val();
+	var supplier_hidden_id = $('#supplier_hidden_id').val();
+	//var cart_total_amt = $('#cart_total_amt').val();
 	$('#err_supplier_id').text('');
 	if(supplier_id == '')
 	{
 		$('#err_supplier_id').text('Please enter seller mobile no.');
+		return false;
+	}
+	
+	if(supplier_hidden_id == '')
+	{
+		$('#err_supplier_id').text('Please enter valid mobile no.');
+		return false;
+	}
+	
+	if(typeof cartData === 'undefined')
+	{
 		return false;
 	}
 	
