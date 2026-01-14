@@ -4,7 +4,7 @@
 	//echo $page;die;
 ?>
 <!doctype html>
-<html lang="en" data-bs-theme="semi-dark">
+<html lang="en" data-bs-theme="<?php echo $_SESSION['ROLE_ID']==1 ? 'light' : 'semi-dark'; ?>">
 
 <head>
   <meta charset="utf-8">
