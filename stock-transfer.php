@@ -110,6 +110,7 @@
 
 $imagePath = IMG_PATH . 'noImg.jpg';
 
+
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
@@ -123,37 +124,26 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 <main class="main-wrapper">
     <div class="main-content">
 		  <div class="row">
-			<!--<div class="col-md-5">
+			<div class="col-md-5">
 				<select name="product" id="product" onchange=add_to_cart(this) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
-						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode";
-						$tables = PRODUCT_VARIANTS . " pv
-						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
-						$where = "WHERE 1 ORDER BY p.name";
-						$params = [];
-						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+						$sqlQuery = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 2);
 						if($sqlQuery[0] != '')
 						{
 							foreach($sqlQuery as $arr)
 							{	
-								$imagePath = MAIN_SERVER_PATH . $arr->image;
-								if (!empty($arr->image) && file_exists($imagePath)) {
-									$imagePath = MAIN_SERVER_PATH . $arr->image;
-								} else {
-									$imagePath = IMG_PATH . 'noImg.jpg';
-								}
 					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$arr->name.'@@@'.$imagePath; ?>"><?PHP echo $arr->name.' ('.$arr->stock.' '.$arr->type.')'; ?></option>
+						<option value="<?PHP echo $arr->admin_id ?>" <?php echo $arr->admin_id== $_SESSION['USER_ID'] ? 'selected' : '' ?>><?PHP echo $arr->name; ?></option>
 					<?PHP
 							}
 						}
 					?>
 				</select>
-			</div>-->
-			<div class="col-md-5">
-				<input type="text" class="form-control" name="barcode" id="barcode" oninput="getProducts(this.value)" placeholder="Barcode">
 			</div>
+			<!--<div class="col-md-5">
+				<input type="text" class="form-control" name="barcode" id="barcode" oninput="getProducts(this.value)" placeholder="Barcode">
+			</div>-->
 			<!--<div class="col-md-5">
 				<select name="supplier_id" id="supplier_id" class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
@@ -326,10 +316,7 @@ $(document).ready(function(){
 
 function getProducts(val)
 {
-	var barcode = val;
-	//alert(barcode);
-	if(barcode && barcode.trim() !== '')
-	{
+		var barcode = val;
 		var datapost = 'action=productbarcord&barcode='+barcode;
 		$.ajax({
 			type: "POST",
@@ -411,7 +398,6 @@ function getProducts(val)
 			   
 			}
 		});
-	}
 }
 function user_details(val)
 {

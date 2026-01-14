@@ -37,7 +37,7 @@
 		
 		case "productbarcord":
 			$barcode = $_POST['barcode'];
-			$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, PV.stock_unit_id ,p.name, p.image, p.barcode";
+			$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode";
 						$tables = PRODUCT_VARIANTS . " pv
 						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
 						$where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";

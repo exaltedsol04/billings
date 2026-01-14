@@ -230,7 +230,7 @@
 									  <tr id="dataARow<?php echo($arr->id);?>">
 										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
 										<td><?PHP echo $arr->barcode; ?></td>
-										<td><?PHP echo $arr->name; ?></td>
+										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
 										<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
 										<td><?PHP echo $arr->measurement; ?></td>
 										<td><?PHP echo $arr->request_date; ?></td>

@@ -83,7 +83,7 @@
 									?>
 									  <tr>
 										<td colspan="5">
-										<div class="alert alert-warning text-center" role="alert"><strong>No record found.</strong></div>
+										 No record found.
 										</td>
 									  </tr>
 						<?PHP
