@@ -42,7 +42,7 @@ function add_to_cart(product) {
 	
 	progress_bar();
     
-	//alert('ok');
+	$('#product-modal').modal('hide');
 	
 	//let product = $("#product").val();
 	const myArray = product.split("@@@");

@@ -38,7 +38,6 @@
 		if(!empty($product_variant_id) && !empty($supplier_hidden_id))
 		{
 			//echo "<pre>";print_r($product_variant_id);die;
-			//echo $supplier_hidden_id . '---' .$_SESSION['USER_ID'] .'---'. $cart_total_amt;die;
 			//echo "<pre>";print_r($_POST);die;
 			$sellers_details = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 1);
 			$store_id = $sellers_details->admin_id;
@@ -51,8 +50,8 @@
 				':user_id'				=> $_SESSION['USER_ID'],
 				':store_id'				=> $general_cls_call->specialhtmlremover($store_id),
 				':total_amount'			=> $general_cls_call->specialhtmlremover($cart_total_amt),
-				':discount_amount'			=> '0.00',
-				':discount_percentage'		=> '0.00',
+				':discount_amount'		=> '0.00',
+				':discount_percentage'	=> '0.00',
 				':payment_method'		=> '',
 				':created_at'			=> date("Y-m-d H:i:s"),
 				':updated_at'			=> date("Y-m-d H:i:s")

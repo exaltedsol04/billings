@@ -35,10 +35,10 @@
 			$erMsg = "Please enter your username.";
 		}*/
 		
-		if(!empty($product_variant_id) && !empty($supplier_hidden_id))
+		//if(!empty($product_variant_id) && !empty($supplier_hidden_id))
+		if($_POST)
 		{
 			//echo "<pre>";print_r($product_variant_id);die;
-			//echo $supplier_hidden_id . '---' .$_SESSION['USER_ID'] .'---'. $cart_total_amt;die;
 			//echo "<pre>";print_r($_POST);die;
 			$sellers_details = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 1);
 			$store_id = $sellers_details->admin_id;
@@ -53,7 +53,7 @@
 				':total_amount'			=> $general_cls_call->specialhtmlremover($cart_total_amt),
 				':discount_amount'			=> '0.00',
 				':discount_percentage'		=> '0.00',
-				':payment_method'		=> '',
+				':payment_method'		=> $payment_method,
 				':created_at'			=> date("Y-m-d H:i:s"),
 				':updated_at'			=> date("Y-m-d H:i:s")
 			);
@@ -203,7 +203,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 		}
 	?>
 	<div class="card">
-		<form name="frm" action="" method="post">
+		<form name="frm" action="<?= SITE_URL ?>cart" method="post" id="cart-list-form">
 		<div class="card-body">
 			<div class="table-responsive">
 				<table class="table table-striped table-bordered">
@@ -223,11 +223,12 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 				</table>
 				  
 			</div>
+			<input type="hidden" name="payment_method" id="payment_method">
 			<div class="box-footer text-center">
 				<div class="loader" id="loader1" style="display:none"></div>
 				
 				
-				<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right">PAY</button>
+				<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right" onclick="cart_pay()">PAY</button>
 				
 				<input type="hidden" id="supplier_hidden_id" name="supplier_hidden_id">
 			</div>
@@ -290,6 +291,53 @@ $imagePath = IMG_PATH . 'noImg.jpg';
                           </div>
                         </div>--><!--end row-->
                       </div>
+                      <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-grd btn-grd-danger rounded-0"
+                          data-bs-dismiss="modal">Cancel</button>
+                        <!--<button type="button" class="btn btn-grd btn-grd-info rounded-0">Save changes</button>-->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+	
+	<!-- Py modal Modal -->
+			<div class="modal fade" id="paymentmode-modal">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header border-bottom-0 py-2 btn-grd bg-grd-primary">
+                        <h5 class="modal-title">Payment Mode</h5>
+                        <a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+                          <i class="material-icons-outlined">close</i>
+                        </a>
+                      </div>
+                      <div class="modal-body">
+						<div class="d-flex justify-content-center">
+							<div class="col-lg-6 col-md-8 col-sm-12">
+								<div class="card rounded-0 text-center">
+									<div class="card-body">
+
+										<!--<img src="assets/images/gallery/01.png"
+											 class="img-fluid rounded-4 mb-3"
+											 alt="">-->
+
+										<div class="mb-3">
+								<select onchange="pay_method(this.value)" class="form-select select2-dropdown mx-auto"
+													style="max-width: 250px;">
+												<option value="">Select</option>
+												<option value="cod">COD</option>
+												<option value="online">Online</option>
+											</select>
+										</div>
+
+										<button type="button" class="btn btn-grd-danger rounded-4 px-5" onclick="pay_now()">
+											Pay Now
+										</button>
+
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
                       <div class="modal-footer border-top-0">
                         <button type="button" class="btn btn-grd btn-grd-danger rounded-0"
                           data-bs-dismiss="modal">Cancel</button>
@@ -444,5 +492,21 @@ function selectUser(mobile, name, id) {
 
     // optional hidden field
     $('#supplier_hidden_id').val(id);
+}
+function cart_pay()
+{
+	$('#paymentmode-modal').modal('show');
+}
+function pay_method(val)
+{
+	$('#payment_method').val(val);
+}
+function pay_now()
+{
+	 alert('ok');
+	//$('#cart-list-form').submit();
+	$('#paymentmode-modal').modal('hide');
+	document.getElementById('cart-list-form').submit();
+	
 }
 </script>

@@ -57,7 +57,7 @@
 			</li>
 			<li <?php if($page=='stock-transfer.php') { echo ('class="mm-active"');} ?>>
 				<a href="<?php echo SITE_URL.'stock-transfer'; ?>">
-					<div class="parent-icon"><i class="material-icons-outlined">inventory_2</i></div>
+					<div class="parent-icon"><i class="material-icons-outlined">sync_alt</i></div>
 					<div class="menu-title">Stock Transfer</div>
 				</a>
 			</li>
