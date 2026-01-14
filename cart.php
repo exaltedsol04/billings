@@ -490,10 +490,12 @@ function cart_pay()
 		return false;
 	}
 	
+	$('#err_p_method').text('');
+	
 	$('#show-payment-div').show();
 	$('#show-stock-div').hide();
 	$('#show-stock-div').html('');
-	$('#payment_method').val('').trigger('change');
+	//$('#payment_method').val('').trigger('change');
 	$('#paymentmode-modal').modal('show');
 }
 function pay_method(val)
@@ -503,6 +505,7 @@ function pay_method(val)
 function pay_now()
 {
 	var p_method =  $('#payment_method').val();
+	//alert(p_method);
 	if(p_method == '')
 	{
 		$('#err_p_method').text('Please select payment type');
@@ -554,10 +557,16 @@ function save_post_data()
 		data: datapost,
 		success: function(response){
 			$('#actionstatus').val('paynow');
-			var result = JSON.parse(response);
-			//alert(response);
+			$('#supplier_id').val('');
+			var order_id = JSON.parse(response);
+			//alert(order_id);
 			clearCart();
 			$('#paymentmode-modal').modal('hide');
+			clearCart();
+				window.open(
+					"<?= SITE_URL ?>print_cart_invoice?order_id=" + order_id,
+					"_blank"
+				);
 		}
 	});
 }

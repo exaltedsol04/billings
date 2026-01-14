@@ -20,7 +20,12 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
 	$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 	
 	//echo "<pre>"; print_r($sqlQuery);die;
-						
+//------------------------
+$pos_order_itm = $general_cls_call->select_query("*", POS_ORDERS_ITEMS, "WHERE pos_order_id=:pos_order_id", [':pos_order_id' => $order_id], 1);
+$product_id = $pos_order_itm->product_id;
+
+$product_variant_data  = $general_cls_call->select_query("*", PRODUCTS, "WHERE id=:id", [':id' => $product_id], 1);		
+$barcode = 	$product_variant_data->barcode;		
 ?>
 <!DOCTYPE html>
 <html>
@@ -139,7 +144,7 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
         </tr>-->
         <tr>
             <td><strong>Date:</strong></td>
-            <td><?= date('j M Y g:i A', strtotime($order->created_at)) ?></td>
+            <td><?= date('d/m/Y H:i:s', strtotime($order->created_at)) ?></td>
         </tr>
         <!--<tr>
             <td><strong>GST Reg:</strong></td>
@@ -170,11 +175,11 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
     <table class="items">
         <thead>
             <tr>
-                <th>Sl.</th>
-                <th>Name</th>
+                <th>HSN Code</th>
+                <th>Desc.</th>
+				<th>Net Price</th>
                 <th>Qty</th>
-                <th>Price</th>
-                <th>Amount</th>
+                <th>Value</th>
             </tr>
         </thead>
 
@@ -182,6 +187,7 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
 		<?php 
 		$sl =1;
 		$tot_amt = 0;
+		$count_qty = 0;
 		if($sqlQuery[0] != '')
 		{
 			foreach($sqlQuery as $arr)
@@ -189,15 +195,16 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
 				$product = $general_cls_call->select_query("*", PRODUCTS, "WHERE id=:id", [':id' => $arr->id], 1);
 		?>
 				<tr>
-					<td><?= $sl ?></td>
+					<td><?= $barcode ?></td>
 					<td><?= $general_cls_call->cart_product_name($product->name) ?></td>
-					<td><?= $arr->quantity ?><br><small>Pieces</small></td>
 					<td>₹<?= $arr->unit_price ?></td>
+					<td><?= $arr->quantity ?><br><small>Pieces</small></td>
 					<td>₹<?= $arr->total_price ?></td>
 				</tr>
 		<?php 
 			$sl++;
 			  $tot_amt = $tot_amt + $arr->total_price;
+			  $count_qty = $count_qty + $arr->quantity;
 			}
 		}
 		?>
@@ -206,8 +213,24 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
 
     <!-- SUMMARY -->
     <table class="summary">
+		<tr>
+            <td class="label bold"  style="text-align:left;">Item</td>
+            <td class="value bold"><?= $sl  ?></td>
+        </tr>
+		<tr>
+            <td class="label bold"  style="text-align:left;">Qty.</td>
+            <td class="value bold"><?= $count_qty  ?></td>
+        </tr>
+		<tr>
+            <td class="label bold"  style="text-align:left;">Total discount.</td>
+            <td class="value bold">₹0.00</td>
+        </tr>
+		<tr>
+            <td class="label bold"  style="text-align:left;">Net sale value (Inc. GST)</td>
+            <td class="value bold">₹<?= $tot_amt  ?></td>
+        </tr>
         <tr>
-            <td class="label bold">Total Amt:</td>
+            <td class="label bold"  style="text-align:left;">Total Amt. Paid:</td>
             <td class="value bold">₹<?= $tot_amt  ?></td>
         </tr>
         <!--<tr>

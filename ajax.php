@@ -102,7 +102,7 @@
 				$stockLimit = $product_variant_dtls->stock;
 				
 				// check from product_stock_transaction 
-				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id", array(':product_variant_id'=> $val), 'stock');
+				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $val, 'status'=>1, 'product_id'=> $product_variant_dtls->product_id), 'stock');
 				//echo $stock_used->price; die;
 				$remainingStock = $stockLimit + $stock_used->price;
 				//echo $remainingStock; die;
