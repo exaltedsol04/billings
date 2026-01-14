@@ -92,5 +92,143 @@
 			echo json_encode($userArray);
 			
 		break;
+		
+		case "paynow":
+			//echo "<pre>";print_r($_POST);die;
+			$stockArr =[];
+			foreach($_POST['product_variant_id'] as $k=>$val)
+			{
+				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id", array(':id'=> $val), 1);
+				$stockLimit = $product_variant_dtls->stock;
+				
+				// check from product_stock_transaction 
+				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id", array(':product_variant_id'=> $val), 'stock');
+				//echo $stock_used->price; die;
+				$remainingStock = $stockLimit + $stock_used->price;
+				//echo $remainingStock; die;
+				//if($remainingStock <= 0)
+				if($remainingStock < $_POST['qty'][$k])
+				{
+					$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
+					$product_name = $general_cls_call->cart_product_name($product_dtls->name);
+					
+					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
+					$unitname = $unit_dtls->name;
+					
+					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					
+					$available_stock = $stockLimit + $stock_used->price;
+					/*if($available_stock == 0)
+					{
+						$variant_stock = 'Out of stock';
+					}
+					else{
+						$variant_stock = $available_stock;
+					}*/
+					
+					
+					$stockArr[] = [
+						"product_name" => $product_name,
+						"variant_name" => $p_variant_name,
+						"variant_stock" => $stockLimit + $stock_used->price,
+					];
+					
+				}
+				
+			}
+			
+			//echo "<pre>";print_r($stockArr);die;
+			echo json_encode($stockArr);
+		break;
+		
+		case "paynowsave":
+			 
+			//echo "<pre>";print_r($_POST);die;
+			$sellers_details = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 1);
+			$store_id = $sellers_details->admin_id;
+			
+			$field = "pos_user_id, user_id, store_id, total_amount, discount_amount, discount_percentage, payment_method, created_at, updated_at";
+			$value = ":pos_user_id, :user_id, :store_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :created_at, :updated_at";
+			
+			$addExecute=array(
+				':pos_user_id'			=> $_POST['supplier_hidden_id'],
+				':user_id'				=> $_SESSION['USER_ID'],
+				':store_id'				=> $general_cls_call->specialhtmlremover($store_id),
+				':total_amount'			=> $_POST['cart_total_amt'],
+				':discount_amount'			=> '0.00',
+				':discount_percentage'		=> '0.00',
+				':payment_method'		=> $_POST['payment_method'],
+				':created_at'			=> date("Y-m-d H:i:s"),
+				':updated_at'			=> date("Y-m-d H:i:s")
+			);
+			
+			$last_insert_id = $general_cls_call->insert_query(POS_ORDERS, $field, $value, $addExecute);
+			//echo $last_insert_id; die;
+			foreach($_POST['product_variant_id'] as $k=>$val) {
+				
+				
+				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $val), 1);
+				//echo "<pre>";print_r($product_variant_dtls);die;
+				$product_id = $product_variant_dtls->product_id;
+				
+				$unit_price = $product_variant_dtls->discounted_price;
+				$total_price = $_POST['qty'][$k] * $unit_price;
+				
+				$field = "pos_order_id, product_id, product_variant_id, quantity, unit_price, total_price, created_at, updated_at";
+				$value = ":pos_order_id, :product_id, :product_variant_id, :quantity, :unit_price, :total_price, :created_at, :updated_at";
+				
+				
+				$addExecute=array(
+					':pos_order_id'			=> $general_cls_call->specialhtmlremover($last_insert_id),
+					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
+					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
+					':quantity'				=> $_POST['qty'][$k],
+					':unit_price'			=> $general_cls_call->specialhtmlremover($unit_price),
+					':total_price'			=> $general_cls_call->specialhtmlremover($total_price),
+					':created_at'			=> date("Y-m-d H:i:s"),
+					':updated_at'			=> date("Y-m-d H:i:s")
+				);
+				$general_cls_call->insert_query(POS_ORDERS_ITEMS, $field, $value, $addExecute);
+			}
+			
+			// insert into product_stock_transaction
+			if($last_insert_id)
+			{
+				foreach($_POST['product_variant_id'] as $k=>$val) {
+					
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $val), 1);
+					//echo "<pre>";print_r($product_variant_dtls);die;
+					$product_id = $product_variant_dtls->product_id;
+					//echo $val.'-> '.$product_id; die;
+					$unit_price = $product_variant_dtls->discounted_price;
+					$total_price = $_POST['qty'][$k] * $unit_price;
+					
+					$field = "seller_id, product_variant_id, product_id,  stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, approved_by, approved_date, order_id";
+					$value = ":seller_id, :product_variant_id, :product_id, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :approved_by, :approved_date, :order_id";
+					
+					
+					$addExecute=array(
+						':seller_id'			=> $_POST['supplier_hidden_id'],
+						':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
+						':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
+						
+						':stock'				=> -($_POST['qty'][$k]),
+						':created_date'			=> date("Y-m-d H:i:s"),
+						':status'				=> 1,
+						':selling_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->discounted_price),
+						':purchase_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->price),
+						':transaction_type'		=> 2,
+						':received_selled_id'	=> null,
+						':approved_by'			=> null,
+						':approved_date'		=> null,
+						':order_id'		       => $general_cls_call->specialhtmlremover($last_insert_id),
+					);
+					$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
+				}
+			}
+				
+		echo json_encode($last_insert_id);
+			
+		break;
     }
 ?>

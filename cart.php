@@ -174,6 +174,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 			<div class="col-md-5">
 				<input type="text" class="form-control" id="supplier_id" name="supplier_id" placeholder="Mobile No" oninput="user_details(this.value)">
 				<div id="user_suggestions" class="list-group position-absolute w-100" style="z-index:1000;"></div>
+				<span class="text-danger" id="err_supplier_id"></span>
 			</div>
 			
 			<div class="col-md-2">
@@ -231,6 +232,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 				<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right" onclick="cart_pay()">PAY</button>
 				
 				<input type="hidden" id="supplier_hidden_id" name="supplier_hidden_id">
+				<input type="hidden" name="action" value="paynow" id="actionstatus">
 			</div>
         </div>
         </form>
@@ -312,29 +314,29 @@ $imagePath = IMG_PATH . 'noImg.jpg';
                       </div>
                       <div class="modal-body">
 						<div class="d-flex justify-content-center">
-							<div class="col-lg-6 col-md-8 col-sm-12">
-								<div class="card rounded-0 text-center">
+							<div class="col-lg-12 col-md-12 col-sm-12">
+								<!--<div class="card rounded-0 text-center">-->
 									<div class="card-body">
 
-										<!--<img src="assets/images/gallery/01.png"
-											 class="img-fluid rounded-4 mb-3"
-											 alt="">-->
-
+										<span id="show-stock-div" style="display:none;"></span>
+										<span id="show-payment-div">
 										<div class="mb-3">
-								<select onchange="pay_method(this.value)" class="form-select select2-dropdown mx-auto"
+											<select onchange="pay_method(this.value)" class="form-select select2-dropdown mx-auto"
 													style="max-width: 250px;">
 												<option value="">Select</option>
 												<option value="cod">COD</option>
 												<option value="online">Online</option>
 											</select>
+											<span class="text-danger" id="err_p_method"></span>
 										</div>
 
 										<button type="button" class="btn btn-grd-danger rounded-4 px-5" onclick="pay_now()">
 											Pay Now
 										</button>
+										</span>
 
 									</div>
-								</div>
+								<!--</div>-->
 							</div>
 						</div>
 					</div>
@@ -478,6 +480,7 @@ function user_details(val)
 					$.each(result, function (i, user) {
 						html += '<a href="javascript:;" class="list-group-item list-group-item-action" ' + 'onclick="selectUser(\'' + user.mobile + '\', \'' + user.name + '\', ' + user.id + ')">' +user.mobile + ' (' + user.name + ')' +'</a>';
 					});
+					$('#err_supplier_id').text('');
 					$('#user_suggestions').html(html).show();
 				} else {
 					$('#user_suggestions').hide();
@@ -495,6 +498,19 @@ function selectUser(mobile, name, id) {
 }
 function cart_pay()
 {
+	//cart-list-form
+	var supplier_id = $('#supplier_id').val();
+	$('#err_supplier_id').text('');
+	if(supplier_id == '')
+	{
+		$('#err_supplier_id').text('Please enter seller mobile no.');
+		return false;
+	}
+	
+	$('#show-payment-div').show();
+	$('#show-stock-div').hide();
+	$('#show-stock-div').html('');
+	$('#payment_method').val('').trigger('change');
 	$('#paymentmode-modal').modal('show');
 }
 function pay_method(val)
@@ -503,10 +519,63 @@ function pay_method(val)
 }
 function pay_now()
 {
-	 alert('ok');
-	//$('#cart-list-form').submit();
-	$('#paymentmode-modal').modal('hide');
-	document.getElementById('cart-list-form').submit();
+	var p_method =  $('#payment_method').val();
+	if(p_method == '')
+	{
+		$('#err_p_method').text('Please select payment type');
+		return false;
+	}
 	
+	var datapost = $('#cart-list-form').serialize();
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			var result = JSON.parse(response);
+			
+			var html = '<div class="col-md-12">';
+				//alert(result.length);
+				if (result.length > 0) {
+					$.each(result, function (i, stock) {
+						html += '<div class="row align-items-start border-bottom py-2">';
+							html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
+							html += '<span class="col-md-3 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
+							html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
+						html += '</div>';
+					});
+					$('#show-payment-div').hide();
+					$('#show-stock-div').html(html).show();
+				} else {
+					$('#show-payment-div').show();
+					$('#show-stock-div').hide();
+					$('#actionstatus').val('paynowsave');
+					save_post_data();
+				}
+			html += '</div>';
+		}
+	});
+	
+	
+	//$('#paymentmode-modal').modal('hide');
+	//document.getElementById('cart-list-form').submit();
+	
+}
+
+function save_post_data()
+{
+	var datapost = $('#cart-list-form').serialize();
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			$('#actionstatus').val('paynow');
+			var result = JSON.parse(response);
+			//alert(response);
+			clearCart();
+			$('#paymentmode-modal').modal('hide');
+		}
+	});
 }
 </script>
