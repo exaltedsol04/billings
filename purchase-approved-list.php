@@ -60,15 +60,15 @@
 				<div class="card">
 					<div class="card-body">
 						<div class="table-responsive">
-							<table id="example1" class="table table-striped table-bordered">
+							<table id="example2" class="table table-striped table-bordered">
 								<thead>
 									<tr>
-							<td><input type="text" class="form-control" id="search-zero1" placeholder="Search by barcode"></td>
-							<td><input type="text" class="form-control" id="search-one1" placeholder="Search by product name"></td>
+							<td><input type="text" class="form-control" id="search-zero" placeholder="Search by barcode"></td>
+							<td><input type="text" class="form-control" id="search-one" placeholder="Search by product name"></td>
 							<td></td>
 							<td></td>
 							<td></td>
-							<td><input type="text" class="form-control" id="search-five1" placeholder="Search by seller name"></td>
+							<td><input type="text" class="form-control" id="search-five" placeholder="Search by seller name"></td>
 							<td></td>
 						</tr>
                       <tr>
