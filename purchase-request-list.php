@@ -12,14 +12,15 @@
 	/*=========== STATUS CHANGE START ================*/
 		if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '2'))
 		{		
-			$setValues="status=:status, approved_by=:approved_by";
+			$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date";
 			$whereClause=" WHERE id=:id";
 			$updateExecute=array(
 				':approved_by'=>$_SESSION['USER_ID'],
 				':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
+				':approved_date'=> date("Y-m-d H:i:s"),
 				':id'=>$_GET['id']
 			);
-			$updateRec=$general_cls_call->update_query(PURCHASE_REQUESTS, $setValues, $whereClause, $updateExecute);
+			$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
 			header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php')."?m=1");
 		}
 	/*=========== STATUS CHANGE END ================*/
