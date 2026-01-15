@@ -22,44 +22,67 @@
               </a>
             </li>
 			<?php if(isset($_SESSION['ROLE_ID']) && $_SESSION['ROLE_ID']==1) {?>
-			
 			<li <?php if($page=='products.php') { echo ('class="mm-active"');} ?>>
-				<a href="<?php echo SITE_URL.'products'; ?>">
-					<div class="parent-icon"><i class="material-icons-outlined">apps</i></div>
-					<div class="menu-title">Products</div>
-				</a>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">apps</i>
+				</div>
+				<div class="menu-title">Products</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'products'; ?>"><i class="material-icons-outlined">arrow_right</i>Product List</a>
+				</li>
+			  </ul>
 			</li>
-			
 			<li <?php if($page=='invoices.php') { echo ('class="mm-active"');} ?>>
-				<a href="<?php echo SITE_URL.'invoices'; ?>">
-					<div class="parent-icon"><i class="material-icons-outlined">description</i></div>
-					<div class="menu-title">Invoices</div>
-				</a>
-			</li>	
-			<li <?php if($page=='purchases.php') { echo ('class="mm-active"');} ?>>
-				<a href="<?php echo SITE_URL.'purchases'; ?>">
-					<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i></div>
-					<div class="menu-title">Purchases</div>
-				</a>
-			</li>	
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">description</i>
+				</div>
+				<div class="menu-title">Billing</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'invoices'; ?>"><i class="material-icons-outlined">arrow_right</i>Invoices</a>
+				</li>
+			  </ul>
+			</li>
+			<li <?php if($page=='purchase-request-list.php' || $page=='purchase-approved-list') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
+				</div>
+				<div class="menu-title">Purchases</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'purchase-request-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Request List</a></li>
+				<li><a href="<?php echo SITE_URL.'purchase-approved-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved List</a></li>
+			  </ul>
+			</li>
+
 			<?php } elseif(isset($_SESSION['ROLE_ID']) && $_SESSION['ROLE_ID']==3) {?>
 			<li <?php if($page=='cart.php') { echo ('class="mm-active"');} ?>>
 				<a href="<?php echo SITE_URL.'cart'; ?>">
 					<div class="parent-icon"><i class="material-icons-outlined">shopping_bag</i></div>
-					<div class="menu-title">Cart</div>
-				</a>
-			</li>	
-			<li <?php if($page=='purchase-request.php') { echo ('class="mm-active"');} ?>>
-				<a href="<?php echo SITE_URL.'purchase-request'; ?>">
-					<div class="parent-icon"><i class="material-icons-outlined">inventory_2</i></div>
-					<div class="menu-title">Purchase Request</div>
+					<div class="menu-title">POS</div>
 				</a>
 			</li>
+			<li <?php if($page=='purchase-request.php' || $page=='purchase-report') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">inventory_2</i>
+				</div>
+				<div class="menu-title">Purchases</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'purchase-request'; ?>"><i class="material-icons-outlined">arrow_right</i>Request</a></li>
+				<li><a href="<?php echo SITE_URL.'purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Report</a></li>
+			  </ul>
+			</li>
 			<li <?php if($page=='stock-transfer.php') { echo ('class="mm-active"');} ?>>
-				<a href="<?php echo SITE_URL.'stock-transfer'; ?>">
-					<div class="parent-icon"><i class="material-icons-outlined">sync_alt</i></div>
-					<div class="menu-title">Stock Transfer</div>
-				</a>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">sync_alt</i>
+				</div>
+				<div class="menu-title">Stock Management</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Stock</a></li>
+			  </ul>
 			</li>
 			<?php } ?>
 			<li>

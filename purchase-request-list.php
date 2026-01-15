@@ -1,0 +1,291 @@
+<?PHP error_reporting(0);
+	include_once 'init.php';
+	$pageAccessRoleIds = [1];
+	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+	ob_start();
+	if(isset($_GET['m']) && $_GET['m']==1) {
+			$msg= '<div class="alert alert-success alert-dismissible">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+				Success! Status update successfully.
+			</div>';
+		}
+	/*=========== STATUS CHANGE START ================*/
+		if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '0'))
+		{		
+			$setValues="status=:status, approved_by=:approved_by";
+			$whereClause=" WHERE id=:id";
+			$updateExecute=array(
+				':approved_by'=>$_SESSION['USER_ID'],
+				':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
+				':id'=>$_GET['id']
+			);
+			$updateRec=$general_cls_call->update_query(PURCHASE_REQUESTS, $setValues, $whereClause, $updateExecute);
+			if($updateRec) {
+				
+				$pr = $general_cls_call->select_query("product_id, product_variant_id, qty", PURCHASE_REQUESTS, "WHERE id=:id", array(':id'=>$_GET['id']), 1);
+				
+				$setValues="stock = stock + :stock";
+				$whereClause=" WHERE id=:id";
+				$updateExecute=array(
+					':stock' => $pr->qty,
+					':id' => $pr->product_variant_id,
+				);
+				$updateRec=$general_cls_call->update_query(PRODUCT_VARIANTS, $setValues, $whereClause, $updateExecute);
+				header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php')."?m=1");
+			}
+		}
+	/*=========== STATUS CHANGE END ================*/
+	ob_end_flush();
+?>
+	<!-- ######### HEADER START ############### -->
+		<?PHP include_once("includes/adminHeader.php"); ?>
+	<!-- ######### HEADER END ############### -->
+      
+	<!-- ######### HEADER START ############### -->
+		<?PHP include_once("includes/adminMenu.php"); ?>
+	<!-- ######### HEADER END ############### -->
+
+
+  <!--start main wrapper-->
+  <main class="main-wrapper">
+    <div class="main-content">
+		
+		<?php echo $msg;?>
+		<div id="msg"></div>
+					
+      <!--breadcrumb-->
+				<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+					<div class="breadcrumb-title pe-3"><?php echo SITE_TITLE; ?></div>
+					<div class="ps-3">
+						<nav aria-label="breadcrumb">
+							<ol class="breadcrumb mb-0 p-0">
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								</li>
+								<li class="breadcrumb-item active" aria-current="page">Purchase Request List</li>
+							</ol>
+						</nav>
+					</div>
+				</div>
+				<!--end breadcrumb-->
+     
+				<div class="card">
+					<div class="card-body">
+						<div class="table-responsive">
+							<table id="example2" class="table table-striped table-bordered">
+								<thead>
+									<tr>
+							<td><input type="text" class="form-control" id="search-zero" placeholder="Search by barcode"></td>
+							<td><input type="text" class="form-control" id="search-one" placeholder="Search by product name"></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td><input type="text" class="form-control" id="search-five" placeholder="Search by seller name"></td>
+							<td></td>
+							<td></td>
+						</tr>
+                      <tr>
+						<th>Barcode</th>
+						<th>Product Name</th>
+						<th>Qty.</th>
+						<th>Measurement</th>
+						<th>Request Date</th>
+						<th>Requested By</th>
+						<th class="text-center">Status</th>
+						<th class="text-center">Action</th>
+                      </tr>
+								</thead>
+								<tbody>
+									<?php 
+						$fields = "pr.id, pr.product_id, pr.qty, pr.request_date, pr.status, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, a.username";
+						$tables = PURCHASE_REQUESTS . " pr
+						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.created_by";
+						$where = "WHERE pr.status = :status ORDER BY pr.request_date DESC";
+						$params = [
+							':status' => 0
+						];
+						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+						
+						if($sqlQuery[0] != '')
+						{
+							$i = 1;
+							foreach($sqlQuery as $arr)
+							{	
+								/*$imagePath = MAIN_SERVER_PATH . $arr->image;
+								if (!empty($arr->image) && file_exists($imagePath)) {
+									$imagePath = MAIN_SERVER_PATH . $arr->image;
+								} else {
+									$imagePath = IMG_PATH . 'noImg.jpg';
+								}*/
+					?>
+									  <tr id="dataRow<?php echo($arr->id);?>">
+										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
+										<td><?PHP echo $arr->barcode; ?></td>
+										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
+										<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
+										<td><?PHP echo $arr->measurement; ?></td>
+										<td><?PHP echo $arr->request_date; ?></td>
+										<td><?PHP echo $arr->username; ?></td>
+										<td class="text-center">
+										<?php if($arr->status == '1') { ?>
+											<span class="text-success">Approved</span>
+										<?php } else { ?>
+											<a href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1" title = "Click here to approved" data-bs-toggle="tooltip"><span class="text-danger text-bold">Pending</span></a>
+										<?php }	?>
+										</td>
+										<td class="text-center">
+											<a href="javascript:void(0)" data-bs-toggle="tooltip" title="Click here to delete" onclick="deleteData('<?PHP echo PURCHASE_REQUESTS; ?>', <?PHP echo $arr->id; ?>)">
+											<i class="material-icons-outlined text-danger">close</i>
+											</a>
+										</td>
+									  </tr>
+										<?PHP
+												$i++;
+											}
+										}
+										else
+										{
+									?>
+									  <tr>
+										<td colspan="8" class="text-center">No record found.
+										</td>
+									  </tr>
+						<?PHP
+							}	
+						?>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				
+				
+				<!--breadcrumb-->
+				<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+					<div class="breadcrumb-title pe-3"><?php echo SITE_TITLE; ?></div>
+					<div class="ps-3">
+						<nav aria-label="breadcrumb">
+							<ol class="breadcrumb mb-0 p-0">
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								</li>
+								<li class="breadcrumb-item active" aria-current="page">Purchase Approved List</li>
+							</ol>
+						</nav>
+					</div>
+				</div>
+				<!--end breadcrumb-->
+     
+				<div class="card">
+					<div class="card-body">
+						<div class="table-responsive">
+							<table id="example1" class="table table-striped table-bordered">
+								<thead>
+									<tr>
+							<td><input type="text" class="form-control" id="search-zero1" placeholder="Search by barcode"></td>
+							<td><input type="text" class="form-control" id="search-one1" placeholder="Search by product name"></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td><input type="text" class="form-control" id="search-five1" placeholder="Search by seller name"></td>
+							<td></td>
+							<td></td>
+						</tr>
+                      <tr>
+						<th>Barcode</th>
+						<th>Product Name</th>
+						<th>Qty.</th>
+						<th>Measurement</th>
+						<th>Request Date</th>
+						<th>Requested By</th>
+						<th class="text-center">Status</th>
+						<th class="text-center">Action</th>
+                      </tr>
+								</thead>
+								<tbody>
+									<?php 
+						$fields = "pr.id, pr.product_id, pr.qty, pr.request_date, pr.status, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, a.username";
+						$tables = PURCHASE_REQUESTS . " pr
+						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.created_by";
+						$where = "WHERE pr.status = :status ORDER BY pr.request_date DESC";
+						$params = [
+							':status' => 1
+						];
+						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+						
+						if($sqlQuery[0] != '')
+						{
+							$i = 1;
+							foreach($sqlQuery as $arr)
+							{	
+								/*$imagePath = MAIN_SERVER_PATH . $arr->image;
+								if (!empty($arr->image) && file_exists($imagePath)) {
+									$imagePath = MAIN_SERVER_PATH . $arr->image;
+								} else {
+									$imagePath = IMG_PATH . 'noImg.jpg';
+								}*/
+					?>
+									  <tr id="dataARow<?php echo($arr->id);?>">
+										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
+										<td><?PHP echo $arr->barcode; ?></td>
+										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
+										<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
+										<td><?PHP echo $arr->measurement; ?></td>
+										<td><?PHP echo $arr->request_date; ?></td>
+										<td><?PHP echo $arr->username; ?></td>
+										<td class="text-center">
+											<span class="text-success">Approved</span>
+										</td>
+										<td class="text-center">
+											<a href="javascript:void(0)" data-bs-toggle="tooltip" title="Click here to delete" onclick="deleteApprovedData('<?PHP echo PURCHASE_REQUESTS; ?>', <?PHP echo $arr->id; ?>)">
+											<i class="material-icons-outlined text-danger">close</i>
+											</a>
+										</td>
+									  </tr>
+										<?PHP
+												$i++;
+											}
+										}
+										else
+										{
+									?>
+									  <tr>
+										<td colspan="8" class="text-center">No record found.
+										</td>
+									  </tr>
+						<?PHP
+							}	
+						?>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+    </div>
+  </main>
+  <!--end main wrapper-->
+  <div class="modal fade" id="barcodeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" style="display:inline-block">Product Barcode</h4>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<div class="modal-body text-center">
+				<svg id="barcode"></svg>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!--end main wrapper-->
+<!-- ######### FOOTER START ############### -->
+	<?PHP include_once("includes/adminFooter.php"); ?>
+<!-- ######### FOOTER END ############### -->
+</body>
+</html>
