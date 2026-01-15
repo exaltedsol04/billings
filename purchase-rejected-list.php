@@ -3,14 +3,14 @@
 	$pageAccessRoleIds = [1];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
-		if(isset($_GET['m']) && $_GET['m']==1) {
+	if(isset($_GET['m']) && $_GET['m']==1) {
 			$msg= '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
 				<div class="text-white"><strong>Success</strong> Status update successfully.</div>
 				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 		  </div>';
 		}
 	/*=========== STATUS CHANGE START ================*/
-		if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '2'))
+		if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '0'))
 		{		
 			$setValues="status=:status, approved_by=:approved_by";
 			$whereClause=" WHERE id=:id";
@@ -49,7 +49,7 @@
 							<ol class="breadcrumb mb-0 p-0">
 								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Purchase Request List</li>
+								<li class="breadcrumb-item active" aria-current="page">Purchase Rejected List</li>
 							</ol>
 						</nav>
 					</div>
@@ -89,7 +89,7 @@
 						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.created_by";
 						$where = "WHERE pr.status = :status ORDER BY pr.request_date DESC";
 						$params = [
-							':status' => 0
+							':status' => 2
 						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 						
@@ -125,7 +125,7 @@
 													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
 															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-success text-bold">Approve</span></a>
 															
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=2" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
+															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=0" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-warning text-bold">Pending</span></a>
 													</div>
 												</div>
 											</div>

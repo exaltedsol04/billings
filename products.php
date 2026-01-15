@@ -175,15 +175,109 @@
 					<style>
 						body {
 							margin: 0;
+							padding: 0;
+							background: #eee;
+							font-family: "Courier New", monospace;
+						}
+
+						.label {
+							width: 320px;
+							background: #fff;
+							padding: 12px;
+							border-radius: 6px;
+							margin: 20px auto;
+							box-shadow: 0 0 4px rgba(0,0,0,0.2);
+							font-size: 14px;
+						}
+
+						.center {
+							text-align: center;
+						}
+
+						.brand {
+							font-size: 22px;
+							font-weight: bold;
+							letter-spacing: 1px;
+						}
+
+						.product {
+							font-size: 16px;
+							font-weight: bold;
+							margin-top: 4px;
+						}
+
+						.barcode {
+							margin: 10px 0;
+						}
+
+						.barcode img {
+							width: 100%;
+							height: 60px;
+							object-fit: cover;
+						}
+
+						.barcode-text {
+							font-size: 14px;
+							margin-top: 5px;
+							letter-spacing: 1px;
+						}
+
+						.row {
 							display: flex;
-							justify-content: center;
-							align-items: center;
-							height: 100vh;
+							justify-content: space-between;
+							border-top: 1px solid #000;
+							border-bottom: 1px solid #000;
+							padding: 6px 4px;
+							margin: 8px 0;
+							font-size: 16px;
+							font-weight: bold;
+						}
+
+						.note {
+							font-size: 12px;
+							margin-top: 6px;
+						}
+
+						@media print {
+							@page {
+								margin: 0;
+							}
+							body {
+								display: flex;
+								justify-content: center;
+							}
+							.label {
+								box-shadow: none;
+								margin: 0;
+							}
 						}
 					</style>
 				</head>
 				<body>
-					<svg id="barcode"></svg>
+					<div class="label">
+						<div class="center brand">RELIANCE SMART</div>
+						<div class="center product">GREEN PEAS kg</div>
+
+						<div class="barcode center">
+							<!-- Replace barcode image if needed -->
+							<svg id="barcode"></svg>
+						</div>
+
+						<!-- Weight Section (PRICE REMOVED) -->
+						<div class="row">
+							<div>Weight :- 0.588 Kg</div>
+						</div>
+
+						<div class="note">
+							* Includes the weight of packaging
+						</div>
+
+						<div class="note">
+							Non PCR Label
+						</div>
+
+					</div>
+					
 
 					<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
 					<script>

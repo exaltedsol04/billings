@@ -114,14 +114,25 @@ $barcode = 	$product_variant_data->barcode;
     }
 
     @media print {
-        body {
-            background: none;
-        }
-        .receipt {
-            box-shadow: none;
-            margin: 0;
-        }
-    }
+		@page {
+			size: auto;
+			margin: 0;
+		}
+
+		body {
+			margin: 0;
+			padding: 0;
+			display: flex;
+			justify-content: center;
+		}
+
+		.receipt {
+			margin: 0 auto;
+			width: 320px;
+			box-shadow: none;
+		}
+	}
+
 </style>
 </head>
 
