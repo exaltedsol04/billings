@@ -62,7 +62,7 @@
 	?>
 	 
 		<div class="alert alert-success border-0 bg-success alert-dismissible fade show success-message" style="display:none">
-			<div class="text-white"><strong><?PHP echo 'Data has been submitted successfully'; ?></strong> <?PHP echo $msg; ?></div>
+			<div class="text-white"><strong><?PHP echo 'Data has been submitted successfully'; ?></strong></div>
 			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 		</div>
 	<?PHP
