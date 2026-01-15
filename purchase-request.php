@@ -13,7 +13,7 @@
 		{
 			foreach($product_variant_id as $k=>$val) {
 				
-				$field = "product_id, product_variant_id, qty, created_by, request_date";
+				/*$field = "product_id, product_variant_id, qty, created_by, request_date";
 				$value = ":product_id, :product_variant_id, :qty, :created_by, :request_date";
 				$addExecute=array(
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id[$k]),
@@ -24,8 +24,43 @@
 				);
 				$general_cls_call->insert_query(PURCHASE_REQUESTS, $field, $value, $addExecute);
 				$sucMsg="Data has been submitted successfully";
+				$_SESSION['call_js'] = true;*/
+				
+				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $val), 1);
+				//echo "<pre>";print_r($product_variant_dtls);die;
+				$product_id = $product_variant_dtls->product_id;
+				//echo $val.'-> '.$product_id; die;
+				$unit_price = $product_variant_dtls->discounted_price;
+				$total_price = $_POST['qty'][$k] * $unit_price;
+				
+				
+				$field = "seller_id, product_variant_id, product_id,  stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id";
+				$value = ":seller_id, :product_variant_id, :product_id, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
+				
+				$addExecute=array(
+					':seller_id'			=> $_SESSION['USER_ID'],
+					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
+					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
+					
+					':stock'				=> ($_POST['qty'][$k]),
+					':created_date'			=> date("Y-m-d H:i:s"),
+					':status'				=> 0,
+					':selling_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->discounted_price),
+					':purchase_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->price),
+					':transaction_type'		=> 1,
+					':received_selled_id'	=> '',
+					':parent_id'			=> 0,
+					':approved_by'			=> null,
+					':approved_date'		=> null,
+					':order_id'		       => '',
+				);
+				
+				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
+				
+				$sucMsg="Data has been submitted successfully";
 				$_SESSION['call_js'] = true;
-			}				
+			}
+			
 		}
 		else
 		{
@@ -57,13 +92,14 @@
 		</div>
 	<?PHP
 		}
+		
 		if(isset($sucMsg) && $sucMsg != '')
 		{
 	?>
 	
-		<div class="alert alert-success fade in">
-		  <button class="close" data-dismiss="alert">X</button>
-		  <i class="fa-fw fa fa-check"></i><strong>Success</strong> <?PHP echo $sucMsg; ?>
+		<div class="alert alert-success border-0 bg-success alert-dismissible fade show success-message">
+			<div class="text-white"><strong><?PHP echo 'Data has been submitted successfully'; ?></strong></div>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 		</div>
 	<?PHP
 		}
