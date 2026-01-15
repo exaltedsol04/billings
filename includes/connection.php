@@ -28,11 +28,14 @@
 	{
     	die($e->getMessage());													/* This will make a database connection and if not connected it will give error */
 	}
-
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+            || $_SERVER['SERVER_PORT'] == 443)
+            ? "https://"
+            : "http://";
 			
 	//Domain URL
 	define("FOLDER_PATH", "billings/");
-	define("DOMAIN_NAME", "http://".$_SERVER['HTTP_HOST']."/".FOLDER_PATH);
+	define("DOMAIN_NAME", $protocol.$_SERVER['HTTP_HOST']."/".FOLDER_PATH);
 	define("SITE_URL", DOMAIN_NAME."");
 
 	define("IMAGE_FOLDER", "images/");
