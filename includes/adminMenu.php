@@ -44,7 +44,7 @@
 				</li>
 			  </ul>
 			</li>
-			<li <?php if($page=='purchase-request-list.php' || $page=='purchase-approved-list') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='purchase-request-list.php' || $page=='purchase-approved-list' || $page=='purchase-rejected-list') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
 				</div>
@@ -53,6 +53,7 @@
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'purchase-request-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Request List</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-approved-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved List</a></li>
+				<li><a href="<?php echo SITE_URL.'purchase-rejected-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Rejected List</a></li>
 			  </ul>
 			</li>
 
