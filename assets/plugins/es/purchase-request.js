@@ -22,6 +22,7 @@ let add_to_cart = () => {
 	let productPrice = myArray[1];
 	let productName = myArray[2];
 	let productId = myArray[3];
+	let productBarcode = myArray[4];
 	let qty = 1;
 	let search = purchaseBasket.find((x) => x.id === selectedItem);
 	//alert('ok');
@@ -29,6 +30,7 @@ let add_to_cart = () => {
   if (search === undefined) {
     purchaseBasket.push({
       id: selectedItem,
+      barcode: productBarcode,
 	  name: productName,
 	  price: productPrice,
 	  pid: productId,
@@ -73,7 +75,7 @@ let generatePurchaseItems = () => {
   if (purchaseBasket.length !== 0) {
     return (PurchaseCart.innerHTML = purchaseBasket
       .map((x) => {
-        let { id, item, qty, price, name, pid } = x;
+        let { id, item, qty, price, barcode, name, pid } = x;
 
 		$('#loader').hide();
 		$('#removeCart').show();
@@ -85,6 +87,7 @@ let generatePurchaseItems = () => {
        // let search = shopItemsData.find((x) => x.id === id) || [];
         //let { qty, price, name, pid } = search;
         return `<tr>
+				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${barcode}</td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
 				  ${name}
 				  <input type="hidden" value="${id}" name="product_variant_id[]">

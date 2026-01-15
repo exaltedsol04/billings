@@ -13,19 +13,6 @@
 		{
 			foreach($product_variant_id as $k=>$val) {
 				
-				/*$field = "product_id, product_variant_id, qty, created_by, request_date";
-				$value = ":product_id, :product_variant_id, :qty, :created_by, :request_date";
-				$addExecute=array(
-					':product_id'			=> $general_cls_call->specialhtmlremover($product_id[$k]),
-					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
-					':qty'					=> $general_cls_call->specialhtmlremover($qty[$k]),
-					':created_by'			=> $_SESSION['USER_ID'],
-					':request_date'			=> date("Y-m-d H:i:s")
-				);
-				$general_cls_call->insert_query(PURCHASE_REQUESTS, $field, $value, $addExecute);
-				$sucMsg="Data has been submitted successfully";
-				$_SESSION['call_js'] = true;*/
-				
 				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $val), 1);
 				//echo "<pre>";print_r($product_variant_dtls);die;
 				$product_id = $product_variant_dtls->product_id;
@@ -126,8 +113,11 @@
 								} else {
 									$imagePath = IMG_PATH . 'noImg.jpg';
 								}*/
+								$barcode = $arr->barcode;
+								
+								$barcode = !empty($barcode) ?  '(' . $barcode .')' : '';
 					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id; ?>"><?PHP echo $general_cls_call->cart_product_name($arr->name).' ('.$arr->stock.' '.$arr->type.')'; ?></option>
+								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$arr->barcode; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->stock.' '.$arr->type.')'; ?></option>
 					<?PHP
 							}
 						}
@@ -146,6 +136,7 @@
 				<table class="table table-striped table-bordered">
 					  <thead>
 						<tr>
+							<th>Barcode</th>
 							<th>Product</th>
 							<th class="text-center">Price</th>
 							<th class="text-center" style="width:160px">Qty</th>

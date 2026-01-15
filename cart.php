@@ -212,6 +212,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 				  <thead>
 					<tr>
 					  <th class="text-center" style="width:160px">Qty</th>
+					  <th>Barcode</th>
 					  <th>Product</th>
 					  <th class="text-center">Price</th>
 					  <th class="text-center">Total Price</th>
@@ -359,7 +360,8 @@ function getProducts(val)
 					data[0].id + '@@@' +
 					data[0].discounted_price + '@@@' +
 					data[0].name + '@@@' +
-					data[0].image;
+					data[0].image + '@@@' +
+					data[0].barcode;
 					//var parameter = data[0].id + '@@@' + data[0].discounted_price + '@@@' + data[0].name + '@@@' + data[0].imagePath;
 					//add_to_cart(parameter);
 					
@@ -387,7 +389,8 @@ function getProducts(val)
 					item.id + '@@@' +
 					item.discounted_price + '@@@' +
 					item.name + '@@@' +
-					item.image;
+					item.image + '@@@' +
+					data[0].barcode;
 					
 					var images = item.imagePath;
 					html += '<div class="col">';
@@ -395,7 +398,7 @@ function getProducts(val)
                               html += '<div class="card-body">';
                                 html += '<img src=" ' + images + ' " class="img-fluid rounded-4 img-path" alt="">';
                                 html += '<div class="mt-3">';
-                                   html += '<h5 class="mb-0 fw-bold product-short-title">' + item.name + '</h5>';
+								 html += '<h5 class="mb-0 fw-bold product-short-title">' + item.name + '</h5>';
                                   html += ' <p class="mb-0 product-short-name">' + item.measurement +  ' ' + item.stock_unit_id + '</p>';
                                    html += '<div class="product-price d-flex align-items-center gap-2 mt-2">';
                                      html += '<div class="h6 fw-bold">₹' + item.discounted_price + '</div';

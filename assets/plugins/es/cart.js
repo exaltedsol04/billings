@@ -50,12 +50,14 @@ function add_to_cart(product) {
 	let productPrice = myArray[1];
 	let productName = myArray[2];
 	let productImage = myArray[3];
+	let productBarcode = myArray[4];
 	let qty = 1;
 	let search = basket.find((x) => x.id === selectedItem);
 
   if (search === undefined) {
     basket.push({
       id: selectedItem,
+      barcode: productBarcode,
 	  name: productName,
 	  price: productPrice,
 	  pimage: productImage,
@@ -99,7 +101,7 @@ let generateCartItems = () => {
   if (basket.length !== 0) {
     return (ShoppingCart.innerHTML = basket
       .map((x) => {
-        let { id, item, qty, price, name, pimage } = x;
+        let { id, item, qty, price, barcode, name, pimage } = x;
 
 		$('#loader').hide();
 		let progress = 0;
@@ -123,6 +125,7 @@ let generateCartItems = () => {
 						</span>
 					</div>
 				  </td>
+				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${barcode}</td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}</td>
 				  <input type="hidden" value="${id}" name="product_variant_id[]">
 				  <td class="text-center">₹ ${price}</td>						  
