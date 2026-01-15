@@ -57,16 +57,16 @@
 		</div>
 	<?PHP
 		}
-		if(isset($sucMsg) && $sucMsg != '')
-		{
+		//if(isset($sucMsg) && $sucMsg != '')
+		//{
 	?>
-	
-		<div class="alert alert-success fade in">
-		  <button class="close" data-dismiss="alert">X</button>
-		  <i class="fa-fw fa fa-check"></i><strong>Success</strong> <?PHP echo $sucMsg; ?>
+	 
+		<div class="alert alert-success border-0 bg-success alert-dismissible fade show success-message" style="display:none">
+			<div class="text-white"><strong><?PHP echo 'Data has been submitted successfully'; ?></strong> <?PHP echo $msg; ?></div>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 		</div>
 	<?PHP
-		}
+		//}
 	?>
 	
 		  <div class="row">
@@ -235,6 +235,7 @@ function save_post_data()
 			var order_id = JSON.parse(response);
 			//alert(order_id);
 			clearCart();
+			$('.success-message').show();
 		}
 	});
 }

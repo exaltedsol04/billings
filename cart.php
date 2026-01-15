@@ -35,7 +35,7 @@
 			$erMsg = "Please enter your username.";
 		}*/
 		
-		//if(!empty($product_variant_id) && !empty($supplier_hidden_id))
+		//if(!empty($product_variant_id) && !empty($user_hidden_id))
 		if($_POST)
 		{
 			//echo "<pre>";print_r($product_variant_id);die;
@@ -47,7 +47,7 @@
 			$value = ":pos_user_id, :user_id, :store_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :created_at, :updated_at";
 			
 			$addExecute=array(
-				':pos_user_id'			=> $general_cls_call->specialhtmlremover($supplier_hidden_id),
+				':pos_user_id'			=> $general_cls_call->specialhtmlremover($user_hidden_id),
 				':user_id'				=> $_SESSION['USER_ID'],
 				':store_id'				=> $general_cls_call->specialhtmlremover($store_id),
 				':total_amount'			=> $general_cls_call->specialhtmlremover($cart_total_amt),
@@ -233,7 +233,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 				
 				<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right" onclick="cart_pay()">PAY</button>
 				
-				<input type="hidden" id="supplier_hidden_id" name="supplier_hidden_id">
+				<input type="hidden" id="user_hidden_id" name="user_hidden_id">
 				<input type="hidden" name="action" value="paynow" id="actionstatus">
 			</div>
         </div>
@@ -454,7 +454,7 @@ function selectUser(mobile, name, id) {
     $('#user_suggestions').hide();
 
     // optional hidden field
-    $('#supplier_hidden_id').val(id);
+    $('#user_hidden_id').val(id);
 }
 function cart_pay()
 {
@@ -469,7 +469,7 @@ function cart_pay()
 	
 	//alert(cartData);
 	var supplier_id = $('#supplier_id').val();
-	var supplier_hidden_id = $('#supplier_hidden_id').val();
+	var user_hidden_id = $('#user_hidden_id').val();
 	//var cart_total_amt = $('#cart_total_amt').val();
 	$('#err_supplier_id').text('');
 	if(supplier_id == '')
@@ -478,7 +478,7 @@ function cart_pay()
 		return false;
 	}
 	
-	if(supplier_hidden_id == '')
+	if(user_hidden_id == '')
 	{
 		$('#err_supplier_id').text('Please enter valid mobile no.');
 		return false;

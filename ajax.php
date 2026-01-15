@@ -151,7 +151,7 @@
 			
 			$addExecute=array(
 				':pos_user_id'			=> $_SESSION['USER_ID'],
-				':user_id'				=> $_POST['supplier_hidden_id'],
+				':user_id'				=> $_POST['user_hidden_id'],
 				':store_id'				=> $general_cls_call->specialhtmlremover($store_id),
 				':total_amount'			=> $_POST['cart_total_amt'],
 				':discount_amount'			=> '0.00',
