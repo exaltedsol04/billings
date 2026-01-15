@@ -340,7 +340,27 @@
 		}
 		$status = 1;
 		echo json_encode($status);
-			
+		break;
+		
+		case "productprint":
+				$barcode = $_POST['barcode'];
+				$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode";
+				$tables = PRODUCT_VARIANTS . " pv INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id"; $where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";
+				$params = [];
+				$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
+				//echo "<pre>";print_r($sqlQuery);die;
+				
+				$stock_unit_data = $general_cls_call->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$sqlQuery->stock_unit_id), 1);
+				
+				//echo "<pre>";print_r($stock_unit_data);die;
+				$measurement = $sqlQuery->measurement;
+				$unitname = $stock_unit_data->name;
+				
+				$stockArr[] = [
+						"measurement" => $measurement,
+						"unitname" => $unitname,
+					];
+				echo json_encode($stockArr);
 		break;
     }
 ?>

@@ -165,8 +165,8 @@
 		
 		
 		
-		function printBarcode(ID) {
-
+		function print_product_barcode(ID) {
+			//alert(ID);
 			let printWindow = window.open('', '_blank');
 			printWindow.document.write(`
 				<html>
@@ -265,7 +265,7 @@
 
 						<!-- Weight Section (PRICE REMOVED) -->
 						<div class="row">
-							<div>Weight :- 0.588 Kg</div>
+							<div>Weight :- <span id="measurementdata"></span></div>
 						</div>
 
 						<div class="note">
@@ -278,7 +278,7 @@
 
 					</div>
 					
-
+					<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>
 					<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
 					<script>
 						JsBarcode("#barcode", "${ID}", {
@@ -288,6 +288,23 @@
 							width: 2,
 							fontSize: 14
 						});
+						//alert(ID);
+						
+						/*$.ajax({
+							type: "POST",
+							url: SITE_URL + "ajax",
+							data: {
+								action: "productprint",
+								product_id: ID
+							},
+							success: function(response){
+								 alert(response);
+								setTimeout(function () {
+									window.print();
+									window.close();
+								}, 300);
+							}
+						});*/
 
 						setTimeout(function () {
 							window.print();
@@ -299,6 +316,29 @@
 			`);
 
 			printWindow.document.close();
+		}
+		
+		
+		function printBarcode(ID) {
+			//alert(ID);
+			//var datapost = 'action=productprint&phone='+ID;
+			$.ajax({
+				type: "POST",
+				url: "<?= SITE_URL ?>ajax",
+				data: {
+					action: "productprint",
+					barcode: ID
+				},
+				success: function (response) {
+					var data = JSON.parse(response);
+					 //alert(data);
+				
+					var value = data[0].measurement +' ' + data[0].unitname;
+					//alert(value)
+					$('#measurementdata').html(value);
+					print_product_barcode(ID)
+				}
+			});
 		}
 </script>
 
