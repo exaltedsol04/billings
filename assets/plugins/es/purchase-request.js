@@ -16,7 +16,6 @@ let purchaseBasket = JSON.parse(localStorage.getItem("purchaseData")) || [];
 let add_to_cart = () => {
 	
 	$("#loader").show();
-	
 	let product = $("#product").val();
 	const myArray = product.split("@@@");
 	let selectedItem = parseInt(myArray[0]);

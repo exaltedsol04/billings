@@ -5,7 +5,7 @@
 	ob_start();
 
 /*=========== ACCOUNT SETTINGS START ===========*/
-	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnSubmit'])) && $_POST['btnSubmit'] === "SAVE")
+	/*if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnSubmit'])) && $_POST['btnSubmit'] === "SAVE")
 	{	
 		extract($_POST);
 		//echo "<pre>";print_r($product_variant_id);die;
@@ -25,19 +25,13 @@
 				$general_cls_call->insert_query(PURCHASE_REQUESTS, $field, $value, $addExecute);
 				$sucMsg="Data has been submitted successfully";
 				$_SESSION['call_js'] = true;
-				/*if($sucMsg) {
-					echo "<script src='bower_components/jquery/dist/jquery.min.js'></script><script src='dist/js/purchase-request.js'></script><script>
-					alert(1);
-						clearCart();
-					</script>";
-				}*/
 			}				
 		}
 		else
 		{
 			$erMsg = "Please choose product.";
 		}
-	}
+	}*/
 /*===========  END ===========*/
 
 
@@ -76,7 +70,7 @@
 	?>
 	
 		  <div class="row">
-			<div class="col-8 col-xl-8">
+			<div class="col-5 col-xl-5">
 				<select name="product" id="product" onchange=add_to_cart(this) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
@@ -90,12 +84,6 @@
 						{
 							foreach($sqlQuery as $arr)
 							{	
-								/*$imagePath = MAIN_SERVER_PATH . $arr->image;
-								if (!empty($arr->image) && file_exists($imagePath)) {
-									$imagePath = MAIN_SERVER_PATH . $arr->image;
-								} else {
-									$imagePath = IMG_PATH . 'noImg.jpg';
-								}*/
 					?>
 								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id; ?>"><?PHP echo $general_cls_call->cart_product_name($arr->name).' ('.$arr->stock.' '.$arr->type.')'; ?></option>
 					<?PHP
@@ -103,126 +91,63 @@
 						}
 					?>
 				</select>
+				<span class="text-danger" id="err_product"></span>
 			</div>
-			<div class="col-4 col-xl-4">
+			<div class="col-md-5">
+				<select name="seller_id" id="seller_id" class="form-select select2-dropdown" tabindex="1" onchange="sellers(this.value)">
+					<option value="">Select...</option>
+					<?PHP
+						$sqlQuery = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id!=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 2);
+						if($sqlQuery[0] != '')
+						{
+							foreach($sqlQuery as $arr)
+							{	
+					?>
+						<option value="<?PHP echo $arr->admin_id ?>"><?PHP echo $arr->name; ?></option>
+					<?PHP
+							}
+						}
+					?>
+				</select>
+				<span class="text-danger" id="err_seller"></span>
+			</div>
+			<div class="col-2 col-xl-2">
 				<button id="removeCart" class="btn btn-grd btn-grd-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Request</button>
 			</div>
 		</div>
     </div>
 	<div class="card">
 		<div class="card-body">	
-			<form name="frm" action="" method="post">
-			<div class="table-responsive">
-				<table class="table table-striped table-bordered">
-					  <thead>
-						<tr>
-							<th>Product</th>
-							<th class="text-center">Price</th>
-							<th class="text-center" style="width:160px">Qty</th>
-							<th class="text-center">Total Price</th>
-							<th class="text-center">Remove</th>
-						</tr>
-					  </thead>
-					  <tbody id="purchase-cart">
-						</tbody>
-					  <tfoot id="total_amount_show" style="font-weight:bold; font-size:20px">
-					  </tfoot>
-				</table>
-			</div>
-			<div class="box-footer text-center">
-					<div class="loader" id="loader1" style="display:none"></div>
-
-                    <button type="submit" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5">Submit Request</button>
-					
-					
-                  </div>
+			<form name="frm" action="" method="post" id="stock-list-form">
+				<div class="table-responsive">
+					<table class="table table-striped table-bordered">
+						  <thead>
+							<tr>
+								<th>Product</th>
+								<th class="text-center">Price</th>
+								<th class="text-center" style="width:160px">Qty</th>
+								<th class="text-center">Total Price</th>
+								<th class="text-center">Remove</th>
+							</tr>
+						  </thead>
+						  <tbody id="purchase-cart">
+							</tbody>
+						  <tfoot id="total_amount_show" style="font-weight:bold; font-size:20px">
+						  </tfoot>
+					</table>
+				</div>
+				<span id="show-stock-div"></span>
+				<div class="box-footer text-center">
+						<div class="loader" id="loader1" style="display:none"></div>
+						<button type="button" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5" onclick="submit_request();">Submit Request</button>
+				</div>
+				<input type="hidden" name="action" value="checkStockTransferItem" id="actionstatus">
+				<input type="hidden" name="hid_seller_id"  id="hid_seller_id">
+				<input type="hidden" name="product_id"  id="product_id">
 			</form>
 		</div>
-	</div>
-		
-	<div class="card">
-		<div class="card-body">
-			<div class="table-responsive">
-				  <table id="example2" class="table table-striped table-bordered">
-                    <thead>
-						<tr>
-							<td><input type="text" class="form-control" id="search-zero" placeholder="Search by barcode"></td>
-							<td><input type="text" class="form-control" id="search-one" placeholder="Search by product name"></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						</tr>
-                      <tr>
-						<th>P.Code</th>
-						<th>Name</th>
-						<th>Request Qty.</th>
-						<th>Measurement</th>
-						<th class="text-center">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-					<?php 
-						$fields = "pr.id, pr.product_id, pr.qty, pr.status, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, a.username";
-						$tables = PURCHASE_REQUESTS . " pr
-						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
-						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.created_by";
-
-						/*$where = "WHERE u.status = :status";
-						$params = [
-							':status' => 1
-						];*/
-						$where = "WHERE 1 ORDER BY pr.request_date DESC";
-						$params = [];
-						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
-
-
-						
-						if($sqlQuery[0] != '')
-						{
-							$i = 1;
-							foreach($sqlQuery as $arr)
-							{	
-								/*$imagePath = MAIN_SERVER_PATH . $arr->image;
-								if (!empty($arr->image) && file_exists($imagePath)) {
-									$imagePath = MAIN_SERVER_PATH . $arr->image;
-								} else {
-									$imagePath = IMG_PATH . 'noImg.jpg';
-								}*/
-					?>
-                      <tr id="dataRow<?php echo($arr->id);?>">
-						<td><?PHP echo $arr->barcode; ?></td>
-						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
-						<td><?PHP echo $arr->measurement; ?></td>
-						<td class="text-center"><?PHP echo $arr->status == 1 ? '<span class="text-success">Approved</span>' : '<span class="text-danger">Pending</span>' ; ?></td>
-                      </tr>
-						<?PHP
-								$i++;
-							}
-						}
-						else
-						{
-					?>
-                      <tr>
-                        <td colspan="5">No record found.</div>
-						</td>
-					  </tr>
-					<?PHP
-						}	
-					?>
-                   </tbody>
-                  </table>
-				  
-					  
-                  </div>
-              </div>
-            </div>
-			
-			
-		
-		
-      </main>
+	</div>	
+</main>
 
 	<!-- ######### FOOTER START ############### -->
 		<?PHP include_once("includes/adminFooter.php"); ?>
@@ -237,3 +162,86 @@
 
   </body>
 </html>
+<script>
+function sellers(id)
+{
+	$('#hid_seller_id').val(id);
+}
+function submit_request()
+{
+	$('#err_product').text('');
+	$('#err_seller').text('');
+	var seller_id = $('#seller_id').val();
+	var items = localStorage.getItem("purchaseData", JSON.stringify(purchaseBasket));
+	if (items) {
+		var data = JSON.parse(items);
+		if (data.length > 0) {
+			var cartData = data[0].id;
+		}
+	}
+	
+	if(typeof cartData === 'undefined')
+	{
+		$('#err_product').text('Please select product');
+		return false;
+	}
+	
+	if(seller_id == '')
+	{
+		$('#err_seller').text('Please choose store to transfer.');
+		return false;
+	}
+	
+	var datapost = $('#stock-list-form').serialize();
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			var result = JSON.parse(response);
+			
+			var html = '<div class="col-md-4">';
+				//alert(result.length);
+				if (result.length > 0) {
+					$.each(result, function (i, stock) {
+						html += '<div class="row align-items-start border-bottom py-2">';
+							html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
+							html += '<span class="col-md-3 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
+							html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
+						html += '</div>';
+					});
+					//$('#show-payment-div').hide();
+					$('#show-stock-div').html(html).show();
+				} else {
+					//$('#show-payment-div').show();
+					$('#show-stock-div').hide();
+					$('#actionstatus').val('stockTransferSave');
+					save_post_data();
+				}
+			html += '</div>';
+		}
+	});
+}
+function save_post_data()
+{
+	var datapost = $('#stock-list-form').serialize();
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			$('#actionstatus').val('checkStockTransferItem');
+			$('#supplier_id').val('');
+			var order_id = JSON.parse(response);
+			//alert(order_id);
+			clearCart();
+			/*$('#paymentmode-modal').modal('hide');
+			clearCart();
+				window.open(
+					"<?= SITE_URL ?>print_cart_invoice?order_id=" + order_id,
+					"_blank"
+				);*/
+		}
+	});
+}
+</script>

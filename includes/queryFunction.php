@@ -62,7 +62,7 @@
 		}
 		public function select_query_sum($table,$where,$data_array,$field)
 		{
-			$query_string="SELECT SUM(".$field.") as price FROM ".$table." ".$where." ";
+			$query_string="SELECT SUM(".$field.") as total FROM ".$table." ".$where." ";
 			$query = $this->db->prepare($query_string);
 			//echo $query_string;print_r($data_array);
 			foreach($data_array As $key=>$value)

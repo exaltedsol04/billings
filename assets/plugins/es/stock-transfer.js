@@ -16,6 +16,7 @@ let purchaseBasket = JSON.parse(localStorage.getItem("purchaseData")) || [];
 let add_to_cart = () => {
 	
 	$("#loader").show();
+	$('#err_product').text('');
 	
 	let product = $("#product").val();
 	const myArray = product.split("@@@");
@@ -25,7 +26,8 @@ let add_to_cart = () => {
 	let productId = myArray[3];
 	let qty = 1;
 	let search = purchaseBasket.find((x) => x.id === selectedItem);
-	//alert('ok');
+	
+	$('#product_id').val(productId);
 
   if (search === undefined) {
     purchaseBasket.push({
@@ -82,6 +84,7 @@ let generatePurchaseItems = () => {
 		if (typeof label !== 'undefined' && label != '') {
 			custom_label = '<br/><small class="text-muted">Custom Label: '+label+'</small>';
 		}*/
+	
 
        // let search = shopItemsData.find((x) => x.id === id) || [];
         //let { qty, price, name, pid } = search;
