@@ -29,7 +29,7 @@
 							<td></td>
 						</tr>
                       <tr>
-						<th>P.Code</th>
+						<th>Baecode</th>
 						<th>Name</th>
 						<th>Request Qty.</th>
 						<th>Measurement</th>
@@ -38,21 +38,20 @@
                     </thead>
                     <tbody>
 					<?php 
-						$fields = "pr.id, pr.product_id, pr.qty, pr.status, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, a.username";
-						$tables = PURCHASE_REQUESTS . " pr
+						$fields = "pr.id, pr.product_id, pr.status, pr.stock as pqty, pv.stock_unit_id, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode";
+						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
-						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.created_by";
+						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id";
 
 						/*$where = "WHERE u.status = :status";
 						$params = [
 							':status' => 1
 						];*/
-						$where = "WHERE 1 ORDER BY pr.request_date DESC";
+						$where = "WHERE pr.status=0 AND pr.transaction_type = '1' AND pr.seller_id ='" .$_SESSION['USER_ID']. "' ORDER BY pr.created_date DESC";
 						$params = [];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 
-
+						//echo "<pre>"; print_r($sqlQuery);die;
 						
 						if($sqlQuery[0] != '')
 						{
@@ -65,12 +64,14 @@
 								} else {
 									$imagePath = IMG_PATH . 'noImg.jpg';
 								}*/
+								
+								$unitdata = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
 					?>
                       <tr id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $arr->barcode; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
-						<td><?PHP echo $arr->measurement; ?></td>
+						<td><?PHP echo $arr->pqty ?></td>
+						<td><?PHP echo $arr->measurement . ' ' .$unitdata->name; ?></td>
 						<td>
 						<?PHP echo $arr->status == 1 ? '<p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Approved</p>' : '<p class="dash-lable mb-0 bg-warning bg-opacity-10 text-warning rounded-2">Pending</p>' ; ?></td>
                       </tr>
