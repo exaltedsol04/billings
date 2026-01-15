@@ -84,8 +84,10 @@
 						{
 							foreach($sqlQuery as $arr)
 							{	
+							    $barcode = $arr->barcode;
+								$barcode = !empty($barcode) ? '(' . $barcode . ')': '';
 					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id; ?>"><?PHP echo $general_cls_call->cart_product_name($arr->name).' ('.$arr->stock.' '.$arr->type.')'; ?></option>
+								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$arr->barcode; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->stock.' '.$arr->type.')'; ?></option>
 					<?PHP
 							}
 						}
@@ -123,6 +125,7 @@
 					<table class="table table-striped table-bordered">
 						  <thead>
 							<tr>
+								<th>Barcode</th>
 								<th>Product</th>
 								<th class="text-center">Price</th>
 								<th class="text-center" style="width:160px">Qty</th>
