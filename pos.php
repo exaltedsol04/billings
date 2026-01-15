@@ -8,34 +8,6 @@
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
 	{	
 		extract($_POST);
-		/*if($txtUsername!='')
-		{
-			if($txtNewPassword==$txtConfirmPassword)
-			{
-				$newHashPassword = password_hash(stripslashes(trim($txtNewPassword)), PASSWORD_BCRYPT);
-				
-				$password=isset($txtNewPassword) && $txtNewPassword != "" ? $newHashPassword : $hidPassword; 
-
-				$setValues="username=:username, password=:password";
-				$updateExecute=array(
-					':username'		=>$general_cls_call->specialhtmlremover($txtUsername),
-					':password'		=>$general_cls_call->specialhtmlremover($password)
-				);
-				$whereClause=" WHERE id=".$_SESSION['USER_ID'];
-				$general_cls_call->update_query(ADMIN_MASTER, $setValues, $whereClause, $updateExecute);
-				$sucMsg = "Your profile has been updated successfully.";
-			}
-			else
-			{
-				$erMsg = "Confirm password does not match with new password.";
-			}
-		}
-		else
-		{
-			$erMsg = "Please enter your username.";
-		}*/
-		
-		//if(!empty($product_variant_id) && !empty($user_hidden_id))
 		if($_POST)
 		{
 			//echo "<pre>";print_r($product_variant_id);die;
@@ -87,28 +59,11 @@
 				$general_cls_call->insert_query(POS_ORDERS_ITEMS, $field, $value, $addExecute);
 				
 				$sucMsg="Data has been submitted successfully";
-				
 			}
-			
-			/*if ($last_insert_id) {
-				header("Location: print_cart_invoice?order_id=".$last_insert_id);
-				exit;
-			}*/
 		}
-		
 	}
-/*=========== ACCOUNT SETTINGS END ===========*/
 
-
-/*=========== SELECT QUERY START ===========*/
-	$adminVal=$general_cls_call->select_query("*", ADMIN_MASTER, "WHERE id=:id", array(':id'=>$_SESSION['USER_ID']), 1);
-/*=========== SELECT QUERY END ===========*/
-
-
-	if(!isset($_POST['txtUsername'])) { $_POST['txtUsername'] =			$adminVal->username; }
-	if(!isset($_POST['hidPassword'])) { $_POST['hidPassword'] =			$adminVal->password; }
-
-$imagePath = IMG_PATH . 'noImg.jpg';
+	$imagePath = IMG_PATH . 'noImg.jpg';
 
 	ob_end_flush();
 ?>
@@ -123,61 +78,15 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 <main class="main-wrapper">
     <div class="main-content">
 		  <div class="row">
-			<!--<div class="col-md-5">
-				<select name="product" id="product" onchange=add_to_cart(this) class="form-select select2-dropdown" tabindex="1">
-					<option value="">Select...</option>
-					<?PHP
-						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode";
-						$tables = PRODUCT_VARIANTS . " pv
-						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
-						$where = "WHERE 1 ORDER BY p.name";
-						$params = [];
-						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
-						if($sqlQuery[0] != '')
-						{
-							foreach($sqlQuery as $arr)
-							{	
-								$imagePath = MAIN_SERVER_PATH . $arr->image;
-								if (!empty($arr->image) && file_exists($imagePath)) {
-									$imagePath = MAIN_SERVER_PATH . $arr->image;
-								} else {
-									$imagePath = IMG_PATH . 'noImg.jpg';
-								}
-					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$arr->name.'@@@'.$imagePath; ?>"><?PHP echo $arr->name.' ('.$arr->stock.' '.$arr->type.')'; ?></option>
-					<?PHP
-							}
-						}
-					?>
-				</select>
-			</div>-->
 			<div class="col-md-5">
 				<input type="text" class="form-control" name="barcode" id="barcode" oninput="getProducts(this.value)" placeholder="Barcode">
 				<span id="err_empty_cart" class="text-danger"></span>
 			</div>
-			<!--<div class="col-md-5">
-				<select name="supplier_id" id="supplier_id" class="form-select select2-dropdown" tabindex="1">
-					<option value="">Select...</option>
-					<?PHP
-						$sqlQuery = $general_cls_call->select_query("id, name, country_code, mobile", USERS, "WHERE 1", array(), 2);
-						if($sqlQuery[0] != '')
-						{
-							foreach($sqlQuery as $arr)
-							{	
-					?>
-								<option value="<?PHP echo $arr->id; ?>"><?PHP echo $arr->mobile.' ('.$arr->name.')'; ?></option>
-					<?PHP
-							}
-						}
-					?>
-				</select>
-			</div>-->
 			<div class="col-md-5">
 				<input type="text" class="form-control" id="supplier_id" name="supplier_id" placeholder="Mobile No" oninput="user_details(this.value)">
 				<div id="user_suggestions" class="list-group position-absolute w-100" style="z-index:1000;"></div>
 				<span class="text-danger" id="err_supplier_id"></span>
 			</div>
-			
 			<div class="col-md-2">
 				 <button id="removeCart" class="btn btn-grd btn-grd-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Cart</button>
 			</div>
@@ -230,10 +139,7 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 			<input type="hidden" name="payment_method" id="payment_method">
 			<div class="box-footer text-center">
 				<div class="loader" id="loader1" style="display:none"></div>
-				
-				
 				<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right" onclick="cart_pay()">PAY</button>
-				
 				<input type="hidden" id="user_hidden_id" name="user_hidden_id">
 				<input type="hidden" name="action" value="paynow" id="actionstatus">
 			</div>
@@ -245,8 +151,8 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 			<div class="modal fade" id="product-modal">
                   <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                      <div class="modal-header border-bottom-0 py-2 btn-grd bg-grd-primary">
-                        <h5 class="modal-title">Find Out Our New Products</h5>
+                      <div class="modal-header border-bottom-0 py-2 bg-grd-primary">
+                        <h5 class="modal-title btn-grd">Find Out Our New Products</h5>
                         <a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
                           <i class="material-icons-outlined">close</i>
                         </a>
@@ -257,7 +163,6 @@ $imagePath = IMG_PATH . 'noImg.jpg';
                       <div class="modal-footer border-top-0">
                         <button type="button" class="btn btn-grd btn-grd-danger rounded-0"
                           data-bs-dismiss="modal">Cancel</button>
-                        <!--<button type="button" class="btn btn-grd btn-grd-info rounded-0">Save changes</button>-->
                       </div>
                     </div>
                   </div>
@@ -267,8 +172,8 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 			<div class="modal fade" id="paymentmode-modal">
                   <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                      <div class="modal-header border-bottom-0 py-2 btn-grd bg-grd-primary">
-                        <h5 class="modal-title">Payment Mode</h5>
+                      <div class="modal-header border-bottom-0 py-2 bg-grd-primary">
+                        <h5 class="modal-title btn-grd">Payment Mode</h5>
                         <a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
                           <i class="material-icons-outlined">close</i>
                         </a>
@@ -276,12 +181,10 @@ $imagePath = IMG_PATH . 'noImg.jpg';
                       <div class="modal-body">
 						<div class="d-flex justify-content-center">
 							<div class="col-lg-12 col-md-12 col-sm-12">
-								<!--<div class="card rounded-0 text-center">-->
 									<div class="card-body">
-
 										<span id="show-stock-div" style="display:none;"></span>
 										<span id="show-payment-div">
-										<div class="mb-3">
+										<div class="mb-3 text-center">
 											<select onchange="pay_method(this.value)" class="form-select select2-dropdown mx-auto"
 													style="max-width: 250px;">
 												<option value="">Select</option>
@@ -290,21 +193,18 @@ $imagePath = IMG_PATH . 'noImg.jpg';
 											</select>
 											<span class="text-danger" id="err_p_method"></span>
 										</div>
-
-										<button type="button" class="btn btn-grd btn-grd-primary px-5" onclick="pay_now()">
-											Pay Now
-										</button>
 										</span>
 
 									</div>
-								<!--</div>-->
 							</div>
 						</div>
 					</div>
                       <div class="modal-footer border-top-0">
-                        <button type="button" class="btn btn-grd btn-grd-danger rounded-0"
+					  
+                        <button type="button" class="btn btn-grd btn-grd-danger"
                           data-bs-dismiss="modal">Cancel</button>
-                        <!--<button type="button" class="btn btn-grd btn-grd-info rounded-0">Save changes</button>-->
+						  
+                        <button type="button" class="btn btn-grd btn-grd-primary px-5" onclick="pay_now()">Pay Now</button>
                       </div>
                     </div>
                   </div>
