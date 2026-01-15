@@ -129,7 +129,7 @@
 					$stockArr[] = [
 						"product_name" => $product_name,
 						"variant_name" => $p_variant_name,
-						"variant_stock" => $stock_used->total,
+						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
 					];
 					
 				}

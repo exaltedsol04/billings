@@ -5,7 +5,33 @@
 	ob_start();
 	ob_end_flush();
 	
-	$parchase_stock_data = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val, 'status'=>2, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
+	// dashboard work
+	$admin_product_stock= 0;
+	$admin_parchase_stock= 0;
+	$admin_total_sell= 0;
+	
+	$user_available_stock= 0;
+	$user_parchase_stock= 0;
+	
+	// admin 
+	$admin_product_data = $general_cls_call->select_query_sum(PRODUCTS, "WHERE 1", array(), 'id');
+	$admin_product_stock = $admin_product_data->total;
+	
+	$admin_parchase_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE status!=:status", array('status'=>2), 'stock');
+	$admin_parchase_stock = $admin_parchase_data->total;
+	
+	$admin_total_sell_data = $general_cls_call->select_query_sum(POS_ORDERS, "WHERE 1", array(), 'total_amount');
+	$admin_total_sell = $admin_total_sell_data->total;
+	//echo $admin_total_sell; die;
+	
+	// users
+	$available_stock_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE  status!=:status AND seller_id=:seller_id", array('status'=>2, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
+	
+	$user_available_stock = $available_stock_data->total;
+	
+	$parchase_stock_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE transaction_type=:transaction_type AND status=:status AND seller_id=:seller_id", array('transaction_type'=> 1, 'status'=>0, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
+	
+	$user_parchase_stock = $parchase_stock_data->total;
 ?>
 
  <!-- ######### HEADER START ############### -->
@@ -49,7 +75,7 @@
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo">12300</h3>
+                    <h3 class="mb-0 text-indigo"><?= $admin_product_stock ; ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'products'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>
@@ -68,7 +94,7 @@
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo">123</h3>
+                    <h3 class="mb-0 text-indigo"><?= $admin_parchase_stock ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'purchase-request-list'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>
@@ -87,7 +113,7 @@
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo">123</h3>
+                    <h3 class="mb-0 text-indigo">₹<?= $admin_total_sell ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'invoices'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>
@@ -108,7 +134,7 @@
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo">123</h3>
+                    <h3 class="mb-0 text-indigo"><?= $user_available_stock ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'stock-transfer'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>
@@ -127,7 +153,7 @@
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo">123</h3>
+                    <h3 class="mb-0 text-indigo"><?= $user_parchase_stock ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'purchase-request'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>

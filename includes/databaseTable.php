@@ -6,7 +6,6 @@
 	define("PRODUCT_IMAGES",  TABLE_PREFIX."product_images");
 	define("INVOICE",  TABLE_PREFIX."invoice");
 	define("USERS",  TABLE_PREFIX."users");
-	define("PURCHASE_REQUESTS",  TABLE_PREFIX."purchase_requests");
 	define("UNITS",  TABLE_PREFIX."units");
 	define("SELLERS",  TABLE_PREFIX."sellers");
 	define("POS_ORDERS",  TABLE_PREFIX."pos_orders");
