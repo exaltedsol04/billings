@@ -65,10 +65,10 @@
 									<tr>
 							<td><input type="text" class="form-control" id="search-zero" placeholder="Search by barcode"></td>
 							<td><input type="text" class="form-control" id="search-one" placeholder="Search by product name"></td>
-							<td></td>
-							<td></td>
-							<td></td>
 							<td><input type="text" class="form-control" id="search-five" placeholder="Search by seller name"></td>
+							<td></td>
+							<td></td>
+							<td></td>
 							<td></td>
 						</tr>
                       <tr>
@@ -83,12 +83,12 @@
 								</thead>
 								<tbody>
 									<?php 
-						$fields = "pr.id, pr.product_id, pr.qty, pr.request_date, pr.status, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, a.username";
-						$tables = PURCHASE_REQUESTS . " pr
+						$fields = "pr.id, pr.product_id, pr.status, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, a.username";
+						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.created_by";
-						$where = "WHERE pr.status = :status ORDER BY pr.request_date DESC";
+						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.seller_id";
+						$where = "WHERE pr.status = :status ORDER BY pr.created_date DESC";
 						$params = [
 							':status' => 2
 						];
@@ -105,13 +105,16 @@
 								} else {
 									$imagePath = IMG_PATH . 'noImg.jpg';
 								}*/
+								
+								$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+								$unitname = $unit_dtls->name;
 					?>
 									  <tr id="dataRow<?php echo($arr->id);?>">
 										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
 										<td><?PHP echo $arr->barcode; ?></td>
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
 										<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
-										<td><?PHP echo $arr->measurement; ?></td>
+										<td><?PHP echo $arr->measurement.' '. $unitname; ?></td>
 										<td><?PHP echo $arr->request_date; ?></td>
 										<td><?PHP echo $arr->username; ?></td>
 										<td class="text-center">

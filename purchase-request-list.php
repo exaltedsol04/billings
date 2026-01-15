@@ -3,12 +3,13 @@
 	$pageAccessRoleIds = [1];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
-		if(isset($_GET['m']) && $_GET['m']==1) {
+		/*if(isset($_GET['m']) && $_GET['m']==1) 
+		{
 			$msg= '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
 				<div class="text-white"><strong>Success</strong> Status update successfully.</div>
 				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 		  </div>';
-		}
+		}*/
 	/*=========== STATUS CHANGE START ================*/
 		if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '2'))
 		{		
@@ -21,7 +22,22 @@
 				':id'=>$_GET['id']
 			);
 			$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
-			header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php')."?m=1");
+			//header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php')."?m=1");
+			if($updateRec)
+			{
+				$sucMsg="Data has been submitted successfully";
+			}
+			
+			//header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php'));
+		}
+		
+		if(isset($sucMsg)) 
+		{
+			$sucMsg = '';
+			$msg= '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+				<div class="text-white"><strong>Success</strong> Status update successfully.</div>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		  </div>';
 		}
 	/*=========== STATUS CHANGE END ================*/
 	ob_end_flush();
@@ -71,7 +87,7 @@
 							<td><input type="text" class="form-control" id="search-five" placeholder="Search by seller name"></td>
 							<td></td>
 						</tr>
-                      <tr>
+                      <tr  class="text-center">
 						<th>Barcode</th>
 						<th>Product Name</th>
 						<th>Qty.</th>
@@ -83,17 +99,17 @@
 								</thead>
 								<tbody>
 									<?php 
-						$fields = "pr.id, pr.product_id, pr.qty, pr.request_date, pr.status, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, a.username";
-						$tables = PURCHASE_REQUESTS . " pr
+						$fields = "pr.id, pr.product_id, pr.status, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, pv.stock_unit_id, p.name, p.image, p.barcode, a.username";
+						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.created_by";
-						$where = "WHERE pr.status = :status ORDER BY pr.request_date DESC";
+						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.seller_id";
+						$where = "WHERE pr.status = :status ORDER BY pr.created_date DESC";
 						$params = [
 							':status' => 0
 						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
-						
+						//echo "<pre>";print_r($sqlQuery);die;
 						if($sqlQuery[0] != '')
 						{
 							$i = 1;
@@ -105,13 +121,16 @@
 								} else {
 									$imagePath = IMG_PATH . 'noImg.jpg';
 								}*/
+								
+								$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+								$unitname = $unit_dtls->name;
 					?>
-									  <tr id="dataRow<?php echo($arr->id);?>">
+									  <tr id="dataRow<?php echo($arr->id);?>"  class="text-center">
 										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
 										<td><?PHP echo $arr->barcode; ?></td>
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
 										<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
-										<td><?PHP echo $arr->measurement; ?></td>
+										<td><?PHP echo $arr->measurement.' '.$unitname; ?></td>
 										<td><?PHP echo $arr->request_date; ?></td>
 										<td><?PHP echo $arr->username; ?></td>
 										<td class="text-center">
