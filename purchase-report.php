@@ -28,7 +28,7 @@
 							<td></td>
 							<td></td>
 						</tr>
-                      <tr>
+                      <tr  class="text-center">
 						<th>Baecode</th>
 						<th>Name</th>
 						<th>Request Qty.</th>
@@ -67,7 +67,7 @@
 								
 								$unitdata = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
 					?>
-                      <tr id="dataRow<?php echo($arr->id);?>">
+                      <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $arr->barcode; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td><?PHP echo $arr->pqty ?></td>
