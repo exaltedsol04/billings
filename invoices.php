@@ -40,8 +40,9 @@
 								<thead>
 									<tr>
 										<td><input type="text" class="form-control" id="search-zero" placeholder="Search by Invoice Id"></td>
-										<td></td>
 										<td><input type="text" class="form-control" id="search-one" placeholder="Search by name"></td>
+										<td></td>
+										
 										<td></td>
 										<td></td>
 									</tr>
