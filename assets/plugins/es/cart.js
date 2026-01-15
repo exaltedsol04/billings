@@ -146,7 +146,7 @@ let generateCartItems = () => {
    $('#removeCart, #loader').hide();
    let progress = 0;
     ShoppingCart.innerHTML = `<tr>
-						  <td colspan="5" class="text-center">Cart is Empty</td>
+						  <td colspan="6" class="text-center">Cart is Empty</td>
     </td></tr>`;
   }
   
@@ -257,7 +257,7 @@ let TotalAmount = () => {
       .reduce((x, y) => x + y, 0);
 
     return (totalAmountShow.innerHTML = `<tr>
-						  <td colspan="3">Sum</td>
+						  <td colspan="4">Sum</td>
 						  <td id="cartAmount" class="cartAmount text-center">₹ ${amount.toFixed(2)}</td>
 						  <input type="hidden" name="cart_total_amt" value="${amount.toFixed(2)}">
 						</tr>`);

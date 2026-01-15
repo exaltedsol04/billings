@@ -120,7 +120,7 @@ let generatePurchaseItems = () => {
    
    $('#removeCart, #loader').hide();
     PurchaseCart.innerHTML = `<tr>
-						  <td colspan="5" class="text-center">No Record Found.</td>
+						  <td colspan="6" class="text-center">No Record Found.</td>
     </td></tr>`;
   }
   
@@ -228,7 +228,7 @@ let TotalAmount = () => {
       .reduce((x, y) => x + y, 0);
 
     return (totalAmountShow.innerHTML = `<tr>
-						  <td colspan="3">Sum</td>
+						  <td colspan="4">Sum</td>
 						  <td id="cartAmount" class="cartAmount text-center">₹ ${amount.toFixed(2)}</td>
 						</tr>`);
   } else return;
