@@ -64,7 +64,7 @@
 									$where = "WHERE 1 ORDER BY p.name";
 									$params = [];
 									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
-									
+									//echo "<pre>";print_r($sqlQuery);die;
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
@@ -79,7 +79,7 @@
 									?>
 											  <tr id="dataRow<?php echo($selectValue->id);?>">
 												<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
-												<td><?PHP echo $selectValue->barcode; ?></td>
+												<td><?PHP echo !empty($selectValue->barcode)  ? $selectValue->barcode : 'N/A'; ?></td>
 												<td><?PHP echo $general_cls_call->explode_name($selectValue->name); ?></td>
 												<td><?PHP echo $selectValue->stock.' '.$selectValue->type; ?></td>
 												<td><?PHP echo $selectValue->measurement; ?></td>
