@@ -96,80 +96,42 @@
 		case "paynow":
 			//echo "<pre>";print_r($_POST);die;
 			$stockArr =[];
-			$barcode = '';
-			if(isset($_POST['id']) && isset($_POST['barcode']))
-			{
-				$pv_id = $_POST['id'];
-				$barcode = $_POST['barcode'];
-				$product_variant_id = array(0=>$pv_id);
-			}
-			else{
-				$product_variant_id = $_POST['product_variant_id'];
-			}
-			//echo "<pre>";print_r($product_variant_id);die;
-			/*$fields = "pv.id";
-			$tables = PRODUCT_VARIANTS . " pv INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
-			$where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";
-			$params = [];
-			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
-			echo "<pre>";print_r($sqlQuery);die;*/
-			
-			foreach($product_variant_id as $k=>$val)
+			foreach($_POST['product_variant_id'] as $k=>$val)
 			{
 				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id", array(':id'=> $val), 1);
 				
 				// check from product_stock_transaction 
-				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val, 'status'=>1, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
+				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status!=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val, 'status'=>2, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
 				//echo $stock_used->price; die;
 				$remainingStock = $stock_used->total;
 				//echo $remainingStock; die;
 				//if($remainingStock <= 0)
-				// if only barcode send check stock
-				if($barcode == 1)
+				if($remainingStock < $_POST['qty'][$k])
 				{
-					//echo 'stock->'.$remainingStock;die;
-					if($remainingStock > 0 || $remainingStock == '')
-					{
-						$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
-						$product_name = $general_cls_call->cart_product_name($product_dtls->name);
-						
-						$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
-						$unitname = $unit_dtls->name;
-						
-						$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
-						
-						$available_stock = $stock_used->total;
-						
-						$stockArr[] = [
-							"product_name" => $product_name,
-							"variant_name" => $p_variant_name,
-							"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
-						];
-					}
-				}
+					$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
+					$product_name = $general_cls_call->cart_product_name($product_dtls->name);
 					
-				// after cart add check stock
-				if($barcode == '')
-				{
-					if($remainingStock < $_POST['qty'][$k])
+					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
+					$unitname = $unit_dtls->name;
+					
+					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					
+					$available_stock = $stock_used->total;
+					/*if($available_stock == 0)
 					{
-						$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
-						$product_name = $general_cls_call->cart_product_name($product_dtls->name);
-						
-						$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
-						$unitname = $unit_dtls->name;
-						
-						$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
-						
-						$available_stock = $stock_used->total;
-						
-						$stockArr[] = [
-							"product_name" => $product_name,
-							"variant_name" => $p_variant_name,
-							"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
-						];
-						
+						$variant_stock = 'Out of stock';
 					}
+					else{
+						$variant_stock = $available_stock;
+					}*/
+					
+					
+					$stockArr[] = [
+						"product_name" => $product_name,
+						"variant_name" => $p_variant_name,
+						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
+					];
+					
 				}
 				
 			}
@@ -276,7 +238,7 @@
 				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id", array(':id'=> $val), 1);
 				
 				// check from product_stock_transaction 
-				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val, 'status'=>1, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
+				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status!=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val, 'status'=>2, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
 				//echo $stock_used->price; die;
 				$remainingStock = $stock_used->total;
 				//echo $remainingStock; die;
@@ -394,11 +356,11 @@
 				$measurement = $sqlQuery->measurement;
 				$unitname = $stock_unit_data->name;
 				
-				$stockArr = [
+				$stockArr[] = [
 						"measurement" => $measurement,
 						"unitname" => $unitname,
 					];
-				echo json_encode($stockArr);
+				echo json_encode($stockArr);exit;
 		break;
     }
 ?>

@@ -21,13 +21,13 @@
   <link rel="stylesheet" type="text/css" href="assets/plugins/metismenu/metisMenu.min.css">
   <link rel="stylesheet" type="text/css" href="assets/plugins/metismenu/mm-vertical.css">
   <link rel="stylesheet" type="text/css" href="assets/plugins/simplebar/css/simplebar.css">
-  <?php if($page=='purchase-request.php' || $page=='stock-transfer.php' || $page=='products.php') {  ?>	
+  <?php if($page=='purchase-request.php' || $page=='stock-transfer.php' || $page=='products.php' || $page=='pos.php') {  ?>	
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
   <?php } ?>
   <!--bootstrap css-->
   <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-  <?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php' || $page=='barcode.php' || $page=='sellers.;php') {  ?>	
+  <?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php' || $page=='barcode.php' || $page=='pos.php') {  ?>	
   <link href="assets/plugins/datatable/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
   <?php } ?>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
