@@ -356,11 +356,11 @@
 				$measurement = $sqlQuery->measurement;
 				$unitname = $stock_unit_data->name;
 				
-				$stockArr[] = [
+				$stockArr = [
 						"measurement" => $measurement,
 						"unitname" => $unitname,
 					];
-				echo json_encode($stockArr);exit;
+				echo json_encode($stockArr);
 		break;
     }
 ?>

@@ -94,55 +94,30 @@
 		<style>
 			body {
 				margin: 0;
-				padding: 0;
 				font-family: "Courier New", monospace;
-				width: 80mm;
-				height: auto;
-				overflow: hidden;
 			}
-
 			.label {
-				width: 80mm;
-				padding: 8px;
+				width: 320px;
+				padding: 12px;
+				margin: auto;
 				text-align: center;
-				page-break-after: avoid;
 			}
-
 			.row {
 				border-top: 1px solid #000;
 				border-bottom: 1px solid #000;
 				padding: 6px;
-				margin: 6px 0;
-				font-weight: bold;
-				text-align: left;
-			}
-			
-			.product {
+				margin: 8px 0;
 				font-weight: bold;
 			}
-			
-			.note {
-				text-align: left;
-			}
-
 			@media print {
-				@page {
-					size: 80mm auto;
-					margin: 0;
-				}
-
-				* {
-					page-break-before: avoid !important;
-					page-break-after: avoid !important;
-					page-break-inside: avoid !important;
-				}
+				@page { margin: 0; }
 			}
 		</style>
-
 		</head>
 
 		<body>
 		<div class="label">
+			<div class="brand"><b>RELIANCE SMART</b></div>
 			<div class="product">GREEN PEAS</div>
 
 			<svg id="barcode"></svg>
