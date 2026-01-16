@@ -26,6 +26,7 @@
 							<td></td>
 						</tr>
                       <tr  class="text-center">
+						<th>Sl. No</th>
 						<th>Barcode</th>
 						<th>Name</th>
 						<th class="text-center">Print Barcode</th>
@@ -47,6 +48,7 @@
 							{	
 					?>
                      <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
+						<td><?PHP echo $i; ?></td>
 						<td><?PHP echo $arr->barcode; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td class="text-center">
