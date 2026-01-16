@@ -160,11 +160,12 @@ generateCartItems();
  */
 
 let increment = (id) => {
+	
 	$("#loader").show();
 	progress_bar();
   let selectedItem = id;
   let search = basket.find((x) => x.id === selectedItem);
-
+   //alert(id);
   if (search === undefined) {
     basket.push({
       id: selectedItem,
@@ -176,6 +177,9 @@ let increment = (id) => {
 //console.log(basket);
   update(selectedItem);
   localStorage.setItem("data", JSON.stringify(basket));
+  //let parameter = '';
+  //alert(search.qty);
+  check_qty_stock(id, search.qty);
   setTimeout(function () {
 	generateCartItems();
   }, 500);
@@ -201,6 +205,7 @@ let decrement = (id) => {
   basket = basket.filter((x) => x.qty !== 0);
   //generateCartItems();
   localStorage.setItem("data", JSON.stringify(basket));
+  $('#check-stock-pay-div').html(' ');
   setTimeout(function () {
 	generateCartItems();
   }, 500);
