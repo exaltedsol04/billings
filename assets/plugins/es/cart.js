@@ -45,6 +45,7 @@ function add_to_cart(product) {
 	$('#product-modal').modal('hide');
 	
 	//let product = $("#product").val();
+	//alert(product);
 	const myArray = product.split("@@@");
 	let selectedItem = parseInt(myArray[0]);
 	let productPrice = myArray[1];
@@ -228,6 +229,7 @@ let update = (id) => {
 let removeItem = (id) => {
 	$("#loader").show();
 	progress_bar();
+	
   let selectedItem = id;
   basket = basket.filter((x) => x.id !== selectedItem);
   calculation();
@@ -278,6 +280,7 @@ let clearCart = () => {
 	generateCartItems();
   }, 500);
   //generateCartItems();
+  $('#check-stock-div').html('');
   calculation();
   localStorage.setItem("data", JSON.stringify(basket));
   

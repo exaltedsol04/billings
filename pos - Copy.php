@@ -78,39 +78,11 @@
 <main class="main-wrapper">
     <div class="main-content">
 		  <div class="row">
-			<div class="col-md-3">
+			<div class="col-md-5">
 				<input type="text" class="form-control" name="barcode" id="barcode" oninput="getProducts(this.value)" placeholder="Barcode">
 				<span id="err_empty_cart" class="text-danger"></span>
 			</div>
-			<div class="col-md-4">
-				<select name="product" id="product" onchange=add_to_cart(this.value) class="form-select select2-dropdown" tabindex="1">
-					<option value="">Select...</option>
-					<?PHP
-						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode";
-						$tables = PRODUCT_VARIANTS . " pv
-						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
-						$where = "WHERE 1 ORDER BY p.name";
-						$params = [];
-						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
-						if($sqlQuery[0] != '')
-						{
-							foreach($sqlQuery as $arr)
-							{	
-								$imagePath = MAIN_SERVER_PATH . $arr->image;
-								if (!empty($arr->image) && file_exists($imagePath)) {
-									$imagePath = MAIN_SERVER_PATH . $arr->image;
-								} else {
-									$imagePath = IMG_PATH . 'noImg.jpg';
-								}
-					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$arr->name.'@@@'.$imagePath.'@@@'.$arr->barcode; ?>"><?PHP echo $arr->name.' ('.$arr->stock.' '.$arr->type.')'; ?></option>
-					<?PHP
-							}
-						}
-					?>
-				</select>
-			</div>
-			<div class="col-md-3">
+			<div class="col-md-5">
 				<input type="text" class="form-control" id="supplier_id" name="supplier_id" placeholder="Mobile No" oninput="user_details(this.value)">
 				<div id="user_suggestions" class="list-group position-absolute w-100" style="z-index:1000;"></div>
 				<span class="text-danger" id="err_supplier_id"></span>
@@ -118,13 +90,8 @@
 			<div class="col-md-2">
 				 <button id="removeCart" class="btn btn-grd btn-grd-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Cart</button>
 			</div>
-			
-			<div class="col-md-12">
-				<span id="check-stock-div"></span>
-			</div>
-			
 		</div>
-    </div>
+        </div>
 
 	<?PHP
 		if(isset($erMsg) && $erMsg != '')
@@ -146,7 +113,7 @@
 	<?PHP
 		}
 	?>
-	<div class="card mt-4">
+	<div class="card">
 		<form name="frm" action="<?= SITE_URL ?>cart" method="post" id="cart-list-form">
 		<div class="card-body">
 			<div class="table-responsive">
@@ -171,11 +138,12 @@
 			
 			<input type="hidden" name="payment_method" id="payment_method">
 			
+			<span id="show-stock-div"></span>
 			<div class="box-footer text-center">
 				<div class="loader" id="loader1" style="display:none"></div>
 				<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right" onclick="cart_pay()">PAY</button>
 				<input type="hidden" id="user_hidden_id" name="user_hidden_id">
-				<input type="text" name="action" value="paynow" id="actionstatus">
+				<input type="hidden" name="action" value="paynow" id="actionstatus">
 			</div>
         </div>
         </form>
@@ -272,7 +240,6 @@ $(document).ready(function(){
 function getProducts(val)
 {
 	var barcode = val;
-	$('#check-stock-div').html('');
 	//alert(barcode);
 	if(barcode && barcode.trim() !== '')
 	{
@@ -291,7 +258,6 @@ function getProducts(val)
 			
 				if(data.length == 1)
 				{
-					
 					var parameter =
 					data[0].id + '@@@' +
 					data[0].discounted_price + '@@@' +
@@ -302,10 +268,10 @@ function getProducts(val)
 					//add_to_cart(parameter);
 					
 					if (typeof add_to_cart !== 'function') {
+
 						$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/cart.js")
 							.done(function () {
-								//add_to_cart(parameter);
-								check_product_stock(data[0].id, parameter);
+								add_to_cart(parameter);
 							})
 							.fail(function () {
 								alert('Failed to load cart.js');
@@ -313,8 +279,7 @@ function getProducts(val)
 
 					} else {
 						// Already loaded
-						//add_to_cart(parameter);
-						check_product_stock(data[0].id, parameter);
+						add_to_cart(parameter);
 					}
 				}
 				else if(data.length > 1)
@@ -345,7 +310,7 @@ function getProducts(val)
                                  html += '</div>';
                                  html += '<div class="d-grid mt-2">';
                                    html += '<a href="javascript:;" class="btn btn-grd btn-grd-primary px-5" ' +
-        'onclick="check_product_stock(\'' + item.id + '\', \'' + parameter + '\')">Add to cart</a>';
+        'onclick="add_to_cart(\'' + parameter + '\')">Add to cart</a>';
                                  html += '</div>';
                                html += '</div>';
                         html += '</div>';
@@ -363,67 +328,6 @@ function getProducts(val)
 		});
 	}
 }
-function check_product_stock(id,parameter)
-{
-	//alert(id);alert(parameter);
-	//var datapost = $('#cart-list-form').serialize();
-	let barcode = 1;
-	var datapost = 'action=paynow&id='+id + '&barcode=' + barcode;
-	$.ajax({
-		type: "POST",
-		url: "<?PHP echo SITE_URL; ?>ajax",
-		data: datapost,
-		success: function(response){
-			var result = JSON.parse(response);
-			
-			var stockCount = 0;
-			var html = '<div class="col-md-5">';
-				//alert(result.length);
-				if (result.length > 0) {
-					$.each(result, function (i, stock) {
-						html += '<div class="row align-items-start border-bottom py-2">';
-							html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
-							html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
-							html += '<span class="col-md-3 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
-						html += '</div>';
-						
-						stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
-					});
-					//$('#show-payment-div').hide();
-					//alert(stockCount);
-					if(stockCount > 0)
-					{
-					    if (typeof add_to_cart !== 'function') {
-							$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/cart.js")
-								.done(function () {
-									add_to_cart(parameter);
-									//check_product_stock(parameter);
-								})
-								.fail(function () {
-									alert('Failed to load cart.js');
-								});
-
-						} else {
-							add_to_cart(parameter);
-						}
-					}
-					else{
-						$('#check-stock-div').html(html).show();
-					}
-					$('#product-modal').modal('hide');
-				} else {
-					//add_to_cart(parameter);
-					//$('#paymentmode-modal').modal('show');
-					/*$('#show-payment-div').show();
-					$('#show-stock-div').hide();
-					$('#actionstatus').val('paynowsave');*/
-					//save_post_data();
-				}
-			html += '</div>';
-		}
-	});
-}
-
 function user_details(val)
 {
 	var datapost = 'action=userdetails&phone='+val;
@@ -497,39 +401,8 @@ function cart_pay()
 	$('#show-stock-div').hide();
 	$('#show-stock-div').html('');
 	//$('#payment_method').val('').trigger('change');
-	//$('#paymentmode-modal').modal('show'); // 16-01-2026
+	$('#paymentmode-modal').modal('show'); // 16-01-2026
 	
-	var datapost = $('#cart-list-form').serialize();
-	$.ajax({
-		type: "POST",
-		url: "<?PHP echo SITE_URL; ?>ajax",
-		data: datapost,
-		success: function(response){
-			var result = JSON.parse(response);
-			
-			var html = '<div class="col-md-4">';
-				//alert(result.length);
-				if (result.length > 0) {
-					$.each(result, function (i, stock) {
-						html += '<div class="row align-items-start border-bottom py-2">';
-							html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
-							html += '<span class="col-md-3 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
-							html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
-						html += '</div>';
-					});
-					//$('#show-payment-div').hide();
-					$('#check-stock-div').html(html).show();
-				} else {
-					
-					$('#show-payment-div').show();
-					$('#show-stock-div').hide();
-					$('#show-stock-div').html('');
-					//$('#payment_method').val('').trigger('change');
-					$('#paymentmode-modal').modal('show');
-				}
-			html += '</div>';
-		}
-	});
 }
 function pay_method(val)
 {
@@ -551,23 +424,37 @@ function pay_now()
 		url: "<?PHP echo SITE_URL; ?>ajax",
 		data: datapost,
 		success: function(response){
-			$('#actionstatus').val('paynow');
-			$('#supplier_id').val('');
-			var order_id = JSON.parse(response);
-			//alert(order_id);
-			clearCart();
-			$('#paymentmode-modal').modal('hide');
-			clearCart();
-				window.open(
-					"<?= SITE_URL ?>print_cart_invoice?order_id=" + order_id,
-					"_blank"
-				);
+			var result = JSON.parse(response);
+			
+			var html = '<div class="col-md-12">';
+				//alert(result.length);
+				if (result.length > 0) {
+					$.each(result, function (i, stock) {
+						html += '<div class="row align-items-start border-bottom py-2">';
+							html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
+							html += '<span class="col-md-3 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
+							html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
+						html += '</div>';
+					});
+					$('#show-payment-div').hide();
+					$('#show-stock-div').html(html).show();
+				} else {
+					$('#show-payment-div').show();
+					$('#show-stock-div').hide();
+					$('#actionstatus').val('paynowsave');
+					save_post_data();
+				}
+			html += '</div>';
 		}
 	});
 	
+	
+	//$('#paymentmode-modal').modal('hide');
+	//document.getElementById('cart-list-form').submit();
+	
 }
 
-function save_post_data() // no use
+function save_post_data()
 {
 	var datapost = $('#cart-list-form').serialize();
 	$.ajax({
