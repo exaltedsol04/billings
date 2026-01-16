@@ -83,7 +83,7 @@
 				<span id="err_empty_cart" class="text-danger"></span>
 			</div>
 			<div class="col-md-4">
-				<select name="product" id="product" onchange=add_to_cart(this.value) class="form-select select2-dropdown" tabindex="1">
+				<select name="product" id="product" onchange=check_product_stock_onchange(this.value) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
 						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode";
@@ -171,11 +171,14 @@
 			
 			<input type="hidden" name="payment_method" id="payment_method">
 			
+			<div class="col-md-12">
+				<span id="check-stock-pay-div"></span>
+			</div>
 			<div class="box-footer text-center">
 				<div class="loader" id="loader1" style="display:none"></div>
 				<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right" onclick="cart_pay()">PAY</button>
 				<input type="hidden" id="user_hidden_id" name="user_hidden_id">
-				<input type="text" name="action" value="paynow" id="actionstatus">
+				<input type="hidden" name="action" value="paynow" id="actionstatus">
 			</div>
         </div>
         </form>
@@ -363,6 +366,15 @@ function getProducts(val)
 		});
 	}
 }
+
+function check_product_stock_onchange(product)
+{
+	$('#check-stock-div').html('');
+	const myArray = product.split("@@@");
+	let pvid = parseInt(myArray[0]);
+	check_product_stock(pvid,product)
+}
+
 function check_product_stock(id,parameter)
 {
 	//alert(id);alert(parameter);
@@ -382,9 +394,9 @@ function check_product_stock(id,parameter)
 				if (result.length > 0) {
 					$.each(result, function (i, stock) {
 						html += '<div class="row align-items-start border-bottom py-2">';
-							html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
-							html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
-							html += '<span class="col-md-3 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
+							html += '<span class="col-md-5 fw-bold text-break text-nowrap text-danger">Out of stock</span>';
+							/*html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
+							html += '<span class="col-md-3 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';*/
 						html += '</div>';
 						
 						stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
@@ -423,6 +435,7 @@ function check_product_stock(id,parameter)
 		}
 	});
 }
+
 
 function user_details(val)
 {
@@ -518,7 +531,7 @@ function cart_pay()
 						html += '</div>';
 					});
 					//$('#show-payment-div').hide();
-					$('#check-stock-div').html(html).show();
+					$('#check-stock-pay-div').html(html).show();
 				} else {
 					
 					$('#show-payment-div').show();
@@ -545,7 +558,9 @@ function pay_now()
 		return false;
 	}
 	
-	var datapost = $('#cart-list-form').serialize();
+	$('#actionstatus').val('paynowsave');
+	save_post_data();
+	/*var datapost = $('#cart-list-form').serialize();
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -563,7 +578,7 @@ function pay_now()
 					"_blank"
 				);
 		}
-	});
+	});*/
 	
 }
 
