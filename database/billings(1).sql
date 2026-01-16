@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 12, 2026 at 12:14 PM
+-- Generation Time: Jan 16, 2026 at 12:39 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.1.12
 
@@ -4021,6 +4021,19 @@ CREATE TABLE `bl_pos_orders` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `bl_pos_orders`
+--
+
+INSERT INTO `bl_pos_orders` (`id`, `pos_user_id`, `user_id`, `store_id`, `total_amount`, `discount_amount`, `discount_percentage`, `payment_method`, `created_at`, `updated_at`) VALUES
+(1, 9, 2, 2, '82.00', '0.00', '0.00', 'cod', '2026-01-14 08:32:55', '2026-01-14 08:32:55'),
+(2, 9, 2, 2, '82.00', '0.00', '0.00', 'cod', '2026-01-14 10:17:47', '2026-01-14 10:17:47'),
+(3, 2, 9, 2, '82.00', '0.00', '0.00', 'cod', '2026-01-15 04:54:04', '2026-01-15 04:54:04'),
+(4, 2, 0, 2, '82.00', '0.00', '0.00', 'online', '2026-01-15 05:20:04', '2026-01-15 05:20:04'),
+(5, 2, 9, 2, '82.00', '0.00', '0.00', 'cod', '2026-01-15 05:21:27', '2026-01-15 05:21:27'),
+(6, 2, 9, 2, '82.00', '0.00', '0.00', 'cod', '2026-01-15 05:23:07', '2026-01-15 05:23:07'),
+(7, 2, 9, 2, '82.00', '0.00', '0.00', 'online', '2026-01-15 06:31:41', '2026-01-15 06:31:41');
+
 -- --------------------------------------------------------
 
 --
@@ -4038,6 +4051,19 @@ CREATE TABLE `bl_pos_order_items` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `bl_pos_order_items`
+--
+
+INSERT INTO `bl_pos_order_items` (`id`, `pos_order_id`, `product_id`, `product_variant_id`, `quantity`, `unit_price`, `total_price`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 1, 1, '82.00', '82.00', '2026-01-14 08:32:55', '2026-01-14 08:32:55'),
+(2, 2, 1, 1, 1, '82.00', '82.00', '2026-01-14 10:17:47', '2026-01-14 10:17:47'),
+(3, 3, 1, 1, 1, '82.00', '82.00', '2026-01-15 04:54:04', '2026-01-15 04:54:04'),
+(4, 4, 1, 1, 1, '82.00', '82.00', '2026-01-15 05:20:04', '2026-01-15 05:20:04'),
+(5, 5, 1, 1, 1, '82.00', '82.00', '2026-01-15 05:21:27', '2026-01-15 05:21:27'),
+(6, 6, 1, 1, 1, '82.00', '82.00', '2026-01-15 05:23:07', '2026-01-15 05:23:07'),
+(7, 7, 1, 1, 1, '82.00', '82.00', '2026-01-15 06:31:41', '2026-01-15 06:31:41');
 
 -- --------------------------------------------------------
 
@@ -4362,6 +4388,49 @@ CREATE TABLE `bl_product_ratings` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `bl_product_stock_transaction`
+--
+
+CREATE TABLE `bl_product_stock_transaction` (
+  `id` int(11) NOT NULL,
+  `seller_id` int(11) NOT NULL,
+  `product_variant_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `stock` double NOT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '0=pending, 1=approved,2=reject',
+  `selling_price` double NOT NULL,
+  `purchase_price` double NOT NULL,
+  `transaction_type` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1=Purchase Request, 2=Sell POS, 3=Sell APP, 4=Transfer Stock',
+  `received_selled_id` int(10) DEFAULT NULL,
+  `parent_id` int(10) NOT NULL,
+  `approved_by` int(10) DEFAULT NULL,
+  `approved_date` datetime DEFAULT NULL,
+  `order_id` int(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bl_product_stock_transaction`
+--
+
+INSERT INTO `bl_product_stock_transaction` (`id`, `seller_id`, `product_variant_id`, `product_id`, `stock`, `created_date`, `status`, `selling_price`, `purchase_price`, `transaction_type`, `received_selled_id`, `parent_id`, `approved_by`, `approved_date`, `order_id`) VALUES
+(1, 3, 1, 1, 30, '2026-01-13 06:14:44', 1, 100, 90, 0, 0, 0, NULL, NULL, 0),
+(2, 3, 3, 2, -20, '2026-01-13 06:14:44', 1, 100, 90, 0, 0, 0, NULL, NULL, 0),
+(3, 2, 1, 1, 10, '2026-01-13 06:17:47', 1, 50, 10, 0, 0, 0, NULL, NULL, 0),
+(4, 3, 2, 6, -2, '2026-01-13 06:18:10', 1, 50, 10, 0, 0, 0, NULL, NULL, 0),
+(5, 9, 1, 1, -1, '2026-01-14 14:02:55', 1, 82, 110, 2, 0, 0, 0, '0000-00-00 00:00:00', 1),
+(6, 9, 1, 1, -1, '2026-01-14 15:47:47', 1, 82, 110, 2, 0, 0, 0, '0000-00-00 00:00:00', 2),
+(7, 2, 1, 1, -1, '2026-01-15 10:24:04', 1, 82, 110, 2, 0, 0, 0, '0000-00-00 00:00:00', 3),
+(8, 2, 1, 1, -1, '2026-01-15 10:50:04', 1, 82, 110, 2, 0, 0, 0, '0000-00-00 00:00:00', 4),
+(9, 2, 1, 1, -1, '2026-01-15 10:51:27', 1, 82, 110, 2, 0, 0, 0, '0000-00-00 00:00:00', 5),
+(10, 2, 1, 1, -1, '2026-01-15 10:53:07', 1, 82, 110, 2, 0, 0, 0, '0000-00-00 00:00:00', 6),
+(11, 2, 1, 1, -1, '2026-01-15 12:01:41', 1, 82, 110, 2, 0, 0, 0, '0000-00-00 00:00:00', 7),
+(12, 2, 178, 109, 8, '2026-01-15 12:05:10', 0, 245, 350, 1, 0, 0, 0, '0000-00-00 00:00:00', 0),
+(13, 2, 1, 1, 3, '2026-01-15 12:05:23', 0, 82, 110, 1, 0, 0, 0, '0000-00-00 00:00:00', 0);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `bl_product_tag`
 --
 
@@ -4421,7 +4490,7 @@ INSERT INTO `bl_product_variants` (`id`, `product_id`, `type`, `status`, `measur
 (27, 27, 'packet', 0, 250.00, 26.00, 20.00, 1.00, 3, NULL),
 (28, 28, 'loose', 1, 0.50, 100.00, 75.00, 20.75, 2, NULL),
 (29, 29, 'packet', 0, 250.00, 30.00, 20.00, 4.00, 3, NULL),
-(31, 33, 'packet', 0, 1.00, 75.00, 70.00, 100.00, 2, NULL),
+(31, 33, 'packet', 0, 1.00, 75.00, 70.00, 101.00, 2, NULL),
 (32, 34, 'loose', 1, 100.00, 16.00, 12.00, 0.00, 3, NULL),
 (33, 35, 'loose', 1, 20.00, 29.00, 25.52, 0.00, 5, NULL),
 (34, 36, 'loose', 1, 1.00, 26.00, 22.88, 0.00, 5, NULL),
@@ -4515,7 +4584,7 @@ INSERT INTO `bl_product_variants` (`id`, `product_id`, `type`, `status`, `measur
 (175, 107, 'packet', 0, 1.00, 189.00, 119.00, 1.00, 2, NULL),
 (176, 108, 'packet', 0, 1.00, 260.00, 236.00, 1.00, 2, NULL),
 (177, 103, 'packet', 1, 200.00, 50.00, 48.00, 10000.00, 3, NULL),
-(178, 109, 'packet', 1, 250.00, 350.00, 245.00, 14.00, 7, NULL),
+(178, 109, 'packet', 1, 250.00, 350.00, 245.00, 15.00, 7, NULL),
 (179, 110, 'packet', 1, 1.00, 900.00, 630.00, 0.00, 2, NULL),
 (180, 110, 'packet', 1, 500.00, 450.00, 315.00, 0.00, 3, NULL),
 (182, 112, 'packet', 1, 500.00, 600.00, 420.00, 10.00, 4, NULL),
@@ -4557,32 +4626,6 @@ CREATE TABLE `bl_promo_codes` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `bl_purchase_requests`
---
-
-CREATE TABLE `bl_purchase_requests` (
-  `id` int(10) NOT NULL,
-  `product_id` int(10) NOT NULL,
-  `product_variant_id` int(10) NOT NULL,
-  `qty` int(10) NOT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=pending, 1=approved',
-  `created_by` int(10) NOT NULL,
-  `request_date` datetime NOT NULL,
-  `approved_date` datetime DEFAULT NULL,
-  `approved_by` int(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `bl_purchase_requests`
---
-
-INSERT INTO `bl_purchase_requests` (`id`, `product_id`, `product_variant_id`, `qty`, `status`, `created_by`, `request_date`, `approved_date`, `approved_by`) VALUES
-(15, 109, 178, 1, 0, 2, '2026-01-12 11:45:15', NULL, NULL),
-(16, 36, 34, 1, 0, 2, '2026-01-12 11:45:15', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -5859,7 +5902,7 @@ CREATE TABLE `bl_users` (
 --
 
 INSERT INTO `bl_users` (`id`, `name`, `email`, `password`, `is_verified`, `email_verification_code`, `profile`, `country_code`, `mobile`, `balance`, `referral_code`, `friends_code`, `status`, `created_at`, `updated_at`, `deleted_at`, `type`, `stripe_id`, `pm_type`, `pm_last_four`, `trial_ends_at`) VALUES
-(9, 'Anil Dharane', 'info.foodcons@gmail.com', NULL, 0, NULL, '', '+91', '7719277976', 0, 'EEAF92', NULL, 1, '2025-10-01 21:38:51', '2025-10-01 21:38:51', NULL, 'phone', NULL, NULL, NULL, NULL),
+(9, 'Anil Dharane', 'info.foodcons@gmail.com', NULL, 0, NULL, '', '+91', '1111111111', 0, 'EEAF92', NULL, 1, '2025-10-01 21:38:51', '2025-10-01 21:38:51', NULL, 'phone', NULL, NULL, NULL, NULL),
 (10, 'test test', 'test@ugugu.jfj', '$2y$10$I0eMTEa4bUYTcrxMTWvp8OVsHSMDlgKvtSYhkGRoCZ3jBu7JdRRva', 0, NULL, '', '', '9665027030', 110, '2179CA', NULL, 1, '2025-10-01 21:39:21', '2025-11-24 13:35:36', NULL, 'phone', NULL, NULL, NULL, NULL),
 (11, 'sachin ', 'ayur@gmail.com', NULL, 0, NULL, '', '+91', '9474713238', 100, '90179C', NULL, 1, '2025-10-01 21:53:08', '2025-11-20 21:16:49', '2025-11-20 21:16:49', 'phone', NULL, NULL, NULL, NULL),
 (12, 'test user', 'testuser@gmail.com', NULL, 0, NULL, '', '+91', '9614500391', 10, '07A741', NULL, 1, '2025-10-02 09:35:29', '2025-11-08 14:27:05', NULL, 'phone', NULL, NULL, NULL, NULL),
@@ -7155,6 +7198,12 @@ ALTER TABLE `bl_product_ratings`
   ADD UNIQUE KEY `product_ratings_product_id_user_id_unique` (`product_id`,`user_id`);
 
 --
+-- Indexes for table `bl_product_stock_transaction`
+--
+ALTER TABLE `bl_product_stock_transaction`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `bl_product_tag`
 --
 ALTER TABLE `bl_product_tag`
@@ -7172,12 +7221,6 @@ ALTER TABLE `bl_product_variants`
 -- Indexes for table `bl_promo_codes`
 --
 ALTER TABLE `bl_promo_codes`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `bl_purchase_requests`
---
-ALTER TABLE `bl_purchase_requests`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -7701,13 +7744,13 @@ ALTER TABLE `bl_pos_additional_charges`
 -- AUTO_INCREMENT for table `bl_pos_orders`
 --
 ALTER TABLE `bl_pos_orders`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `bl_pos_order_items`
 --
 ALTER TABLE `bl_pos_order_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `bl_pos_users`
@@ -7734,6 +7777,12 @@ ALTER TABLE `bl_product_ratings`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `bl_product_stock_transaction`
+--
+ALTER TABLE `bl_product_stock_transaction`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
 -- AUTO_INCREMENT for table `bl_product_tag`
 --
 ALTER TABLE `bl_product_tag`
@@ -7750,12 +7799,6 @@ ALTER TABLE `bl_product_variants`
 --
 ALTER TABLE `bl_promo_codes`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `bl_purchase_requests`
---
-ALTER TABLE `bl_purchase_requests`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `bl_rating_images`
