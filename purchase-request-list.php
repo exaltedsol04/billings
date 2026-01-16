@@ -131,7 +131,7 @@
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
 										<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
 										<td><?PHP echo $arr->measurement.' '.$unitname; ?></td>
-										<td><?PHP echo $arr->request_date; ?></td>
+										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
 										<td><?PHP echo $arr->username; ?></td>
 										<td class="text-center">
 											<div class="ms-auto">

@@ -71,7 +71,7 @@
 										<td style="width:100px"><?PHP echo $selectValue->id; ?></td>
 										<td><?PHP echo $customer->name; ?></td>
 										<td><?PHP echo $customer->mobile; ?></td>
-										<td><?PHP echo date('j M Y g:i A', strtotime($selectValue->created_at)); ?></td>
+										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td>₹<?PHP echo $pos_order_item->total_price; ?></td>
 										<!--<td><?PHP echo $pos_order_item->total_price; ?></td>-->
 									  </tr>
