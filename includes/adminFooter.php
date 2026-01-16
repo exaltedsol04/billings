@@ -16,7 +16,7 @@
 	<!--plugins-->
 	<!--<script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>-->
 	<script src="assets/plugins/metismenu/metisMenu.min.js"></script>
-	<?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php') {  ?>
+	<?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php' || $page=='barcode.php') {  ?>
 		<script src="assets/plugins/datatable/js/jquery.dataTables.min.js"></script>
 		<script src="assets/plugins/datatable/js/dataTables.bootstrap5.min.js"></script>
 	<?php } if($page=='purchase-request.php' || $page=='stock-transfer.php') {  ?>
@@ -30,7 +30,7 @@
     <script>
 	$(function () {
 		$('[data-bs-toggle="tooltip"]').tooltip();
-		<?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php') {  ?>
+		<?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php' || $page=='barcode.php') {  ?>
 		
 			var table = $('#example2').DataTable( {
 				lengthChange: false,
