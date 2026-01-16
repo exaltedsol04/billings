@@ -33,6 +33,7 @@
 				</li>
 			  </ul>
 			</li>
+<<<<<<< HEAD
 			<!--<li <?php if($page=='sellers.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">apps</i>
@@ -44,6 +45,8 @@
 				</li>
 			  </ul>
 			</li>-->
+=======
+>>>>>>> 4105dd71d524eff8afa1ee2a80f89e475c9cfec0
 			<li <?php if($page=='invoices.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">description</i>

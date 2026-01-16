@@ -1,0 +1,20 @@
+
+ 
+Cpanel
+-------------
+Domain: pos.trumilan.com/cpanel
+UserName: postrumilan
+PassWord: mjQjLJx-hiai.xoC
+ 
+Database
+-----------------
+Database: postrumilan_billings
+Database Username: postrumilan_billings
+Database Password: billings2026
+
+----------------------------------------------------------
+Login credential
+https://pos.trumilan.com/
+
+admin@billing.in / 123456
+seller@billing.in / 123456
