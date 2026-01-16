@@ -362,6 +362,14 @@
 			$date2 = $date1[2].'-'.$date1[1].'-'.$date1[0];
 			return $date2;
 		}
+		function change_date_format($date, $toFormat) {
+			if (empty($date)) {
+				return '';
+			}
+
+			return date($toFormat, strtotime($date));
+		}
+
 		function explode_name($name='')
 		{
 			if (strpos($name, '*|*') !== false) {
