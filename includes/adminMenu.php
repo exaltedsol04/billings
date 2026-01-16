@@ -75,7 +75,7 @@
 				<li><a href="<?php echo SITE_URL.'purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Report</a></li>
 			  </ul>
 			</li>
-			<li <?php if($page=='stock-transfer.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='stock-transfer.php' || $page=='available-stock-report.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">sync_alt</i>
 				</div>
@@ -83,6 +83,7 @@
 			  </a>
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Stock</a></li>
+				<li><a href="<?php echo SITE_URL.'available-stock-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Stock Report</a></li>
 			  </ul>
 			</li>
 			<?php } ?>

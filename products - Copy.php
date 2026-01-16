@@ -166,98 +166,136 @@
 		
 		
 		function printBarcode(ID) {
+			//alert(ID);
 			let printWindow = window.open('', '_blank');
-
 			printWindow.document.write(`
-		<!DOCTYPE html>
-		<html>
-		<head>
-		<title>Print Barcode</title>
-		<style>
-			body {
-				margin: 0;
-				font-family: "Courier New", monospace;
-			}
-			.label {
-				width: 320px;
-				padding: 12px;
-				margin: auto;
-				text-align: center;
-			}
-			.row {
-				border-top: 1px solid #000;
-				border-bottom: 1px solid #000;
-				padding: 6px;
-				margin: 8px 0;
-				font-weight: bold;
-			}
-			@media print {
-				@page { margin: 0; }
-			}
-		</style>
-		</head>
+				<html>
+				<head>
+					<title>Print Barcode</title>
+					<style>
+						body {
+							margin: 0;
+							padding: 0;
+							background: #eee;
+							font-family: "Courier New", monospace;
+						}
 
-		<body>
-		<div class="label">
-			<div class="brand"><b>RELIANCE SMART</b></div>
-			<div class="product">GREEN PEAS</div>
+						.label {
+							width: 320px;
+							background: #fff;
+							padding: 12px;
+							border-radius: 6px;
+							margin: 20px auto;
+							box-shadow: 0 0 4px rgba(0,0,0,0.2);
+							font-size: 14px;
+						}
 
-			<svg id="barcode"></svg>
+						.center {
+							text-align: center;
+						}
 
-			<div class="row">
-				Weight :- <span id="measurementdata">Loading...</span>
-			</div>
+						.brand {
+							font-size: 22px;
+							font-weight: bold;
+							letter-spacing: 1px;
+						}
 
-			<div class="note">* Includes the weight of packaging</div>
-		</div>
+						.product {
+							font-size: 16px;
+							font-weight: bold;
+							margin-top: 4px;
+						}
 
-		<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>
-		<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+						.barcode {
+							margin: 10px 0;
+						}
 
-		<script>
-			var ID = "${ID}"; // ✅ passed safely
+						.barcode img {
+							width: 100%;
+							height: 60px;
+							object-fit: cover;
+						}
 
-			// Generate barcode
-			JsBarcode("#barcode", ID, {
-				format: "CODE128",
-				displayValue: true,
-				height: 60,
-				width: 2,
-				fontSize: 14
-			});
+						.barcode-text {
+							font-size: 14px;
+							margin-top: 5px;
+							letter-spacing: 1px;
+						}
 
-			// Fetch weight dynamically
-			$.ajax({
-				type: "POST",
-				url: "<?= SITE_URL ?>ajax",
-				data: { action: "productprint", barcode: ID },
-				dataType: "json",
-				success: function(res) {
-					alert(res);
-					var da = JSON.stringify(res);
-					alert(da.measurement);
-					if(res.measurement && res.unitname){
-						$('#measurementdata').text(res.measurement + ' ' + res.unitname);
-					} else {
-						$('#measurementdata').text('N/A');
-					}
+						.row {
+							display: flex;
+							justify-content: space-between;
+							border-top: 1px solid #000;
+							border-bottom: 1px solid #000;
+							padding: 6px 4px;
+							margin: 8px 0;
+							font-size: 16px;
+							font-weight: bold;
+						}
 
-					// PRINT AFTER EVERYTHING IS READY
-					setTimeout(function(){
+						.note {
+							font-size: 12px;
+							margin-top: 6px;
+						}
+
+						@media print {
+							@page {
+								margin: 0;
+							}
+							body {
+								display: flex;
+								justify-content: center;
+							}
+							.label {
+								box-shadow: none;
+								margin: 0;
+							}
+						}
+					</style>
+				</head>
+				<body>
+					<div class="label">
+						<div class="center brand">RELIANCE SMART</div>
+						<div class="center product">GREEN PEAS kg</div>
+
+						<div class="barcode center">
+							<!-- Replace barcode image if needed -->
+							<svg id="barcode"></svg>
+						</div>
+
+						<!-- Weight Section (PRICE REMOVED) -->
+						<div class="row">
+							<div>Weight :- <span id="measurementdata"></span></div>
+						</div>
+
+						<div class="note">
+							* Includes the weight of packaging
+						</div>
+
+						<div class="note">
+							Non PCR Label
+						</div>
+
+					</div>
+					
+					<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>
+					<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+					<script>
+					JsBarcode("#barcode", "${ID}", {
+						format: "CODE128",
+						displayValue: true,
+						height: 60,
+						width: 2,
+						fontSize: 14
+					});
+						
+					setTimeout(function () {
 						window.print();
 						window.close();
 					}, 300);
-				},
-				error: function(){
-					$('#measurementdata').text('Error');
-					window.print();
-					window.close();
-				}
-			});
-		<\/script>
-
-		</body>
-		</html>
+					<\/script>
+				</body>
+				</html>
 			`);
 
 			printWindow.document.close();

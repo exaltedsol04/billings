@@ -360,7 +360,7 @@
 						"measurement" => $measurement,
 						"unitname" => $unitname,
 					];
-				echo json_encode($stockArr);
+				echo json_encode($stockArr);exit;
 		break;
     }
 ?>
