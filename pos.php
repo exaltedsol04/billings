@@ -424,6 +424,9 @@ function check_product_stock(id,parameter)
 					}
 					$('#product-modal').modal('hide');
 				} else {
+					
+					$('#check-stock-div').html('<span class="col-md-5 fw-bold text-break text-nowrap text-danger">Out of stock</span>').show();
+					$('#product-modal').modal('hide');
 					//add_to_cart(parameter);
 					//$('#paymentmode-modal').modal('show');
 					/*$('#show-payment-div').show();
@@ -473,6 +476,7 @@ function selectUser(mobile, name, id) {
 function cart_pay()
 {
 	//cart-list-form
+	$('#check-stock-div').html('');
 	var items = localStorage.getItem("data", JSON.stringify(basket));
 	if (items) {
 		var data = JSON.parse(items);
@@ -560,26 +564,6 @@ function pay_now()
 	
 	$('#actionstatus').val('paynowsave');
 	save_post_data();
-	/*var datapost = $('#cart-list-form').serialize();
-	$.ajax({
-		type: "POST",
-		url: "<?PHP echo SITE_URL; ?>ajax",
-		data: datapost,
-		success: function(response){
-			$('#actionstatus').val('paynow');
-			$('#supplier_id').val('');
-			var order_id = JSON.parse(response);
-			//alert(order_id);
-			clearCart();
-			$('#paymentmode-modal').modal('hide');
-			clearCart();
-				window.open(
-					"<?= SITE_URL ?>print_cart_invoice?order_id=" + order_id,
-					"_blank"
-				);
-		}
-	});*/
-	
 }
 
 function save_post_data() // no use
@@ -592,6 +576,7 @@ function save_post_data() // no use
 		success: function(response){
 			$('#actionstatus').val('paynow');
 			$('#supplier_id').val('');
+			$('#check-stock-pay-div').html('');
 			var order_id = JSON.parse(response);
 			//alert(order_id);
 			clearCart();
