@@ -367,9 +367,50 @@ function getProducts(val)
 	}
 }
 
+function check_qty_stock(id, inc)
+{
+	//alert(inc);
+	let barcode = 1;
+	var datapost = 'action=paynow&id='+id + '&barcode=' + barcode;
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			var result = JSON.parse(response);
+			
+			var stockCount = 0;
+			var html = '<div class="col-md-5">';
+				//alert(result.length);
+				if (result.length > 0) {
+					$.each(result, function (i, stock) {
+						html += '<div class="row align-items-start border-bottom py-2">';
+							html += '<span class="col-md-5 fw-bold text-break text-nowrap text-danger">Out of stock</span>';
+						html += '</div>';
+						
+						stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
+					});
+					//$('#show-payment-div').hide();
+					//alert(stockCount);
+					if(inc > stockCount)
+					{
+					$('#check-stock-pay-div').html('<span class="col-md-5 fw-bold text-break text-nowrap text-danger">stock limit is '+ stockCount + '</span>');
+					}
+					
+				} else {
+					
+					$('#check-stock-div').html('<span class="col-md-5 fw-bold text-break text-nowrap text-danger">Out of stock</span>').show();
+					$('#product-modal').modal('hide');
+				}
+			html += '</div>';
+		}
+	});
+}
+
 function check_product_stock_onchange(product)
 {
 	$('#check-stock-div').html('');
+	$('#check-stock-pay-div').html('');
 	const myArray = product.split("@@@");
 	let pvid = parseInt(myArray[0]);
 	check_product_stock(pvid,product)
@@ -524,13 +565,13 @@ function cart_pay()
 		success: function(response){
 			var result = JSON.parse(response);
 			
-			var html = '<div class="col-md-4">';
+			var html = '<div class="col-md-5">';
 				//alert(result.length);
 				if (result.length > 0) {
 					$.each(result, function (i, stock) {
 						html += '<div class="row align-items-start border-bottom py-2">';
 							html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
-							html += '<span class="col-md-3 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
+							html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
 							html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
 						html += '</div>';
 					});

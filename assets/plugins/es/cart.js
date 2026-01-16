@@ -8,6 +8,12 @@ let totalAmountShow = document.getElementById("total_amount_show");
 
 let basket = JSON.parse(localStorage.getItem("data")) || [];
 
+$(document).on("keydown", ".qty-input", function (e) {
+  if (e.key === "-" || e.key === "e") {
+    e.preventDefault();
+  }
+});
+
 /**
  * ! used to add to cart
  */
@@ -120,7 +126,7 @@ let generateCartItems = () => {
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default btn-qty" style="cursor:pointer" onclick="decrement(${id})">−</button>
 						</span>
-						<input type="text" class="form-control text-center qty-input" value="${qty}" min="1" id="qty_${id}" name="qty[]">
+						<input type="number" class="form-control text-center qty-input" value="${qty}" min="1" oninput="updateQty(${id}, this.value)" id="qty_${id}" name="qty[]">
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default btn-qty" style="cursor:pointer" onclick="increment(${id})" >+</button>
 						</span>
@@ -160,11 +166,12 @@ generateCartItems();
  */
 
 let increment = (id) => {
+	
 	$("#loader").show();
 	progress_bar();
   let selectedItem = id;
   let search = basket.find((x) => x.id === selectedItem);
-
+   //alert(id);
   if (search === undefined) {
     basket.push({
       id: selectedItem,
@@ -176,6 +183,9 @@ let increment = (id) => {
 //console.log(basket);
   update(selectedItem);
   localStorage.setItem("data", JSON.stringify(basket));
+  //let parameter = '';
+  //alert(search.qty);
+  check_qty_stock(id, search.qty);
   setTimeout(function () {
 	generateCartItems();
   }, 500);
@@ -201,6 +211,36 @@ let decrement = (id) => {
   basket = basket.filter((x) => x.qty !== 0);
   //generateCartItems();
   localStorage.setItem("data", JSON.stringify(basket));
+  $('#check-stock-pay-div').html(' ');
+  setTimeout(function () {
+	generateCartItems();
+  }, 500);
+};
+
+/**
+ * ! used to update the selected product item quantity by value
+ */
+
+let updateQty = (id, value) => {
+  let qty = parseInt(value);
+
+  // Prevent empty, zero, or negative values
+  if (isNaN(qty) || qty < 1) {
+    qty = 1;
+    document.getElementById(`qty_${id}`).value = 1;
+  }
+
+  let search = basket.find((x) => x.id === id);
+  if (!search) return;
+
+  search.qty = qty;
+  search.item = qty; // keep item count in sync
+
+  localStorage.setItem("data", JSON.stringify(basket));
+
+  calculation();
+  TotalAmount();
+  
   setTimeout(function () {
 	generateCartItems();
   }, 500);
