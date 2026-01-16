@@ -24,23 +24,20 @@
 							<td><input type="text" class="form-control" id="search-zero" placeholder="Search by barcode"></td>
 							<td><input type="text" class="form-control" id="search-one" placeholder="Search by product name"></td>
 							<td></td>
-							<td></td>
 						</tr>
                       <tr  class="text-center">
 						<th>Baecode</th>
 						<th>Name</th>
-						<th>Available stock.</th>
-						<th>Measurement</th>
+						<th class="text-center">Print Barcode</th>
                       </tr>
                     </thead>
                     <tbody>
 					<?php 
-						$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode";
+						$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, pv.measurement, p.name, p.barcode";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
-						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-						$where = "WHERE pr.status=1 AND pr.seller_id ='" .$_SESSION['USER_ID']. "' GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id";
+						$where = "WHERE pr.status=1 AND pr.seller_id ='" .$_SESSION['USER_ID']. "' GROUP BY pr.product_variant_id";
 						$params = [];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 						if($sqlQuery[0] != '')
@@ -52,8 +49,9 @@
                      <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $arr->barcode; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td><?PHP echo $arr->total_stock ?></td>
-						<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
+						<td class="text-center">
+							<a href = "javascript:void(0)" onclick="printBarcode('<?php echo($arr->barcode);?>')" title = "Click here to Print Barcode"><i class="material-icons-outlined">printer</i></a>
+						</td>
 					</tr>
 						<?PHP
 								$i++;
@@ -63,7 +61,7 @@
 						{
 					?>
                       <tr>
-                        <td colspan="4">No record found.</div>
+                        <td colspan="3">No record found.</div>
 						</td>
 					  </tr>
 					<?PHP
@@ -76,9 +74,136 @@
             </div>
       </main>
 
+<div id="printBarcodeArea" class="print-barcode-only">
+    <svg id="barcode"></svg>
+</div>
 	<!-- ######### FOOTER START ############### -->
 		<?PHP include_once("includes/adminFooter.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	
+	<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+	<script type="text/javascript">
+		function printBarcode(ID) {
+			let printWindow = window.open('', '_blank');
+
+			printWindow.document.write(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+		<title>Print Barcode</title>
+		<style>
+			body {
+				margin: 0;
+				font-family: "Courier New", monospace;
+			}
+			.label {
+				width: 320px;
+				padding: 12px;
+				margin: auto;
+				text-align: center;
+			}
+			.row {
+				border-top: 1px solid #000;
+				border-bottom: 1px solid #000;
+				padding: 6px;
+				margin: 8px 0;
+				font-weight: bold;
+			}
+			@media print {
+				@page { margin: 0; }
+			}
+		</style>
+		</head>
+
+		<body>
+		<div class="label">
+			<div class="brand"><b>RELIANCE SMART</b></div>
+			<div class="product">GREEN PEAS</div>
+
+			<svg id="barcode"></svg>
+
+			<div class="row">
+				Weight :- <span id="measurementdata">Loading...</span>
+			</div>
+
+			<div class="note">* Includes the weight of packaging</div>
+		</div>
+
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>
+		<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+
+		<script>
+			var ID = "${ID}";
+
+			// Generate barcode
+			JsBarcode("#barcode", ID, {
+				format: "CODE128",
+				displayValue: true,
+				height: 60,
+				width: 2,
+				fontSize: 14
+			});
+
+			// Fetch weight dynamically
+			$.ajax({
+				type: "POST",
+				url: "<?= SITE_URL ?>ajax",
+				data: { action: "productprint", barcode: ID },
+				dataType: "json",
+				success: function(res) {
+					//alert(res);
+					//var da = JSON.stringify(res);
+					//var da = JSON.parse(res);
+					//alert(da.measurement);
+					if(res.measurement && res.unitname){
+						$('#measurementdata').text(res.measurement + ' ' + res.unitname);
+					} else {
+						$('#measurementdata').text('N/A');
+					}
+
+					// PRINT AFTER EVERYTHING IS READY
+					setTimeout(function(){
+						window.print();
+						window.close();
+					}, 300);
+				},
+				error: function(){
+					$('#measurementdata').text('Error');
+					window.print();
+					window.close();
+				}
+			});
+		<\/script>
+
+		</body>
+		</html>
+			`);
+
+			printWindow.document.close();
+		}
+		
+		
+		function printBarcode_s(ID) {
+			alert(ID);
+			//var datapost = 'action=productprint&phone='+ID;
+			$.ajax({
+				type: "POST",
+				url: "<?= SITE_URL ?>ajax",
+				data: {
+					action: "productprint",
+					barcode: ID
+				},
+				success: function (response) {
+					var data = JSON.parse(response);
+					 //alert(data);
+				
+					var value = data[0].measurement +' ' + data[0].unitname;
+					alert(value)
+					$('#measurementdata').html(value);
+					//print_product_barcode(ID)
+				}
+			});
+		}
+</script>
   </body>
 </html>

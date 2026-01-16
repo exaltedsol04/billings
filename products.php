@@ -5,6 +5,13 @@
 	ob_start();
 	
 	ob_end_flush();
+	
+	$orWhere = '';
+	if(isset($_GET['sid'])  && $_GET['sid'] != '')
+	{
+		$seller_id = $_GET['sid'];
+		$orWhere = "AND pr.seller_id ='" .$seller_id. "'";
+	}
 ?>
 	<!-- ######### HEADER START ############### -->
 		<?PHP include_once("includes/adminHeader.php"); ?>
@@ -32,8 +39,29 @@
 					</div>
 				</div>
 				<!--end breadcrumb-->
-     
-				<div class="card">
+				<div class="row">
+					<div class="col-md-5">
+						<select name="seller_id" id="seller_id" class="form-select select2-dropdown" tabindex="1" onchange="select_sellers(this.value)">
+							<option value="">Select...</option>
+							<option value="">All</option>
+							<?PHP
+								$sqlQuery = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id!=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 2);
+								if($sqlQuery[0] != '')
+								{
+									foreach($sqlQuery as $arr)
+									{	
+							?>
+								<option value="<?PHP echo $arr->admin_id ?>"><?PHP echo $arr->name; ?></option>
+							<?PHP
+									}
+								}
+							?>
+						</select>
+						<span class="text-danger" id="err_seller"></span>
+					</div>
+				</div>
+			
+				<div class="card mt-4">
 					<div class="card-body">
 						<div class="table-responsive">
 							<table id="example2" class="table table-striped table-bordered">
@@ -44,49 +72,40 @@
 										<td><input type="text" class="form-control" id="search-one" placeholder="Search by product name"></td>
 										<td></td>
 										<td></td>
-										<td></td>
+										
 									</tr>
-								  <tr>
+								  <tr class="text-center">
 									<!--<th>Image</th>-->
 									<th>Barcode</th>
 									<th>Name</th>
-									<th>Stock</th>
+									<th>Available Stock</th>
 									<th>Measurement</th>
-									<th class="text-center">Print Barcode</th>
-								  </tr>
+									</tr>
 								</thead>
 								<tbody>
 									<?php 
-			
-									$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode";
-									$tables = PRODUCT_VARIANTS . " pv
-									INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
-									$where = "WHERE 1 ORDER BY p.name";
-									$params = [];
-									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+								
+									$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode";
+						$tables = PRODUCT_STOCK_TRANSACTION . " pr
+						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+						$where = "WHERE pr.status=1 ".$orWhere." GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+						$params = [];
+						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 									//echo "<pre>";print_r($sqlQuery);die;
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
-										foreach($sqlQuery as $selectValue)
+										foreach($sqlQuery as $arr)
 										{	
-											/*$imagePath = MAIN_SERVER_PATH . $selectValue->image;
-											if (!empty($selectValue->image) && file_exists($imagePath)) {
-												$imagePath = MAIN_SERVER_PATH . $selectValue->image;
-											} else {
-												$imagePath = IMG_PATH . 'noImg.jpg';
-											}*/
 									?>
-											  <tr id="dataRow<?php echo($selectValue->id);?>">
-												<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
-												<td><?PHP echo !empty($selectValue->barcode)  ? $selectValue->barcode : 'N/A'; ?></td>
-												<td><?PHP echo $general_cls_call->explode_name($selectValue->name); ?></td>
-												<td><?PHP echo $selectValue->stock.' '.$selectValue->type; ?></td>
-												<td><?PHP echo $selectValue->measurement; ?></td>
-												<td class="text-center">
-													<a href = "javascript:void(0)" onclick="printBarcode('<?php echo($selectValue->barcode);?>')" title = "Click here to Print Barcode"><i class="material-icons-outlined">printer</i></a>
-												</td>
-											  </tr>
+											  <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
+												<td><?PHP echo $arr->barcode; ?></td>
+												<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
+												<td><?PHP echo $arr->total_stock ?></td>
+												<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
+											</tr>
 									<?PHP
 											$i++;
 										}
@@ -95,8 +114,8 @@
 									{
 								?>
 											  <tr>
-												<td colspan="5">
-												<div class="alert alert-warning text-center" role="alert"><strong>No record found.</strong></div>
+												<td colspan="4">
+												No record found.
 												</td>
 											  </tr>
 								<?PHP
@@ -137,157 +156,19 @@
 		<?PHP include_once("includes/adminFooter.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 
-
-  <!--plugins-->
-	<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-	<script type="text/javascript">
-		/*function printBarcode(ID) {
-
-			// Enable barcode-only print mode
-			document.body.classList.add('print-barcode-mode');
-
-			document.getElementById('barcode').innerHTML = '';
-
-			JsBarcode("#barcode", ID, {
-				format: "CODE128",
-				displayValue: true,
-				height: 60,
-				fontSize: 14
-			});
-
-			setTimeout(function () {
-				window.print();
-
-				// Disable after printing
-				document.body.classList.remove('print-barcode-mode');
-			}, 300);
-		}*/
-		
-		
-		
-		function printBarcode(ID) {
-			let printWindow = window.open('', '_blank');
-
-			printWindow.document.write(`
-		<!DOCTYPE html>
-		<html>
-		<head>
-		<title>Print Barcode</title>
-		<style>
-			body {
-				margin: 0;
-				font-family: "Courier New", monospace;
-			}
-			.label {
-				width: 320px;
-				padding: 12px;
-				margin: auto;
-				text-align: center;
-			}
-			.row {
-				border-top: 1px solid #000;
-				border-bottom: 1px solid #000;
-				padding: 6px;
-				margin: 8px 0;
-				font-weight: bold;
-			}
-			@media print {
-				@page { margin: 0; }
-			}
-		</style>
-		</head>
-
-		<body>
-		<div class="label">
-			<div class="brand"><b>RELIANCE SMART</b></div>
-			<div class="product">GREEN PEAS</div>
-
-			<svg id="barcode"></svg>
-
-			<div class="row">
-				Weight :- <span id="measurementdata">Loading...</span>
-			</div>
-
-			<div class="note">* Includes the weight of packaging</div>
-		</div>
-
-		<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>
-		<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
-
-		<script>
-			var ID = "${ID}"; // ✅ passed safely
-
-			// Generate barcode
-			JsBarcode("#barcode", ID, {
-				format: "CODE128",
-				displayValue: true,
-				height: 60,
-				width: 2,
-				fontSize: 14
-			});
-
-			// Fetch weight dynamically
-			$.ajax({
-				type: "POST",
-				url: "<?= SITE_URL ?>ajax",
-				data: { action: "productprint", barcode: ID },
-				dataType: "json",
-				success: function(res) {
-					alert(res);
-					var da = JSON.stringify(res);
-					alert(da.measurement);
-					if(res.measurement && res.unitname){
-						$('#measurementdata').text(res.measurement + ' ' + res.unitname);
-					} else {
-						$('#measurementdata').text('N/A');
-					}
-
-					// PRINT AFTER EVERYTHING IS READY
-					setTimeout(function(){
-						window.print();
-						window.close();
-					}, 300);
-				},
-				error: function(){
-					$('#measurementdata').text('Error');
-					window.print();
-					window.close();
-				}
-			});
-		<\/script>
-
-		</body>
-		</html>
-			`);
-
-			printWindow.document.close();
-		}
-		
-		
-		function printBarcode_s(ID) {
-			alert(ID);
-			//var datapost = 'action=productprint&phone='+ID;
-			$.ajax({
-				type: "POST",
-				url: "<?= SITE_URL ?>ajax",
-				data: {
-					action: "productprint",
-					barcode: ID
-				},
-				success: function (response) {
-					var data = JSON.parse(response);
-					 //alert(data);
-				
-					var value = data[0].measurement +' ' + data[0].unitname;
-					alert(value)
-					$('#measurementdata').html(value);
-					//print_product_barcode(ID)
-				}
-			});
-		}
-</script>
-
-
 </body>
 
 </html>
+<script>
+function select_sellers(id)
+{
+	
+	if(id != '')
+	{
+		window.location.href = "<?= SITE_URL ?>products?sid=" + id;
+	}
+	else{
+		window.location.href = "<?= SITE_URL ?>products";
+	}
+}
+</script>

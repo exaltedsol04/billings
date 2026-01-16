@@ -63,7 +63,7 @@
 						{
 					?>
                       <tr>
-                        <td colspan="4">No record found.</div>
+                        <td colspan="4">No record found.
 						</td>
 					  </tr>
 					<?PHP

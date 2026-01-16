@@ -69,7 +69,6 @@
 							<td></td>
 							<td></td>
 							<td></td>
-							<td></td>
 						</tr>
                       <tr>
 						<th>Barcode</th>
@@ -78,7 +77,6 @@
 						<th>Measurement</th>
 						<th>Request Date</th>
 						<th>Requested By</th>
-						<th class="text-center">Action</th>
                       </tr>
 								</thead>
 								<tbody>
@@ -117,24 +115,6 @@
 										<td><?PHP echo $arr->measurement.' '. $unitname; ?></td>
 										<td><?PHP echo $arr->request_date; ?></td>
 										<td><?PHP echo $arr->username; ?></td>
-										<td class="text-center">
-											<div class="ms-auto">
-												  <div class="btn-group">
-													<button type="button" class="btn btn-<?PHP echo $arr->status==1 ? 'success' : ($arr->status==2 ? 'danger' : 'warning'); ?>">
-													<?PHP echo $arr->status==1 ? 'Approved' : ($arr->status==2 ? 'Rejected' : 'Pending'); ?>
-													</button>
-													<button type="button" class="btn btn-<?PHP echo $arr->status==1 ? 'success' : ($arr->status==2 ? 'danger' : 'warning'); ?> split-bg-<?PHP echo $arr->status==1 ? 'success' : ($arr->status==2 ? 'danger' : 'warning'); ?> dropdown-toggle dropdown-toggle-split"
-													  data-bs-toggle="dropdown"> <span class="visually-hidden">Toggle Dropdown</span>
-													</button>
-													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-success text-bold">Approve</span></a>
-															
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=0" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-warning text-bold">Pending</span></a>
-													</div>
-												</div>
-											</div>
-										
-										</td>
 									  </tr>
 										<?PHP
 												$i++;
@@ -144,7 +124,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="7" class="text-center">No record found.
+										<td colspan="6" class="text-center">No record found.
 										</td>
 									  </tr>
 						<?PHP

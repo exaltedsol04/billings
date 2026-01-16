@@ -33,6 +33,17 @@
 				</li>
 			  </ul>
 			</li>
+			<li <?php if($page=='sellers.php') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">apps</i>
+				</div>
+				<div class="menu-title">sellers</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'sellers'; ?>"><i class="material-icons-outlined">arrow_right</i>Sellers List</a>
+				</li>
+			  </ul>
+			</li>
 			<li <?php if($page=='invoices.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">description</i>

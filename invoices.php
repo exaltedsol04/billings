@@ -68,7 +68,7 @@
 											$pos_order_item = $general_cls_call->select_query("*", POS_ORDERS_ITEMS, "WHERE pos_order_id=:pos_order_id", [':pos_order_id' => $selectValue->id], 1);											
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
-										<td style="width:100px">#<?PHP echo $selectValue->id; ?></td>
+										<td style="width:100px"><?PHP echo $selectValue->id; ?></td>
 										<td><?PHP echo $customer->name; ?></td>
 										<td><?PHP echo $customer->mobile; ?></td>
 										<td><?PHP echo date('j M Y g:i A', strtotime($selectValue->created_at)); ?></td>
