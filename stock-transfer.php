@@ -3,38 +3,6 @@
 	$pageAccessRoleIds = [3];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
-
-/*=========== ACCOUNT SETTINGS START ===========*/
-	/*if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnSubmit'])) && $_POST['btnSubmit'] === "SAVE")
-	{	
-		extract($_POST);
-		//echo "<pre>";print_r($product_variant_id);die;
-		if(!empty($product_variant_id))
-		{
-			foreach($product_variant_id as $k=>$val) {
-				
-				$field = "product_id, product_variant_id, qty, created_by, request_date";
-				$value = ":product_id, :product_variant_id, :qty, :created_by, :request_date";
-				$addExecute=array(
-					':product_id'			=> $general_cls_call->specialhtmlremover($product_id[$k]),
-					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
-					':qty'					=> $general_cls_call->specialhtmlremover($qty[$k]),
-					':created_by'			=> $_SESSION['USER_ID'],
-					':request_date'			=> date("Y-m-d H:i:s")
-				);
-				$general_cls_call->insert_query(PURCHASE_REQUESTS, $field, $value, $addExecute);
-				$sucMsg="Data has been submitted successfully";
-				$_SESSION['call_js'] = true;
-			}				
-		}
-		else
-		{
-			$erMsg = "Please choose product.";
-		}
-	}*/
-/*===========  END ===========*/
-
-
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->

@@ -350,9 +350,9 @@
 					':transaction_type'		=> 4,
 					':received_selled_id'	=> $_POST['hid_seller_id'],
 					':parent_id'			=> 0,
-					':approved_by'			=> null,
-					':approved_date'		=> null,
-					':order_id'		       => '',
+					':approved_by'			=> 0,
+					':approved_date' 		=> '0000-00-00 00:00:00',
+					':order_id'		       => 0,
 				);
 				
 				$last_insert_id = $general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
@@ -371,9 +371,9 @@
 					':transaction_type'		=> 4,
 					':received_selled_id'	=> 0,
 					':parent_id'			=> $last_insert_id,
-					':approved_by'			=> null,
-					':approved_date'		=> null,
-					':order_id'		       => '',
+					':approved_by'			=> 0,
+					':approved_date' 		=> '0000-00-00 00:00:00',
+					':order_id'		       => 0,
 				);
 				
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
