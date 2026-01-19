@@ -47,8 +47,8 @@ $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
 	define("JS_PATH", DOMAIN_NAME."js/");
 	define("CSS_PATH", DOMAIN_NAME."css/");
 
-	define("ADMIN_TITLE", ".::. Billings Control Panel .::.");
-	define("SITE_TITLE", "Billings");
+	define("ADMIN_TITLE", ".::. Ecoleaf Satara Control Panel .::.");
+	define("SITE_TITLE", "Ecoleaf Satara");
 	
 	define("MAIN_SERVER_PATH", "images/");
 ?>

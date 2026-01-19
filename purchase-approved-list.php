@@ -63,20 +63,22 @@
 							<table id="example2" class="table table-striped table-bordered">
 								<thead>
 									<tr>
-							<td><input type="text" class="form-control" id="search-zero" placeholder="Search by barcode"></td>
-							<td><input type="text" class="form-control" id="search-one" placeholder="Search by product name"></td>
 							<td></td>
+							<td><input type="text" class="form-control" id="search-one" placeholder="Search by barcode"></td>
+							<td><input type="text" class="form-control" id="search-two" placeholder="Search by product name"></td>
 							<td></td>
 							<td></td>
 							<td><input type="text" class="form-control" id="search-five" placeholder="Search by seller name"></td>
+							<td></td>
 						</tr>
                       <tr class="text-center">
+						<th>Sl. No.</th>
 						<th>Barcode</th>
 						<th>Product Name</th>
 						<th>Qty.</th>
 						<th>Measurement</th>
-						<th>Request Date</th>
 						<th>Requested By</th>
+						<th>Request Date</th>
                       </tr>
 								</thead>
 								<tbody>
@@ -86,16 +88,17 @@
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.seller_id";
-						$where = "WHERE pr.status = :status ORDER BY pr.created_date DESC";
+						$where = "WHERE pr.status = :status AND pr.transaction_type = :transaction_type ORDER BY pr.created_date DESC";
 						$params = [
-							':status' => 1
+							':status' => 1,
+							':transaction_type' => 1	
 						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 						
 						if($sqlQuery[0] != '')
 						{
 							$i = 1;
-							foreach($sqlQuery as $arr)
+							foreach($sqlQuery as $key=>$arr)
 							{	
 								/*$imagePath = MAIN_SERVER_PATH . $arr->image;
 								if (!empty($arr->image) && file_exists($imagePath)) {
@@ -108,12 +111,13 @@
 					?>
 									  <tr id="dataARow<?php echo($arr->id);?>"  class="text-center">
 										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
+										<td><?PHP echo $key+1; ?></td>
 										<td><?PHP echo $arr->barcode; ?></td>
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
-										<td><?PHP echo $arr->qty.' '.$arr->type; ?></td>
+										<td><?PHP echo $arr->pqty ?></td>
 										<td><?PHP echo $arr->measurement. ' '. $unitname; ?></td>
-										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
 										<td><?PHP echo $arr->username; ?></td>
+										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
 									</tr>
 										<?PHP
 												$i++;

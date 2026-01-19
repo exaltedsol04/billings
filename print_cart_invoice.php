@@ -12,12 +12,16 @@ $seller = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_i
 $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' => $order->pos_user_id], 1);
 
 //--------------------------
-	$fields = "pv.*, p.*";
-	$tables = POS_ORDERS_ITEMS . " pv
-	INNER JOIN " . POS_ORDERS . " p ON p.id = pv.pos_order_id";
-	$where = "WHERE p.id= '".$order_id."' ";
-	$params = [];
+	$fields = "poi.*, po.*";
+	$tables = POS_ORDERS_ITEMS . " poi
+	INNER JOIN " . POS_ORDERS . " po ON po.id = poi.pos_order_id";
+	$where = "WHERE po.id= :order_id";
+	$params = [
+		':order_id' => $order_id
+	];
 	$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+	
+	//$product = $general_cls_call->select_query("*", PRODUCTS, "WHERE id=:id", [':id' => $arr->id], 1);
 	
 	//echo "<pre>"; print_r($sqlQuery);die;
 //------------------------
@@ -145,7 +149,7 @@ $barcode = 	$product_variant_data->barcode;
     <div class="center logo"><img src="https://admin.ecofresh.in/storage/logo/1762600335_71147.png" width="100"/></div>
 
     <div class="center small">
-        <strong>Ecoleaf Satara</strong><br>
+        <strong><?php echo SITE_TITLE; ?></strong><br>
         Near Shushma Petrol Pump Wadhe Phata,<br>
         Highway, Bangalore, Satara, Maharashtra 415001<br>
         Satara - Maharashtra - 415001<br><br>
@@ -163,10 +167,10 @@ $barcode = 	$product_variant_data->barcode;
 
     <div class="small">
         Place of Supply & State Code: 27 MH<br>
-        Customer Type: URD<br>
+        Customer: <?php echo $customer->name.' ('.$customer->mobile.')'; ?><br>
         Date: <?php echo date('d/m/Y H:i');?><br>
-        Bill No: 166<br>
-        Store: TMK1 &nbsp;&nbsp; Cashier: 60893486<br>
+        Bill No: <?php echo $order_id; ?><br>
+        Store: <?php echo $seller->store_name; ?> &nbsp;&nbsp; Cashier: <?php echo $seller->name; ?><br>
         POS No: R106
     </div>
 
