@@ -105,7 +105,7 @@
 
 			.label {
 				width: 80mm;
-				padding: 8px;
+				padding: 4px;
 				text-align: center;
 				page-break-after: avoid;
 			}
@@ -124,7 +124,7 @@
 			}
 			
 			.note {
-				text-align: left;
+				text-align: center;
 			}
 
 			@media print {
@@ -149,11 +149,7 @@
 
 			<svg id="barcode"></svg>
 
-			<div class="row">
-				Weight :- <span id="measurementdata">Loading...</span>
-			</div>
-
-			<div class="note">* Includes the weight of packaging</div>
+			<div class="note">Weight: <span id="measurementdata">Loading...</span></div>
 		</div>
 
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>
@@ -166,7 +162,7 @@
 			JsBarcode("#barcode", ID, {
 				format: "CODE128",
 				displayValue: true,
-				height: 60,
+				height: 55,
 				width: 2,
 				fontSize: 14
 			});
