@@ -12,7 +12,7 @@
 		$seller_id = $_GET['sid'];
 		$orWhere = "AND pr.seller_id ='" .$seller_id. "'";
 		
-		$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode";
+		$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode, u.name as unit_name";
 		$tables = PRODUCT_STOCK_TRANSACTION . " pr
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
@@ -20,10 +20,11 @@
 		$where = "WHERE pr.status=1 ".$orWhere." GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
 		$params = [];
 		$sqlQueryP = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+		//echo "<pre>";print_r($sqlQueryP);die;
 	}
 	else{
 		
-		$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
+		$fields = "pv.id as pvid, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
 		$tables = PRODUCT_VARIANTS . " pv
 		INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id 
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
@@ -118,15 +119,30 @@
 									if($sqlQueryP[0] != '')
 									{
 										$i = 1;
+										$total_stock = 0;
 										foreach($sqlQueryP as $k=>$arr)
 										{	
+										  if(!empty($arr->pvid))
+										  {
+											  $stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $arr->pvid, 'status'=>1, 'product_id'=> $arr->product_id), 'stock');
+											  $total_stock = $stock_used->total;
+											 
+											  if(empty($total_stock))
+											  {
+												  $total_stock = 0;
+											  }
+											  
+										  }
+										  else{
+											  $total_stock = $arr->total_stock;
+										  }
 									?>
 											  <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 												<td><?PHP echo $k+1; ?></td>
 												<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 												<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-												<td><?PHP echo $arr->total_stock ?></td>
-												<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
+												<td><?PHP echo $total_stock ?></td>
+												<td><?PHP echo $arr->measurement. ' ' .$arr->unit_name; ?></td>
 											</tr>
 									<?PHP
 											$i++;
