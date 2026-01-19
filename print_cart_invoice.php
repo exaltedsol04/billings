@@ -9,7 +9,7 @@ $order = $general_cls_call->select_query("*", POS_ORDERS, "WHERE id=:id", [':id'
 $seller = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", [':admin_id' => $order->store_id], 1);
 //echo "<pre>"; print_r($seller);die;
 
-$customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' => $order->pos_user_id], 1);
+$customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' => $order->user_id], 1);
 
 //--------------------------
 	$fields = "poi.*, po.*";
@@ -167,7 +167,7 @@ $barcode = 	$product_variant_data->barcode;
 
     <div class="small">
         Place of Supply & State Code: 27 MH<br>
-        Customer: <?php echo $customer->name.' ('.$customer->mobile.')'; ?><br>
+        Customer: <?php echo $customer->name.' (M. '.$customer->mobile.')'; ?><br>
         Date: <?php echo date('d/m/Y H:i');?><br>
         Bill No: #<?php echo $order_id; ?><br>
         Store: <?php echo $seller->store_name; ?> &nbsp;&nbsp; Cashier: <?php echo $seller->name; ?><br>
