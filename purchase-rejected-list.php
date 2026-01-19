@@ -113,7 +113,7 @@
 									  <tr id="dataRow<?php echo($arr->id);?>">
 										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
 										<td><?PHP echo $key+1; ?></td>
-										<td><?PHP echo $arr->barcode; ?></td>
+										<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
 										<td><?PHP echo $arr->pqty ?></td>
 										<td><?PHP echo $arr->measurement.' '. $unitname; ?></td>
