@@ -25,6 +25,7 @@ let add_to_cart = () => {
 	let productName = myArray[2];
 	let productId = myArray[3];
 	let productBarcode = myArray[4];
+	let productMeasurement = myArray[5];
 	let qty = 1;
 	let search = stockBasket.find((x) => x.id === selectedItem);
 	
@@ -33,8 +34,8 @@ let add_to_cart = () => {
   if (search === undefined) {
     stockBasket.push({
       id: selectedItem,
-	  barcode: productBarcode,
-	  name: productName,
+	  measurement: productMeasurement,
+	  name: productBarcode+productName,
 	  price: productPrice,
 	  pid: productId,
       qty: parseInt(qty),
@@ -77,8 +78,8 @@ let generateStockItems = () => {
 	
   if (stockBasket.length !== 0) {
     return (StockCart.innerHTML = stockBasket
-      .map((x) => {
-        let { id, item, qty, price, barcode, name, pid } = x;
+      .map((x, index) => {
+        let { id, item, qty, price, measurement, name, pid } = x;
 
 		$('#loader').hide();
 		$('#removeCart').show();
@@ -91,13 +92,14 @@ let generateStockItems = () => {
        // let search = shopItemsData.find((x) => x.id === id) || [];
         //let { qty, price, name, pid } = search;
         return `<tr>
-				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${barcode}</td>
+				 <td class="text-center">${index + 1}</td>
+				  
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
 				  ${name}
 				  <input type="hidden" value="${id}" name="product_variant_id[]">
 				  <input type="hidden" value="${pid}" name="product_id[]">
 				  </td>
-				  <td class="text-center">₹ ${price}</td>	
+				 
 					<td>
 					<div class="input-group quantity-group">
 						<span class="input-group-btn">
@@ -108,7 +110,9 @@ let generateStockItems = () => {
 							<button type="button" class="btn btn-default btn-qty" style="cursor:pointer" onclick="increment(${id})" >+</button>
 						</span>
 					</div>
-				  </td>					  
+				  </td>
+					<td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${measurement}</td>
+				  <td class="text-center">₹ ${price}</td>	
 				  <td class="text-center">₹ ${(qty * price).toFixed(2)}</td>
 				  <td class="text-center">
 					<i style="cursor:pointer;" onclick="removeItem(${id})" class="material-icons-outlined text-danger">close</i>
@@ -124,7 +128,7 @@ let generateStockItems = () => {
    
    $('#removeCart, #loader').hide();
     StockCart.innerHTML = `<tr>
-						  <td colspan="6" class="text-center">No Record Found.</td>
+						  <td colspan="7" class="text-center">No Record Found.</td>
     </td></tr>`;
   }
   
@@ -232,7 +236,7 @@ let TotalAmount = () => {
       .reduce((x, y) => x + y, 0);
 
     return (totalAmountShow.innerHTML = `<tr>
-						  <td colspan="4">Sum</td>
+						  <td colspan="5">Sum</td>
 						  <td id="cartAmount" class="cartAmount text-center">₹ ${amount.toFixed(2)}</td>
 						</tr>`);
   } else return;
