@@ -21,8 +21,9 @@
 				  <table id="example2" class="table table-striped table-bordered">
                     <thead>
 						<tr>
-							<td><input type="text" class="form-control" id="search-zero" placeholder="Search by barcode"></td>
-							<td><input type="text" class="form-control" id="search-one" placeholder="Search by product name"></td>
+							<td></td>
+							<td><input type="text" class="form-control" id="search-one" placeholder="Search by barcode"></td>
+							<td><input type="text" class="form-control" id="search-two" placeholder="Search by product name"></td>
 							<td></td>
 						</tr>
                       <tr  class="text-center">
@@ -49,7 +50,7 @@
 					?>
                      <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $i; ?></td>
-						<td><?PHP echo $arr->barcode; ?></td>
+						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td class="text-center">
 							<a href = "javascript:void(0)" onclick="printBarcode('<?php echo($arr->barcode);?>')" title = "Click here to Print Barcode"><i class="material-icons-outlined">printer</i></a>

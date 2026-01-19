@@ -179,7 +179,7 @@ function submit_request()
 	$('#err_product').text('');
 	$('#err_seller').text('');
 	var seller_id = $('#seller_id').val();
-	var items = localStorage.getItem("purchaseData", JSON.stringify(purchaseBasket));
+	var items = localStorage.getItem("stockData", JSON.stringify(stockBasket));
 	if (items) {
 		var data = JSON.parse(items);
 		if (data.length > 0) {
