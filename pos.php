@@ -342,7 +342,7 @@ function getProducts(val)
 					item.image + '@@@' +
 					item.barcode + '@@@' +
 					item.measurement + ' ' + item.stock_unit_id;
-					alert(parameter);
+					//alert(parameter);
 					var images = item.imagePath;
 					html += '<div class="col">';
 							html += '<div class="card rounded-4">';

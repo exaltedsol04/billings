@@ -76,7 +76,7 @@
 					<?PHP
 						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode";
 						$tables = PRODUCT_VARIANTS . " pv
-						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
+						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id INNER JOIN " . PRODUCT_STOCK_TRANSACTION . " pst ON pst.product_id = pv.product_id AND pst.product_variant_id = pv.id AND pst.status=1";
 						$where = "WHERE 1 ORDER BY p.name";
 						$params = [];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
