@@ -71,7 +71,7 @@
 					?>
                       <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $k+1 ?></td>
-						<td><?PHP echo $arr->barcode; ?></td>
+						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td><?PHP echo $arr->pqty ?></td>
 						<td><?PHP echo $arr->measurement . ' ' .$unitdata->name; ?></td>
