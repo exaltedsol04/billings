@@ -37,9 +37,11 @@
 		
 		case "productbarcord":
 			$barcode = $_POST['barcode'];
-			$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode";
+			$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode, u.name as unit_name";
 						$tables = PRODUCT_VARIANTS . " pv
-						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
+						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id
+						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
+						INNER JOIN " . PRODUCT_STOCK_TRANSACTION . " pst ON pst.product_id = pv.product_id AND pst.product_variant_id = pv.id AND pst.status=1";
 						$where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";
 						$params = [];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
@@ -55,7 +57,7 @@
 				}
 				
 				// get unit 
-				$stock_unit_id = $general_cls_call->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$val->stock_unit_id), 1);
+				//$stock_unit_id = $general_cls_call->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$val->stock_unit_id), 1);
 				
 				$productArr[] = [
 					'id'               => $val->id,
@@ -68,7 +70,7 @@
 					'image'            => $val->image,
 					'barcode'          => $val->barcode,
 					'imagePath'        => $imagePath,
-					'stock_unit_id'          => $stock_unit_id->name,
+					'stock_unit_id'    => $val->unit_name,
 				];
 			}
 			//echo "<pre>";print_r($productArr);die;

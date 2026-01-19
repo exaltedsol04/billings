@@ -1,12 +1,12 @@
-let PurchaseCart = document.getElementById("purchase-cart");
+let StockCart = document.getElementById("stock-cart");
 let totalAmountShow = document.getElementById("total_amount_show");
 /**
- * ! purchaseBasket to hold all the selected items
+ * ! stockBasket to hold all the selected items
  * ? the getItem part is retrieving data from the local storage
- * ? if local storage is blank, purchaseBasket becomes an empty array
+ * ? if local storage is blank, stockBasket becomes an empty array
  */
 
-let purchaseBasket = JSON.parse(localStorage.getItem("purchaseData")) || [];
+let stockBasket = JSON.parse(localStorage.getItem("stockData")) || [];
 
 /**
  * ! used to add to cart
@@ -26,12 +26,12 @@ let add_to_cart = () => {
 	let productId = myArray[3];
 	let productBarcode = myArray[4];
 	let qty = 1;
-	let search = purchaseBasket.find((x) => x.id === selectedItem);
+	let search = stockBasket.find((x) => x.id === selectedItem);
 	
 	$('#product_id').val(productId);
 
   if (search === undefined) {
-    purchaseBasket.push({
+    stockBasket.push({
       id: selectedItem,
 	  barcode: productBarcode,
 	  name: productName,
@@ -45,11 +45,11 @@ let add_to_cart = () => {
 	search.qty += parseInt(qty);
   }
 
-  console.log(purchaseBasket);
+  console.log(stockBasket);
   update(selectedItem);
-  localStorage.setItem("purchaseData", JSON.stringify(purchaseBasket));
+  localStorage.setItem("stockData", JSON.stringify(stockBasket));
   setTimeout(function () {
-	generatePurchaseItems();
+	generateStockItems();
   }, 500);
 };
 
@@ -60,7 +60,7 @@ let add_to_cart = () => {
 let calculation = () => {
   let cartIcon = document.getElementById("cartAmount");
   if(cartIcon){
-	cartIcon.innerHTML = purchaseBasket.map((x) => x.item).reduce((x, y) => x + y, 0);
+	cartIcon.innerHTML = stockBasket.map((x) => x.item).reduce((x, y) => x + y, 0);
   }
 };
 
@@ -70,13 +70,13 @@ calculation();
 /**
  * ! Generates the Cart Page with product cards composed of
  * ! images, title, price, buttons, & Total price
- * ? When purchaseBasket is blank -> show's Cart is Empty
+ * ? When stockBasket is blank -> show's Cart is Empty
  */
 
-let generatePurchaseItems = () => {
+let generateStockItems = () => {
 	
-  if (purchaseBasket.length !== 0) {
-    return (PurchaseCart.innerHTML = purchaseBasket
+  if (stockBasket.length !== 0) {
+    return (StockCart.innerHTML = stockBasket
       .map((x) => {
         let { id, item, qty, price, barcode, name, pid } = x;
 
@@ -119,18 +119,18 @@ let generatePurchaseItems = () => {
       })
       .join(""));
   } else {
-   // PurchaseCart.innerHTML = "";
+   // StockCart.innerHTML = "";
    totalAmountShow.innerHTML = "";
    
    $('#removeCart, #loader').hide();
-    PurchaseCart.innerHTML = `<tr>
+    StockCart.innerHTML = `<tr>
 						  <td colspan="6" class="text-center">No Record Found.</td>
     </td></tr>`;
   }
   
 };
 
-generatePurchaseItems();
+generateStockItems();
 
 /**
  * ! used to increase the selected product item quantity by 1
@@ -139,21 +139,21 @@ generatePurchaseItems();
 let increment = (id) => {
 	$("#loader").show();
   let selectedItem = id;
-  let search = purchaseBasket.find((x) => x.id === selectedItem);
+  let search = stockBasket.find((x) => x.id === selectedItem);
 
   if (search === undefined) {
-    purchaseBasket.push({
+    stockBasket.push({
       id: selectedItem,
       qty: 1,
     });
   } else {
     search.qty += 1;
   }
-//console.log(purchaseBasket);
+//console.log(stockBasket);
   update(selectedItem);
-  localStorage.setItem("purchaseData", JSON.stringify(purchaseBasket));
+  localStorage.setItem("stockData", JSON.stringify(stockBasket));
   setTimeout(function () {
-	generatePurchaseItems();
+	generateStockItems();
   }, 500);
 };
 
@@ -164,7 +164,7 @@ let increment = (id) => {
 let decrement = (id) => {
 	$("#loader").show();
   let selectedItem = id;
-  let search = purchaseBasket.find((x) => x.id === selectedItem);
+  let search = stockBasket.find((x) => x.id === selectedItem);
 
   if (search === undefined) return;
   else if (search.qty === 0) return;
@@ -173,11 +173,11 @@ let decrement = (id) => {
   }
 
   update(selectedItem);
-  purchaseBasket = purchaseBasket.filter((x) => x.qty !== 0);
-  //generatePurchaseItems();
-  localStorage.setItem("purchaseData", JSON.stringify(purchaseBasket));
+  stockBasket = stockBasket.filter((x) => x.qty !== 0);
+  //generateStockItems();
+  localStorage.setItem("stockData", JSON.stringify(stockBasket));
   setTimeout(function () {
-	generatePurchaseItems();
+	generateStockItems();
   }, 500);
 };
 
@@ -186,7 +186,7 @@ let decrement = (id) => {
  */
 
 let update = (id) => {
-  let search = purchaseBasket.find((x) => x.id === id);
+  let search = stockBasket.find((x) => x.id === id);
   
   //console.log(id, search.qty);
   
@@ -197,33 +197,33 @@ let update = (id) => {
 };
 
 /**
- * ! Used to remove 1 selected product card from purchaseBasket
+ * ! Used to remove 1 selected product card from stockBasket
  * ! using the X [cross] button
  */
 
 let removeItem = (id) => {
 	$("#loader").show();
   let selectedItem = id;
-  purchaseBasket = purchaseBasket.filter((x) => x.id !== selectedItem);
+  stockBasket = stockBasket.filter((x) => x.id !== selectedItem);
   calculation();
   setTimeout(function () {
-	generatePurchaseItems();
+	generateStockItems();
   }, 500);
-  //generatePurchaseItems();
+  //generateStockItems();
   TotalAmount();
-  localStorage.setItem("purchaseData", JSON.stringify(purchaseBasket));
+  localStorage.setItem("stockData", JSON.stringify(stockBasket));
 };
 
 
 /**
  * ! Used to calculate total amount of the selected Products
  * ! with specific quantity
- * ? When purchaseBasket is blank, it will show nothing
+ * ? When stockBasket is blank, it will show nothing
  */
 
 let TotalAmount = () => {
-  if (purchaseBasket.length !== 0) {
-    let amount = purchaseBasket
+  if (stockBasket.length !== 0) {
+    let amount = stockBasket
       .map((x) => {
         let { id, qty, price } = x;
         //let filterData = shopItemsData.find((x) => x.id === id);
@@ -246,12 +246,12 @@ TotalAmount();
 
 let clearCart = () => {
 	$("#loader").show();
-  purchaseBasket = [];
+  stockBasket = [];
   setTimeout(function () {
-	generatePurchaseItems();
+	generateStockItems();
   }, 500);
-  //generatePurchaseItems();
+  //generateStockItems();
   calculation();
-  localStorage.setItem("purchaseData", JSON.stringify(purchaseBasket));
+  localStorage.setItem("stockData", JSON.stringify(stockBasket));
   
 };

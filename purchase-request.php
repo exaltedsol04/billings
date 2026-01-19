@@ -98,9 +98,10 @@
 				<select name="product" id="product" onchange=add_to_cart(this) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
-						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode";
+						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
 						$tables = PRODUCT_VARIANTS . " pv
-						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
+						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id
+						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
 						$where = "WHERE 1 ORDER BY p.name";
 						$params = [];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
@@ -116,9 +117,9 @@
 								}*/
 								$barcode = $arr->barcode;
 								
-								$barcode = !empty($barcode) ?  '(' . $barcode .')' : '';
+								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$arr->barcode; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->stock.' '.$arr->type.')'; ?></option>
+								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->unit_name; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
 					<?PHP
 							}
 						}
@@ -137,10 +138,11 @@
 				<table class="table table-striped table-bordered">
 					  <thead>
 						<tr>
-							<th>Barcode</th>
+							<th>Sl. No.</th>
 							<th>Product</th>
-							<th class="text-center">Price</th>
 							<th class="text-center" style="width:160px">Qty</th>
+							<th>Measurement</th>
+							<th class="text-center">Price</th>
 							<th class="text-center">Total Price</th>
 							<th class="text-center">Remove</th>
 						</tr>

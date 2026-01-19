@@ -27,7 +27,7 @@
   <?php } ?>
   <!--bootstrap css-->
   <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-  <?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php' || $page=='barcode.php' || $page=='pos.php') {  ?>	
+  <?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php' || $page=='barcode.php' || $page=='approved-purchase-report.php') {  ?>	
   <link href="assets/plugins/datatable/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
   <?php } ?>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">

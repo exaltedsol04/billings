@@ -133,7 +133,7 @@
 								<th class="text-center">Remove</th>
 							</tr>
 						  </thead>
-						  <tbody id="purchase-cart">
+						  <tbody id="stock-cart">
 							</tbody>
 						  <tfoot id="total_amount_show" style="font-weight:bold; font-size:20px">
 						  </tfoot>

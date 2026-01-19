@@ -58,14 +58,16 @@ function add_to_cart(product) {
 	let productName = myArray[2];
 	let productImage = myArray[3];
 	let productBarcode = myArray[4];
+	let productMeasurement = myArray[5];
+	//alert(productMeasurement);
 	let qty = 1;
 	let search = basket.find((x) => x.id === selectedItem);
 
   if (search === undefined) {
     basket.push({
       id: selectedItem,
-      barcode: productBarcode,
-	  name: productName,
+      measurement: productMeasurement,
+	  name: productBarcode+productName,
 	  price: productPrice,
 	  pimage: productImage,
       qty: parseInt(qty),
@@ -105,10 +107,11 @@ calculation();
  */
 
 let generateCartItems = () => {
+	
   if (basket.length !== 0) {
     return (ShoppingCart.innerHTML = basket
-      .map((x) => {
-        let { id, item, qty, price, barcode, name, pimage } = x;
+      .map((x, index) => {
+        let { id, item, qty, price, measurement, name, pimage } = x;
 
 		$('#loader').hide();
 		let progress = 0;
@@ -117,10 +120,12 @@ let generateCartItems = () => {
 		if (typeof label !== 'undefined' && label != '') {
 			custom_label = '<br/><small class="text-muted">Custom Label: '+label+'</small>';
 		}*/
-
+		
+		//let rowCount = 1;
        // let search = shopItemsData.find((x) => x.id === id) || [];
         //let { qty, price, name, pimage } = search;
         return `<tr>
+					<td class="text-center">${index + 1}</td>
 					<td>
 					<div class="input-group quantity-group">
 						<span class="input-group-btn">
@@ -132,7 +137,7 @@ let generateCartItems = () => {
 						</span>
 					</div>
 				  </td>
-				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${barcode}</td>
+				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${measurement}</td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}</td>
 				  <input type="hidden" value="${id}" name="product_variant_id[]">
 				  <td class="text-center">₹ ${price}</td>						  
@@ -140,8 +145,7 @@ let generateCartItems = () => {
 				  <td class="text-center"><i style="cursor:pointer;" onclick="removeItem(${id})" class="material-icons-outlined text-danger">close</i>
 				  </td>
 				</tr>`;
-						
-						
+					
       })
       .join(""));
 	  
@@ -153,7 +157,7 @@ let generateCartItems = () => {
    $('#removeCart, #loader').hide();
    let progress = 0;
     ShoppingCart.innerHTML = `<tr>
-						  <td colspan="6" class="text-center">Cart is Empty</td>
+						  <td colspan="7" class="text-center">Cart is Empty</td>
     </td></tr>`;
   }
   
@@ -299,7 +303,7 @@ let TotalAmount = () => {
       .reduce((x, y) => x + y, 0);
 
     return (totalAmountShow.innerHTML = `<tr>
-						  <td colspan="4">Sum</td>
+						  <td colspan="5">Sum</td>
 						  <td id="cartAmount" class="cartAmount text-center">₹ ${amount.toFixed(2)}</td>
 						  <input type="hidden" name="cart_total_amt" value="${amount.toFixed(2)}">
 						</tr>`);

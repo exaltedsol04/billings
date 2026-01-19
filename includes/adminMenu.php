@@ -65,7 +65,7 @@
 					<div class="menu-title">POS</div>
 				</a>
 			</li>
-			<li <?php if($page=='purchase-request.php' || $page=='purchase-report') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='purchase-request.php' || $page=='purchase-report' || $page=='approved-purchase-report') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">inventory_2</i>
 				</div>
@@ -74,6 +74,7 @@
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'purchase-request'; ?>"><i class="material-icons-outlined">arrow_right</i>Request</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Report</a></li>
+				<li><a href="<?php echo SITE_URL.'approved-purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Purchase</a></li>
 			  </ul>
 			</li>
 			<li <?php if($page=='stock-transfer.php' || $page=='available-stock-report.php' || $page=='barcode.php') { echo ('class="mm-active"');} ?>>
@@ -83,7 +84,7 @@
 				<div class="menu-title">Stock Management</div>
 			  </a>
 			  <ul>
-				<li><a href="<?php echo SITE_URL.'stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Stock</a></li>
+				<li><a href="<?php echo SITE_URL.'stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>Stock Transfer</a></li>
 				<li><a href="<?php echo SITE_URL.'available-stock-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Stock Report</a></li>
 				<li><a href="<?php echo SITE_URL.'barcode'; ?>"><i class="material-icons-outlined">arrow_right</i>Barcode</a></li>
 			  </ul>
