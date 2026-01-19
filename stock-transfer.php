@@ -79,7 +79,7 @@
 						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id 
 						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 						INNER JOIN " . PRODUCT_STOCK_TRANSACTION . " pst ON pst.product_id = pv.product_id AND pst.product_variant_id = pv.id AND pst.status=1";
-						$where = "WHERE 1 ORDER BY p.name";
+						$where = "WHERE 1 GROUP BY pv.id ORDER BY p.name";
 						$params = [];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 						if($sqlQuery[0] != '')
@@ -146,7 +146,7 @@
 				<span id="show-stock-div"></span>
 				<div class="box-footer text-center">
 						<div class="loader" id="loader1" style="display:none"></div>
-						<button type="button" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5" onclick="submit_request();">Submit Request</button>
+						<button type="button" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5 submit-stock-transfer" onclick="submit_request();">Transfer</button>
 				</div>
 				<input type="hidden" name="action" value="checkStockTransferItem" id="actionstatus">
 				<input type="hidden" name="hid_seller_id"  id="hid_seller_id">

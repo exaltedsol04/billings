@@ -226,7 +226,10 @@ let removeItem = (id) => {
  */
 
 let TotalAmount = () => {
+  
+  $('.submit-stock-transfer').hide();
   if (stockBasket.length !== 0) {
+	  $('.submit-stock-transfer').show();
     let amount = stockBasket
       .map((x) => {
         let { id, qty, price } = x;
@@ -250,6 +253,7 @@ TotalAmount();
 
 let clearCart = () => {
 	$("#loader").show();
+	$('.submit-stock-transfer').hide();
   stockBasket = [];
   setTimeout(function () {
 	generateStockItems();

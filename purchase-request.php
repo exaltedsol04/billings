@@ -156,7 +156,7 @@
 			<div class="box-footer text-center">
 					<div class="loader" id="loader1" style="display:none"></div>
 
-                    <button type="submit" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5">Submit Request</button>
+                    <button type="submit" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5 submit-request" style="display:none">Submit Request</button>
 					
 					
                   </div>
@@ -183,3 +183,4 @@
 
   </body>
 </html>
+

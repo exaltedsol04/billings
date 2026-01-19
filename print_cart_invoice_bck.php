@@ -31,20 +31,22 @@ $barcode = 	$product_variant_data->barcode;
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Receipt</title>
+<title>Reliance Smart Receipt</title>
 
 <style>
     body {
-        font-family: "arial";
+        background: #f2f2f2;
+        font-family: "Courier New", monospace;
     }
 
     .receipt {
-        width: 300px;
-        margin: 0px auto;
-        padding: 0px;
+        width: 320px;
+        margin: 20px auto;
+        background: #fff;
+        padding: 12px;
         color: #000;
         box-shadow: 0 0 5px rgba(0,0,0,0.2);
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .center {
@@ -68,18 +70,18 @@ $barcode = 	$product_variant_data->barcode;
 
     .small {
         font-size: 11px;
-        line-height: 1;
+        line-height: 1.4;
     }
 
     table {
-        width: 98%;
+        width: 100%;
         border-collapse: collapse;
-        font-size: 10px;
+        font-size: 12px;
     }
 
     th, td {
         text-align: left;
-        padding: 0px 0;
+        padding: 3px 0;
     }
 
     th {
@@ -100,20 +102,20 @@ $barcode = 	$product_variant_data->barcode;
     }
 
     .qr img {
-        width: 80px;
-        height: 80px;
+        width: 120px;
+        height: 120px;
     }
 
     .footer {
-        font-size: 9px;
-        line-height: 1;
+        font-size: 10.5px;
+        line-height: 1.4;
         margin-top: 8px;
         text-align: center;
     }
 
     @media print {
 		@page {
-			
+			size: auto;
 			margin: 0;
 		}
 
@@ -125,13 +127,9 @@ $barcode = 	$product_variant_data->barcode;
 		}
 
 		.receipt {
-			margin-left: 0px;
-			margin-right:30px;
-			width: 280px;
+			margin: 0 auto;
+			width: 320px;
 			box-shadow: none;
-			padding:0px;
-			font-size: 10px;
-			line-height: -2;
 		}
 	}
 
@@ -142,16 +140,18 @@ $barcode = 	$product_variant_data->barcode;
 
 <div class="receipt">
 
-    <div class="center logo"><img src="https://admin.ecofresh.in/storage/logo/1762600335_71147.png" width="100"/></div>
+    <div class="center logo">Company Name</div>
 
     <div class="center small">
-        <strong>Ecoleaf Satara</strong><br>
-        Near Shushma Petrol Pump Wadhe Phata,<br>
-        Highway, Bangalore, Satara, Maharashtra 415001<br>
+        <strong>RELIANCE SMART</strong><br>
+        Pioneer Tower, CTS No. 523A/1,<br>
+        Plot No 11/12/3, Sadar Bazar<br>
         Satara - Maharashtra - 415001<br><br>
 
-        Customer Care: 18008910001<br>
-        FSSAI Lic No: 11525039000226
+        Customer Care: 18008910001 / 18001027382<br>
+        CIN No: U01100MH1999PLC120563<br>
+        GSTIN: 27AABCR1718E1ZP<br>
+        FSSAI Lic No: 11520039000839
     </div>
 
     <div class="divider"></div>
@@ -164,8 +164,8 @@ $barcode = 	$product_variant_data->barcode;
     <div class="small">
         Place of Supply & State Code: 27 MH<br>
         Customer Type: URD<br>
-        Date: <?php echo date('d/m/Y H:i');?><br>
-        Bill No: 166<br>
+        Date: <?php echo date('d/m/Y H:i:s');?><br>
+        Bill No: 165<br>
         Store: TMK1 &nbsp;&nbsp; Cashier: 60893486<br>
         POS No: R106
     </div>
@@ -261,7 +261,7 @@ $barcode = 	$product_variant_data->barcode;
 
     <div class="qr">
         <!-- Replace src with real QR image -->
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=RelianceSmartReceipt">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=RelianceSmartReceipt">
     </div>
 
     <div class="footer">

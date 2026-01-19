@@ -19,7 +19,7 @@ $(document).on("keydown", ".qty-input", function (e) {
 
 
 let add_to_cart = () => {
-	
+	$('.submit-request').show();
 	$("#loader").show();
 	let product = $("#product").val();
 	const myArray = product.split("@@@");
@@ -256,7 +256,10 @@ let removeItem = (id) => {
  */
 
 let TotalAmount = () => {
+	
+	$('.submit-request').hide();
   if (purchaseBasket.length !== 0) {
+	  $('.submit-request').show();
     let amount = purchaseBasket
       .map((x) => {
         let { id, qty, price } = x;
@@ -280,6 +283,7 @@ TotalAmount();
 
 let clearCart = () => {
 	$("#loader").show();
+	$('.submit-request').hide();
   purchaseBasket = [];
   setTimeout(function () {
 	generatePurchaseItems();

@@ -242,10 +242,10 @@
 					$unit_price = $product_variant_dtls->discounted_price;
 					$total_price = $_POST['qty'][$k] * $unit_price;
 					
-					$field = "seller_id, product_variant_id, product_id,  stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, approved_by, approved_date, order_id";
-					$value = ":seller_id, :product_variant_id, :product_id, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :approved_by, :approved_date, :order_id";
+					$field = "seller_id, product_variant_id, product_id,  stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id, approved_by, approved_date, order_id";
+					$value = ":seller_id, :product_variant_id, :product_id, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
 					
-					
+					//parent_id
 					$addExecute=array(
 						':seller_id'			=> $_SESSION['USER_ID'],
 						':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
@@ -257,9 +257,10 @@
 						':selling_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->discounted_price),
 						':purchase_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->price),
 						':transaction_type'		=> 2,
-						':received_selled_id'	=> null,
-						':approved_by'			=> null,
-						':approved_date'		=> null,
+						':received_selled_id'	=> 0,
+						':parent_id'	=> 0,
+						':approved_by'			=> 0,
+						':approved_date' 		=> '0000-00-00 00:00:00',
 						':order_id'		       => $general_cls_call->specialhtmlremover($last_insert_id),
 					);
 					$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
