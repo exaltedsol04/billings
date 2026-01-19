@@ -21,13 +21,15 @@
 				  <table id="example2" class="table table-striped table-bordered">
                     <thead>
 						<tr>
-							<td><input type="text" class="form-control" id="search-zero" placeholder="Search by barcode"></td>
-							<td><input type="text" class="form-control" id="search-one" placeholder="Search by product name"></td>
+							<td></td>
+							<td><input type="text" class="form-control" id="search-one" placeholder="Search by barcode"></td>
+							<td><input type="text" class="form-control" id="search-two" placeholder="Search by product name"></td>
 							<td></td>
 							<td></td>
 						</tr>
                       <tr  class="text-center">
-						<th>Baecode</th>
+						<th>Sl. No.</th>
+						<th>Barcode</th>
 						<th>Name</th>
 						<th>Available stock.</th>
 						<th>Measurement</th>
@@ -46,11 +48,12 @@
 						if($sqlQuery[0] != '')
 						{
 							$i = 1;
-							foreach($sqlQuery as $arr)
+							foreach($sqlQuery as $k=>$arr)
 							{	
 					?>
                      <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
-						<td><?PHP echo $arr->barcode; ?></td>
+						<td><?PHP echo $k+1 ?></td>
+						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td><?PHP echo $arr->total_stock ?></td>
 						<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
@@ -63,7 +66,7 @@
 						{
 					?>
                       <tr>
-                        <td colspan="4">No record found.
+                        <td colspan="5">No record found.
 						</td>
 					  </tr>
 					<?PHP
