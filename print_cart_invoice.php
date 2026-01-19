@@ -169,7 +169,7 @@ $barcode = 	$product_variant_data->barcode;
         Place of Supply & State Code: 27 MH<br>
         Customer: <?php echo $customer->name.' ('.$customer->mobile.')'; ?><br>
         Date: <?php echo date('d/m/Y H:i');?><br>
-        Bill No: <?php echo $order_id; ?><br>
+        Bill No: #<?php echo $order_id; ?><br>
         Store: <?php echo $seller->store_name; ?> &nbsp;&nbsp; Cashier: <?php echo $seller->name; ?><br>
         POS No: R106
     </div>
