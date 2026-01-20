@@ -190,7 +190,7 @@
 			</div>
 			
 			<input type="hidden" name="payment_method" id="payment_method">
-			<input type="text" id="cart-stock-limit">
+			<input type="hidden" id="cart-stock-limit">
 			<div class="col-md-12">
 				<span id="check-stock-pay-div"></span>
 			</div>
