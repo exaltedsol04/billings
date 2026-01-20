@@ -196,7 +196,7 @@ function submit_request()
 		success: function(response){
 			var result = JSON.parse(response);
 			
-			var html = '<div class="col-md-6">';
+			var html = '<div class="col-md-7">';
 				//alert(result.length);
 				if (result.length > 0) {
 					$.each(result, function (i, stock) {
