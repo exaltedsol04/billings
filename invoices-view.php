@@ -5,7 +5,27 @@
 	ob_start();
 
 	ob_end_flush();
-	echo 'view';die;
+	$order_id = '';
+	if(isset($_GET['order_id']))
+	{
+		$order_id = $_GET['order_id'];
+		
+		$fields = "poi.quantity, poi.unit_price, poi.total_price, pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode, u.name as unit_name";
+		
+		$tables = POS_ORDERS_ITEMS . " poi INNER JOIN " . PRODUCT_VARIANTS . " pv ON poi.product_variant_id = pv.id
+		INNER JOIN " . PRODUCTS . " p ON p.id = poi.product_id
+		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
+		";
+		
+		
+		$where = "WHERE poi.pos_order_id=:pos_order_id ORDER BY poi.id";
+		$params = [
+			':pos_order_id'	=>	$order_id
+		];
+		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+				
+		//echo "<pre>";print_r($sqlQuery);die;
+	}
 ?>
 	<!-- ######### HEADER START ############### -->
 		<?PHP include_once("includes/adminHeader.php"); ?>
@@ -48,35 +68,30 @@
 										<td></td>
 									</tr>
 								  <tr class="text-center">
-									<th style="width:100px">Invoice Id</th>
-									<th>Customer Name</th>
-									<th>Mobile</th>
-									<th>Date Time</th>
-									<th>Total Sale</th>
-									<th>Action</th>
+									<th>S. No.</th>
+									<th>Product Name</th>
+									<th>Quantity</th>
+									<th>Product Variant</th>
+									<th>Unit Price</th>
+									<th>Total Price</th>
 								  </tr>
 								</thead>
 								<tbody>
 									<?php
-									$sqlQuery = $general_cls_call->select_query("*", POS_ORDERS, " WHERE 1", array(), 2);
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
-										foreach($sqlQuery as $selectValue)
+										foreach($sqlQuery as $k=>$selectValue)
 										{
-											$customer = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", [':admin_id' => $selectValue->pos_user_id], 1);
-
-											/*$pos_order_item = $general_cls_call->select_query("*", POS_ORDERS_ITEMS, "WHERE pos_order_id=:pos_order_id", [':pos_order_id' => $selectValue->id], 1);*/
-
-											$pos_order_item = $general_cls_call->select_query_sum( POS_ORDERS_ITEMS, "WHERE pos_order_id =:pos_order_id", array(':pos_order_id'=> $selectValue->id), 'total_price');											
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
-										<td style="width:100px"><?PHP echo $selectValue->id; ?></td>
-										<td><?PHP echo $customer->name; ?></td>
-										<td><?PHP echo $customer->mobile; ?></td>
-										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td>₹<?PHP echo $pos_order_item->total; ?></td>
-										<td class="font-22"><a href="<?php echo SITE_URL.'invoice-view'; ?>"><i class="lni lni-keyword-research"></i></a></td>
+										<td style="width:100px"><?PHP echo $k+1; ?></td>
+										<td><?PHP echo $general_cls_call->cart_product_name($selectValue->name); ?></td>
+										<td><?PHP echo $selectValue->quantity; ?></td>
+										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
+										<td>₹<?PHP echo $selectValue->unit_price; ?></td>
+										<td>₹<?PHP echo $selectValue->total_price; ?></td>
+										
 									  </tr>
 										<?PHP
 												$i++;
@@ -86,7 +101,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="6">
+										<td colspan="7">
 										 No record found.
 										</td>
 									  </tr>

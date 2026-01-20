@@ -75,7 +75,7 @@
 										<td><?PHP echo $customer->mobile; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td>₹<?PHP echo $pos_order_item->total; ?></td>
-										<td class="font-22"><a href="<?php echo SITE_URL.'invoice-view'; ?>"><i class="lni lni-keyword-research">arrow_right</i></a></td>
+										<td><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
 										<?PHP
 												$i++;
