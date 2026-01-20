@@ -21,6 +21,17 @@
                 <div class="menu-title">Dashboard</div>
               </a>
             </li>
+			<li <?php if($page=='invoices.php') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">description</i>
+				</div>
+				<div class="menu-title">Billing</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'invoices'; ?>"><i class="material-icons-outlined">arrow_right</i>Invoices</a>
+				</li>
+			  </ul>
+			</li>
 			<?php if(isset($_SESSION['ROLE_ID']) && $_SESSION['ROLE_ID']==1) {?>
 			<li <?php if($page=='products.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
@@ -34,17 +45,7 @@
 			  </ul>
 			</li>
 
-			<li <?php if($page=='invoices.php') { echo ('class="mm-active"');} ?>>
-			  <a href="javascript:;" class="has-arrow">
-				<div class="parent-icon"><i class="material-icons-outlined">description</i>
-				</div>
-				<div class="menu-title">Billing</div>
-			  </a>
-			  <ul>
-				<li><a href="<?php echo SITE_URL.'invoices'; ?>"><i class="material-icons-outlined">arrow_right</i>Invoices</a>
-				</li>
-			  </ul>
-			</li>
+			
 			<li <?php if($page=='purchase-request-list.php' || $page=='purchase-approved-list' || $page=='purchase-rejected-list') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>

@@ -1,6 +1,6 @@
 <?PHP error_reporting(0);
 	include_once 'init.php';
-	$pageAccessRoleIds = [1];
+	$pageAccessRoleIds = [1,3];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
 
@@ -57,7 +57,20 @@
 								</thead>
 								<tbody>
 									<?php
-									$sqlQuery = $general_cls_call->select_query("*", POS_ORDERS, " WHERE 1", array(), 2);
+									if($_SESSION['USER_ID'] == 1)
+									{
+										$where = "WHERE 1";
+										$params = [];
+									}
+									else{
+										$where = "WHERE pos_user_id=:pos_user_id";
+										$params = [
+											':pos_user_id'	=>	$_SESSION['USER_ID']
+										];
+									}
+									
+									$sqlQuery = $general_cls_call->select_query("*", POS_ORDERS, $where, $params, 2);
+						
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;

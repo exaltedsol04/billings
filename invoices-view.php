@@ -1,27 +1,41 @@
 <?PHP error_reporting(0);
 	include_once 'init.php';
-	$pageAccessRoleIds = [1];
+	$pageAccessRoleIds = [1,3];
+	
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
 
 	ob_end_flush();
+	//echo $_SESSION['USER_ID'];die;
 	$order_id = '';
 	if(isset($_GET['order_id']))
 	{
 		$order_id = $_GET['order_id'];
 		
-		$fields = "poi.quantity, poi.unit_price, poi.total_price, pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode, u.name as unit_name";
+		$fields = "po.pos_user_id, poi.quantity, poi.unit_price, poi.total_price, pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode, u.name as unit_name";
 		
 		$tables = POS_ORDERS_ITEMS . " poi INNER JOIN " . PRODUCT_VARIANTS . " pv ON poi.product_variant_id = pv.id
+		INNER JOIN " . POS_ORDERS . " po ON po.id = poi.pos_order_id
 		INNER JOIN " . PRODUCTS . " p ON p.id = poi.product_id
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 		";
 		
+		if($_SESSION['USER_ID'] == 1)
+		{
+			$where = "WHERE poi.pos_order_id=:pos_order_id ORDER BY poi.id";
+				$params = [
+				':pos_order_id'	=>	$order_id
+			];
+		}
+		else{
+			$where = "WHERE po.pos_user_id=:pos_user_id AND poi.pos_order_id=:pos_order_id ORDER BY poi.id";
+				$params = [
+				':pos_order_id'	=>	$order_id,
+				':pos_user_id'	=>	$_SESSION['USER_ID']
+			];
+		}
 		
-		$where = "WHERE poi.pos_order_id=:pos_order_id ORDER BY poi.id";
-		$params = [
-			':pos_order_id'	=>	$order_id
-		];
+		
 		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 				
 		//echo "<pre>";print_r($sqlQuery);die;
