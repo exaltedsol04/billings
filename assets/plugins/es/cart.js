@@ -133,7 +133,7 @@ let generateCartItems = () => {
 						</span>
 						<input type="number" class="form-control text-center qty-input" value="${qty}" min="1" oninput="updateQty(${id}, this.value)" id="qty_${id}" name="qty[]">
 						<span class="input-group-btn">
-							<button type="button" class="btn btn-default btn-qty" style="cursor:pointer" onclick="increment(${id})" >+</button>
+							<button type="button" class="btn btn-default btn-qty qty-increment" style="cursor:pointer" onclick="increment(${id})" >+</button>
 						</span>
 					</div>
 				  </td>
@@ -173,9 +173,21 @@ let increment = (id) => {
 	
 	$("#loader").show();
 	progress_bar();
+	let cart_stock_limit = $('#cart-stock-limit').val();
+	//alert(cart_stock_limit);
+	
   let selectedItem = id;
   let search = basket.find((x) => x.id === selectedItem);
+  
+  check_qty_stock(id, search.qty+1);
+  if(cart_stock_limit != '')
+  {
+	//alert(cart_stock_limit);
+	$('.qty-input').val(cart_stock_limit);
+	return false;
+  }
    //alert(id);
+   //alert(search.qty);
   if (search === undefined) {
     basket.push({
       id: selectedItem,
@@ -189,11 +201,53 @@ let increment = (id) => {
   localStorage.setItem("data", JSON.stringify(basket));
   //let parameter = '';
   //alert(search.qty);
-  check_qty_stock(id, search.qty);
+  //check_qty_stock(id, search.qty);
   setTimeout(function () {
 	generateCartItems();
   }, 500);
 };
+
+/*let increment = (id, btn) => {
+
+    let row = $(btn).closest('tr');
+    let qtyInput = row.find('.qty-input');
+	//alert(qtyInput);
+    let selectedItem = id;
+    let search = basket.find((x) => x.id === selectedItem);
+
+    let currentQty = search ? search.qty : 0;
+
+    check_qty_stock(id, currentQty + 1, function (stockCount) {
+
+        if (currentQty >= stockCount) {
+            
+            qtyInput.val(stockCount);
+
+            Lobibox.notify('default', {
+                position: 'center top',
+                size: 'mini',
+                msg: `<div style="text-align:center;">Available stock is ${stockCount}</div>`
+            });
+
+            return;
+        }
+
+        
+        if (!search) {
+            basket.push({ id: selectedItem, qty: 1 });
+        } else {
+            search.qty += 1;
+        }
+
+        qtyInput.val(search.qty);
+        update(selectedItem);
+        localStorage.setItem("data", JSON.stringify(basket));
+		
+		setTimeout(function () {
+			generateCartItems();
+		  }, 500);
+	});
+};*/
 
 /**
  * ! used to decrease the selected product item quantity by 1
@@ -201,6 +255,7 @@ let increment = (id) => {
 
 let decrement = (id) => {
 	$("#loader").show();
+	$('#cart-stock-limit').val('');
 	progress_bar();
   let selectedItem = id;
   let search = basket.find((x) => x.id === selectedItem);
