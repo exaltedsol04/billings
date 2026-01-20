@@ -122,6 +122,27 @@
 			</form>
 		</div>
 	</div>	
+	
+	<!-- Modal -->
+			<div class="modal fade" id="product-modal">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header border-bottom-0 py-2 bg-grd-primary">
+                        <h5 class="modal-title btn-grd">Find Out Products Stock</h5>
+                        <a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+                          <i class="material-icons-outlined">close</i>
+                        </a>
+                      </div>
+                      <div class="modal-body">
+							<span id="show-products"></span>
+                      </div>
+                      <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-grd btn-grd-danger rounded-0"
+                          data-bs-dismiss="modal">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 </main>
 
 	<!-- ######### FOOTER START ############### -->
@@ -175,7 +196,7 @@ function submit_request()
 		success: function(response){
 			var result = JSON.parse(response);
 			
-			var html = '<div class="col-md-4">';
+			var html = '<div class="col-md-6">';
 				//alert(result.length);
 				if (result.length > 0) {
 					$.each(result, function (i, stock) {
@@ -186,10 +207,14 @@ function submit_request()
 						html += '</div>';
 					});
 					//$('#show-payment-div').hide();
-					$('#show-stock-div').html(html).show();
+					//$('#show-stock-div').html(html).show();
+					$('#show-products').html(html);
+					$('#product-modal').modal('show');
 				} else {
 					//$('#show-payment-div').show();
 					$('#show-stock-div').hide();
+					$('#show-products').html('');
+					$('#product-modal').modal('hide');
 					$('#actionstatus').val('stockTransferSave');
 					save_post_data();
 				}
