@@ -75,12 +75,15 @@
 				
 				if($stock_used->total > 0)
 				{
+					$barcode = $val->barcode;
+					$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
+								
 					$productArr[] = [
 						'id'               => $val->product_variant_id,
 						'discounted_price' => $val->selling_price,
 						'name'             => $general_cls_call->cart_product_name($val->name),
 						'imagePath'        => $imagePath,
-						'barcode'          => $val->barcode,
+						'barcode'          => $barcode,
 						'measurement'      => $val->measurement,
 						'product_id'       => $val->product_id,
 						'stock'            => $val->total_stock,

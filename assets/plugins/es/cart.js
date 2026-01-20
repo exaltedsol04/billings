@@ -131,7 +131,7 @@ let generateCartItems = () => {
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default btn-qty" style="cursor:pointer" onclick="decrement(${id})">−</button>
 						</span>
-						<input type="number" class="form-control text-center qty-input" value="${qty}" min="1" oninput="updateQty(${id}, this.value)" id="qty_${id}" name="qty[]">
+						<input type="number" class="form-control text-center qty-input${id}" value="${qty}" min="1" oninput="updateQty(${id}, this.value)" id="qty_${id}" name="qty[]">
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default btn-qty qty-increment" style="cursor:pointer" onclick="increment(${id})" >+</button>
 						</span>
@@ -179,13 +179,7 @@ let increment = (id) => {
   let selectedItem = id;
   let search = basket.find((x) => x.id === selectedItem);
   
-  check_qty_stock(id, search.qty+1);
-  if(cart_stock_limit != '')
-  {
-	//alert(cart_stock_limit);
-	$('.qty-input').val(cart_stock_limit);
-	return false;
-  }
+  
    //alert(id);
    //alert(search.qty);
   if (search === undefined) {
@@ -195,6 +189,13 @@ let increment = (id) => {
     });
   } else {
     search.qty += 1;
+	check_qty_stock(id, search.qty+1);
+	  if(cart_stock_limit != '')
+	  {
+		//alert(cart_stock_limit);
+		$('.qty-input' + id).val(cart_stock_limit);
+		return false;
+	  }
   }
 //console.log(basket);
   update(selectedItem);

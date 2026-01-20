@@ -190,7 +190,7 @@
 			</div>
 			
 			<input type="hidden" name="payment_method" id="payment_method">
-			<input type="hidden" id="cart-stock-limit">
+			<input type="text" id="cart-stock-limit">
 			<div class="col-md-12">
 				<span id="check-stock-pay-div"></span>
 			</div>
@@ -314,11 +314,19 @@ function getProducts(val)
 				//alert(data[0].name);
 				//alert(data.length);
 				$('#barcode').val('');
+				let totData = data.length;
+				/*$.each(data, function (index, item) {
+					let pvqty = $('#qty_' + item.id).val();
+					let pvstock = item.stock;
+					if(pvqty >= pvstock){
+						totData = totData -1;
+					}
+				});*/
 				
 				//alert(data.length);
-				if(data.length == 1)
+				if(totData == 1)
 				{
-					
+					//alert(data.length);
 					var parameter =
 					data[0].id + '@@@' +
 					data[0].discounted_price + '@@@' +
@@ -345,7 +353,7 @@ function getProducts(val)
 						check_product_stock(data[0].id, parameter);
 					}
 				}
-				else if(data.length > 1)
+				else if(totData > 1)
 				{
 					var html = '<div class="row row-cols-1 row-cols-lg-2">';
 					$.each(data, function (index, item) {
@@ -417,13 +425,13 @@ function check_qty_stock(id, inc)
 			var result = JSON.parse(response);
 			
 			var stockCount = 0;
-			var html = '<div class="col-md-5">';
+			
 				//alert(result.length);
 				if (result.length > 0) {
 					$.each(result, function (i, stock) {
-						html += '<div class="row align-items-start border-bottom py-2">';
+						/*html += '<div class="row align-items-start border-bottom py-2">';
 							html += '<span class="col-md-5 fw-bold text-break text-nowrap text-danger">Out of stock</span>';
-						html += '</div>';
+						html += '</div>';*/
 						
 						stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
 					});
@@ -431,14 +439,8 @@ function check_qty_stock(id, inc)
 					//alert(stockCount);
 					if(inc > stockCount)
 					{
-						/*$('#check-stock-pay-div').html('<span class="col-md-5 fw-bold text-break text-nowrap text-danger">stock limit is '+ stockCount + '</span>');*/
-						//$('.qty-input').val(stockCount);
-						
-						//let stockCount = parseInt(stockCount);
-						//callback(stockCount);
-						//$(this).closest('tr').find('.qty-increment').prop('disabled', true);
 						$('#cart-stock-limit').val(stockCount);
-						$('.qty-input').val(stockCount);
+						$('.qty-input' + id).val(stockCount);
 						let msgStock = '<div style="text-align:center;">Available  stock is ' + stockCount + '</div>';
 							Lobibox.notify('default', {
 								pauseDelayOnHover: true,
@@ -453,18 +455,17 @@ function check_qty_stock(id, inc)
 					//alert('ok');
 					/*$('#check-stock-div').html('<span class="col-md-5 fw-bold text-break text-nowrap text-danger">Out of stocks</span>').show();*/
 					
-					let msgStock = 'Out of stock';
 					Lobibox.notify('default', {
 						pauseDelayOnHover: true,
 						continueDelayOnInactiveTab: false,
 						position: 'center top',
 						size: 'mini',
-						msg: msgStock
+						msg: '<div style="text-align:center;">Out of stock</div>'
 					});
 					
 					$('#product-modal').modal('hide');
 				}
-			html += '</div>';
+			
 		}
 	});
 }
@@ -481,6 +482,14 @@ function check_product_stock_onchange(product)
 function check_product_stock(id,parameter)
 {
 	//alert(id);alert(parameter);
+	
+	let pvqty = $('#qty_' + id).val();
+	//alert(pvqty);
+	if(typeof pvqty === 'undefined')
+	{
+		pvqty = 0;
+	}
+	
 	//var datapost = $('#cart-list-form').serialize();
 	let barcode = 1;
 	var datapost = 'action=paynow&id='+id + '&barcode=' + barcode;
@@ -492,18 +501,26 @@ function check_product_stock(id,parameter)
 			var result = JSON.parse(response);
 			
 			var stockCount = 0;
-			var html = '<div class="col-md-5">';
+			
 				//alert(result.length);
 				if (result.length > 0) {
+					var html = '<div class="col-md-5">';
 					$.each(result, function (i, stock) {
-						html += '<div class="row align-items-start border-bottom py-2">';
-							html += '<span class="col-md-5 fw-bold text-break text-nowrap text-danger">Out of stock</span>';
-							/*html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
-							html += '<span class="col-md-3 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';*/
-						html += '</div>';
+						stockCount = parseInt(stockCount) + parseInt(stock.variant_stock)-parseInt(pvqty);
+						//alert(stockCount);
 						
-						stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
+						if(stockCount == 0)
+						{
+							Lobibox.notify('default', {
+								pauseDelayOnHover: true,
+								continueDelayOnInactiveTab: false,
+								position: 'center top',
+								size: 'mini',
+								msg: '<div style="text-align:center;">Out of stock</div>'
+							});
+						}
 					});
+					html += '</div>';
 					//$('#show-payment-div').hide();
 					//alert(stockCount);
 					if(stockCount > 0)
@@ -536,7 +553,7 @@ function check_product_stock(id,parameter)
 						continueDelayOnInactiveTab: false,
 						position: 'center top',
 						size: 'mini',
-						msg: msgStock
+						msg: '<div style="text-align:center;">Out of stock-2</div>'
 					});
 					$('#product-modal').modal('hide');
 					//add_to_cart(parameter);
@@ -546,7 +563,7 @@ function check_product_stock(id,parameter)
 					$('#actionstatus').val('paynowsave');*/
 					//save_post_data();
 				}
-			html += '</div>';
+			
 		}
 	});
 }
