@@ -5,6 +5,7 @@
 	ob_start();
 
 	ob_end_flush();
+	echo 'view';die;
 ?>
 	<!-- ######### HEADER START ############### -->
 		<?PHP include_once("includes/adminHeader.php"); ?>
@@ -75,7 +76,7 @@
 										<td><?PHP echo $customer->mobile; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td>₹<?PHP echo $pos_order_item->total; ?></td>
-										<td class="font-22"><a href="<?php echo SITE_URL.'invoice-view'; ?>"><i class="lni lni-keyword-research">arrow_right</i></a></td>
+										<td class="font-22"><a href="<?php echo SITE_URL.'invoice-view'; ?>"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
 										<?PHP
 												$i++;
