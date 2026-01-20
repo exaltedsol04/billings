@@ -66,22 +66,8 @@
 				<span class="text-danger" id="err_product"></span>
 			</div>
 			<div class="col-md-5">
-				<select name="seller_id" id="seller_id" class="form-select select2-dropdown" tabindex="1" onchange="sellers(this.value)">
-					<option value="">Select...</option>
-					<?PHP
-						$sqlQuery = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id!=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 2);
-						if($sqlQuery[0] != '')
-						{
-							foreach($sqlQuery as $arr)
-							{	
-					?>
-						<option value="<?PHP echo $arr->admin_id ?>"><?PHP echo $arr->name; ?></option>
-					<?PHP
-							}
-						}
-					?>
-				</select>
-				<span class="text-danger" id="err_seller"></span>
+				<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity">
+				<span class="text-danger" id="err_stock"></span>
 			</div>
 			<div class="col-2 col-xl-2">
 				<button id="removeCart" class="btn btn-grd btn-grd-danger mb-3 pull-right" style="display:none" type="button" onclick="clearCart()" class="removeAll" data-toggle="tooltip" title="Clear Your Cart">Clear Request</button>
@@ -148,7 +134,7 @@
 	<!-- ######### FOOTER START ############### -->
 		<?PHP include_once("includes/adminFooter.php"); ?>
 	<!-- ######### FOOTER END ############### -->
-	<script src="assets/plugins/es/stock-transfer.js"></script>
+	<!--<script src="assets/plugins/es/stock-transfer.js"></script>-->
 	<?php if (!empty($_SESSION['call_js'])) { ?>
 		<script>
 			clearCart();
