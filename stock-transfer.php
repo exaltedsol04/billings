@@ -129,7 +129,7 @@
                   <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                       <div class="modal-header border-bottom-0 py-2 bg-grd-primary">
-                        <h5 class="modal-title btn-grd">Find Out Products Stock</h5>
+                        <h5 class="modal-title btn-grd">Products Available Stock</h5>
                         <a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
                           <i class="material-icons-outlined">close</i>
                         </a>

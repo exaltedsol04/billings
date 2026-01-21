@@ -1,6 +1,6 @@
 <?PHP error_reporting(0);
 	include_once 'init.php';
-	$pageAccessRoleIds = [1,3];
+	$pageAccessRoleIds = [1];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
 
@@ -26,7 +26,7 @@
 							<ol class="breadcrumb mb-0 p-0">
 								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Invoices</li>
+								<li class="breadcrumb-item active" aria-current="page">Purchase Stock</li>
 							</ol>
 						</nav>
 					</div>
@@ -47,47 +47,43 @@
 										<td></td>
 									</tr>
 								  <tr class="text-center">
-									<th style="width:100px">Invoice Id</th>
-									<th>Customer Name</th>
-									<th>Mobile</th>
-									<th>Date Time</th>
-									<th>Total Sale</th>
+									<th style="width:100px">Sl. No.</th>
+									<th>Vendors</th>
+									<th>Product Name</th>
+									<th>Variant Name</th>
+									<th>Purchase Stock</th>
+									<th>Purchase Date</th>
 									<th>Action</th>
 								  </tr>
 								</thead>
 								<tbody>
 									<?php
-									if($_SESSION['USER_ID'] == 1)
-									{
-										$where = "WHERE 1";
-										$params = [];
-									}
-									else{
-										$where = "WHERE pos_user_id=:pos_user_id";
-										$params = [
-											':pos_user_id'	=>	$_SESSION['USER_ID']
-										];
-									}
+									$fields = "asp.stock, asp.created_at, pv.measurement, p.name, p.image, p.barcode, u.name as unit_name, v.name as vendor";
 									
-									$sqlQuery = $general_cls_call->select_query("*", POS_ORDERS, $where, $params, 2);
-						
+									$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
+										INNER JOIN " . PRODUCT_VARIANTS . " pv ON pv.id = asp.product_variant_id
+										INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
+										INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id 
+										INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
+										
+									$where = "WHERE 1";
+									$params = [];
+									
+									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+									//echo "<pre>";print_r($sqlQuery);die;
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
-										foreach($sqlQuery as $selectValue)
+										foreach($sqlQuery as $k=>$selectValue)
 										{
-											$customer = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", [':admin_id' => $selectValue->pos_user_id], 1);
-
-											/*$pos_order_item = $general_cls_call->select_query("*", POS_ORDERS_ITEMS, "WHERE pos_order_id=:pos_order_id", [':pos_order_id' => $selectValue->id], 1);*/
-
-											$pos_order_item = $general_cls_call->select_query_sum( POS_ORDERS_ITEMS, "WHERE pos_order_id =:pos_order_id", array(':pos_order_id'=> $selectValue->id), 'total_price');											
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
-										<td style="width:100px"><?PHP echo $selectValue->id; ?></td>
-										<td><?PHP echo $customer->name; ?></td>
-										<td><?PHP echo $customer->mobile; ?></td>
+									    <td style="width:100px"><?php echo $k+1 ;?></td>
+										<td style="width:100px"><?PHP echo $selectValue->vendor; ?></td>
+										<td><?PHP echo $general_cls_call->cart_product_name($selectValue->name); ?></td>
+										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
+										<td><?PHP echo $selectValue->stock; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td>₹<?PHP echo $pos_order_item->total; ?></td>
 										<td><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
 										<?PHP
@@ -98,7 +94,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="6">
+										<td colspan="7">
 										 No record found.
 										</td>
 									  </tr>

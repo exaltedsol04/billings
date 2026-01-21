@@ -21,6 +21,17 @@
                 <div class="menu-title">Dashboard</div>
               </a>
             </li>
+			<li <?php if($page=='invoices.php' || $page=='invoices-view.php') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">description</i>
+				</div>
+				<div class="menu-title">Billing</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'invoices'; ?>"><i class="material-icons-outlined">arrow_right</i>Invoices</a>
+				</li>
+			  </ul>
+			</li>
 			<?php if(isset($_SESSION['ROLE_ID']) && $_SESSION['ROLE_ID']==1) {?>
 			<li <?php if($page=='products.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
@@ -33,18 +44,19 @@
 				</li>
 			  </ul>
 			</li>
-
-			<li <?php if($page=='invoices.php') { echo ('class="mm-active"');} ?>>
+			
+			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
-				<div class="parent-icon"><i class="material-icons-outlined">description</i>
+				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
 				</div>
-				<div class="menu-title">Billing</div>
+				<div class="menu-title">Purchases Stock</div>
 			  </a>
 			  <ul>
-				<li><a href="<?php echo SITE_URL.'invoices'; ?>"><i class="material-icons-outlined">arrow_right</i>Invoices</a>
-				</li>
+				<li><a href="<?php echo SITE_URL.'purchase-stock-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Add</a></li>
+				<li><a href="<?php echo SITE_URL.'purchase-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a></li>
 			  </ul>
 			</li>
+			
 			<li <?php if($page=='purchase-request-list.php' || $page=='purchase-approved-list' || $page=='purchase-rejected-list') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
@@ -77,7 +89,7 @@
 				<li><a href="<?php echo SITE_URL.'approved-purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Purchase</a></li>
 			  </ul>
 			</li>
-			<li <?php if($page=='stock-transfer.php' || $page=='available-stock-report.php' || $page=='barcode.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='stock-transfer.php' || $page=='available-stock-report.php' || $page=='barcode.php' || $page=='online-stock-transfer.php' || $page=='available-online-report.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">sync_alt</i>
 				</div>
@@ -85,7 +97,9 @@
 			  </a>
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>Stock Transfer</a></li>
-				<li><a href="<?php echo SITE_URL.'available-stock-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Stock Report</a></li>
+				<li><a href="<?php echo SITE_URL.'online-stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>Online Stock</a></li>
+				<li><a href="<?php echo SITE_URL.'available-stock-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Pos Stock</a></li>
+				<li><a href="<?php echo SITE_URL.'available-online-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Online Stock</a></li>
 				<li><a href="<?php echo SITE_URL.'barcode'; ?>"><i class="material-icons-outlined">arrow_right</i>Barcode</a></li>
 			  </ul>
 			</li>

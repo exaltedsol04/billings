@@ -38,25 +38,18 @@
 		case "productbarcord":
 			$barcode = $_POST['barcode'];
 			$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, p.name, p.image, p.barcode";
-						$tables = PRODUCT_STOCK_TRANSACTION . " pr
-						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
-						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-						$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id AND p.barcode = :barcode GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
-						$params = [
-							':status'	=>	1,
-							':seller_id'	=>	$_SESSION['USER_ID'],
-							':barcode'	=>	$barcode
-						];
-						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
-			/*$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode, u.name as unit_name";
-						$tables = PRODUCT_VARIANTS . " pv
-						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id
-						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
-						INNER JOIN " . PRODUCT_STOCK_TRANSACTION . " pst ON pst.product_id = pv.product_id AND pst.product_variant_id = pv.id AND pst.status=1";
-						$where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";
-						$params = [];
-						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);*/
+			$tables = PRODUCT_STOCK_TRANSACTION . " pr
+			INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+			INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id AND p.barcode = :barcode GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+			$params = [
+				':status'	=>	1,
+				':seller_id'	=>	$_SESSION['USER_ID'],
+				':barcode'	=>	$barcode
+			];
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+			
 			//echo "<pre>";print_r($sqlQuery);die;
 			$productArr = [];
 
@@ -128,12 +121,6 @@
 				$product_variant_id = $_POST['product_variant_id'];
 			}
 			//echo "<pre>";print_r($product_variant_id);die;
-			/*$fields = "pv.id";
-			$tables = PRODUCT_VARIANTS . " pv INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
-			$where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";
-			$params = [];
-			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
-			echo "<pre>";print_r($sqlQuery);die;*/
 			
 			foreach($product_variant_id as $k=>$val)
 			{
@@ -420,6 +407,53 @@
 						"measurement" => $measurement,
 						"unitname" => $unitname,
 					];
+				echo json_encode($stockArr);
+		break;
+		
+		case "onlineProductStock":
+				$pv_id = $_POST['pvid'];
+				$pid = $_POST['pid'];
+				$product_variant_id = array(0=>$pv_id);
+				foreach($product_variant_id as $k=>$val)
+				{
+					$Where = "WHERE id=:id AND product_id=:product_id";
+					$params = [
+						':id'	=>	$pv_id,
+						':product_id'	=>	$pid
+					];
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
+					
+					
+					$where = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
+					
+					$params = [
+						':product_variant_id'	=>	$val,
+						':product_id'	=>	$product_variant_dtls->product_id,
+						':status'	=>	1,
+						':stock_type'	=>	1,
+						':seller_id'	=>	$_SESSION['USER_ID']
+					];
+					// check from product_stock_transaction 
+					$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $where, $params, 'stock');
+					
+					// after cart add check stock
+					
+					$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
+					$product_name = $general_cls_call->cart_product_name($product_dtls->name);
+					
+					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
+					$unitname = $unit_dtls->name;
+					
+					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					
+					$available_stock = $stock_used->total;
+					
+					$stockArr[] = [
+						"product_name" => $product_name,
+						"variant_name" => $p_variant_name,
+						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
+					];
+				}
 				echo json_encode($stockArr);
 		break;
     }
