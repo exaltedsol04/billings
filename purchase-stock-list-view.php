@@ -1,6 +1,6 @@
 <?PHP error_reporting(0);
 	include_once 'init.php';
-	$pageAccessRoleIds = [1,3];
+	$pageAccessRoleIds = [1];
 	
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
@@ -8,34 +8,18 @@
 	ob_end_flush();
 	//echo $_SESSION['USER_ID'];die;
 	$order_id = '';
-	if(isset($_GET['order_id']))
+	if(isset($_GET['pvid']))
 	{
-		$order_id = $_GET['order_id'];
-		
-		$fields = "po.pos_user_id, poi.quantity, poi.unit_price, poi.total_price, pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode, u.name as unit_name";
-		
-		$tables = POS_ORDERS_ITEMS . " poi INNER JOIN " . PRODUCT_VARIANTS . " pv ON poi.product_variant_id = pv.id
-		INNER JOIN " . POS_ORDERS . " po ON po.id = poi.pos_order_id
-		INNER JOIN " . PRODUCTS . " p ON p.id = poi.product_id
+		$fields = "asp.id, asp.product_id, asp.status, asp.stock, asp.created_at, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor";
+		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
+		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
+		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
-		";
-		
-		if($_SESSION['USER_ID'] == 1)
-		{
-			$where = "WHERE poi.pos_order_id=:pos_order_id ORDER BY poi.id";
-				$params = [
-				':pos_order_id'	=>	$order_id
-			];
-		}
-		else{
-			$where = "WHERE po.pos_user_id=:pos_user_id AND poi.pos_order_id=:pos_order_id ORDER BY poi.id";
-				$params = [
-				':pos_order_id'	=>	$order_id,
-				':pos_user_id'	=>	$_SESSION['USER_ID']
-			];
-		}
-		
-		
+		INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
+		$where = "WHERE asp.product_variant_id=:product_variant_id";
+		$params = [
+			':product_variant_id' => $_GET['pvid']
+		];
 		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 				
 		//echo "<pre>";print_r($sqlQuery);die;
@@ -61,7 +45,7 @@
 							<ol class="breadcrumb mb-0 p-0">
 								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Invoices View</li>
+								<li class="breadcrumb-item active" aria-current="page">Purchase Stock View</li>
 							</ol>
 						</nav>
 					</div>
@@ -74,19 +58,21 @@
 							<table id="example2" class="table table-striped table-bordered">
 								<thead>
 									<tr>
-									    <td></td>
-										<td><input type="text" class="form-control" id="search-one" placeholder="Search by product"></td>
 										<td></td>
+										<td><input type="text" class="form-control" id="search-one" placeholder="Search by Vendor"></td>
+										<td><input type="text" class="form-control" id="search-two" placeholder="Search by name"></td>
+										
+										
 										<td></td>
 										<td></td>
 									</tr>
 								  <tr class="text-center">
 									<th>S. No.</th>
+									<th>Vendor</th>
 									<th>Product Name</th>
-									<th>Quantity</th>
 									<th>Product Variant</th>
-									<th>Unit Price</th>
-									<th>Total Price</th>
+									<th>Stock</th>
+									<th>Purchase Date</th>
 								  </tr>
 								</thead>
 								<tbody>
@@ -98,12 +84,12 @@
 										{
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
-										<td style="width:100px"><?PHP echo $k+1; ?></td>
+										<td><?PHP echo $k+1; ?></td>
+										<td><?PHP echo $selectValue->vendor; ?></td>
 										<td><?PHP echo $general_cls_call->cart_product_name($selectValue->name); ?></td>
-										<td><?PHP echo $selectValue->quantity; ?></td>
 										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-										<td>₹<?PHP echo $selectValue->unit_price; ?></td>
-										<td>₹<?PHP echo $selectValue->total_price; ?></td>
+										<td><?PHP echo $selectValue->stock; ?></td>
+										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										
 									  </tr>
 										<?PHP

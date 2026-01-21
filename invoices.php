@@ -39,10 +39,9 @@
 							<table id="example2" class="table table-striped table-bordered">
 								<thead>
 									<tr>
-										<td><input type="text" class="form-control" id="search-zero" placeholder="Search by Invoice Id"></td>
-										<td><input type="text" class="form-control" id="search-one" placeholder="Search by name"></td>
 										<td></td>
-										
+										<td><input type="text" class="form-control" id="search-one" placeholder="Search by custoner"></td>
+										<td><input type="text" class="form-control" id="search-two" placeholder="Search by mobile"></td>
 										<td></td>
 										<td></td>
 									</tr>

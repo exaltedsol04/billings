@@ -45,7 +45,7 @@
 			  </ul>
 			</li>
 			
-			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
 				</div>

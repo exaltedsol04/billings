@@ -68,7 +68,7 @@
 				<div class="card-body p-4">
 					<div class="d-flex align-items-start justify-content-between mb-3">
 					  <div class="">
-						<h5 class="mb-0 fw-bold">Online stock</h5>
+						<h5 class="mb-0 fw-bold">Purchase Stock</h5>
 					  </div>
 					  
 					</div>

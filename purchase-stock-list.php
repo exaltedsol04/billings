@@ -58,15 +58,14 @@
 								</thead>
 								<tbody>
 									<?php
-									$fields = "asp.stock, asp.created_at, pv.measurement, p.name, p.image, p.barcode, u.name as unit_name, v.name as vendor";
+									$fields = "asp.id, asp.product_id, asp.product_variant_id, asp.status, SUM(asp.stock) as total_stock, asp.created_at, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor";
 									
 									$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
-										INNER JOIN " . PRODUCT_VARIANTS . " pv ON pv.id = asp.product_variant_id
-										INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
-										INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id 
-										INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-										
-									$where = "WHERE 1";
+									INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
+									INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
+									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
+									INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
+									$where = "WHERE 1 GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0";
 									$params = [];
 									
 									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
@@ -82,9 +81,9 @@
 										<td style="width:100px"><?PHP echo $selectValue->vendor; ?></td>
 										<td><?PHP echo $general_cls_call->cart_product_name($selectValue->name); ?></td>
 										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-										<td><?PHP echo $selectValue->stock; ?></td>
+										<td><?PHP echo $selectValue->total_stock; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
+										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_variant_id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
 										<?PHP
 												$i++;
