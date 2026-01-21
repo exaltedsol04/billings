@@ -48,10 +48,11 @@
 									</tr>
 								  <tr class="text-center">
 									<th style="width:100px">Invoice Id</th>
-									<th>Customer Name</th>
-									<th>Mobile</th>
-									<th>Date Time</th>
-									<th>Total Sale</th>
+									<th>Vendors</th>
+									<th>Product Name</th>
+									<th>Product Variant Name</th>
+									<th>Purchase Stock</th>
+									<th>Purchase Date</th>
 									<th>Action</th>
 								  </tr>
 								</thead>
@@ -88,6 +89,7 @@
 										<td><?PHP echo $customer->mobile; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td>₹<?PHP echo $pos_order_item->total; ?></td>
+										<td></td>
 										<td><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
 										<?PHP
@@ -98,7 +100,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="6">
+										<td colspan="7">
 										 No record found.
 										</td>
 									  </tr>
