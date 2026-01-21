@@ -39,7 +39,7 @@
 	
 		  <div class="row">
 			<div class="col-5 col-xl-5">
-				<select name="product" id="product" onchange=add_to_cart(this) class="form-select select2-dropdown" tabindex="1">
+				<select name="product" id="product" onchange=check_product_stock_onchange(this.value) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
 						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
@@ -113,6 +113,7 @@
 				</div>
 				<span id="show-stock-div"></span>
 				<div class="box-footer text-center">
+				<span id="qty-total"></span>
 						<div class="loader" id="loader1" style="display:none"></div>
 						<button type="button" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5 submit-stock-transfer" onclick="submit_request();">Transfer</button>
 				</div>
@@ -149,6 +150,8 @@
 		<?PHP include_once("includes/adminFooter.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	<script src="assets/plugins/es/stock-transfer.js"></script>
+	<link rel="stylesheet" href="assets/plugins/notifications/css/lobibox.min.css">
+	<script src="assets/plugins/notifications/js/lobibox.min.js"></script>
 	<?php if (!empty($_SESSION['call_js'])) { ?>
 		<script>
 			clearCart();
@@ -159,6 +162,153 @@
   </body>
 </html>
 <script>
+$(document).ready(function(){
+	//Start Increase and Decrease
+	Object.keys(localStorage).forEach(key => {
+		if (key.startsWith('transfer-stock-limit') && key.endsWith('-value')) {
+		  let inputId = key.replace('-value', '');
+
+		  // Ensure input exists
+		  if ($('#' + inputId).length === 0) {
+			$('#qty-total').append(`<input type="hidden" id="${inputId}">`);
+		  }
+
+		  // Set the value from localStorage (even if empty)
+		  let storedValue = localStorage.getItem(key);
+		  $('#' + inputId).val(storedValue !== null ? storedValue : '');
+		}
+	});
+	//End Increase and Decrease
+});
+function check_qty_stock(id, inc)
+{
+	let barcode = 1;
+	var datapost = 'action=paynow&id='+id + '&barcode=' + barcode;
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			var result = JSON.parse(response);
+			var stockCount = 0;
+			if (result.length > 0) {
+				$.each(result, function (i, stock) {
+					stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
+				});
+				if(inc >= stockCount)
+				{
+					//Start Increase and Decrease
+					let inputId = 'transfer-stock-limit' + id;
+					$('#' + inputId).val(stockCount);
+					localStorage.setItem(inputId + '-value', stockCount);
+					$('.qty-input' + id).val(stockCount);
+					//End Increase and Decrease
+					let msgStock = '<div style="text-align:center;">Available  stock is ' + stockCount + '</div>';
+						Lobibox.notify('default', {
+							pauseDelayOnHover: true,
+							continueDelayOnInactiveTab: false,
+							position: 'center top',
+							size: 'mini',
+							msg: msgStock
+						});
+				}
+				
+			} else {					
+				Lobibox.notify('default', {
+					pauseDelayOnHover: true,
+					continueDelayOnInactiveTab: false,
+					position: 'center top',
+					size: 'mini',
+					msg: '<div style="text-align:center;">Out of stock</div>'
+				});					
+			}
+		}
+	});
+}
+function check_product_stock_onchange(product)
+{
+	$('#check-stock-div').html('');
+	$('#check-stock-pay-div').html('');
+	const myArray = product.split("@@@");
+	let pvid = parseInt(myArray[0]);
+	check_product_stock(pvid,product);
+}
+function check_product_stock(id,parameter)
+{	
+	let pvqty = $('#qty_' + id).val();
+	if(typeof pvqty === 'undefined'){
+		pvqty = 0;
+	}
+	let barcode = 1;
+	var datapost = 'action=paynow&id='+id + '&barcode=' + barcode;
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			var result = JSON.parse(response);
+			var stockCount = 0;
+			if (result.length > 0) {
+				var html = '<div class="col-md-5">';
+				$.each(result, function (i, stock) {
+					stockCount = parseInt(stockCount) + parseInt(stock.variant_stock)-parseInt(pvqty);
+					if(stockCount == 0)
+					{
+						Lobibox.notify('default', {
+							pauseDelayOnHover: true,
+							continueDelayOnInactiveTab: false,
+							position: 'center top',
+							size: 'mini',
+							msg: '<div style="text-align:center;">Out of stock</div>'
+						});
+					}
+				});
+				html += '</div>';
+				if(stockCount > 0)
+				{
+					if (typeof add_to_cart !== 'function') {
+						$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/stock-transfer.js")
+							.done(function () {
+								add_to_cart(parameter);
+							})
+							.fail(function () {
+								alert('Failed to load stock-transfer.js');
+							});
+
+					} else {
+						add_to_cart(parameter);
+					}
+					//Start Increase and Decrease
+					let inputId = 'transfer-stock-limit' + id;
+					// ensure it exists
+					if ($('#' + inputId).length === 0) {
+					  $('#qty-total').append(`<input type="hidden" id="${inputId}">`);
+					} else {
+					  $('#' + inputId).show();
+					}
+					$('#' + inputId).val(pvqty === 0 ? '' : pvqty);
+					localStorage.setItem(inputId + '-value', pvqty === 0 ? '' : pvqty);
+					//End Increase and Decrease
+				}
+				else{
+					$('#check-stock-div').html(html).show();
+				}
+				$('#product-modal').modal('hide');
+			} else {				
+				let msgStock = 'Out of stock';
+				Lobibox.notify('default', {
+					pauseDelayOnHover: true,
+					continueDelayOnInactiveTab: false,
+					position: 'center top',
+					size: 'mini',
+					msg: '<div style="text-align:center;">Out of stock</div>'
+				});
+				$('#product-modal').modal('hide');
+			}
+			
+		}
+	});
+}
 function sellers(id)
 {
 	$('#hid_seller_id').val(id);
@@ -174,16 +324,10 @@ function submit_request()
 		if (data.length > 0) {
 			var cartData = data[0].id;
 		}
-	}
-	
-	if(typeof cartData === 'undefined')
-	{
+	} if(typeof cartData === 'undefined') {
 		$('#err_product').text('Please select product');
 		return false;
-	}
-	
-	if(seller_id == '')
-	{
+	} if(seller_id == ''){
 		$('#err_seller').text('Please choose store to transfer.');
 		return false;
 	}

@@ -18,40 +18,11 @@ $(document).on("keydown", ".qty-input", function (e) {
  * ! used to add to cart
  */
 
-let progress_bar = () => {
-	/*let progress = 0;
-
-            $('#progressBar')
-                .removeClass('active')
-                .addClass('progress-bar-success')
-                .text('Completed');
-	let interval = setInterval(function () {
-        progress += 1;
-
-        $('#progressBar')
-            .css('width', progress + '%')
-            .text(progress + '%');
-
-        if (progress >= 100) {
-            clearInterval(interval);
-            $('#progressBar')
-                .removeClass('active')
-                .addClass('progress-bar-success')
-                .text('Completed');
-        }
-    }, 2);*/ // speed (lower = faster)
-};
-
 //let add_to_cart = () => {
 function add_to_cart(product) {	
 	$("#loader").show();
 	$('#err_empty_cart').text('');
-	progress_bar();
-    
 	$('#product-modal').modal('hide');
-	
-	//let product = $("#product").val();
-	//alert(product);
 	const myArray = product.split("@@@");
 	let selectedItem = parseInt(myArray[0]);
 	let productPrice = myArray[1];
@@ -59,7 +30,6 @@ function add_to_cart(product) {
 	let productImage = myArray[3];
 	let productBarcode = myArray[4];
 	let productMeasurement = myArray[5];
-	//alert(productMeasurement);
 	let qty = 1;
 	let search = basket.find((x) => x.id === selectedItem);
 
@@ -78,7 +48,7 @@ function add_to_cart(product) {
 	search.qty += parseInt(qty);
   }
 
-  console.log(basket);
+  //console.log(basket);
   update(selectedItem);
   localStorage.setItem("data", JSON.stringify(basket));
   setTimeout(function () {
@@ -107,24 +77,14 @@ calculation();
  */
 
 let generateCartItems = () => {
-	
   if (basket.length !== 0) {
     return (ShoppingCart.innerHTML = basket
       .map((x, index) => {
         let { id, item, qty, price, measurement, name, pimage } = x;
-
 		$('#loader').hide();
 		let progress = 0;
 		$('#removeCart').show();
-		/*let custom_label = '';
-		if (typeof label !== 'undefined' && label != '') {
-			custom_label = '<br/><small class="text-muted">Custom Label: '+label+'</small>';
-		}*/
-		
-		//let rowCount = 1;
-       // let search = shopItemsData.find((x) => x.id === id) || [];
-        //let { qty, price, name, pimage } = search;
-        return `<tr>
+        return `<tr id="dataRow${id}">
 					<td class="text-center">${index + 1}</td>
 					<td>
 					<div class="input-group quantity-group">
@@ -148,12 +108,8 @@ let generateCartItems = () => {
 					
       })
       .join(""));
-	  
-	  
   } else {
-   // ShoppingCart.innerHTML = "";
    totalAmountShow.innerHTML = "";
-   
    $('#removeCart, #loader').hide();
    let progress = 0;
     ShoppingCart.innerHTML = `<tr>
@@ -170,111 +126,68 @@ generateCartItems();
  */
 
 let increment = (id) => {
-	
 	$("#loader").show();
-	progress_bar();
-	let cart_stock_limit = $('#cart-stock-limit').val();
-	//alert(cart_stock_limit);
-	
-  let selectedItem = id;
-  let search = basket.find((x) => x.id === selectedItem);
-  
-  
-   //alert(id);
-   //alert(search.qty);
-  if (search === undefined) {
-    basket.push({
-      id: selectedItem,
-      qty: 1,
-    });
-  } else {
-    search.qty += 1;
-	check_qty_stock(id, search.qty+1);
-	  if(cart_stock_limit != '')
-	  {
+	let selectedItem = id;
+	let search = basket.find((x) => x.id === selectedItem);
+	if (search === undefined) {
+		basket.push({
+		  id: selectedItem,
+		  qty: 1,
+		});
+	} else {
+		let inputId = 'cart-stock-limit' + id;
+		// 2. Call stock check
+		check_qty_stock(id, search.qty + 1);
+		// 3. Read value AFTER stock check
+		let cart_stock_limit = $('#' + inputId).val();
 		//alert(cart_stock_limit);
-		$('.qty-input' + id).val(cart_stock_limit);
-		return false;
-	  }
-  }
-//console.log(basket);
-  update(selectedItem);
-  localStorage.setItem("data", JSON.stringify(basket));
-  //let parameter = '';
-  //alert(search.qty);
-  //check_qty_stock(id, search.qty);
-  setTimeout(function () {
-	generateCartItems();
-  }, 500);
+		// 4. Apply logic
+		if (cart_stock_limit !== '') {
+		  $('.qty-input' + id).val(cart_stock_limit);
+		  $('#dataRow' + id).find('.qty-increment').prop('disabled', true);
+		}
+		else if (search.qty <= cart_stock_limit || cart_stock_limit==='') {
+		  // only increment if input was NOT just created
+		  if(cart_stock_limit==='') {
+				search.qty += 1;
+				update(selectedItem);
+				localStorage.setItem("data", JSON.stringify(basket));
+		  }
+		}
+	}
+	setTimeout(function () {
+		generateCartItems();
+	}, 500);
 };
-
-/*let increment = (id, btn) => {
-
-    let row = $(btn).closest('tr');
-    let qtyInput = row.find('.qty-input');
-	//alert(qtyInput);
-    let selectedItem = id;
-    let search = basket.find((x) => x.id === selectedItem);
-
-    let currentQty = search ? search.qty : 0;
-
-    check_qty_stock(id, currentQty + 1, function (stockCount) {
-
-        if (currentQty >= stockCount) {
-            
-            qtyInput.val(stockCount);
-
-            Lobibox.notify('default', {
-                position: 'center top',
-                size: 'mini',
-                msg: `<div style="text-align:center;">Available stock is ${stockCount}</div>`
-            });
-
-            return;
-        }
-
-        
-        if (!search) {
-            basket.push({ id: selectedItem, qty: 1 });
-        } else {
-            search.qty += 1;
-        }
-
-        qtyInput.val(search.qty);
-        update(selectedItem);
-        localStorage.setItem("data", JSON.stringify(basket));
-		
-		setTimeout(function () {
-			generateCartItems();
-		  }, 500);
-	});
-};*/
 
 /**
  * ! used to decrease the selected product item quantity by 1
  */
 
 let decrement = (id) => {
-	$("#loader").show();
-	$('#cart-stock-limit').val('');
-	progress_bar();
-  let selectedItem = id;
-  let search = basket.find((x) => x.id === selectedItem);
+	$("#loader").show();	
+	let selectedItem = id;
+	let search = basket.find((x) => x.id === selectedItem);
 
-  if (search === undefined) return;
-  else if (search.qty === 0) return;
-  else {
-    search.qty -= 1;
-  }
-
-  update(selectedItem);
-  basket = basket.filter((x) => x.qty !== 0);
-  //generateCartItems();
-  localStorage.setItem("data", JSON.stringify(basket));
-  $('#check-stock-pay-div').html(' ');
-  setTimeout(function () {
-	generateCartItems();
-  }, 500);
+	if (search === undefined) return;
+	else if (search.qty === 0) return;
+	else {
+		search.qty -= 1;
+		$('#dataRow' + id).find('.qty-increment').prop('disabled', false);
+		let inputId = 'cart-stock-limit' + id;
+		$('#' + inputId).val('')
+		localStorage.setItem(inputId + '-value', '');
+		if (search.qty == 0) {
+			$('#qty-total').find('#' + inputId).remove();
+		}
+	}
+	update(selectedItem);
+	basket = basket.filter((x) => x.qty !== 0);
+	localStorage.setItem("data", JSON.stringify(basket));
+	$('#check-stock-pay-div').html(' ');
+	setTimeout(function () {
+		generateCartItems();
+	}, 500);
 };
 
 /**
@@ -295,7 +208,7 @@ let updateQty = (id, value) => {
 
   search.qty = qty;
   search.item = qty; // keep item count in sync
-
+	
   localStorage.setItem("data", JSON.stringify(basket));
 
   calculation();
@@ -312,10 +225,7 @@ let updateQty = (id, value) => {
 
 let update = (id) => {
   let search = basket.find((x) => x.id === id);
-  
   //console.log(id, search.qty);
-  
-  //document.getElementById('qty_'+id).innerHTML = search.qty;
   $('#qty_'+id).val(search.qty);
   calculation();
   TotalAmount();
@@ -328,17 +238,17 @@ let update = (id) => {
 
 let removeItem = (id) => {
 	$("#loader").show();
-	progress_bar();
-	
-  let selectedItem = id;
-  basket = basket.filter((x) => x.id !== selectedItem);
-  calculation();
-  setTimeout(function () {
-	generateCartItems();
-  }, 500);
-  //generateCartItems();
-  TotalAmount();
-  localStorage.setItem("data", JSON.stringify(basket));
+	let selectedItem = id;
+	basket = basket.filter((x) => x.id !== selectedItem);
+	calculation();
+	setTimeout(function () {
+		generateCartItems();
+	}, 500);
+	let inputId = 'cart-stock-limit' + id;
+	localStorage.setItem(inputId + '-value', '');
+	$('#qty-total').find('#' + inputId).remove();
+	TotalAmount();
+	localStorage.setItem("data", JSON.stringify(basket));
 };
 
 
@@ -353,7 +263,6 @@ let TotalAmount = () => {
     let amount = basket
       .map((x) => {
         let { id, qty, price } = x;
-        //let filterData = shopItemsData.find((x) => x.id === id);
         return price * qty;
       })
       .reduce((x, y) => x + y, 0);
@@ -374,14 +283,19 @@ TotalAmount();
 
 let clearCart = () => {
 	$("#loader").show();
-	progress_bar();
-  basket = [];
-  setTimeout(function () {
-	generateCartItems();
-  }, 500);
-  //generateCartItems();
-  $('#check-stock-div').html('');
-  calculation();
-  localStorage.setItem("data", JSON.stringify(basket));
+	basket = [];
+	setTimeout(function () {
+		generateCartItems();
+	}, 500);
+	$('#qty-total').html('');
+	// reset related localStorage
+	Object.keys(localStorage).forEach(key => {
+	  if (key.startsWith('cart-stock-limit')) {
+		localStorage.removeItem(key);
+	  }
+	});
+	$('#check-stock-div').html('');
+	calculation();
+	localStorage.setItem("data", JSON.stringify(basket));
   
 };
