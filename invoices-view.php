@@ -80,13 +80,13 @@
 										<td></td>
 										<td></td>
 									</tr>
-								  <tr class="text-center">
+								  <tr>
 									<th>S. No.</th>
 									<th>Product Name</th>
-									<th>Quantity</th>
-									<th>Product Variant</th>
-									<th>Unit Price</th>
-									<th>Total Price</th>
+									<th class="text-center">Quantity</th>
+									<th class="text-center">Measurement</th>
+									<th class="text-center">Unit Price</th>
+									<th class="text-center">Total Price</th>
 								  </tr>
 								</thead>
 								<tbody>
@@ -97,13 +97,13 @@
 										foreach($sqlQuery as $k=>$selectValue)
 										{
 									?>
-									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
+									  <tr id="dataRow<?php echo($selectValue->id);?>">
 										<td style="width:100px"><?PHP echo $k+1; ?></td>
 										<td><?PHP echo $general_cls_call->cart_product_name($selectValue->name); ?></td>
-										<td><?PHP echo $selectValue->quantity; ?></td>
-										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-										<td>₹<?PHP echo $selectValue->unit_price; ?></td>
-										<td>₹<?PHP echo $selectValue->total_price; ?></td>
+										<td class="text-center"><?PHP echo $selectValue->quantity; ?></td>
+										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
+										<td class="text-center">₹<?PHP echo $selectValue->unit_price; ?></td>
+										<td class="text-center">₹<?PHP echo $selectValue->total_price; ?></td>
 										
 									  </tr>
 										<?PHP

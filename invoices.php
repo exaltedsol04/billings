@@ -45,12 +45,12 @@
 										<td></td>
 										<td></td>
 									</tr>
-								  <tr class="text-center">
+								  <tr>
 									<th style="width:100px">Invoice Id</th>
 									<th>Customer Name</th>
-									<th>Mobile</th>
+									<th class="text-center">Mobile</th>
 									<th>Date Time</th>
-									<th>Total Sale</th>
+									<th class="text-center">Total Sale</th>
 									<th>Action</th>
 								  </tr>
 								</thead>
@@ -81,12 +81,12 @@
 
 											$pos_order_item = $general_cls_call->select_query_sum( POS_ORDERS_ITEMS, "WHERE pos_order_id =:pos_order_id", array(':pos_order_id'=> $selectValue->id), 'total_price');											
 									?>
-									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
+									  <tr id="dataRow<?php echo($selectValue->id);?>">
 										<td style="width:100px"><?PHP echo $selectValue->id; ?></td>
 										<td><?PHP echo $customer->name; ?></td>
-										<td><?PHP echo $customer->mobile; ?></td>
+										<td class="text-center"><?PHP echo $customer->mobile; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td>₹<?PHP echo $pos_order_item->total; ?></td>
+										<td class="text-center">₹<?PHP echo $pos_order_item->total; ?></td>
 										<td><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
 										<?PHP

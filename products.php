@@ -7,7 +7,7 @@
 	ob_end_flush();
 	
 	$orWhere = '';
-	if(isset($_GET['sid'])  && $_GET['sid'] != '')
+	if(isset($_GET['sid'])  && $_GET['sid'] != 'admin')
 	{
 		$seller_id = $_GET['sid'];
 		$orWhere = "AND pr.seller_id ='" .$seller_id. "'";
@@ -22,8 +22,8 @@
 		$sqlQueryP = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 		//echo "<pre>";print_r($sqlQueryP);die;
 	}
-	else{
-		
+	else if(isset($_GET['sid'])  && $_GET['sid'] == 'admin')
+	{
 		$fields = "pv.id as pvid, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
 		$tables = PRODUCT_VARIANTS . " pv
 		INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id 
@@ -64,7 +64,7 @@
 					<div class="col-md-5">
 						<select name="seller_id" id="seller_id" class="form-select select2-dropdown" tabindex="1" onchange="select_sellers(this.value)">
 							<option value="">Select...</option>
-							<option value="">All</option>
+							<option value="admin">Admin</option>
 							<?PHP
 								$sqlQuery = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id!=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 2);
 								if($sqlQuery[0] != '')
@@ -107,14 +107,6 @@
 								<tbody>
 									<?php 
 								
-									/*$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode";
-						$tables = PRODUCT_STOCK_TRANSACTION . " pr
-						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
-						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-						$where = "WHERE pr.status=1 ".$orWhere." GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
-						$params = [];
-						$sqlQueryP = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);*/
 									//echo "<pre>";print_r($sqlQuery);die;
 									if($sqlQueryP[0] != '')
 									{
@@ -124,7 +116,7 @@
 										{	
 										  if(!empty($arr->pvid))
 										  {
-											  $stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $arr->pvid, 'status'=>1, 'product_id'=> $arr->product_id), 'stock');
+											  $stock_used = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $arr->pvid, 'status'=>1, 'product_id'=> $arr->product_id), 'stock');
 											  $total_stock = $stock_used->total;
 											 
 											  if(empty($total_stock))

@@ -1,0 +1,17 @@
+ALTER TABLE `bl_product_stock_transaction` ADD `stock_type` INT(11) NOT NULL DEFAULT '1' AFTER `stock`;
+
+ALTER TABLE `bl_product_stock_transaction` CHANGE `transaction_type` `transaction_type` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '1=Purchase Request, 2=Sell POS, 3=Sell APP, 4=Transfer stock, 5=online stock';
+
+ALTER TABLE `bl_product_stock_transaction` CHANGE `stock_type` `stock_type` INT(11) NOT NULL DEFAULT '1' COMMENT '1=pos; 2=online';
+
+CREATE TABLE `bl_admin_stock_purchase_list` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `vendor_id` int(11) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `product_variant_id` int(11) DEFAULT NULL,
+  `stock` int(11) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT 0 COMMENT '0=pending; 1= approved by admin',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `updated_at` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci

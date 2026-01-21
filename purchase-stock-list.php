@@ -39,9 +39,10 @@
 							<table id="example2" class="table table-striped table-bordered">
 								<thead>
 									<tr>
-										<td><input type="text" class="form-control" id="search-zero" placeholder="Search by Invoice Id"></td>
-										<td><input type="text" class="form-control" id="search-one" placeholder="Search by name"></td>
 										<td></td>
+										<td><input type="text" class="form-control" id="search-one" placeholder="Search by Vendor"></td>
+										<td><input type="text" class="form-control" id="search-two" placeholder="Search by name"></td>
+										
 										
 										<td></td>
 										<td></td>
@@ -50,8 +51,8 @@
 									<th style="width:100px">Sl. No.</th>
 									<th>Vendors</th>
 									<th>Product Name</th>
-									<th>Variant Name</th>
-									<th>Purchase Stock</th>
+									<th>Stock</th>
+									<th>Measurement</th>
 									<th>Purchase Date</th>
 									<th>Action</th>
 								  </tr>
@@ -75,15 +76,17 @@
 										$i = 1;
 										foreach($sqlQuery as $k=>$selectValue)
 										{
+											$barcode = $selectValue->barcode;
+								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
 									    <td style="width:100px"><?php echo $k+1 ;?></td>
 										<td style="width:100px"><?PHP echo $selectValue->vendor; ?></td>
-										<td><?PHP echo $general_cls_call->cart_product_name($selectValue->name); ?></td>
-										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
+										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
 										<td><?PHP echo $selectValue->total_stock; ?></td>
+										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_variant_id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
+										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_variant_id);?>"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
 										<?PHP
 												$i++;
