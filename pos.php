@@ -304,6 +304,7 @@ $(document).ready(function(){
 function getProducts(val)
 {
 	var barcode = val;
+	//alert(barcode);
 	$('#check-stock-div').html('');
 	//alert(barcode);
 	if(barcode && barcode.trim() !== '')

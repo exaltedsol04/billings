@@ -4,6 +4,9 @@ ALTER TABLE `bl_product_stock_transaction` CHANGE `transaction_type` `transactio
 
 ALTER TABLE `bl_product_stock_transaction` CHANGE `stock_type` `stock_type` INT(11) NOT NULL DEFAULT '1' COMMENT '1=pos; 2=online';
 
+ALTER TABLE `bl_admin_stock_purchase_list` ADD `product_stock_transaction_id` INT(11) NOT NULL AFTER `stock`;
+ALTER TABLE `bl_admin_stock_purchase_list` CHANGE `product_stock_transaction_id` `product_stock_transaction_id` INT(11) NOT NULL DEFAULT '0'; 
+
 CREATE TABLE `bl_admin_stock_purchase_list` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `vendor_id` int(11) DEFAULT NULL,

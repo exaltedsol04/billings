@@ -47,8 +47,10 @@
 						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id 
 						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 						INNER JOIN " . PRODUCT_STOCK_TRANSACTION . " pst ON pst.product_id = pv.product_id AND pst.product_variant_id = pv.id AND pst.status=1";
-						$where = "WHERE 1 GROUP BY pv.id ORDER BY p.name";
-						$params = [];
+						$where = "WHERE pst.stock_type=:stock_type GROUP BY pv.id ORDER BY p.name";
+						$params = [
+							':stock_type' => 1
+						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 						if($sqlQuery[0] != '')
 						{

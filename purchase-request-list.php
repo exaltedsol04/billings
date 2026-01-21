@@ -12,7 +12,14 @@
 		}*/
 	/*=========== STATUS CHANGE START ================*/
 		if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '2'))
-		{		
+		{
+			// get product and product variant_ab
+			$product_stk_dtls = $general_cls_call->select_query("*", PRODUCT_STOCK_TRANSACTION, "WHERE id =:id ", array(':id'=> $_GET['id']), 1);
+			
+			// check available stock 
+			$stock_available = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $product_stk_dtls->product_variant_id, 'status'=>1, 'product_id'=> $product_stk_dtls->product_id), 'stock');
+			
+			
 			$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date";
 			$whereClause=" WHERE id=:id";
 			$updateExecute=array(
@@ -21,11 +28,46 @@
 				':approved_date'=> date("Y-m-d H:i:s"),
 				':id'=>$_GET['id']
 			);
-			$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
-			//header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php')."?m=1");
-			if($updateRec)
+				
+				
+			if($stock_available->total >= $_GET['qty'])
 			{
-				$sucMsg="Data has been submitted successfully";
+				$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+				
+				
+				// add to admin stock transaction table 
+				
+				$field = "vendor_id, product_id, product_variant_id, stock,  product_stock_transaction_id, status, created_at, updated_at";
+				$value = ":vendor_id, :product_id, :product_variant_id, :stock,  :product_stock_transaction_id,:status, :created_at, :updated_at";
+				
+				$addExecute=array(
+					':vendor_id'			=> 0,
+					':product_id'			=> $product_stk_dtls->product_id,
+					':product_variant_id'	=> $product_stk_dtls->product_variant_id,
+					':stock'				=> -($_GET['qty']),
+					':product_stock_transaction_id'	=> $_GET['id'],
+					':status'				=> 1,
+					':created_at' 			=> date('Y-m-d h:i:s'),
+					':updated_at'		    => date('Y-m-d H:i:s')
+				);
+				$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
+				
+				if($updateRec)
+				{
+					$sucMsg="Data has been submitted successfully";
+				}
+			}
+			else{
+				$erMsg = "Stock not available";
+			}
+			
+			if(empty($_GET['qty']))
+			{
+				$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+				if($updateRec)
+				{
+					$sucMsg="Data has been submitted successfully";
+				}
 			}
 			
 			//header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php'));
@@ -72,6 +114,26 @@
 					</div>
 				</div>
 				<!--end breadcrumb-->
+				<?PHP
+					if(isset($erMsg) && $erMsg != '')
+					{
+				?>
+					<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+						<div class="text-white"><strong><?PHP echo $Error_mesg; ?></strong> <?PHP echo $erMsg; ?></div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				<?PHP
+					}
+					if(isset($sucMsg) && $sucMsg != '')
+					{
+				?>
+					<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+						<div class="text-white"><strong>Success</strong> <?PHP echo $sucMsg; ?></div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				<?PHP
+					}
+				?>
      
 				<div class="card">
 					<div class="card-body">
@@ -147,7 +209,7 @@
 													  data-bs-toggle="dropdown"> <span class="visually-hidden">Toggle Dropdown</span>
 													</button>
 													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-success text-bold">Approve</span></a>
+															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1&qty=<?php echo $arr->pqty ?>" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-success text-bold">Approve</span></a>
 															
 															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=2" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
 													</div>

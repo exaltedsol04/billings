@@ -66,8 +66,10 @@
 									INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 									INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-									$where = "WHERE 1 GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0";
-									$params = [];
+									$where = "WHERE asp.status=:status GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0";
+									$params = [
+										':status'=> 1
+									];
 									
 									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 									//echo "<pre>";print_r($sqlQuery);die;
