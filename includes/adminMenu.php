@@ -44,7 +44,18 @@
 				</li>
 			  </ul>
 			</li>
-
+			
+			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
+				</div>
+				<div class="menu-title">Purchases Stock</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'purchase-stock-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Add</a></li>
+				<li><a href="<?php echo SITE_URL.'purchase-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a></li>
+			  </ul>
+			</li>
 			
 			<li <?php if($page=='purchase-request-list.php' || $page=='purchase-approved-list' || $page=='purchase-rejected-list') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">

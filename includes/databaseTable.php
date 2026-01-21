@@ -11,4 +11,6 @@
 	define("POS_ORDERS",  TABLE_PREFIX."pos_orders");
 	define("POS_ORDERS_ITEMS",  TABLE_PREFIX."pos_order_items");
 	define("PRODUCT_STOCK_TRANSACTION",  TABLE_PREFIX."product_stock_transaction");
+	define("VENDORS",  TABLE_PREFIX."vendors");
+	define("ADMIN_STOCK_PURCHASE_LIST",  TABLE_PREFIX."admin_stock_purchase_list");
 ?>
