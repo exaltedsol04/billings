@@ -25,8 +25,8 @@
 				':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
 				':stock'				=> $stock,
 				':status'				=> 0,
-				':created_at' 		=> date('Y-m-d h:i:s'),
-				':updated_at'		       => '0000-00-00 00:00:00',
+				':created_at' 			=> date('Y-m-d h:i:s'),
+				':updated_at'		    => date('Y-m-d H:i:s')
 			);
 			$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
 			$sucMsg = "Stock Inserted Successfully";
