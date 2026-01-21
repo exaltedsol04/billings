@@ -14,13 +14,13 @@
 				$erMsg = "Stock Quantity Greater Than Available Stock.";
 			}
 			else{
-				//echo "<pre>";print_r($_POST);die;
+				//echo "<pre>";print_r($_POST);
 				$explode_product = explode("@@@", $product);
 				$product_variant_id = $explode_product[6];
 				$product_id = $explode_product[0];
 				$stock = $stock;
 				$selling_price = $explode_product[1];
-				$purchase_price = $purchase_price[7];
+				$purchase_price = $explode_product[7];
 				
 				$field = "seller_id, product_variant_id, product_id, stock, stock_type, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id, approved_by, approved_date, order_id";
 				$value = ":seller_id, :product_variant_id, :product_id, :stock, :stock_type, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
@@ -28,16 +28,16 @@
 					//parent_id
 				$addExecute=array(
 					':seller_id'			=> $_SESSION['USER_ID'],
-					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
+					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					
-					':stock'				=> -($stock),
-					':stock_type'				=> 2,
+					':stock'				=> $stock,
+					':stock_type'			=> 2,
 					':created_date'			=> date("Y-m-d H:i:s"),
 					':status'				=> 1,
 					':selling_price'		=> $general_cls_call->specialhtmlremover($selling_price),
 					':purchase_price'		=> $general_cls_call->specialhtmlremover($purchase_price),
-					':transaction_type'		=> 3,
+					':transaction_type'		=> 5,
 					':received_selled_id'	=> 0,
 					':parent_id'	=> 0,
 					':approved_by'			=> 0,
@@ -45,6 +45,28 @@
 					':order_id'		       => 0,
 				);
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
+				
+				
+				$addExecute=array(
+					':seller_id'			=> $_SESSION['USER_ID'],
+					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
+					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
+					
+					':stock'				=> -($stock),
+					':stock_type'			=> 1,
+					':created_date'			=> date("Y-m-d H:i:s"),
+					':status'				=> 1,
+					':selling_price'		=> $general_cls_call->specialhtmlremover($selling_price),
+					':purchase_price'		=> $general_cls_call->specialhtmlremover($purchase_price),
+					':transaction_type'		=> 5,
+					':received_selled_id'	=> 0,
+					':parent_id'	=> 0,
+					':approved_by'			=> 0,
+					':approved_date' 		=> '0000-00-00 00:00:00',
+					':order_id'		       => 0,
+				);
+				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
+				
 				$sucMsg = "Stock Inserted Successfully";
 			}
 		}

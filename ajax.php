@@ -438,22 +438,21 @@
 					
 					// after cart add check stock
 					
-						$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
-						$product_name = $general_cls_call->cart_product_name($product_dtls->name);
-						
-						$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
-						$unitname = $unit_dtls->name;
-						
-						$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
-						
-						$available_stock = $stock_used->total;
-						
-						$stockArr[] = [
-							"product_name" => $product_name,
-							"variant_name" => $p_variant_name,
-							"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
-						];
+					$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
+					$product_name = $general_cls_call->cart_product_name($product_dtls->name);
 					
+					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
+					$unitname = $unit_dtls->name;
+					
+					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					
+					$available_stock = $stock_used->total;
+					
+					$stockArr[] = [
+						"product_name" => $product_name,
+						"variant_name" => $p_variant_name,
+						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
+					];
 				}
 				echo json_encode($stockArr);
 		break;
