@@ -13,12 +13,12 @@ let stockBasket = JSON.parse(localStorage.getItem("stockData")) || [];
  */
 
 
-let add_to_cart = () => {
+let add_to_cart = (product) => {
 	
 	$("#loader").show();
 	$('#err_product').text('');
-	
-	let product = $("#product").val();
+	$('#product-modal').modal('hide');
+	//let product = $("#product").val();
 	const myArray = product.split("@@@");
 	let selectedItem = parseInt(myArray[0]);
 	let productPrice = myArray[1];
@@ -46,7 +46,7 @@ let add_to_cart = () => {
 	search.qty += parseInt(qty);
   }
 
-  console.log(stockBasket);
+  //console.log(stockBasket);
   update(selectedItem);
   localStorage.setItem("stockData", JSON.stringify(stockBasket));
   setTimeout(function () {
@@ -80,17 +80,8 @@ let generateStockItems = () => {
     return (StockCart.innerHTML = stockBasket
       .map((x, index) => {
         let { id, item, qty, price, measurement, name, pid } = x;
-
 		$('#loader').hide();
 		$('#removeCart').show();
-		/*let custom_label = '';
-		if (typeof label !== 'undefined' && label != '') {
-			custom_label = '<br/><small class="text-muted">Custom Label: '+label+'</small>';
-		}*/
-	
-
-       // let search = shopItemsData.find((x) => x.id === id) || [];
-        //let { qty, price, name, pid } = search;
         return `<tr>
 				 <td class="text-center">${index + 1}</td>
 				  
@@ -123,15 +114,12 @@ let generateStockItems = () => {
       })
       .join(""));
   } else {
-   // StockCart.innerHTML = "";
-   totalAmountShow.innerHTML = "";
-   
+   totalAmountShow.innerHTML = "";   
    $('#removeCart, #loader').hide();
     StockCart.innerHTML = `<tr>
 						  <td colspan="7" class="text-center">No Record Found.</td>
     </td></tr>`;
   }
-  
 };
 
 generateStockItems();
@@ -142,23 +130,38 @@ generateStockItems();
 
 let increment = (id) => {
 	$("#loader").show();
-  let selectedItem = id;
-  let search = stockBasket.find((x) => x.id === selectedItem);
+	let selectedItem = id;
+	let search = stockBasket.find((x) => x.id === selectedItem);
 
-  if (search === undefined) {
-    stockBasket.push({
-      id: selectedItem,
-      qty: 1,
-    });
-  } else {
-    search.qty += 1;
-  }
-//console.log(stockBasket);
-  update(selectedItem);
-  localStorage.setItem("stockData", JSON.stringify(stockBasket));
-  setTimeout(function () {
-	generateStockItems();
-  }, 500);
+	if (search === undefined) {
+		stockBasket.push({
+		  id: selectedItem,
+		  qty: 1,
+		});
+	} else {
+		let inputId = 'transfer-stock-limit' + id;
+		// 2. Call stock check
+		check_qty_stock(id, search.qty + 1);
+		// 3. Read value AFTER stock check
+		let cart_stock_limit = $('#' + inputId).val();
+		//alert(cart_stock_limit);
+		// 4. Apply logic
+		if (cart_stock_limit !== '') {
+			$('.qty-input' + id).val(cart_stock_limit);
+			$('#dataRow' + id).find('.qty-increment').prop('disabled', true);
+		}
+		else if (search.qty <= cart_stock_limit || cart_stock_limit==='') {
+			// only increment if input was NOT just created
+			if(cart_stock_limit==='') {
+				search.qty += 1;
+				update(selectedItem);
+				localStorage.setItem("stockData", JSON.stringify(stockBasket));
+			}
+		}
+	}
+	setTimeout(function () {
+		generateStockItems();
+	}, 500);
 };
 
 /**
@@ -167,22 +170,27 @@ let increment = (id) => {
 
 let decrement = (id) => {
 	$("#loader").show();
-  let selectedItem = id;
-  let search = stockBasket.find((x) => x.id === selectedItem);
+	let selectedItem = id;
+	let search = stockBasket.find((x) => x.id === selectedItem);
 
-  if (search === undefined) return;
-  else if (search.qty === 0) return;
-  else {
-    search.qty -= 1;
-  }
-
-  update(selectedItem);
-  stockBasket = stockBasket.filter((x) => x.qty !== 0);
-  //generateStockItems();
-  localStorage.setItem("stockData", JSON.stringify(stockBasket));
-  setTimeout(function () {
-	generateStockItems();
-  }, 500);
+	if (search === undefined) return;
+	else if (search.qty === 0) return;
+	else {
+		search.qty -= 1;
+		$('#dataRow' + id).find('.qty-increment').prop('disabled', false);
+		let inputId = 'transfer-stock-limit' + id;
+		$('#' + inputId).val('')
+		localStorage.setItem(inputId + '-value', '');
+		if (search.qty == 0) {
+			$('#qty-total').find('#' + inputId).remove();
+		}
+	}
+	update(selectedItem);
+	stockBasket = stockBasket.filter((x) => x.qty !== 0);
+	localStorage.setItem("stockData", JSON.stringify(stockBasket));
+	setTimeout(function () {
+		generateStockItems();
+	}, 500);
 };
 
 /**
@@ -207,15 +215,17 @@ let update = (id) => {
 
 let removeItem = (id) => {
 	$("#loader").show();
-  let selectedItem = id;
-  stockBasket = stockBasket.filter((x) => x.id !== selectedItem);
-  calculation();
-  setTimeout(function () {
-	generateStockItems();
-  }, 500);
-  //generateStockItems();
-  TotalAmount();
-  localStorage.setItem("stockData", JSON.stringify(stockBasket));
+	let selectedItem = id;
+	stockBasket = stockBasket.filter((x) => x.id !== selectedItem);
+	calculation();
+	setTimeout(function () {
+		generateStockItems();
+	}, 500);
+	let inputId = 'transfer-stock-limit' + id;
+	localStorage.setItem(inputId + '-value', '');
+	$('#qty-total').find('#' + inputId).remove();
+	TotalAmount();
+	localStorage.setItem("stockData", JSON.stringify(stockBasket));
 };
 
 
@@ -257,12 +267,18 @@ let clearCart = () => {
 	$("#loader").show();
 	$('.submit-stock-transfer').hide();
 	$('#show-stock-div').hide();
-  stockBasket = [];
-  setTimeout(function () {
-	generateStockItems();
-  }, 500);
-  //generateStockItems();
-  calculation();
-  localStorage.setItem("stockData", JSON.stringify(stockBasket));
+	stockBasket = [];
+	setTimeout(function () {
+		generateStockItems();
+	}, 500);
+	$('#qty-total').html('');
+	// reset related localStorage
+	Object.keys(localStorage).forEach(key => {
+	  if (key.startsWith('transfer-stock-limit')) {
+		localStorage.removeItem(key);
+	  }
+	});
+	calculation();
+	localStorage.setItem("stockData", JSON.stringify(stockBasket));
   
 };
