@@ -54,6 +54,7 @@
 									<th>Credit Stock</th>
 									<th>Debit Stock</th>
 									<th>Available Stock</th>
+									<th>Pending Status</th>
 									<th>Measurement</th>
 									<th>Purchase Date</th>
 									<th>Action</th>
@@ -68,10 +69,8 @@
 									INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 									INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-									$where = "WHERE asp.status=:status GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0";
-									$params = [
-										':status'=> 1
-									];
+									$where = "WHERE 1 GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0";
+									
 									
 									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 									//echo "<pre>";print_r($sqlQuery);die;
@@ -102,6 +101,17 @@
 												':product_stock_transaction_id'=>0
 											];
 											$stock_debit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereDebit, $paramsDebit, 'stock');
+											
+											
+											// pending stock
+											$whereStatus = "WHERE product_id=:product_id AND product_variant_id =:product_variant_id AND status=:status";
+											
+											$paramsStatus = [
+												':product_id'=> $selectValue->product_id,
+												':product_variant_id'=> $selectValue->product_variant_id,
+												':status'=>0
+											];
+											$pending_stock = $general_cls_call->select_query_count( ADMIN_STOCK_PURCHASE_LIST, $whereStatus, $paramsStatus);
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
 									    <td style="width:100px"><?php echo $k+1 ;?></td>
@@ -110,10 +120,11 @@
 										<td><?php echo $stock_credit->total; ?></td>
 										<td><?php echo !empty($stock_debit->total) ? abs($stock_debit->total) : '0'; ?></td>
 										<td><?PHP echo $selectValue->total_stock; ?></td>
+										<td><?php echo $pending_stock; ?></td>
 										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_variant_id);?>"><i class="lni lni-keyword-research"></i></a></td>
-									  </tr>
+									</tr>
 										<?PHP
 												$i++;
 											}
@@ -122,7 +133,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="9">
+										<td colspan="10">
 										 No record found.
 										</td>
 									  </tr>
