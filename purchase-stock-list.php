@@ -69,7 +69,7 @@
 									INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 									INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-									$where = "WHERE 1 GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0";
+									$where = "WHERE 1 GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0 ORDER BY asp.created_at DESC";
 									
 									
 									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
@@ -122,7 +122,7 @@
 										<td><?PHP echo $selectValue->total_stock; ?></td>
 										<td><?php echo $pending_stock; ?></td>
 										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
+										<td><span class="d-none"><?PHP echo $selectValue->created_at; ?></span><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_variant_id);?>"><i class="lni lni-keyword-research"></i></a></td>
 									</tr>
 										<?PHP
@@ -169,5 +169,23 @@
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/adminFooter.php"); ?>
 <!-- ######### FOOTER END ############### -->
+<script>
+$(document).ready(function(){
+	if ($.fn.DataTable.isDataTable('#example2')) {
+		$('#example2').DataTable().destroy();
+	}
+	
+	$('#example2').DataTable({
+		order: [[8, 'desc']],
+		columnDefs: [
+        {
+            targets: 0,        // 1st column
+            orderable: true,  // allow manual ordering
+            orderSequence: ['asc', 'desc'] // manual toggle only
+        }
+    ] 
+	});
+});
+</script>
 </body>
 </html>

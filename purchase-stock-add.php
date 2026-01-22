@@ -27,7 +27,7 @@
 				':stock'				=> $stock,
 				':status'				=> 0,
 				':remarks'				=> $remarks,
-				':created_at' 			=> date('Y-m-d h:i:s'),
+				':created_at' 			=> date('Y-m-d H:i:s'),
 				':updated_at'		    => date('Y-m-d H:i:s')
 			);
 			$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);

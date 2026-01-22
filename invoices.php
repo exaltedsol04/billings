@@ -59,34 +59,35 @@
 									<?php
 									if($_SESSION['USER_ID'] == 1)
 									{
-										$where = "WHERE 1 order by created_at";
+										$where = "WHERE 1 ORDER BY created_at DESC";
 										$params = [];
 									}
 									else{
-										$where = "WHERE pos_user_id=:pos_user_id order by created_at";
+										$where = "WHERE pos_user_id=:pos_user_id  ORDER BY created_at DESC";
 										$params = [
 											':pos_user_id'	=>	$_SESSION['USER_ID']
 										];
 									}
 									
 									$sqlQuery = $general_cls_call->select_query("*", POS_ORDERS, $where, $params, 2);
+									//echo "<pre>";print_r($sqlQuery);die;
 						
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
 										foreach($sqlQuery as $selectValue)
 										{
-											$customer = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", [':admin_id' => $selectValue->pos_user_id], 1);
-
-											/*$pos_order_item = $general_cls_call->select_query("*", POS_ORDERS_ITEMS, "WHERE pos_order_id=:pos_order_id", [':pos_order_id' => $selectValue->id], 1);*/
-
+											/*$customer = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", [':admin_id' => $selectValue->pos_user_id], 1);*/
+											
+											$customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' => $selectValue->user_id], 1);
+											
 											$pos_order_item = $general_cls_call->select_query_sum( POS_ORDERS_ITEMS, "WHERE pos_order_id =:pos_order_id", array(':pos_order_id'=> $selectValue->id), 'total_price');											
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>">
 										<td style="width:100px"><?PHP echo $selectValue->id; ?></td>
 										<td><?PHP echo $customer->name; ?></td>
 										<td class="text-center"><?PHP echo $customer->mobile; ?></td>
-										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
+										<td><span class="d-none"><?PHP echo $selectValue->created_at; ?></span><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td class="text-center">₹<?PHP echo $pos_order_item->total; ?></td>
 										<td><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
@@ -134,5 +135,23 @@
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/adminFooter.php"); ?>
 <!-- ######### FOOTER END ############### -->
+<script>
+$(document).ready(function(){
+	if ($.fn.DataTable.isDataTable('#example2')) {
+		$('#example2').DataTable().destroy();
+	}
+	
+	$('#example2').DataTable({
+		order: [[3, 'desc']],
+		columnDefs: [
+        {
+            targets: 0,        // 1st column
+            orderable: true,  // allow manual ordering
+            orderSequence: ['asc', 'desc'] // manual toggle only
+        }
+    ]
+	});
+});
+</script>
 </body>
 </html>
