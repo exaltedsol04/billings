@@ -13,7 +13,7 @@
 			$explode_product = explode("@@@", $product);
 			
 			$product_id = $explode_product[0];
-			$product_variant_id = $explode_product[1];
+			//$product_variant_id = $explode_product[1];
 			
 			$remarks = !empty($remarks) ? $remarks : null;
 			$field = "vendor_id, product_id, product_variant_id, stock, status, remarks, created_at, updated_at";
@@ -50,6 +50,7 @@
 	
 	
 	ob_end_flush();
+	
 ?>
 
 <!-- ######### HEADER START ############### -->
@@ -97,16 +98,15 @@
 						<form class="row g-4" action="" method="post">
 							<div class="col-md-12">
 								<label for="input1" class="form-label">Products</label>
-									<select name="product" id="product" class="form-select select2-dropdown" tabindex="1">
+									<select name="product" id="product" class="form-select select2-dropdown" tabindex="1" onchange="select_product(this.value)">
 									<option value="">Select...</option>
 									<?PHP
-										$fields = "pv.id as product_variant_id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
-										$tables = PRODUCT_VARIANTS . " pv
-										INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id
-										INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-										$where = "WHERE 1 ORDER BY p.name";
+										$fields = "*";
+										$tables = PRODUCTS;
+										$where = "WHERE 1 ORDER BY name";
 										$params = [];
-										$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+										$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
+										//echo "<pre>"; print_r($sqlQuery);die;
 										if($sqlQuery[0] != '')
 										{
 											foreach($sqlQuery as $arr)
@@ -115,11 +115,17 @@
 												
 												$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 									?>
-												<option value="<?PHP echo $arr->product_id.'@@@'.$arr->product_variant_id.'@@@'.$general_cls_call->cart_product_name($arr->name); ?>" <?php echo ($_POST['product'] == $arr->product_id.'@@@'.$arr->product_variant_id.'@@@'.$general_cls_call->cart_product_name($arr->name)) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
+												<option value="<?PHP echo $arr->id.'@@@'.'@@@'.$general_cls_call->cart_product_name($arr->name); ?>" <?php echo ($_POST['product'] == $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name)) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name); ?></option>
 									<?PHP
 											}
 										}
 									?>
+								</select>
+							</div>
+							<div class="col-md-12">
+								<label for="input5" class="form-label">Unit</label>
+								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1">
+									<option value="">Select...</option>
 								</select>
 							</div>
 							<div class="col-md-12">
@@ -175,3 +181,26 @@
 </body>
 
 </html>
+<script>
+function select_product(product)
+{
+	const myArray = product.split("@@@");
+	let pid = parseInt(myArray[0]);
+	var datapost = 'action=getProductVariant&pid='+pid;
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			var result = JSON.parse(response);
+			if (result.length > 0) {
+				var html = '<option value="">Select...</option>';
+				$.each(result, function (i, variants) {
+					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname + '</option>';
+				});
+				$('#product_variant_id').html(html);
+			}
+		}
+	});
+}
+</script>

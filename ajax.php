@@ -457,5 +457,31 @@
 				}
 				echo json_encode($stockArr);
 		break;
+		case "getProductVariant";
+			 
+			$fields = "pv.id, pv.measurement, u.name as unit_name";
+			$tables = PRODUCT_VARIANTS . " pv
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			
+			$where ="WHERE pv.product_id=:product_id";
+			$params = [
+				':product_id' => $_POST['pid']
+			];
+			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
+			//echo "<pre>"; print_r($sqlQuery);die;
+			$varianrArr = [];
+			if($sqlQuery[0] != '')
+			{
+				foreach($sqlQuery as $arr)
+				{
+					$varianrArr[] = [
+						'id' => $arr->id,
+						'measurement' => $arr->measurement,
+						'unitname' => $arr->unit_name
+					];
+				}
+			}
+			echo json_encode($varianrArr); 
+		break;
     }
 ?>
