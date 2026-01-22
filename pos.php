@@ -120,7 +120,7 @@
 				</select>
 			</div>
 			<div class="col-md-3">
-				<input type="text" class="form-control" id="supplier_id" name="supplier_id" placeholder="Mobile No" oninput="user_details(this.value)">
+				<input type="text" class="form-control" id="supplier_id" name="supplier_id" placeholder="Mobile No" oninput="user_details(this.value)" autocomplete="off">
 				<div id="user_suggestions" class="list-group 1position-absolute 1w-100" style="z-index:1000;"></div>
 				<span class="text-danger" id="err_supplier_id"></span>
 			</div>

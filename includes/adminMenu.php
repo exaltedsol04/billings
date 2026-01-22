@@ -98,7 +98,7 @@
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>Stock Transfer</a></li>
 				<li><a href="<?php echo SITE_URL.'online-stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>Online Stock</a></li>
-				<li><a href="<?php echo SITE_URL.'available-stock-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Pos Stock</a></li>
+				<li><a href="<?php echo SITE_URL.'available-stock-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Stock Report</a></li>
 				<li><a href="<?php echo SITE_URL.'available-online-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Online Stock</a></li>
 				<li><a href="<?php echo SITE_URL.'barcode'; ?>"><i class="material-icons-outlined">arrow_right</i>Barcode</a></li>
 			  </ul>
