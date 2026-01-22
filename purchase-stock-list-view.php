@@ -29,7 +29,7 @@
 	
 	if(isset($_GET['pvid']))
 	{
-		$fields = "asp.id, asp.product_id, asp.status, asp.stock, asp.created_at, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid";
+		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid";
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -103,6 +103,7 @@
 									<th class="text-center">Stock</th>
 									<th>Measurement</th>
 									<th>Purchase Date</th>
+									<th>Remarks</th>
 									<th class="text-center">Action</th>
 								  </tr>
 								</thead>
@@ -123,20 +124,34 @@
 										<td class="text-center"><?PHP echo $selectValue->stock; ?></td>
 										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
+										<td><?php echo !empty($selectValue->remarks) ? $selectValue->remarks : '--';?></td>
 										<td class="text-center">
 											<div class="ms-auto">
 												  <div class="btn-group">
+												  <?php 
+													if($selectValue->status == 0 || $selectValue->status == 2)
+													{
+													?>
 													<button type="button" class="btn btn-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?>">
 													<?PHP echo $selectValue->status==1 ? 'Approved' : ($selectValue->status==2 ? 'Rejected' : 'Pending'); ?>
 													</button>
 													<button type="button" class="btn btn-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?> split-bg-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?> dropdown-toggle dropdown-toggle-split"
 													  data-bs-toggle="dropdown"> <span class="visually-hidden">Toggle Dropdown</span>
 													</button>
+													
 													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
 															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=1&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-success text-bold">Approve</span></a>
 															
 															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=2&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
 													</div>
+													<?php 
+													}
+													else{
+													?>
+													 <p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Completed</p>
+													<?php 
+													}
+													?>
 												</div>
 											</div>
 										</td>
@@ -150,7 +165,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="7">
+										<td colspan="8">
 										 No record found.
 										</td>
 									  </tr>

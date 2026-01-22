@@ -18,3 +18,18 @@ CREATE TABLE `bl_admin_stock_purchase_list` (
   `updated_at` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
+
+CREATE TABLE `bl_vendors` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) DEFAULT NULL,
+  `email` varchar(191) DEFAULT NULL,
+  `mobile` varchar(191) NOT NULL,
+  `status` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+============= 22-01-2026==========
+ALTER TABLE `bl_admin_stock_purchase_list` ADD `remarks` TEXT NULL DEFAULT NULL AFTER `status`; 

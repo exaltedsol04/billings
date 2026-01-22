@@ -9,14 +9,15 @@
 		extract($_POST);
 		if($product != '' && $stock !='')
 		{
-			//echo "<pre>";print_r($_POST);
+			//echo "<pre>";print_r($_POST);die;
 			$explode_product = explode("@@@", $product);
 			
 			$product_id = $explode_product[0];
 			$product_variant_id = $explode_product[1];
 			
-			$field = "vendor_id, product_id, product_variant_id, stock, status, created_at, updated_at";
-			$value = ":vendor_id, :product_id, :product_variant_id, :stock, :status, :created_at, :updated_at";
+			$remarks = !empty($remarks) ? $remarks : null;
+			$field = "vendor_id, product_id, product_variant_id, stock, status, remarks, created_at, updated_at";
+			$value = ":vendor_id, :product_id, :product_variant_id, :stock, :status, :remarks, :created_at, :updated_at";
 				
 				//parent_id
 			$addExecute=array(
@@ -25,6 +26,7 @@
 				':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
 				':stock'				=> $stock,
 				':status'				=> 0,
+				':remarks'				=> $remarks,
 				':created_at' 			=> date('Y-m-d h:i:s'),
 				':updated_at'		    => date('Y-m-d H:i:s')
 			);
@@ -145,6 +147,11 @@
 							<div class="col-md-12">
 								<label for="input5" class="form-label">Stock Quantity</label>
 								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+								<span class="text-danger" id="err_stock"></span>
+							</div>
+							<div class="col-md-12">
+								<label for="input5" class="form-label">Remarks</label>
+								<textarea name="remarks" id="remarks" class="form-control"></textarea>
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<input type="hidden" id="stock_limit" name="stock_limit" value="<?php echo isset($_POST['stock_limit']) ? $_POST['stock_limit'] : '' ?>">

@@ -32,6 +32,7 @@
 						<th>Barcode</th>
 						<th>Name</th>
 						<th>Available stock.</th>
+						<th>Available online stock.</th>
 						<th>Measurement</th>
                       </tr>
                     </thead>
@@ -56,6 +57,7 @@
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td><?PHP echo $arr->total_stock ?></td>
+						<td>--</td>
 						<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
 					</tr>
 						<?PHP
@@ -66,7 +68,7 @@
 						{
 					?>
                       <tr>
-                        <td colspan="5">No record found.
+                        <td colspan="6">No record found.
 						</td>
 					  </tr>
 					<?PHP
