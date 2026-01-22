@@ -97,7 +97,7 @@
 										<td></td>
 									</tr>
 								  <tr>
-									<th class="text-center">S. No.</th>
+									<th class="text-center">Sl. No.</th>
 									<th>Vendor</th>
 									<th>Product Name</th>
 									<th class="text-center">Stock</th>

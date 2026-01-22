@@ -571,10 +571,12 @@ function user_details(val)
 			if (result.length > 0) {
 				$.each(result, function (i, user) {
 					html += '<a href="javascript:;" class="list-group-item list-group-item-action" ' + 'onclick="selectUser(\'' + user.mobile + '\', \'' + user.name + '\', ' + user.id + ')">' +user.mobile + ' (' + user.name + ')' +'</a>';
+					$('#user_hidden_id').val(user.id);
 				});
 				$('#err_supplier_id').text('');
 				$('#user_suggestions').html(html).show();
 			} else {
+				$('#user_hidden_id').val('');
 				$('#user_suggestions').hide();
 			}
 		}
