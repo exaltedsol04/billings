@@ -54,21 +54,25 @@
 							{	
 							
 							 // available online stock 
-							 $wherePos = "WHERE product_id=:product_id AND product_variant_id=:product_variant_id AND  stock_type=:stock_type";
+							 $wherePos = "WHERE product_id=:product_id AND product_variant_id=:product_variant_id AND  stock_type=:stock_type AND seller_id=:seller_id AND status=:status";
 							 
 							$paramsPos = [
 								':product_id' => $arr->product_id,
 								':product_variant_id' => $arr->pvid,
-								':stock_type' => 1
+								':stock_type' => 1,
+								':seller_id' => $_SESSION['USER_ID'],
+								':status' => 1
 							];
 							$pos_stock = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
 							
-							$whereOnline = "WHERE product_id=:product_id AND product_variant_id=:product_variant_id AND  stock_type=:stock_type";
+							$whereOnline = "WHERE product_id=:product_id AND product_variant_id=:product_variant_id AND  stock_type=:stock_type AND seller_id=:seller_id AND status=:status";
 							 
 							$paramsOnline = [
 								':product_id' => $arr->product_id,
 								':product_variant_id' => $arr->pvid,
-								':stock_type' => 2
+								':stock_type' => 2,
+								':seller_id' => $_SESSION['USER_ID'],
+								':status' => 1
 							];
 							$online_stock = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $whereOnline, $paramsOnline, 'stock');
 					?>

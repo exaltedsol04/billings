@@ -122,7 +122,12 @@
 									?>
 								</select>
 							</div>
-							<div class="col-md-12">
+							<div class="col-md-6">
+								<label for="input5" class="form-label">Stock Quantity</label>
+								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+								<span class="text-danger" id="err_stock"></span>
+							</div>
+							<div class="col-md-6">
 								<label for="input5" class="form-label">Unit</label>
 								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1">
 									<option value="">Select...</option>
@@ -150,11 +155,7 @@
 								</select>
 								<span class="text-danger" id="err_stock"></span>
 							</div>
-							<div class="col-md-12">
-								<label for="input5" class="form-label">Stock Quantity</label>
-								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-								<span class="text-danger" id="err_stock"></span>
-							</div>
+							
 							<div class="col-md-12">
 								<label for="input5" class="form-label">Remarks</label>
 								<textarea name="remarks" id="remarks" class="form-control"></textarea>

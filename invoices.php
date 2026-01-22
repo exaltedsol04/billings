@@ -1,5 +1,6 @@
 <?PHP error_reporting(0);
 	include_once 'init.php';
+	
 	$pageAccessRoleIds = [1,3];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
@@ -58,11 +59,11 @@
 									<?php
 									if($_SESSION['USER_ID'] == 1)
 									{
-										$where = "WHERE 1";
+										$where = "WHERE 1 order by created_at";
 										$params = [];
 									}
 									else{
-										$where = "WHERE pos_user_id=:pos_user_id";
+										$where = "WHERE pos_user_id=:pos_user_id order by created_at";
 										$params = [
 											':pos_user_id'	=>	$_SESSION['USER_ID']
 										];

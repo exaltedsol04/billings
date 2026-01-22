@@ -6,6 +6,7 @@
 	#######################################################################################
 
 	session_start();
+	date_default_timezone_set('Asia/Kolkata');
 	include_once("includes/connection.php");			/* This is for includeing the all predefine name of database,tables,user,password and database connection*/
 	include_once("includes/queryFunction.php");			/* This is for includeing the all query function */
 	include_once("includes/databaseTable.php");			/* This is for includeing the all query function */
