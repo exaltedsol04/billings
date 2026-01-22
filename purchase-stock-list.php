@@ -51,7 +51,9 @@
 									<th style="width:100px">Sl. No.</th>
 									<th>Vendors</th>
 									<th>Product Name</th>
-									<th>Stock</th>
+									<th>Credit Stock</th>
+									<th>Debit Stock</th>
+									<th>Available Stock</th>
 									<th>Measurement</th>
 									<th>Purchase Date</th>
 									<th>Action</th>
@@ -80,11 +82,33 @@
 										{
 											$barcode = $selectValue->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
+											
+											// credit stock 
+											$whereCredit = "WHERE product_id= :product_id AND product_variant_id= :product_variant_id AND  product_stock_transaction_id= :product_stock_transaction_id";
+											
+											$paramsCredit = [
+												':product_id' => $selectValue->product_id,
+												':product_variant_id' => $selectValue->product_variant_id,
+												':product_stock_transaction_id' => 0
+											];
+											$stock_credit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereCredit, $paramsCredit, 'stock');
+											
+											// credit debit 
+											$whereDebit = "WHERE product_id=:product_id AND product_variant_id =:product_variant_id AND product_stock_transaction_id!=:product_stock_transaction_id";
+											
+											$paramsDebit = [
+												':product_id'=> $selectValue->product_id,
+												':product_variant_id'=> $selectValue->product_variant_id,
+												':product_stock_transaction_id'=>0
+											];
+											$stock_debit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereDebit, $paramsDebit, 'stock');
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
 									    <td style="width:100px"><?php echo $k+1 ;?></td>
 										<td style="width:100px"><?PHP echo $selectValue->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
+										<td><?php echo $stock_credit->total; ?></td>
+										<td><?php echo !empty($stock_debit->total) ? abs($stock_debit->total) : '0'; ?></td>
 										<td><?PHP echo $selectValue->total_stock; ?></td>
 										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
@@ -98,7 +122,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="7">
+										<td colspan="9">
 										 No record found.
 										</td>
 									  </tr>
