@@ -422,7 +422,7 @@
 						':id'	=>	$pv_id,
 						':product_id'	=>	$pid
 					];
-					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
+					$product_variant_dtls = $general_cls_call->select_join_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
 					
 					
 					$where = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
@@ -468,7 +468,6 @@
 				':product_id' => $_POST['pid']
 			];
 			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
-			//echo "<pre>"; print_r($sqlQuery);die;
 			$varianrArr = [];
 			if($sqlQuery[0] != '')
 			{
