@@ -10,7 +10,7 @@
 	$order_id = '';
 	if(isset($_GET['order_id']))
 	{
-		$fields = "o.final_total as order_total, o.address, o.mobile, o.created_at, oi.status, oi.active_status, oi.product_name, oi.variant_name, oi.quantity, oi.discounted_price, oi.sub_total, oi.cancellation_reason, oi.canceled_at, oi.seller_id, s.name as seller_name, s.city_id, s.street";
+		$fields = "o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, oi.status, oi.active_status, oi.product_name, oi.variant_name, oi.quantity, oi.discounted_price, oi.sub_total, oi.cancellation_reason, oi.canceled_at, oi.seller_id, s.name as seller_name, s.city_id, s.street";
 		$tables = ORDERS_ITEMS . " oi
 		INNER JOIN " . ORDERS . " o ON o.orders_id = oi.orders_id
 		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id";
@@ -147,8 +147,8 @@
 								  <td class="text-center"><?php echo $selectValue->variant_name; ?></td>
 								  <td class="text-center"><?php echo $selectValue->quantity; ?></td>
 								  <td class="text-center">₹<?php echo $selectValue->discounted_price ?></td>
-								  <td class="text-center">₹<?php echo $selectValue->sub_total ?></td>
-								  <td class="text-center">₹<?php echo $selectValue->order_total ?></td>
+								  <td class="text-center">₹<?php echo $selectValue->quantity * $selectValue->discounted_price ?></td>
+								  <td class="text-center">₹<?php echo $selectValue->quantity * $selectValue->discounted_price ?></td>
 								  <!--<td class="text-center"><?php echo $statusName->status ?></td>
 								  <td class="text-center"><?php echo $activeStatusName->status ?></td>
 								  <td class="text-center"><?php echo !empty($selectValue->cancellation_reason) ? $selectValue->cancellation_reason : '--'; ?></td>
@@ -156,7 +156,7 @@
 								  
 							   </tr>
 							<?php 
-							      $subtotal = $subtotal + $selectValue->sub_total;
+							      $subtotal = $subtotal + $selectValue->quantity * $selectValue->discounted_price;
 								}
 							}
 							?>
@@ -166,17 +166,18 @@
 
 					    <div class="row bg-light align-items-center m-0">
 							<div class="col col-auto p-4">
-							   <p class="mb-0">SUBTOTAL</p>
-							   <h4 class="mb-0">₹<?php echo number_format($subtotal) ?></h4>
+							   <p class="mb-0">Paking charge</p>
+							   <h4 class="mb-0">₹<?php echo $sqlQuery[0]->packing_charge ?></h4>
 							</div>
 							<div class="col col-auto p-4">
-							   <i class="bi bi-plus-lg text-muted"></i>
+							   <p class="mb-0">SUBTOTAL</p>
+							   <h4 class="mb-0">₹<?php echo number_format($subtotal) ?></h4>
 							</div>
 							<div class="col col-auto me-auto p-4">
 							</div>
 							<div class="col bg-primary col-auto p-4">
 							 <p class="mb-0 text-white">TOTAL</p>
-							 <h4 class="mb-0 text-white">₹<?php echo number_format($selectValue->order_total) ?></h4>
+							 <h4 class="mb-0 text-white">₹<?php echo number_format($sqlQuery[0]->packing_charge + $subtotal) ?></h4>
 							</div>
 					    </div><!--end row-->
 					</div>
