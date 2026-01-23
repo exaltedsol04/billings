@@ -49,6 +49,10 @@
 		$sqlSellerQuery = $general_cls_call->select_join_query($fieldSeller, $tableSeller, $whereSeller, $paramsSeller, 1);
 		//echo "<pre>";print_r($sqlSellerQuery);die;
 		
+		// get the packing charge
+		
+		$packing = $general_cls_call->select_query("packing_charge", ORDERS, "WHERE orders_id=:orders_id", [':orders_id' => $_GET['order_id']], 1);
+		
 	}
 ?>
 	<!-- ######### HEADER START ############### -->
@@ -183,7 +187,7 @@
 					    <div class="row bg-light align-items-center m-0">
 							<div class="col col-auto p-4">
 							   <p class="mb-0">Paking charge</p>
-							   <h4 class="mb-0">₹<?php echo !empty($sqlQuery[0]->packing_charge) ? $sqlQuery[0]->packing_charge : 0 ?></h4>
+							   <h4 class="mb-0">₹<?php echo !empty($packing->packing_charge) ? $packing->packing_charge : 0 ?></h4>
 							</div>
 							<div class="col col-auto p-4">
 							   <p class="mb-0">SUBTOTAL</p>
@@ -193,7 +197,7 @@
 							</div>
 							<div class="col bg-primary col-auto p-4">
 							 <p class="mb-0 text-white">TOTAL</p>
-							 <h4 class="mb-0 text-white">₹<?php echo number_format($sqlQuery[0]->packing_charge + $subtotal) ?></h4>
+							 <h4 class="mb-0 text-white">₹<?php echo number_format($packing->packing_charge + $subtotal) ?></h4>
 							</div>
 					    </div><!--end row-->
 					</div>

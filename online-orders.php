@@ -72,7 +72,7 @@
 										];
 									}
 									
-									$fields = "distinct(oi.orders_id), o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge";
+									$fields = "distinct(oi.orders_id), o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge,o.created_at";
 									$tables = ORDERS . " o
 									INNER JOIN " . ORDERS_ITEMS . " oi ON oi.orders_id = o.orders_id";
 									
@@ -83,10 +83,10 @@
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
-										$final_total = 0;
+										
 										foreach($sqlQuery as $k=>$selectValue)
 										{
-											
+											$final_total = 0;
 											$seller = $general_cls_call->select_query("name", USERS, "WHERE id=:id", [':id' => $selectValue->user_id], 1);
 											
 											
@@ -106,8 +106,7 @@
 											
 											$statusName = $general_cls_call->select_query("status", ORDERS_STATUS_LISTS, "WHERE id=:id", [':id' => $statusValue], 1);
 											
-											 
-											
+											// calculate final amount
 											
 											if($_SESSION['USER_ID'] == 1)
 											{

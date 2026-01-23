@@ -74,7 +74,7 @@
 										];
 									}
 									
-									$fields = "distinct(oi.orders_id), o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status";
+									$fields = "distinct(oi.orders_id), o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.created_at";
 									$tables = ORDERS . " o
 									INNER JOIN " . ORDERS_ITEMS . " oi ON oi.orders_id = o.orders_id";
 									
@@ -91,6 +91,7 @@
 											$i = 1;
 											foreach($sqlQuery as $k=>$selectValue)
 											{
+												$final_total = 0;
 												$orderStatus = json_decode($selectValue->status);
 												$statusValue = $orderStatus[0][0];
 												//echo $statusValue;
@@ -119,11 +120,32 @@
 												];
 												$sqldeliv = $general_cls_call->select_join_query($delivfields, $delivtables, $delivwhere, $delivparams, 1);
 												
+												// calculate final amount
+											
+													if($_SESSION['USER_ID'] == 1)
+													{
+														$where = "WHERE orders_id=:orders_id";
+														$params = [
+															':orders_id' => $selectValue->orders_id
+														];
+													}
+													else{
+														//echo $_SESSION['USER_ID']; die;
+														$where = "WHERE orders_id=:orders_id AND seller_id=:seller_id";
+														$params = [
+															':orders_id' => $selectValue->orders_id,
+															':seller_id' => $_SESSION['USER_ID']
+														];
+													}
+													
+													$sqlFinalTotQuery = $general_cls_call->select_query_sum(ORDERS_ITEMS, $where, $params, 'sub_total');
+													$final_total = $sqlFinalTotQuery->total + $selectValue->packing_charge;
+												
 										?>
 										  <tr id="dataRow<?php echo($selectValue->id);?>">
 											<td><?PHP echo $selectValue->orders_id; ?></td>
 											<td><?PHP echo !empty($seller->name) ? $seller->name : 'N/A'; ?></td>
-											<td class="text-center">₹<?PHP echo $selectValue->final_total; ?></td>
+											<td class="text-center">₹<?PHP echo $final_total; ?></td>
 											<td class="text-center"><?PHP echo $general_cls_call->time_ago($selectValue->created_at); ?></td>
 											<td class="text-center">--</td>
 											<td><?PHP echo  $deliveryType; ?></td>
