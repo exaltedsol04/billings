@@ -278,6 +278,7 @@ $(document).ready(function(){
 	<?php if (!empty($last_insert_id)) { ?>
         var order_id = <?= (int)$last_insert_id ?>;
 		clearCart();
+		alert(order_id);
         window.open(
             "<?= SITE_URL ?>print_cart_invoice?order_id=" + order_id,
             "_blank"

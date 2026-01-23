@@ -15,9 +15,11 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
 	$fields = "poi.*, po.*";
 	$tables = POS_ORDERS_ITEMS . " poi
 	INNER JOIN " . POS_ORDERS . " po ON po.id = poi.pos_order_id";
-	$where = "WHERE po.id= :order_id";
+	//$where = "WHERE po.id= :order_id";
+	$where = "WHERE po.id=:id";
 	$params = [
-		':order_id' => $order_id
+		':id' => $order_id
+		//':order_id' => $order_id
 	];
 	$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 	
@@ -198,7 +200,7 @@ $barcode = 	$product_variant_data->barcode;
 				{
 					foreach($sqlQuery as $arr)
 					{
-						$product = $general_cls_call->select_query("*", PRODUCTS, "WHERE id=:id", [':id' => $arr->id], 1);
+						$product = $general_cls_call->select_query("*", PRODUCTS, "WHERE id=:id", [':id' => $arr->product_id], 1);
 			?>
             <tr>
                 <td><?= $barcode ?></td>

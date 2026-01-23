@@ -1,6 +1,6 @@
 <?PHP error_reporting(0);
 	include_once 'init.php';
-	$pageAccessRoleIds = [1,3];
+	$pageAccessRoleIds = [1];
 	
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
@@ -10,13 +10,10 @@
 	$order_id = '';
 	if(isset($_GET['order_id']))
 	{
-		
-		/*$sqlQuery = $general_cls_call->select_query("*", ORDERS_ITEMS, "WHERE orders_id=:orders_id", [':orders_id' => $_GET['order_id']], 2);*/
-		
-		
-		$fields = "o.final_total as order_total, oi.status, oi.active_status, oi.product_name, oi.variant_name, oi.quantity, oi.discounted_price, oi.sub_total, oi.cancellation_reason, oi.canceled_at, oi.seller_id";
-		$tables = ORDERS . " o
-		INNER JOIN " . ORDERS_ITEMS . " oi ON oi.orders_id = o.orders_id";
+		$fields = "o.final_total as order_total, o.address, o.mobile, o.created_at, oi.status, oi.active_status, oi.product_name, oi.variant_name, oi.quantity, oi.discounted_price, oi.sub_total, oi.cancellation_reason, oi.canceled_at, oi.seller_id, s.name as seller_name, s.city_id, s.street";
+		$tables = ORDERS_ITEMS . " oi
+		INNER JOIN " . ORDERS . " o ON o.orders_id = oi.orders_id
+		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id";
 		$where = "WHERE oi.orders_id=:orders_id";
 		$params = [
 			':orders_id' => $_GET['order_id']
@@ -24,6 +21,18 @@
 		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 				
 		//echo "<pre>";print_r($sqlQuery);die;
+		
+		// get seller details
+		$fieldSeller = "c.name as city_name, c.zone, c.state, s.name, s.store_name, s.mobile, s.street as seller_street";
+		$tableSeller = SELLERS . " s
+		INNER JOIN " . CITIES . " c ON c.id = s.city_id";
+		$whereSeller = "WHERE s.id=:id";
+		$paramsSeller = [
+			':id' => $sqlQuery[0]->seller_id
+		];
+		$sqlSellerQuery = $general_cls_call->select_join_query($fieldSeller, $tableSeller, $whereSeller, $paramsSeller, 1);
+		//echo "<pre>";print_r($sqlSellerQuery);die;
+		
 	}
 ?>
 	<!-- ######### HEADER START ############### -->
@@ -66,11 +75,10 @@
 						   <div class="">
 							 <small>from</small>
 							 <address class="m-t-5 m-b-5">
-								<strong class="text-inverse">Twitter, Inc.</strong><br>
-								Street Address<br>
-								City, Zip Code<br>
-								Phone: (123) 456-7890<br>
-								Fax: (123) 456-7890
+								<strong class="text-inverse"><?php echo $sqlQuery[0]->seller_name ?></strong><br>
+								<?php echo $sqlSellerQuery->seller_street ?><br>
+								<?php echo $sqlSellerQuery->city_name .' ('. $sqlSellerQuery->state.')' ?><br>
+								Phone:<?php echo $sqlSellerQuery->seller_mobile ?>
 							 </address>
 							</div>
 						  </div>
@@ -78,21 +86,17 @@
 						   <div class="">
 							 <small>to</small>
 							 <address class="m-t-5 m-b-5">
-								<strong class="text-inverse">Company Name</strong><br>
-								Street Address<br>
-								City, Zip Code<br>
-								Phone: (123) 456-7890<br>
-								Fax: (123) 456-7890
+								<?php echo $sqlQuery[0]->address ?><br>
+								Phone: <?php echo $sqlQuery[0]->mobile ?><br>
 							 </address>
 							</div>
 						 </div>
 						 <div class="col">
 						   <div class="">
-							 <small>Invoice / July period</small>
-							 <div class=""><b>August 3,2012</b></div>
+							 <small>Invoice</small>
+							 <div class=""><b><?PHP echo $general_cls_call->change_date_format($sqlQuery[0]->created_at, 'j M Y g:i A'); ?></b></div>
 							 <div class="invoice-detail">
-								#0000123DSS<br>
-								Services Product
+								#<?php echo $_GET['order_id'] ;?><br>
 							 </div>
 						   </div>
 						 </div>
@@ -104,15 +108,16 @@
 							<thead>
 							   <tr>
 								  <th>Sl.No</th>
-								  <th>Seller</th>
 								  <th>Products</th>
 								  <th class="text-center" style="width: 0%;">Variant name</th>
 								  <th class="text-center" style="width: 0%;">Quantity</th>
 								  <th class="text-center" style="width: 0%;">Discount price</th>
-								  <th class="text-center" style="width: 0%;">Status</th>
+								  <th class="text-center" style="width: 0%;">Sub total</th>
+								  <th class="text-center" style="width: 0%;">Final total</th>
+								  <!--<th class="text-center" style="width: 0%;">Status</th>
 								  <th class="text-center" style="width: 0%;">Active status</th>
 								  <th class="text-center" style="width: 0%;">Cancel reason</th>
-								  <th class="text-center" style="width: 0%;">Cancel date</th>
+								  <th class="text-center" style="width: 0%;">Cancel date</th>-->
 							   </tr>
 							</thead>
 							<tbody>
@@ -138,15 +143,16 @@
 							?>
 							   <tr>
 								  <td><?php echo $k+1; ?></td>
-								  <td><?php echo $seller->name; ?></td>
 								  <td><?php echo $general_cls_call->cart_product_name($selectValue->product_name);  ?></td>
 								  <td class="text-center"><?php echo $selectValue->variant_name; ?></td>
 								  <td class="text-center"><?php echo $selectValue->quantity; ?></td>
 								  <td class="text-center">₹<?php echo $selectValue->discounted_price ?></td>
-								  <td class="text-center"><?php echo $statusName->status ?></td>
+								  <td class="text-center">₹<?php echo $selectValue->sub_total ?></td>
+								  <td class="text-center">₹<?php echo $selectValue->order_total ?></td>
+								  <!--<td class="text-center"><?php echo $statusName->status ?></td>
 								  <td class="text-center"><?php echo $activeStatusName->status ?></td>
 								  <td class="text-center"><?php echo !empty($selectValue->cancellation_reason) ? $selectValue->cancellation_reason : '--'; ?></td>
-								  <td class="text-center"><?php echo !empty($selectValue->canceled_at) ? $general_cls_call->change_date_format($selectValue->canceled_at, 'j M Y g:i A') : '--' ?></td>
+								  <td class="text-center"><?php echo !empty($selectValue->canceled_at) ? $general_cls_call->change_date_format($selectValue->canceled_at, 'j M Y g:i A') : '--' ?></td>-->
 								  
 							   </tr>
 							<?php 

@@ -76,7 +76,7 @@
 				</a>
 			</li>
 			
-			<li <?php if($page=='online-orders.php' || $page=='online-order-details.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='online-orders.php' || $page=='online-order-view.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
 				</div>
