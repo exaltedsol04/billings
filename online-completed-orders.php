@@ -1,7 +1,7 @@
 <?PHP error_reporting(0);
 	include_once 'init.php';
 	
-	$pageAccessRoleIds = [1];
+	$pageAccessRoleIds = [1,3];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
 
@@ -59,10 +59,28 @@
 								</thead>
 								<tbody>
 									<?php
-									$where = "WHERE 1 ORDER BY created_at DESC";
+									
+									if($_SESSION['USER_ID'] == 1)
+									{
+										$where = "WHERE 1 ORDER BY o.created_at DESC";
+										$params = [];	
+									}
+									else{
+										$where = "WHERE oi.seller_id=:seller_id  ORDER BY o.created_at DESC";
+										$params = [
+											':seller_id'=> $_SESSION['USER_ID']
+										];
+									}
+									
+									$fields = "distinct(oi.orders_id), o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status";
+									$tables = ORDERS . " o
+									INNER JOIN " . ORDERS_ITEMS . " oi ON oi.orders_id = o.orders_id";
+									
+									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+									/*$where = "WHERE 1 ORDER BY created_at DESC";
 									$params = [];
 									
-									$sqlQuery = $general_cls_call->select_query("*", ORDERS, $where, $params, 2);
+									$sqlQuery = $general_cls_call->select_query("*", ORDERS, $where, $params, 2);*/
 									//echo "<pre>";print_r($sqlQuery);die;
 						
 										if($sqlQuery[0] != '')
@@ -92,7 +110,7 @@
 										  <tr id="dataRow<?php echo($selectValue->id);?>">
 											<td><?PHP echo $selectValue->orders_id; ?></td>
 											<td><?PHP echo !empty($seller->name) ?  $seller->name : 'N/A'; ?></td>
-											<td class="text-center"><?PHP echo $selectValue->final_total; ?></td>
+											<td class="text-center">₹<?PHP echo $selectValue->final_total; ?></td>
 											<td class="text-center"><?PHP echo $general_cls_call->time_ago($selectValue->created_at); ?></td>
 											<td class="text-center">--</td>
 											<td><?PHP echo  $deliveryType; ?></td>

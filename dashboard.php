@@ -32,6 +32,23 @@
 	$parchase_stock_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE transaction_type=:transaction_type AND status=:status AND seller_id=:seller_id", array('transaction_type'=> 1, 'status'=>0, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
 	
 	$user_parchase_stock = $parchase_stock_data->total;
+	
+	// total order
+	
+	if($_SESSION['USER_ID'] == 1)
+	{
+		$wheretotOrder = "WHERE 1";
+		$paramstotStatus = [];
+		
+	}
+	else{
+		$wheretotOrder = "WHERE seller_id=:seller_id  GROUP BY orders_id";		
+		$paramstotStatus = [
+			':seller_id'=> 14
+		];
+	}
+	$total_orders = $general_cls_call->select_query_count(ORDERS_ITEMS, $wheretotOrder, $paramstotStatus);
+	//echo $total_orders;die;
 ?>
 
  <!-- ######### HEADER START ############### -->

@@ -146,6 +146,7 @@
 		{
 			$query_string = "SELECT $fields FROM $tables $where";
 			$query = $this->db->prepare($query_string);
+			//echo $query;print_r($data_array);
 			foreach ($data_array as $key => $value) {
 				$data_array[$key] = stripslashes($value);
 			}

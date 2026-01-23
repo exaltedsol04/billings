@@ -1,6 +1,6 @@
 <?PHP error_reporting(0);
 	include_once 'init.php';
-	$pageAccessRoleIds = [1];
+	$pageAccessRoleIds = [1,3];
 	
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
@@ -10,20 +10,36 @@
 	$order_id = '';
 	if(isset($_GET['order_id']))
 	{
-		$fields = "o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, oi.status, oi.active_status, oi.product_name, oi.variant_name, oi.quantity, oi.discounted_price, oi.sub_total, oi.cancellation_reason, oi.canceled_at, oi.seller_id, s.name as seller_name, s.city_id, s.street";
+		/*$fields = "o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, oi.status, oi.active_status, oi.product_name, oi.variant_name, oi.quantity, oi.discounted_price, oi.sub_total, oi.cancellation_reason, oi.canceled_at, oi.seller_id, s.name as seller_name, s.city_id, s.street";
 		$tables = ORDERS_ITEMS . " oi
 		INNER JOIN " . ORDERS . " o ON o.orders_id = oi.orders_id
-		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id";
-		$where = "WHERE oi.orders_id=:orders_id";
-		$params = [
-			':orders_id' => $_GET['order_id']
-		];
-		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id";*/
+		
+		//--------------------------
+		
+		if($_SESSION['USER_ID'] == 1)
+		{
+			$where = "WHERE orders_id=:orders_id";
+			$params = [
+				':orders_id' => $_GET['order_id']
+			];
+		}
+		else{
+			//echo $_SESSION['USER_ID']; die;
+			$where = "WHERE orders_id=:orders_id AND seller_id=:seller_id";
+			$params = [
+				':orders_id' => $_GET['order_id'],
+				':seller_id' => $_SESSION['USER_ID']
+			];
+		}
+		//$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+		
+		$sqlQuery = $general_cls_call->select_query("*", ORDERS_ITEMS, $where, $params, 2);
 				
 		//echo "<pre>";print_r($sqlQuery);die;
 		
 		// get seller details
-		$fieldSeller = "c.name as city_name, c.zone, c.state, s.name, s.store_name, s.mobile, s.street as seller_street";
+		$fieldSeller = "c.name as city_name, c.zone, c.state, s.name as seller_name, s.store_name, s.mobile, s.street as seller_street";
 		$tableSeller = SELLERS . " s
 		INNER JOIN " . CITIES . " c ON c.id = s.city_id";
 		$whereSeller = "WHERE s.id=:id";
@@ -75,7 +91,7 @@
 						   <div class="">
 							 <small>from</small>
 							 <address class="m-t-5 m-b-5">
-								<strong class="text-inverse"><?php echo $sqlQuery[0]->seller_name ?></strong><br>
+								<strong class="text-inverse"><?php echo $sqlSellerQuery->seller_name ?></strong><br>
 								<?php echo $sqlSellerQuery->seller_street ?><br>
 								<?php echo $sqlSellerQuery->city_name .' ('. $sqlSellerQuery->state.')' ?><br>
 								Phone:<?php echo $sqlSellerQuery->seller_mobile ?>
@@ -167,7 +183,7 @@
 					    <div class="row bg-light align-items-center m-0">
 							<div class="col col-auto p-4">
 							   <p class="mb-0">Paking charge</p>
-							   <h4 class="mb-0">₹<?php echo $sqlQuery[0]->packing_charge ?></h4>
+							   <h4 class="mb-0">₹<?php echo !empty($sqlQuery[0]->packing_charge) ? $sqlQuery[0]->packing_charge : 0 ?></h4>
 							</div>
 							<div class="col col-auto p-4">
 							   <p class="mb-0">SUBTOTAL</p>

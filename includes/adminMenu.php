@@ -76,7 +76,7 @@
 				</a>
 			</li>
 			
-			<li <?php if($page=='online-orders.php' || $page=='online-order-view.php' || $page=='online-completed-orders.php' || $page=='online-processing-orders.php') { echo ('class="mm-active"');} ?>>
+			<!--<li <?php if($page=='online-orders.php' || $page=='online-order-view.php' || $page=='online-completed-orders.php' || $page=='online-processing-orders.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
 				</div>
@@ -90,7 +90,7 @@
 				<li><a href="<?php echo SITE_URL.'online-processing-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Processing orders</a>
 				</li>
 			  </ul>
-			</li>
+			</li>-->
 
 			<?php } elseif(isset($_SESSION['ROLE_ID']) && $_SESSION['ROLE_ID']==3) {?>
 			<li <?php if($page=='pos.php') { echo ('class="mm-active"');} ?>>
@@ -126,6 +126,21 @@
 			  </ul>
 			</li>
 			<?php } ?>
+			<li <?php if($page=='online-orders.php' || $page=='online-order-view.php' || $page=='online-completed-orders.php' || $page=='online-processing-orders.php') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
+				</div>
+				<div class="menu-title">Online order</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'online-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>All Orders</a>
+				</li>
+				<li><a href="<?php echo SITE_URL.'online-completed-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Completed order</a>
+				</li>
+				<li><a href="<?php echo SITE_URL.'online-processing-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Processing orders</a>
+				</li>
+			  </ul>
+			</li>
 			<li>
 				<a href="<?php echo SITE_URL.'logout'; ?>">
 					<div class="parent-icon"><i class="material-icons-outlined">power_settings_new</i></div>
