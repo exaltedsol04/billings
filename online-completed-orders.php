@@ -91,7 +91,7 @@
 										?>
 										  <tr id="dataRow<?php echo($selectValue->id);?>">
 											<td><?PHP echo $selectValue->orders_id; ?></td>
-											<td><?PHP echo $seller->name; ?></td>
+											<td><?PHP echo !empty($seller->name) ?  $seller->name : 'N/A'; ?></td>
 											<td class="text-center"><?PHP echo $selectValue->final_total; ?></td>
 											<td class="text-center"><?PHP echo $general_cls_call->time_ago($selectValue->created_at); ?></td>
 											<td class="text-center">--</td>

@@ -72,6 +72,7 @@
 										{
 											$seller = $general_cls_call->select_query("name", USERS, "WHERE id=:id", [':id' => $selectValue->user_id], 1);
 											
+											
 											$deliveryTime = trim($selectValue->delivery_time);
 
 											if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
@@ -90,7 +91,7 @@
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>">
 										<td><?PHP echo $selectValue->orders_id; ?></td>
-										<td><?PHP echo $seller->name; ?></td>
+										<td><?PHP echo !empty($seller->name) ? $seller->name : 'N/A'; ?></td>
 										<td class="text-center"><?PHP echo $selectValue->final_total; ?></td>
 										<td class="text-center"><?PHP echo $general_cls_call->time_ago($selectValue->created_at); ?></td>
 										<td class="text-center">--</td>

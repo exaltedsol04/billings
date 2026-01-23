@@ -18,4 +18,5 @@
 	define("ORDERS_ITEMS",  TABLE_PREFIX."order_items");
 	define("ORDERS_STATUS_LISTS",  TABLE_PREFIX."order_status_lists");
 	define("CITIES",  TABLE_PREFIX."cities");
+	define("DELIVERY_BOYS",  TABLE_PREFIX."delivery_boys");
 ?>

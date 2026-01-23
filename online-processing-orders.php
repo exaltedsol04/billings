@@ -54,6 +54,8 @@
 									<th class="text-center">Delivery</th>
 									<th>Delivery Type/Slot</th>
 									<th>Order Status</th>
+									<th>Assigned packing man</th>
+									<th>Delivery man</th>
 									<th>Action</th>
 								  </tr>
 								</thead>
@@ -87,16 +89,28 @@
 													}
 													
 													$statusName = $general_cls_call->select_query("status", ORDERS_STATUS_LISTS, "WHERE id=:id", [':id' => $statusValue], 1);
+													
+													
+												$delivfields = "d.name as delivery_boy";
+												$delivtables = ORDERS_ITEMS . " oi
+												INNER JOIN " . DELIVERY_BOYS . " d ON d.id = oi.delivery_boy_id";
+												$delivwhere = "WHERE oi.orders_id=:orders_id";
+												$delivparams = [
+												    ':orders_id' => $selectValue->orders_id
+												];
+												$sqldeliv = $general_cls_call->select_join_query($delivfields, $delivtables, $delivwhere, $delivparams, 1);
 												
 										?>
 										  <tr id="dataRow<?php echo($selectValue->id);?>">
 											<td><?PHP echo $selectValue->orders_id; ?></td>
-											<td><?PHP echo $seller->name; ?></td>
+											<td><?PHP echo !empty($seller->name) ? $seller->name : 'N/A'; ?></td>
 											<td class="text-center"><?PHP echo $selectValue->final_total; ?></td>
 											<td class="text-center"><?PHP echo $general_cls_call->time_ago($selectValue->created_at); ?></td>
 											<td class="text-center">--</td>
 											<td><?PHP echo  $deliveryType; ?></td>
 											<td><?php echo $statusName->status; ?></td>
+											<td></td>
+											<td><?php echo !empty($sqldeliv->delivery_boy) ? $sqldeliv->delivery_boy : 'N/A' ?></td>
 											<td><a href="<?php echo SITE_URL.'online-order-view'; ?>?order_id=<?php echo($selectValue->orders_id);?>"><i class="lni lni-keyword-research"></i></a></td>
 										  </tr>
 										<?PHP
