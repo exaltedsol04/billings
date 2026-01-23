@@ -27,7 +27,7 @@
 							<ol class="breadcrumb mb-0 p-0">
 								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Sellers</li>
+								<li class="breadcrumb-item active" aria-current="page">Online orders list</li>
 							</ol>
 						</nav>
 					</div>
@@ -41,28 +41,28 @@
 								<thead>
 									<tr>
 										<td></td>
-										<td><input type="text" class="form-control" id="search-one" placeholder="Search by seller"></td>
-										<td><input type="text" class="form-control" id="search-two" placeholder="Search by store name"></td>
+										<td><input type="text" class="form-control" id="search-one" placeholder="Search by custoner"></td>
+										<td><input type="text" class="form-control" id="search-two" placeholder="Search by mobile"></td>
 										<td></td>
 										<td></td>
 									</tr>
 								  <tr>
-									<th style="width:100px">Sl. No</th>
-									<th>Name</th>
-									<th>Store Name</th>
-									<th>Email</th>
-									<th class="text-center">Mobile</th>
-									<th class="text-center">Status</th>
-									<th>Availability Status</th>
+									<th style="width:100px">Order Id</th>
+									<th>Seller</th>
+									<th class="text-center">Total Amount</th>
+									<th class="text-center">Order Date</th>
+									<th class="text-center">Delivery</th>
+									<th>Delivery Type/Slot</th>
+									<th>Order Status</th>
+									<th>Action</th>
 								  </tr>
 								</thead>
 								<tbody>
 									<?php
-									$fields = "s.id, s.name, s.store_name, s.email, s.mobile, s.status, s.categories, c.id as category_id, c.name as category_name";
-									$tables = SELLERS . " s INNER JOIN " . CATEGORIES . " c ON c.id = s.categories";
-									$where = "WHERE 1 ORDER BY s.name";
+									$where = "WHERE 1 ORDER BY created_at DESC";
 									$params = [];
-									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+									
+									$sqlQuery = $general_cls_call->select_query("*", ORDERS, $where, $params, 2);
 									//echo "<pre>";print_r($sqlQuery);die;
 						
 									if($sqlQuery[0] != '')
@@ -70,15 +70,33 @@
 										$i = 1;
 										foreach($sqlQuery as $k=>$selectValue)
 										{
+											$seller = $general_cls_call->select_query("name", USERS, "WHERE id=:id", [':id' => $selectValue->user_id], 1);
+											
+											$deliveryTime = trim($selectValue->delivery_time);
+
+											if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
+											{
+												$deliveryType = $matches[1];
+											} else {
+												$deliveryType = $general_cls_call->time_ago($deliveryTime);
+											}
+											
+											$status = '';
+											
+											$orderStatus = json_decode($selectValue->status);
+											$statusValue = $orderStatus[0][0];
+											
+											$statusName = $general_cls_call->select_query("status", ORDERS_STATUS_LISTS, "WHERE id=:id", [':id' => $statusValue], 1);
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>">
-										<td style="width:100px"><?PHP echo $k+1; ?></td>
-										<td><?PHP echo $selectValue->name; ?></td>
-										<td><?PHP echo $selectValue->store_name; ?></td>
-										<td><?PHP echo $selectValue->email; ?></td>
-										<td class="text-center"><?PHP echo $selectValue->mobile; ?></td>
-										<td><?PHP echo $selectValue->status == 1 ? 'Active' : 'Inactive'; ?></td>
-										<td></td>
+										<td><?PHP echo $selectValue->orders_id; ?></td>
+										<td><?PHP echo $seller->name; ?></td>
+										<td class="text-center"><?PHP echo $selectValue->final_total; ?></td>
+										<td class="text-center"><?PHP echo $general_cls_call->time_ago($selectValue->created_at); ?></td>
+										<td class="text-center">--</td>
+										<td><?PHP echo  $deliveryType; ?></td>
+										<td><?php echo $statusName->status; ?></td>
+										<td><a href="<?php echo SITE_URL.'online-order-view'; ?>?order_id=<?php echo($selectValue->orders_id);?>"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
 										<?PHP
 												$i++;
@@ -131,7 +149,7 @@ $(document).ready(function(){
 	}
 	
 	$('#example2').DataTable({
-		order: [[3, 'desc']],
+		order: [[4, 'asc']],
 		columnDefs: [
         {
             targets: 0,        // 1st column

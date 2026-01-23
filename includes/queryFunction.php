@@ -389,5 +389,36 @@
 			}
 			return trim($name);
 		}
+		function time_ago($datetime)
+		{
+			$timestamp = strtotime($datetime);
+			$diff = time() - $timestamp;
+
+			if ($diff < 60) {
+				return $diff . ' sec ago';
+			}
+
+			$diff = round($diff / 60); // minutes
+			if ($diff < 60) {
+				return $diff . ' min ago';
+			}
+
+			$diff = round($diff / 60); // hours
+			if ($diff < 24) {
+				return $diff . ' hr ago';
+			}
+
+			$diff = round($diff / 24); // days
+			if ($diff < 30) {
+				return $diff . ' days ago';
+			}
+
+			$diff = round($diff / 30); // months
+			if ($diff < 12) {
+				return $diff . ' months ago';
+			}
+
+			return round($diff / 12) . ' years ago';
+		}
 	}
 ?>

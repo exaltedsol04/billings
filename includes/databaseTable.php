@@ -13,4 +13,8 @@
 	define("PRODUCT_STOCK_TRANSACTION",  TABLE_PREFIX."product_stock_transaction");
 	define("VENDORS",  TABLE_PREFIX."vendors");
 	define("ADMIN_STOCK_PURCHASE_LIST",  TABLE_PREFIX."admin_stock_purchase_list");
+	define("CATEGORIES",  TABLE_PREFIX."categories");
+	define("ORDERS",  TABLE_PREFIX."orders");
+	define("ORDERS_ITEMS",  TABLE_PREFIX."order_items");
+	define("ORDERS_STATUS_LISTS",  TABLE_PREFIX."order_status_lists");
 ?>
