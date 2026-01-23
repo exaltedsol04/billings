@@ -69,6 +69,12 @@
 				<li><a href="<?php echo SITE_URL.'purchase-rejected-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Rejected List</a></li>
 			  </ul>
 			</li>
+			<li <?php if($page=='seller-list.php') { echo ('class="mm-active"');} ?>>
+				<a href="<?php echo SITE_URL.'seller-list'; ?>">
+					<div class="parent-icon"><i class="material-icons-outlined">inventory</i></div>
+					<div class="menu-title">Seller</div>
+				</a>
+			</li>
 
 			<?php } elseif(isset($_SESSION['ROLE_ID']) && $_SESSION['ROLE_ID']==3) {?>
 			<li <?php if($page=='pos.php') { echo ('class="mm-active"');} ?>>
