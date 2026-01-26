@@ -73,9 +73,8 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Order View Details</a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Invoices View Details</li>
 							</ol>
 						</nav>
 					</div>

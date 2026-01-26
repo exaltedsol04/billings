@@ -141,12 +141,12 @@
 				die($e->getMessage());
 			}
 		}
-		
+
 		public function select_join_query($fields, $tables, $where = '', $data_array = [], $mode = 2)
 		{
 			$query_string = "SELECT $fields FROM $tables $where";
 			$query = $this->db->prepare($query_string);
-			//echo $query;print_r($data_array);
+			//echo $query;print_r($data_array);die;
 			foreach ($data_array as $key => $value) {
 				$data_array[$key] = stripslashes($value);
 			}
@@ -396,30 +396,93 @@
 			$diff = time() - $timestamp;
 
 			if ($diff < 60) {
-				return $diff . ' sec ago';
+				return $diff . ' sec'. ($diff > 1 ? 's' : ''). ' ago';
 			}
 
 			$diff = round($diff / 60); // minutes
 			if ($diff < 60) {
-				return $diff . ' min ago';
+				return $diff . ' min'. ($diff > 1 ? 's' : ''). ' ago';
 			}
 
 			$diff = round($diff / 60); // hours
 			if ($diff < 24) {
-				return $diff . ' hr ago';
+				return $diff . ' hr'. ($diff > 1 ? 's' : ''). ' ago';
 			}
 
 			$diff = round($diff / 24); // days
 			if ($diff < 30) {
-				return $diff . ' days ago';
+				return $diff . ' day'. ($diff > 1 ? 's' : ''). ' ago';
 			}
 
 			$diff = round($diff / 30); // months
 			if ($diff < 12) {
-				return $diff . ' months ago';
+				return $diff . ' month'. ($diff > 1 ? 's' : ''). ' ago';
 			}
 
-			return round($diff / 12) . ' years ago';
+			return round($diff / 12) . ' year'. ($diff > 1 ? 's' : ''). ' ago';
 		}
+		function time_diff($from_time, $to_time)
+		{
+			$from = new DateTime($from_time);
+			$to   = new DateTime($to_time);
+
+			if ($to <= $from) {
+				return "NA";
+			}
+
+			$diff = $from->diff($to);
+
+			$parts = [];
+
+			if ($diff->y > 0) $parts[] = $diff->y . ' year' . ($diff->y > 1 ? 's' : '');
+			if ($diff->m > 0) $parts[] = $diff->m . ' month' . ($diff->m > 1 ? 's' : '');
+			if ($diff->d > 0) $parts[] = $diff->d . ' day' . ($diff->d > 1 ? 's' : '');
+			if ($diff->h > 0) $parts[] = $diff->h . ' hr' . ($diff->h > 1 ? 's' : '');
+			if ($diff->i > 0) $parts[] = $diff->i . ' min' . ($diff->i > 1 ? 's' : '');
+			if ($diff->s > 0) $parts[] = $diff->s . ' sec' . ($diff->s > 1 ? 's' : '');
+
+			return 'in ' . implode(' ', $parts);
+		}
+		function time_diff_format_two($from_time, $to_time)
+		{
+			$from = new DateTime($from_time);
+			$to   = new DateTime($to_time);
+
+			if ($to <= $from) {
+				return "NA";
+			}
+
+			$diff = $from->diff($to);
+
+			// Total seconds difference
+			$totalSeconds = ($to->getTimestamp() - $from->getTimestamp());
+
+			// If less than 1 minute → show seconds only
+			if ($totalSeconds < 60) {
+				return $totalSeconds . 's';
+			}
+
+			$parts = [];
+
+			if ($diff->h > 0) {
+				$parts[] = $diff->h . 'h';
+			}
+
+			if ($diff->i > 0) {
+				$parts[] = $diff->i . 'm';
+			}
+
+			return implode(' ', $parts);
+		}
+
+
+		function add_minutes($datetime, $minutes)
+		{
+			$dt = new DateTime($datetime);
+			$dt->modify("+{$minutes} minutes");
+
+			return $dt->format('Y-m-d H:i:s');
+		}
+
 	}
 ?>

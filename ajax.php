@@ -482,5 +482,192 @@
 			}
 			echo json_encode($varianrArr); 
 		break;
+		case "operatorList":			
+			$fields = "po.id, po.name, po.mobile";
+			$tables = PACKAGING_OPERATORS . " po
+			INNER JOIN " . ADMIN_MASTER . " a ON a.id = po.admin_id
+			LEFT JOIN " . PACKAGING_OPERATORS_ASSIGN . " poa ON poa.packaging_operator_id = po.id";
+			$where = "WHERE po.status = :status
+			AND a.created_by = :created_by
+			AND a.role_id = :role_id
+			AND (poa.status IS NULL OR poa.status != :poastatus)";
+			$params = [
+			  ':status'      => 1,
+			  ':role_id'     => 5,
+			  ':poastatus'   => 3,
+			  ':created_by'  => $_SESSION['USER_ID']
+			];
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);		
+			
+			if (!empty($sqlQuery)) {
+				$data['status'] = 200;
+				$rec = [];
+				foreach($sqlQuery as $arr)
+				{	
+					$rec[] = [
+						'id' => $arr->id,
+						'name' => $arr->name
+					];
+				}
+				$data['rec'] = $rec;
+			} else {
+				$data['status'] = 400;
+				$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+					<div class="text-white"><strong>Error!</strong> No operator found.</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+			} 	
+			echo json_encode($data);
+			exit;
+		break;
+		
+		case "assign_operator_save":
+			extract($_POST);
+			
+			$check_exists = $general_cls_call->select_query("id, status", PACKAGING_OPERATORS_ASSIGN, "WHERE order_id =:order_id", array(':order_id'=> $order_id), 1);
+			if(!empty($check_exists)) {
+				$data['status'] = 200;
+				$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+					<div class="text-white"><strong>Error!</strong> Operator already assigned to this order.</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+			} else {
+				$field = "order_id, packaging_operator_id, assign_by, status, created_at, updated_at";
+				$value = ":order_id, :packaging_operator_id, :assign_by, :status, :created_at, :updated_at";
+				
+				$addExecute=array(
+					':order_id'					=> $order_id,
+					':packaging_operator_id'	=> $packaging_operator_id,
+					':assign_by'				=> $_SESSION['USER_ID'],
+					':status'					=> 3,
+					':created_at'				=> date("Y-m-d H:i:s"),
+					':updated_at'				=> date("Y-m-d H:i:s")
+				);
+				
+				$ok = $general_cls_call->insert_query(PACKAGING_OPERATORS_ASSIGN, $field, $value, $addExecute);
+				if($ok) {
+					//insert order statuses
+					$field = "order_id, status, created_by, user_type, created_at";
+					$value = ":order_id, :status, :created_by, :user_type, :created_at";
+					$addExecute=array(
+						':order_id'				=> $order_id,
+						':status'				=> 3,
+						':created_by'			=> $_SESSION['USER_ID'],
+						':user_type'			=> $_SESSION['ROLE_ID'],
+						':created_at'			=> date("Y-m-d H:i:s")
+					);
+					$general_cls_call->insert_query(ORDERS_STATUSES, $field, $value, $addExecute);
+					//update orders
+					$setValues="active_status=:active_status";
+					$updateExecute=array(
+						':active_status'	=> 3,
+						':order_id'			=> $order_id
+					);
+					$whereClause=" WHERE id = :order_id";
+					$general_cls_call->update_query(ORDERS, $setValues, $whereClause, $updateExecute);
+					//update orders items
+					$setValues="active_status=:active_status";
+					$updateExecute=array(
+						':active_status'	=> 3,
+						':order_id'			=> $order_id
+					);
+					$whereClause=" WHERE order_id = :order_id";
+					$general_cls_call->update_query(ORDERS_ITEMS, $setValues, $whereClause, $updateExecute);
+				
+					$data['status'] = 200;
+					$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+						<div class="text-white"><strong>Success!</strong> Operator assigned successfully.</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>';
+				} else {
+					$data['status'] = 400;
+					$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+						<div class="text-white"><strong>Error!</strong> Something went wrong.</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>';
+				}
+			}
+			echo json_encode($data);
+			exit;
+		break;
+		
+		case "orderStatusList":			
+			$fields = "id, status";
+			$tables = ORDERS_STATUS_LISTS;
+			$where = "WHERE 1";
+			$params = [];
+			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);		
+			
+			if (!empty($sqlQuery)) {
+				$data['status'] = 200;
+				$rec = [];
+				foreach($sqlQuery as $arr)
+				{	
+					$rec[] = [
+						'id' => $arr->id,
+						'name' => $arr->status
+					];
+				}
+				$data['rec'] = $rec;
+			} else {
+				$data['status'] = 400;
+				$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+					<div class="text-white"><strong>Error!</strong> No operator found.</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+			} 	
+			echo json_encode($data);
+			exit;
+		break;
+		
+		case "order_status_change_save":
+			extract($_POST);
+			
+				//update PACKAGING OPERATORS ASSIGN
+				$setValues="status=:status";
+				$updateExecute=array(
+					':status'		=> $order_status_id,
+					':order_id'		=> $order_id
+				);
+				$whereClause=" WHERE order_id = :order_id";
+				$general_cls_call->update_query(PACKAGING_OPERATORS_ASSIGN, $setValues, $whereClause, $updateExecute);
+				//insert order statuses
+				$field = "order_id, status, created_by, user_type, created_at";
+				$value = ":order_id, :status, :created_by, :user_type, :created_at";
+				$addExecute=array(
+					':order_id'				=> $order_id,
+					':status'				=> $order_status_id,
+					':created_by'			=> $_SESSION['USER_ID'],
+					':user_type'			=> $_SESSION['ROLE_ID'],
+					':created_at'			=> date("Y-m-d H:i:s")
+				);
+				$general_cls_call->insert_query(ORDERS_STATUSES, $field, $value, $addExecute);				
+				//update orders
+				$setValues="active_status=:active_status";
+				$updateExecute=array(
+					':active_status'	=> $order_status_id,
+					':order_id'			=> $order_id
+				);
+				$whereClause=" WHERE id = :order_id";
+				$general_cls_call->update_query(ORDERS, $setValues, $whereClause, $updateExecute);
+				//update orders items
+				$setValues="active_status=:active_status";
+				$updateExecute=array(
+					':active_status'	=> $order_status_id,
+					':order_id'			=> $order_id
+				);
+				$whereClause=" WHERE order_id = :order_id";
+				$general_cls_call->update_query(ORDERS_ITEMS, $setValues, $whereClause, $updateExecute);
+			
+				$data['status'] = 200;
+				$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+					<div class="text-white"><strong>Success!</strong> Operator assigned successfully.</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+				
+		
+			echo json_encode($data);
+			
+		break;
     }
 ?>

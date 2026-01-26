@@ -16,7 +16,10 @@
 	define("CATEGORIES",  TABLE_PREFIX."categories");
 	define("ORDERS",  TABLE_PREFIX."orders");
 	define("ORDERS_ITEMS",  TABLE_PREFIX."order_items");
+	define("ORDERS_STATUSES",  TABLE_PREFIX."order_statuses");
 	define("ORDERS_STATUS_LISTS",  TABLE_PREFIX."order_status_lists");
 	define("CITIES",  TABLE_PREFIX."cities");
 	define("DELIVERY_BOYS",  TABLE_PREFIX."delivery_boys");
+	define("PACKAGING_OPERATORS",  TABLE_PREFIX."packaging_operators");
+	define("PACKAGING_OPERATORS_ASSIGN",  TABLE_PREFIX."packaging_operators_assign");
 ?>

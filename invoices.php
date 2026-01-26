@@ -25,9 +25,8 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Invoices</a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Invoices</li>
 							</ol>
 						</nav>
 					</div>
@@ -41,7 +40,7 @@
 								<thead>
 									<tr>
 										<td></td>
-										<td><input type="text" class="form-control" id="search-one" placeholder="Search by custoner"></td>
+										<td><input type="text" class="form-control" id="search-one" placeholder="Search by customer"></td>
 										<td><input type="text" class="form-control" id="search-two" placeholder="Search by mobile"></td>
 										<td></td>
 										<td></td>
@@ -52,7 +51,7 @@
 									<th class="text-center">Mobile</th>
 									<th>Date Time</th>
 									<th class="text-center">Total Sale</th>
-									<th>Action</th>
+									<th class="text-center">Action</th>
 								  </tr>
 								</thead>
 								<tbody>
@@ -89,23 +88,13 @@
 										<td class="text-center"><?PHP echo $customer->mobile; ?></td>
 										<td><span class="d-none"><?PHP echo $selectValue->created_at; ?></span><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td class="text-center">₹<?PHP echo $pos_order_item->total; ?></td>
-										<td><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
+										<td class="text-center"><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
 									  </tr>
 										<?PHP
 												$i++;
 											}
 										}
-										else
-										{
 									?>
-									  <tr>
-										<td colspan="6">
-										 No record found.
-										</td>
-									  </tr>
-						<?PHP
-							}	
-						?>
 								</tbody>
 							</table>
 						</div>

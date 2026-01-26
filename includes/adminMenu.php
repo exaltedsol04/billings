@@ -75,22 +75,6 @@
 					<div class="menu-title">Seller</div>
 				</a>
 			</li>
-			
-			<!--<li <?php if($page=='online-orders.php' || $page=='online-order-view.php' || $page=='online-completed-orders.php' || $page=='online-processing-orders.php') { echo ('class="mm-active"');} ?>>
-			  <a href="javascript:;" class="has-arrow">
-				<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
-				</div>
-				<div class="menu-title">Online order</div>
-			  </a>
-			  <ul>
-				<li><a href="<?php echo SITE_URL.'online-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>All Orders</a>
-				</li>
-				<li><a href="<?php echo SITE_URL.'online-completed-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Completed order</a>
-				</li>
-				<li><a href="<?php echo SITE_URL.'online-processing-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Processing orders</a>
-				</li>
-			  </ul>
-			</li>-->
 
 			<?php } elseif(isset($_SESSION['ROLE_ID']) && $_SESSION['ROLE_ID']==3) {?>
 			<li <?php if($page=='pos.php') { echo ('class="mm-active"');} ?>>
@@ -125,19 +109,33 @@
 				<li><a href="<?php echo SITE_URL.'barcode'; ?>"><i class="material-icons-outlined">arrow_right</i>Barcode</a></li>
 			  </ul>
 			</li>
+			<li <?php if($page=='packaging-operator-add.php' || $page=='packaging-operator-list.php' || $page=='packaging-operator-assign.php') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">inventory_2</i>
+				</div>
+				<div class="menu-title">Packaging Operator</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'packaging-operator-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Add</a></li>
+				<li><a href="<?php echo SITE_URL.'packaging-operator-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a></li>
+				<li><a href="<?php echo SITE_URL.'packaging-operator-assign'; ?>"><i class="material-icons-outlined">arrow_right</i>Assign order</a></li>
+			  </ul>
+			</li>
 			<?php } ?>
-			<li <?php if($page=='online-orders.php' || $page=='online-order-view.php' || $page=='online-completed-orders.php' || $page=='online-processing-orders.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='order-summary.php' || $page=='online-orders.php' || $page=='online-order-details.php' || $page=='online-completed-orders.php' || $page=='online-processing-orders.php' || $page=='online-assigned-orders.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
 				</div>
 				<div class="menu-title">Online order</div>
 			  </a>
 			  <ul>
+				<li><a href="<?php echo SITE_URL.'order-summary'; ?>"><i class="material-icons-outlined">arrow_right</i>Order  summary</a>
+				</li>
+				<li><a href="<?php echo SITE_URL.'online-assigned-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Assigned order</a>
 				<li><a href="<?php echo SITE_URL.'online-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>All Orders</a>
 				</li>
-				<li><a href="<?php echo SITE_URL.'online-completed-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Completed order</a>
-				</li>
 				<li><a href="<?php echo SITE_URL.'online-processing-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Processing orders</a>
+				<li><a href="<?php echo SITE_URL.'online-completed-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Completed order</a>
 				</li>
 			  </ul>
 			</li>

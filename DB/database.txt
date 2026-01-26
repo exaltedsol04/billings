@@ -7,6 +7,7 @@ ALTER TABLE `bl_product_stock_transaction` CHANGE `stock_type` `stock_type` INT(
 ALTER TABLE `bl_admin_stock_purchase_list` ADD `product_stock_transaction_id` INT(11) NOT NULL AFTER `stock`;
 ALTER TABLE `bl_admin_stock_purchase_list` CHANGE `product_stock_transaction_id` `product_stock_transaction_id` INT(11) NOT NULL DEFAULT '0'; 
 
+---------New Tables--------
 CREATE TABLE `bl_admin_stock_purchase_list` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `vendor_id` int(11) DEFAULT NULL,
@@ -31,5 +32,55 @@ CREATE TABLE `bl_vendors` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 
+CREATE TABLE `bl_packaging_operators` (
+  `id` int(10) NOT NULL,
+  `admin_id` int(10) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `mobile` bigint(20) NOT NULL,
+  `street` varchar(255) NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `bl_packaging_operators`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `bl_packaging_operators`
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+COMMIT;
+
+CREATE TABLE `bl_packaging_operators_assign` (
+  `id` int(10) NOT NULL,
+  `order_id` int(10) NOT NULL,
+  `packaging_operator_id` int(10) NOT NULL,
+  `assign_by` int(10) NOT NULL,
+  `status` tinyint(1) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `bl_packaging_operators_assign`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `bl_packaging_operators_assign`
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+COMMIT;
+
+
+---------New Tables--------
 ============= 22-01-2026==========
 ALTER TABLE `bl_admin_stock_purchase_list` ADD `remarks` TEXT NULL DEFAULT NULL AFTER `status`; 
+
+============= 24-01-2026==========
+ALTER TABLE `bl_orders` ADD `order_type` VARCHAR(100) NOT NULL COMMENT 'instant, slot' AFTER `cod_payment_status`, ADD `instant_delivery_time` INT(10) NOT NULL COMMENT 'in minutes' AFTER `order_type`, ADD `from_time` DATETIME NULL DEFAULT NULL AFTER `instant_delivery_time`, ADD `to_time` DATETIME NULL DEFAULT NULL AFTER `from_time`;
+
+INSERT INTO `bl_roles` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VALUES (NULL, 'Packaging Operator', 'web', NULL, NULL); 
+
+ALTER TABLE `bl_order_items` CHANGE `active_status` `active_status` INT(10) NOT NULL; 
+
+
+
+
+
+
