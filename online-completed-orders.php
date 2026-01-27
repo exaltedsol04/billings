@@ -83,7 +83,7 @@
 													  ELSE o.created_at
 												  END DESC";
 										$params = [
-											':seller_id'=> $_SESSION['USER_ID'],
+											':seller_id'=> $_SESSION['SELLER_ID'],
 											':active_status'=> 6
 										];
 									}

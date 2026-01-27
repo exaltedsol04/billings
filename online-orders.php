@@ -87,7 +87,7 @@
 													  ELSE o.created_at
 												  END DESC";
 										$params = [
-											':seller_id'=> $_SESSION['USER_ID']
+											':seller_id'=> $_SESSION['SELLER_ID']
 										];
 									}
 									$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.created_at, o.active_status, SUM(oi.sub_total) AS orders_items_sub_total, u.name AS customer_name, osl.status AS orders_status_list_status, os.created_at AS orders_statuses_created_at";

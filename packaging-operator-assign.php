@@ -262,6 +262,10 @@ $(document).on('click', '#assignOperatorSave', function (e) {
 				"<?= SITE_URL ?>print_packaging_operator_invoice?order_id=" + orderId,
 				"_blank"
 			);
+			
+			setTimeout(() => {
+				window.location.reload();
+			}, 2000);
 		}
     },
     error: function (xhr) {

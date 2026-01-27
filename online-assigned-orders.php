@@ -182,6 +182,7 @@
 <script>
 function orderStatusChange(orderId)
 {
+	$('#no_operator').html('');
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -191,7 +192,7 @@ function orderStatusChange(orderId)
 		},
 		dataType: "json",
 		success: function(response){
-			var html = '<option>Choose...</option>';
+			var html = '<option value="">Choose...</option>';
 			if (response.status == 200) {
 				$.each(response.rec, function (i, r) {
 					html += '<option value="'+ r.id +'"> '+ r.name +' </option>';
@@ -216,6 +217,14 @@ $(document).on('click', '#orderStatusChangeSave', function (e) {
 
   // Example data (change to your fields)
   let order_status_id = $('#order_status_id').val();
+  
+  $('#no_operator').html('');
+  if(order_status_id == '')
+  {
+	  $('#no_operator').html('<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show"><div class="text-white"><strong>Error!</strong> Please choose status.</div><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+	  return false;
+  }
+  
   let orderId    = $('#order_id').val();
   $.ajax({
     url: "<?PHP echo SITE_URL; ?>ajax",
@@ -236,6 +245,9 @@ $(document).on('click', '#orderStatusChangeSave', function (e) {
 			$('#msg').html(response.msg);
 			$('#orderStatusModal').find('#order_status_id').html('');
 			$('#orderStatusModal').modal('hide');
+			setTimeout(() => {
+				window.location.reload();
+			}, 2000);
 		}
     },
     error: function (xhr) {

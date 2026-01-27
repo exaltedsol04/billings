@@ -29,7 +29,7 @@
 			$where = "WHERE orders_id=:orders_id AND seller_id=:seller_id";
 			$params = [
 				':orders_id' => $_GET['order_id'],
-				':seller_id' => $_SESSION['USER_ID']
+				':seller_id' => $_SESSION['SELLER_ID']
 			];
 		}
 		//$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
