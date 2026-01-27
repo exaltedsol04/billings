@@ -14,7 +14,7 @@
 	$cancelled_orders			= 0;
 	$returned_orders			= 0;
 	
-	if($_SESSION['USER_ID'] == 1) {
+	if($_SESSION['ROLE_ID'] == 1) {
 		//total orders
 		$total_orders_where = "WHERE 1 GROUP BY o.orders_id";
 		$total_orders_params = [];
