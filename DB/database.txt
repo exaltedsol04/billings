@@ -1,3 +1,6 @@
+
+Note:- order_statuses -> created_by (admins_id)
+==============================================
 ALTER TABLE `bl_product_stock_transaction` ADD `stock_type` INT(11) NOT NULL DEFAULT '1' AFTER `stock`;
 
 ALTER TABLE `bl_product_stock_transaction` CHANGE `transaction_type` `transaction_type` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '1=Purchase Request, 2=Sell POS, 3=Sell APP, 4=Transfer stock, 5=online stock';
@@ -78,6 +81,12 @@ ALTER TABLE `bl_orders` ADD `order_type` VARCHAR(100) NOT NULL COMMENT 'instant,
 INSERT INTO `bl_roles` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VALUES (NULL, 'Packaging Operator', 'web', NULL, NULL); 
 
 ALTER TABLE `bl_order_items` CHANGE `active_status` `active_status` INT(10) NOT NULL; 
+
+============== 27-01-2026========================
+ALTER TABLE `bl_packaging_operators_assign` CHANGE `assign_by` `assign_by` INT(10) NOT NULL COMMENT 'admins table id';
+ALTER TABLE `bl_packaging_operators_assign` CHANGE `packaging_operator_id` `packaging_operator_id` INT(10) NOT NULL COMMENT 'packaging_operators table id';
+
+
 
 
 

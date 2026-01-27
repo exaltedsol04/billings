@@ -52,43 +52,43 @@
 		//total orders
 		$total_orders_where = "WHERE oi.seller_id=:seller_id GROUP BY o.orders_id";
 		$total_orders_params = [
-			':seller_id'	=> $_SESSION['USER_ID']
+			':seller_id'	=> $_SESSION['SELLER_ID']
 		];
 		//received orders
 		$received_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
 		$received_orders_params = [
 			':active_status'	=> 2,
-			':seller_id'		=> $_SESSION['USER_ID']
+			':seller_id'		=> $_SESSION['SELLER_ID']
 		];	
 		//received orders
 		$processed_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
 		$processed_orders_params = [
 			':active_status'	=> 3,
-			':seller_id'		=> $_SESSION['USER_ID']
+			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 		//out for delivery orders
 		$out_for_delivery_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
 		$out_for_delivery_orders_params = [
 			':active_status'	=> 5,
-			':seller_id'		=> $_SESSION['USER_ID']
+			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 		//delivered orders
 		$delivered_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
 		$delivered_orders_params = [
 			':active_status'	=> 6,
-			':seller_id'		=> $_SESSION['USER_ID']
+			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 		//cancelled orders
 		$cancelled_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
 		$cancelled_orders_params = [
 			':active_status'	=> 7,
-			':seller_id'		=> $_SESSION['USER_ID']
+			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 		//returned orders
 		$returned_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
 		$returned_orders_params = [
 			':active_status'	=> 8,
-			':seller_id'		=> $_SESSION['USER_ID']
+			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 	}
 	$fields = "o.id";
