@@ -35,6 +35,12 @@
 		//$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 		
 		$sqlQuery = $general_cls_call->select_query("*", ORDERS_ITEMS, $where, $params, 2);
+		
+		$whereOrder ="WHERE orders_id=:orders_id";
+		$paramsOrder = [
+				':orders_id' => $_GET['order_id']
+			];
+		$sqlOrder = $general_cls_call->select_query("id", ORDERS, $whereOrder, $paramsOrder, 1);
 				
 		//echo "<pre>";print_r($sqlQuery);die;
 		
@@ -115,7 +121,7 @@
 							 <small>Invoice</small>
 							 <div class=""><b><?PHP echo $general_cls_call->change_date_format($sqlQuery[0]->created_at, 'j M Y g:i A'); ?></b></div>
 							 <div class="invoice-detail">
-								#<?php echo $_GET['order_id'] ;?><br>
+								#<?php echo $sqlOrder->id ;?><br>
 							 </div>
 						   </div>
 						 </div>

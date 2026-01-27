@@ -165,7 +165,7 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
     <div class="center small">********** Original for Recipient **********</div>
 
     <div class="divider"></div>
-	<div class="center bold" style="font-size:20px;margin-bottom:10px;">#<?php echo $_GET['order_id']; ?></div>
+	<div class="center bold" style="font-size:20px;margin-bottom:10px;">Order Id #<?php echo $_GET['order_id']; ?></div>
     <div class="small">
         Place of Supply & State Code: 27 MH<br>
 		<?php 
@@ -258,45 +258,6 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
             <td class="right">₹<?= $tot_amt  ?></td>
         </tr>
     </table>
-
-    <div class="divider"></div>
-
-    <div class="small">
-        ITO PAY UPI ID: rx-7738-10112600<br>
-        Amount Inclusive of Applicable Taxes
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="small">
-        Payment Ref No: TMX1100616507012026<br>
-        Bill of Supply: TMX110626100071<br>
-        ROne Card No: 935XXXX061 ROne Bal (Amount): 6.33<br>
-        Terms & Conditions Apply
-    </div>
-
-    <div class="qr">
-        <!-- Replace src with real QR image -->
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=RelianceSmartReceipt">
-    </div>
-
-    <div class="footer">
-        I/we hereby certify that food/foods mentioned in this<br>
-        invoice is/are warranted to be of the nature<br>
-        and quality which it/these purports/supported to be.<br><br>
-
-        ★ Thank You for Shopping With Us ★<br><br>
-
-        Website: www.relianceretail.com<br>
-        Customer Care email: customerservice@ril.com<br><br>
-
-        Please refer our Website link<br>
-        https://www.relianceretail.com/privacy-policy.html<br>
-        for Privacy Policy<br><br>
-
-        Dynamic Quick Response (QR) code is made<br>
-        available to the Recipient through a digital display
-    </div>
 
 </div>
 
