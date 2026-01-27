@@ -483,6 +483,30 @@
 
 			return $dt->format('Y-m-d H:i:s');
 		}
+		
+		function callAPI($method, $url, $data = [], $headers = [])
+		{
+			$ch = curl_init();
+
+			if ($method == "POST") {
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+			}
+
+			if ($method == "GET" && !empty($data)) {
+				$url .= "?" . http_build_query($data);
+			}
+
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+			$response = curl_exec($ch);
+			curl_close($ch);
+
+			return json_decode($response, true);
+		}
+
 
 	}
 ?>
