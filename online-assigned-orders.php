@@ -59,7 +59,7 @@
 							<th class="text-center">Delivery</th>
 							<th>Delivery Type/Slot</th>
 							<th>Order Status</th>
-							<th class="text-center">Action</th>
+							<th class="text-center">Status</th>
 						  </tr>
 						</thead>
 						<tbody>
@@ -116,15 +116,16 @@
 								<td><?PHP echo  $deliveryType; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
 								<td class="d-flex align-items-center gap-3">
-									<a href="javascript:void(0)" class="text-success font-text2" onclick="orderStatusChange(<?php echo($arr->id);?>)">
+									<!--<a href="javascript:void(0)" class="text-success font-text2" onclick="orderStatusChange(<?php echo($arr->id);?>)">
 										<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success">
 											<i class="lni lni-checkmark-circle fs-5"></i>
 										</div>
-									</a>
-									<a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>">
-										<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning">
+									</a>-->
+									<a href="<?php echo SITE_URL.'online-order-assign'; ?>?order_id=<?php echo($arr->id);?>">
+										<button type="button" class="btn btn-success raised d-flex gap-2" title = "Update status" data-bs-toggle="tooltip"><i class="lni lni-checkmark-circle fs-5"></i>Change</button>
+										<!--<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
 											<span class="material-icons-outlined fs-5">visibility</span>
-										</div>
+										</div>-->
 									</a>
 								</td>
 							  </tr>

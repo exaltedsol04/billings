@@ -153,7 +153,9 @@
 										<td><?php echo $remaining_delivery_time; ?></td>
 										<td><?php echo $deliver_in; ?></td>
 										<td><?php echo $arr->orders_status_list_status; ?></td>
-										<td class="text-center"><a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>"><i class="lni lni-keyword-research"></i></a></td>
+										<td class="text-center"><a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
+											<span class="material-icons-outlined fs-5">visibility</span>
+										</div></td>
 									  </tr>
 										<?PHP
 												$i++;

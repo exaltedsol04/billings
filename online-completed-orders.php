@@ -25,14 +25,35 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Online completed orders list</a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Online delivered orders list</a>
 								</li>
 							</ol>
 						</nav>
 					</div>
 				</div>
 				<!--end breadcrumb-->
-     
+				<h6 class="mb-0 text-uppercase">Search panel</h6>
+						<hr>
+						<div class="card">
+							<div class="card-body">
+								<form class="row g-4" method="post">
+									<div class="col-md-6">
+										<label for="input1" class="form-label">From date</label>
+										<input type="text" class="form-control" id="input1" name="from_date" value="">
+									</div>
+									<div class="col-md-6">
+										<label for="input5" class="form-label">To date</label>
+										<input type="text" name="to_date" value="" class="form-control" id="input5">
+									</div>
+									<div class="col-md-12">
+									  <div class="d-md-flex d-grid justify-content-md-between">
+										<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
+										<button type="button" class="btn btn-grd btn-grd-danger px-4">Search</button>
+									  </div>
+									</div>
+								</form>
+							</div>
+						</div>
 				<div class="card">
 					<div class="card-body">
 						<div class="table-responsive">
@@ -41,7 +62,6 @@
 									<tr>
 										<td></td>
 										<td><input type="text" class="form-control" id="search-one" placeholder="Search by customer"></td>
-										<td></td>
 										<td></td>
 										<td></td>
 										<td></td>
@@ -56,7 +76,6 @@
 									<th class="text-center">Delivery</th>
 									<th>Delivery Type/Slot</th>
 									<th>To be delivered</th>
-									<th>Remaining Delivery Time</th>
 									<th>Deliver min/hrs</th>
 									<th>Order Status</th>
 									<th class="text-center">Action</th>
@@ -115,8 +134,6 @@
 													$to_be_delivered = $general_cls_call->time_diff($arr->from_time, $arr->to_time);
 													$delivery_max_time = $arr->to_time;
 												}
-												$current_time = date('Y-m-d H:i:s');		
-												$remaining_delivery_time = $general_cls_call->time_diff($current_time, $delivery_max_time);
 											
 												$deliveryTime = trim($arr->delivery_time);
 												if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
@@ -143,14 +160,15 @@
 											<td><?PHP echo $arr->id; ?></td>
 											<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>
 											<td class="text-center">₹<?PHP echo $final_total; ?></td>
-											<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at); ?></td>
+											<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>';; ?></td>
 											<td class="text-center">--</td>
 											<td><?PHP echo  $deliveryType; ?></td>
 											<td><?php echo $to_be_delivered; ?></td>
-											<td><?php echo $remaining_delivery_time; ?></td>
 											<td><?php echo $deliver_in; ?></td>
 											<td><?php echo $arr->orders_status_list_status; ?></td>
-											<td class="text-center"><a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>"><i class="lni lni-keyword-research"></i></a></td>
+											<td class="text-center"><a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
+											<span class="material-icons-outlined fs-5">visibility</span>
+										</div></a></td>
 										  </tr>
 										<?PHP
 												$i++;

@@ -150,91 +150,104 @@
       <!--end breadcrumb-->
 
 		<div class="row row-cols-1 row-cols-xl-6">
+			<a href="<?php echo SITE_URL.'online-orders'; ?>">
 			<div class="col d-flex">
-			  <div class="card rounded-4 w-100">
+			  <div class="card rounded-4 w-100 bg-grd-primary bg-gradient text-white">
 				<div class="card-body">
 				  <div class="d-flex align-items-start justify-content-between mb-1">
 					<div class="">
-					  <h5 class="mb-0"><?= $total_orders ? $total_orders : 0; ?></h5>
+					  <h5 class="mb-0 text-white"><?= $total_orders ? $total_orders : 0; ?></h5>
 					  <p class="mb-0">Total orders</p>
 					</div>
 				  </div>
 				</div>
 			  </div>
 			</div>
+			</a>
+			<a href="<?php echo SITE_URL.'online-orders'; ?>">
 			<div class="col d-flex">
-			  <div class="card rounded-4 w-100">
+			  <div class="card rounded-4 w-100 bg-grd-info bg-gradient text-white">
 				<div class="card-body">
 				  <div class="d-flex align-items-start justify-content-between mb-1">
 					<div class="">
-					  <h5 class="mb-0"><?= $received_orders ? $received_orders : 0; ?></h5>
+					  <h5 class="mb-0 text-white"><?= $received_orders ? $received_orders : 0; ?></h5>
 					  <p class="mb-0">Received orders</p>
 					</div>
 				  </div>
 				</div>
 			  </div>
 			</div>
+			</a>
+			<a href="<?php echo SITE_URL.'online-processing-orders'; ?>">
 			<div class="col d-flex">
-			  <div class="card rounded-4 w-100">
+			  <div class="card rounded-4 w-100 bg-grd-branding bg-gradient text-white">
 				<div class="card-body">
 				  <div class="d-flex align-items-start justify-content-between mb-1">
 					<div class="">
-					  <h5 class="mb-0"><?= $processed_orders ? $processed_orders : 0; ?></h5>
+					  <h5 class="mb-0 text-white"><?= $processed_orders ? $processed_orders : 0; ?></h5>
 					  <p class="mb-0">Processed orders</p>
 					</div>
 				  </div>
 				</div>
 			  </div>
 			</div>
+			</a>
+			<a href="<?php echo SITE_URL.'online-orders'; ?>">
 			<div class="col d-flex">
-			  <div class="card rounded-4 w-100">
+			  <div class="card rounded-4 w-100 bg-grd-deep-blue bg-gradient text-white">
 				<div class="card-body">
 				  <div class="d-flex align-items-start justify-content-between mb-1">
 					<div class="">
-					  <h5 class="mb-0"><?= $out_for_delivery_orders ? $out_for_delivery_orders : 0; ?></h5>
+					  <h5 class="mb-0 text-white"><?= $out_for_delivery_orders ? $out_for_delivery_orders : 0; ?></h5>
 					  <p class="mb-0">Out For Delivery</p>
 					</div>
 				  </div>
 				</div>
 			  </div>
 			</div>
+			</a>
+			<a href="<?php echo SITE_URL.'online-completed-orders'; ?>">
 			<div class="col d-flex">
-			  <div class="card rounded-4 w-100">
+			  <div class="card rounded-4 w-100 bg-grd-success bg-gradient text-white">
 				<div class="card-body">
 				  <div class="d-flex align-items-start justify-content-between mb-1">
 					<div class="">
-					  <h5 class="mb-0"><?= $delivered_orders ? $delivered_orders : 0; ?></h5>
+					  <h5 class="mb-0 text-white"><?= $delivered_orders ? $delivered_orders : 0; ?></h5>
 					  <p class="mb-0">Delivered orders</p>
 					</div>
 				  </div>
 				</div>
 			  </div>
 			</div>
+			</a>
+			<a href="<?php echo SITE_URL.'online-orders'; ?>">
 			<div class="col d-flex">
-			  <div class="card rounded-4 w-100">
+			  <div class="card rounded-4 w-100 bg-grd-danger bg-gradient text-white">
 				<div class="card-body">
 				  <div class="d-flex align-items-start justify-content-between mb-1">
 					<div class="">
-					  <h5 class="mb-0"><?= $cancelled_orders ? $cancelled_orders : 0; ?></h5>
+					  <h5 class="mb-0 text-white"><?= $cancelled_orders ? $cancelled_orders : 0; ?></h5>
 					  <p class="mb-0">Cancelled orders</p>
 					</div>
 				  </div>
 				</div>
 			  </div>
 			</div>
+			</a>
+			<a href="<?php echo SITE_URL.'online-orders'; ?>">
 			<div class="col d-flex">
-			  <div class="card rounded-4 w-100">
+			  <div class="card rounded-4 w-100 bg-grd-warning bg-gradient text-white">
 				<div class="card-body">
 				  <div class="d-flex align-items-start justify-content-between mb-1">
 					<div class="">
-					  <h5 class="mb-0"><?= $returned_orders ? $returned_orders : 0; ?></h5>
+					  <h5 class="mb-0 text-white"><?= $returned_orders ? $returned_orders : 0; ?></h5>
 					  <p class="mb-0">Returned orders</p>
 					</div>
 				  </div>
 				</div>
 			  </div>
 			</div>
-			
+			</a>
 			
        
       </div>
