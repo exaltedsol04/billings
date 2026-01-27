@@ -101,7 +101,7 @@
 								
 							//echo "<pre>";print_r($sqlQuery);die;
 							
-							if($sqlQuery[0] != '')
+							if(!empty($sqlQuery[0]))
 							{
 								$i = 1;
 								
@@ -195,6 +195,7 @@
 <script>
 function assignOperator(orderId)
 {
+	$('#no_operator').html('');
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -204,7 +205,7 @@ function assignOperator(orderId)
 		},
 		dataType: "json",
 		success: function(response){
-			var html = '<option>Choose...</option>';
+			var html = '<option value="">Choose...</option>';
 			if (response.status == 200) {
 				$.each(response.rec, function (i, r) {
 					html += '<option value="'+ r.id +'"> '+ r.name +' </option>';
@@ -227,9 +228,17 @@ function assignOperator(orderId)
 $(document).on('click', '#assignOperatorSave', function (e) {
   e.preventDefault();
 
+  let operator_id = $('#operator_id').val();
+  $('#no_operator').html('');
+  if(operator_id == '')
+  {
+	  $('#no_operator').html('<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show"><div class="text-white"><strong>Error!</strong> Please choose operator.</div><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+	  return false;
+  }
   // Example data (change to your fields)
   let operatorId = $('#operator_id').val();
   let orderId    = $('#order_id').val();
+
   $.ajax({
     url: "<?PHP echo SITE_URL; ?>ajax",
     type: 'POST',
@@ -249,6 +258,10 @@ $(document).on('click', '#assignOperatorSave', function (e) {
 			$('#msg').html(response.msg);
 			$('#assignModal').find('#operator_id').html('');
 			$('#assignModal').modal('hide');
+			window.open(
+				"<?= SITE_URL ?>print_packaging_operator_invoice?order_id=" + orderId,
+				"_blank"
+			);
 		}
     },
     error: function (xhr) {
