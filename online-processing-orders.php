@@ -131,10 +131,16 @@
 													$final_total += $arr->packing_charge;
 												}
 												
-												
+												// package man
+												/*$fields = "";
+												$tables = ORDERS . " o
+												INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
+												LEFT JOIN " . USERS . " u ON u.id = o.user_id
+												INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = o.active_status
+												LEFT JOIN " . ORDERS_STATUSES . " os ON os.order_id = o.id AND os.status = o.active_status";*/
 										?>
 										  <tr id="dataRow<?php echo($arr->id);?>">
-											<td><?PHP echo $arr->orders_id; ?></td>
+											<td><?PHP echo $arr->id; ?></td>
 											<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>
 											<td class="text-center">₹<?PHP echo $final_total; ?></td>
 											<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at); ?></td>

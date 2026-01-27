@@ -490,7 +490,7 @@
 
 			if ($method == "POST") {
 				curl_setopt($ch, CURLOPT_POST, true);
-				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 			}
 
 			if ($method == "GET" && !empty($data)) {
@@ -503,6 +503,8 @@
 
 			$response = curl_exec($ch);
 			curl_close($ch);
+			
+			//print_r($data);
 
 			return json_decode($response, true);
 		}

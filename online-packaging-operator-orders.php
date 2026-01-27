@@ -1,13 +1,15 @@
 <?PHP 
-	error_reporting(0);
+	//error_reporting(0);
 	include_once 'init.php';
 	
 	$pageAccessRoleIds = [5];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
-	ob_start();
+	//ob_start();
 	
-	//echo "<pre>";print_r($operator_array);die;
-	ob_end_flush();
+	$dataArray = $general_cls_call->callAPI("POST", SITE_URL."api/online-packaging-operator-orders", ["operator_id"=>$_SESSION['PACKAGING_OPERATOR_ID']]);
+	
+	//echo "<pre>";print_r($dataArray);die;
+	//ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
 		<?PHP include_once("includes/adminHeader.php"); ?>
@@ -64,58 +66,37 @@
 						</thead>
 						<tbody>
 						<?php
-							
-							$where = "WHERE poa.packaging_operator_id=:packaging_operator_id 
-								  AND poa.status=:status
-								  ORDER BY poa.created_at DESC";
-							$params = [
-								':packaging_operator_id'=> $_SESSION['PACKAGING_OPERATOR_ID'],
-								':status'=> 3
-							];
-							
-							
-							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.packing_charge, o.created_at, po.name AS packaging_operator_name, osl.status AS orders_status_list_status";
-
-							$tables = PACKAGING_OPERATORS_ASSIGN . " poa
-							INNER JOIN " . ORDERS . " o ON o.id = poa.order_id
-							LEFT JOIN " . PACKAGING_OPERATORS . " po ON po.id = poa.packaging_operator_id
-							INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = poa.status";
-							
-							$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
-								
-							//echo "<pre>";print_r($sqlQuery);die;
-							
-							if($sqlQuery[0] != '')
+							if(!empty($dataArray['data']))
 							{
 								$i = 1;
 								
-								foreach($sqlQuery as $k=>$arr)
+								foreach($dataArray['data'] as $k=>$arr)
 								{
 									$final_total = 0;											
-									$deliveryTime = trim($arr->delivery_time);
+									$deliveryTime = trim($arr['delivery_time']);
 									if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
 									{
 										$deliveryType = $matches[1];
 									} else {
 										$deliveryType = $general_cls_call->time_ago($deliveryTime);
 									}
-									$final_total = $arr->final_total;
+									$final_total = $arr['final_total'];
 							?>
-							  <tr id="dataRow<?php echo($arr->id);?>">
-								<td><?PHP echo $arr->orders_id; ?></td>
-								<td><?PHP echo !empty($arr->packaging_operator_name) ? $arr->packaging_operator_name : 'N/A'; ?></td>
+							  <tr id="dataRow<?php echo($arr['id']);?>">
+								<td><?PHP echo $arr['id']; ?></td>
+								<td><?PHP echo !empty($arr['packaging_operator_name']) ? $arr['packaging_operator_name'] : 'N/A'; ?></td>
 								<td class="text-center">₹<?PHP echo $final_total; ?></td>
-								<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at); ?></td>
+								<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr['created_at']); ?></td>
 								<td class="text-center">--</td>
 								<td><?PHP echo  $deliveryType; ?></td>
-								<td><?php echo $arr->orders_status_list_status; ?></td>
+								<td><?php echo $arr['orders_status_list_status']; ?></td>
 								<td class="d-flex align-items-center gap-3">
-									<a href="javascript:void(0)" class="text-success font-text2" onclick="orderStatusChange(<?php echo($arr->id);?>)">
+									<a href="javascript:void(0)" class="text-success font-text2" onclick="orderStatusChange(<?php echo($arr['id']);?>)">
 										<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success">
 											<i class="lni lni-checkmark-circle fs-5"></i>
 										</div>
 									</a>
-									<a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>">
+									<a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr['orders_id']);?>">
 										<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning">
 											<span class="material-icons-outlined fs-5">visibility</span>
 										</div>
@@ -186,35 +167,8 @@
 function orderStatusChange(orderId)
 {
 	$('#no_operator').html('');
+	$('#orderStatusModal').find('#order_id').val(orderId);
 	$('#orderStatusModal').modal('show');
-	/*$.ajax({
-		type: "POST",
-		url: "<?PHP echo SITE_URL; ?>ajax",
-		data: {
-		  action: 'orderStatusList',
-		  order_id: orderId
-		},
-		dataType: "json",
-		success: function(response){
-			var html = '<option value="">Choose...</option>';
-			if (response.status == 200) {
-				$.each(response.rec, function (i, r) {
-					html += '<option value="'+ r.id +'"> '+ r.name +' </option>';
-				});
-				$('#orderStatusModal').find('#order_status_id').html(html);
-				$('#orderStatusModal').find('#order_id').val(orderId);
-				$('#orderStatusModal').modal('show');
-			} else if (response.status == 400) {
-				$('#orderStatusModal').find('#order_status_id').html(html);
-				$('#orderStatusModal').find('#no_operator').html(response.msg);
-				$('#orderStatusModal').modal('show');
-			} else {
-				$('#orderStatusModal').find('#order_status_id').html('');
-				$('#orderStatusModal').find('#no_operator').html('');
-				$('#orderStatusModal').modal('hide');
-			}
-		}
-	});*/
 }
 $(document).on('click', '#orderStatusChangeSave', function (e) {
   e.preventDefault();
@@ -234,7 +188,7 @@ $(document).on('click', '#orderStatusChangeSave', function (e) {
     url: "<?PHP echo SITE_URL; ?>ajax",
     type: 'POST',
     data: {
-      action: 'order_status_change_save',
+      action: 'packaging_operator_order_status',
       order_status_id: order_status_id,
       order_id: orderId
     },

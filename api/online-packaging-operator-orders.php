@@ -5,6 +5,7 @@
 	header('Content-Type: application/json');
 	//echo $_POST['operator_id'];die;
 	$operatorId = $_POST['operator_id'];
+	
 
 	if ($operatorId == 0) {
 		$data['status'] = 400;

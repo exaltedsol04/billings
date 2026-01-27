@@ -669,5 +669,22 @@
 			echo json_encode($data);
 			
 		break;
+		
+		case "packaging_operator_order_status":
+			extract($_POST);
+			$dataArray = $general_cls_call->callAPI("POST", SITE_URL."api/packaging-operator-orders-save", ["status"=>$order_status_id, 'order_id'=>$order_id, "user_id"=>$_SESSION['USER_ID'], 'role_id'=>$_SESSION['ROLE_ID']]);
+			//echo $data['msg'];
+			//echo "<pre>";print_r($dataArray);die;
+			if($dataArray['status'] == 200)
+			{
+				$data['status'] = $dataArray['status'];
+				$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+					<div class="text-white"><strong>Success!</strong> '. $dataArray['msg'].'</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+			}
+			echo json_encode($data);
+			
+		break;
     }
 ?>

@@ -161,11 +161,11 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
 
     <div class="divider"></div>
 
-    <div class="center bold">BILL OF SUPPLY</div>
+    <div class="center bold">Packaging List</div>
     <div class="center small">********** Original for Recipient **********</div>
 
     <div class="divider"></div>
-	<div class="center bold" style="font-size:20px;margin-bottom:10px;">#<?php echo $order_id; ?></div>
+	<div class="center bold" style="font-size:20px;margin-bottom:10px;">#<?php echo $_GET['order_id']; ?></div>
     <div class="small">
         Place of Supply & State Code: 27 MH<br>
 		<?php 

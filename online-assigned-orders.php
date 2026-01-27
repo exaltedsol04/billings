@@ -108,7 +108,7 @@
 									$final_total = $arr->final_total;
 							?>
 							  <tr id="dataRow<?php echo($arr->id);?>">
-								<td><?PHP echo $arr->orders_id; ?></td>
+								<td><?PHP echo $arr->id; ?></td>
 								<td><?PHP echo !empty($arr->packaging_operator_name) ? $arr->packaging_operator_name : 'N/A'; ?></td>
 								<td class="text-center">₹<?PHP echo $final_total; ?></td>
 								<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at); ?></td>
