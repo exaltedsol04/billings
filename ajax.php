@@ -594,8 +594,8 @@
 		case "orderStatusList":			
 			$fields = "id, status";
 			$tables = ORDERS_STATUS_LISTS;
-			$where = "WHERE 1";
-			$params = [];
+			$where = "WHERE id=:id";
+			$params = [':id'=>5];
 			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);		
 			
 			if (!empty($sqlQuery)) {
