@@ -10,7 +10,8 @@
 	include_once("includes/connection.php");			/* This is for includeing the all predefine name of database,tables,user,password and database connection*/
 	include_once("includes/queryFunction.php");			/* This is for includeing the all query function */
 	include_once("includes/databaseTable.php");			/* This is for includeing the all query function */
-
+	include_once("includes/config.php"); 
+	
 
 	$general_cls_call=new general($db);
 ?>

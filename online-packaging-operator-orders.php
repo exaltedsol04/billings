@@ -6,7 +6,7 @@
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
 	
-	
+	//echo "<pre>";print_r($operator_array);die;
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
@@ -153,7 +153,14 @@
 				  <label for="order_status_id" class="form-label">Choose status</label>
 				  <select id="order_status_id" class="form-select select2-dropdown mx-auto">
 				  <option value="">Choose...</option>
-				  <option value="5">Packaging done</option>
+				  <?php 
+				  foreach($operator_array as $val)
+				  {
+				  ?>
+				  <option value="<?php echo $val['id'] ;?>"><?php echo $val['value'] ;?></option>
+				  <?php 
+				  }
+				  ?>
 				  </select>
 				</div>
 				<div class="col-md-12" id="no_operator"></div>
