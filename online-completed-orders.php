@@ -212,8 +212,8 @@
 
 $(function () {
 
-  let start = moment().startOf('month');
-  let end   = moment().endOf('month');
+  let start = moment().startOf('today');
+  let end   = moment().endOf('today');
 
   function setDates(start, end) {
     $('#fromDate').val(start.format('YYYY-MM-DD'));
