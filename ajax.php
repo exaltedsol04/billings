@@ -412,23 +412,38 @@
 		break;
 		
 		case "onlineProductStock":
-				$pv_id = $_POST['pvid'];
+				//$pv_id = $_POST['pvid'];
 				$pid = $_POST['pid'];
-				$product_variant_id = array(0=>$pv_id);
+				$stockArr = [];
+				
+				$fld = "distinct(product_variant_id)";
+				$wh = "WHERE product_id=:product_id AND status=:status AND seller_id =:seller_id GROUP BY product_variant_id HAVING SUM(stock) > 0";
+				$para = [
+					':product_id' => $pid,
+					':seller_id' => $_SESSION['USER_ID'],
+					':status' => 1
+				];
+				
+				$product_variant_id = $general_cls_call->select_join_query($fld, PRODUCT_STOCK_TRANSACTION, $wh, $para, 2);
+				
+				//echo "<pre>";print_r($product_variant_id);die;
+				//-------------------------------------------
+				
+				//$product_variant_id = array(0=>$pv_id);
 				foreach($product_variant_id as $k=>$val)
 				{
 					$Where = "WHERE id=:id AND product_id=:product_id";
 					$params = [
-						':id'	=>	$pv_id,
+						':id'	=>	$val->product_variant_id,
 						':product_id'	=>	$pid
 					];
-					$product_variant_dtls = $general_cls_call->select_join_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
-					
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
+					//echo "<pre>";print_r($product_variant_dtls);die;
 					
 					$where = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
 					
 					$params = [
-						':product_variant_id'	=>	$val,
+						':product_variant_id'	=>	$val->product_variant_id,
 						':product_id'	=>	$product_variant_dtls->product_id,
 						':status'	=>	1,
 						':stock_type'	=>	1,
@@ -451,6 +466,7 @@
 					
 					$stockArr[] = [
 						"product_name" => $product_name,
+						"product_variant_id" => $val->product_variant_id,
 						"variant_name" => $p_variant_name,
 						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
 					];
@@ -685,6 +701,54 @@
 			}
 			echo json_encode($data);
 			
+		break;
+		case "onlineCheckVariant":
+				$pv_id = $_POST['pvid'];
+				$pid = $_POST['pid'];
+				$stockArr = [];
+				
+				$product_variant_id = array(0=>$pv_id);
+				foreach($product_variant_id as $k=>$val)
+				{
+					$Where = "WHERE id=:id AND product_id=:product_id";
+					$params = [
+						':id'	=>	$val,
+						':product_id'	=>	$pid
+					];
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
+					//echo "<pre>";print_r($product_variant_dtls);die;
+					
+					$where = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
+					
+					$params = [
+						':product_variant_id'	=>	$val,
+						':product_id'	=>	$product_variant_dtls->product_id,
+						':status'	=>	1,
+						':stock_type'	=>	1,
+						':seller_id'	=>	$_SESSION['USER_ID']
+					];
+					// check from product_stock_transaction 
+					$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $where, $params, 'stock');
+					
+					// after cart add check stock
+					
+					$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
+					$product_name = $general_cls_call->cart_product_name($product_dtls->name);
+					
+					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
+					$unitname = $unit_dtls->name;
+					
+					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					
+					$available_stock = $stock_used->total;
+					
+					$stockArr[] = [
+						"product_name" => $product_name,
+						"variant_name" => $p_variant_name,
+						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
+					];
+				}
+				echo json_encode($stockArr);
 		break;
     }
 ?>

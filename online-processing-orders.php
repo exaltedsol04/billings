@@ -117,7 +117,7 @@
 									
 									<div class="col-md-4">
 										<label for="input5" class="form-label">Order type</label>
-										<select class="form-control" name="order_type">
+										<select class="form-select select2-dropdown" tabindex="1" name="order_type">
 											<option value="">Select..</option>
 											<option value="slot">Slot</option>
 											<option value="instant">Instant</option>
@@ -235,12 +235,15 @@
 												}
 												
 												// package man
-												/*$fields = "";
-												$tables = ORDERS . " o
-												INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
-												LEFT JOIN " . USERS . " u ON u.id = o.user_id
-												INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = o.active_status
-												LEFT JOIN " . ORDERS_STATUSES . " os ON os.order_id = o.id AND os.status = o.active_status";*/
+												$fieldsPac = "ad.username";
+												$wherePac = "WHERE poa.order_id=:order_id";
+												
+												$tablesPac = PACKAGING_OPERATORS . " po
+												INNER JOIN " . PACKAGING_OPERATORS_ASSIGN . " poa ON poa.packaging_operator_id = po.id
+												LEFT JOIN " . ADMIN_MASTER . " ad ON ad.id = po.admin_id";
+												$paramsPac = [ ':order_id'=> $arr->id];
+												
+												$sqlPacQuery = $general_cls_call->select_join_query($fieldsPac, $tablesPac, $wherePac, $paramsPac, 1);
 										?>
 										  <tr id="dataRow<?php echo($arr->id);?>">
 											<td><?PHP echo $arr->id; ?></td>
@@ -252,7 +255,7 @@
 											<td><?php echo $to_be_delivered; ?></td>
 											<td><?php echo $remaining_delivery_time; ?></td>
 											<td><?php echo $arr->orders_status_list_status; ?></td>
-											<td></td>
+											<td><?php echo !empty($sqlPacQuery->username) ? $sqlPacQuery->username : 'N/A' ?></td>
 											<td><?php echo !empty($arr->delivery_boys_name) ? $sqldeliv->delivery_boys_name : 'N/A' ?></td>
 											<td class="text-center"><a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
 											<span class="material-icons-outlined fs-5">visibility</span>

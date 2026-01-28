@@ -13,20 +13,14 @@
 			{
 				$erMsg = "Stock Quantity Greater Than Available Stock.";
 			}
-			elseif($product_variant_id == '')
-			{
-				$erMsg = "Please select the unit.";
-			}
 			else{
-				//echo "<pre>";print_r($_POST);die;
+				//echo "<pre>";print_r($_POST);
 				$explode_product = explode("@@@", $product);
-				$product_variant_id = $product_variant_id;
+				$product_variant_id = $explode_product[6];
 				$product_id = $explode_product[0];
 				$stock = $stock;
-				
-				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id AND product_id=:product_id", array(':id'=> $product_variant_id, ':product_id'=>$product_id), 1);
-				$selling_price = $product_variant_dtls->discounted_price;
-				$purchase_price = $product_variant_dtls->price;
+				$selling_price = $explode_product[1];
+				$purchase_price = $explode_product[7];
 				
 				$field = "seller_id, product_variant_id, product_id, stock, stock_type, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id, approved_by, approved_date, order_id";
 				$value = ":seller_id, :product_variant_id, :product_id, :stock, :stock_type, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
@@ -142,41 +136,45 @@
 								<select name="product" id="product" onchange=product_stock_show(this.value) class="form-select select2-dropdown" tabindex="1">
 								<option value="">Select...</option>
 								<?PHP
-										$fields = "*";
-										$tables = PRODUCTS;
-										$where = "WHERE 1 ORDER BY name";
-										$params = [];
-										$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
-										//echo "<pre>"; print_r($sqlQuery);die;
-										if($sqlQuery[0] != '')
-										{
-											foreach($sqlQuery as $arr)
-											{	
-												$barcode = $arr->barcode;
-												
-												$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
-									?>
-												<option value="<?PHP echo $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name); ?>" <?php echo ($_POST['product'] == $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name)) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name); ?></option>
-									<?PHP
-											}
+									$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, p.name, p.image, p.barcode, pv.id as pvid, pv.discounted_price, pv.price";
+									$tables = PRODUCT_STOCK_TRANSACTION . " pr
+									INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+									INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+									$where = "WHERE pr.status=:status AND pr.stock_type=:stock_type AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+									$params = [
+										':status' => 1,
+										':stock_type' => 1,
+										':seller_id' => $_SESSION['USER_ID'],
+									];
+									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+									if($sqlQuery[0] != '')
+									{
+										foreach($sqlQuery as $arr)
+										{	
+											$barcode = $arr->barcode;
+											$barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
+								?>
+											<option value="<?PHP echo $arr->product_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->stock_unit_name.'@@@'.$arr->pvid.'@@@'.$arr->price; ?>" <?php   echo ($_POST['product'] == $arr->product_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->stock_unit_name.'@@@'.$arr->pvid.'@@@'.$arr->price) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
+								<?PHP
 										}
-									?>
+									}
+								?>
 							</select>
+							<span id="stock-check-div"></span>
 							</div>
-							<div class="col-md-6">
+							<div class="col-md-12">
 								<label for="input5" class="form-label">Unit</label>
-								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1" onchange="unit_measurement(this.value)">
+								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1">
 									<option value="">Select...</option>
 								</select>
 							</div>
-							<div class="col-md-6">
+							<div class="col-md-12">
 								<label for="input5" class="form-label">Stock Quantity</label>
 								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="<?php echo isset($_POST['stock']) ? $_POST['stock'] : '' ?>">
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<input type="hidden" id="stock_limit" name="stock_limit" value="<?php echo isset($_POST['stock_limit']) ? $_POST['stock_limit'] : '' ?>">
-							<input type="hidden" id="hid_product_id">
-							<span id="stock-check-div"></span>
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid align-items-center gap-3">
 									<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-primary px-5">Assign</button>
@@ -198,15 +196,6 @@
 
 </html>
 <script>
-$(document).ready(function() {
-	let product = $('#product').val();
-	if(product !='')
-	{
-		product_stock_show(product)
-	}
-});
-
-
 function product_stock_show(product)
 {
 	$('#stock-check-div').html('');
@@ -214,10 +203,8 @@ function product_stock_show(product)
 	$('#check-stock-pay-div').html('');
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
-	$('#hid_product_id').val(pid);
-	//let pvid = parseInt(myArray[6]);
-	//var datapost = 'action=onlineProductStock&pvid=' + pvid + '&pid=' + pid;
-	var datapost = 'action=onlineProductStock&pid=' + pid;
+	let pvid = parseInt(myArray[6]);
+	var datapost = 'action=onlineProductStock&pvid=' + pvid + '&pid=' + pid;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -226,25 +213,29 @@ function product_stock_show(product)
 			var result = JSON.parse(response);
 			//alert(result.length);
 			if (result.length > 0) {
-				var htmlsel = '<option value="">Select...</option>';
+				var html = '<div class="col-md-5">';
 				$.each(result, function (i, stock) {
-					htmlsel += '<option value='+ stock.product_variant_id +'>' + stock.variant_name + '</option>';
+					html += '<div class="row align-items-start border-bottom py-2">';
+						html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
+						html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
+						html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
+					html += '</div>';
+					$('#stock_limit').val(stock.variant_stock)
 				});
-				$('#product_variant_id').html(htmlsel);
+				html += '</div>';
+				
+				$('#stock-check-div').html(html);
 			}
-			else{
-				var htmlsel = '<option value="">Select...</option>';
-				$('#product_variant_id').html(htmlsel);
-			}
+			
+			get_unit_measurement(pvid);
 		}
 	});
 }
 
-function unit_measurement(pvid)
+function get_unit_measurement(pid)
 {
 	//alert(pid);
-	let pid = $('#hid_product_id').val();
-	var datapost = 'action=onlineCheckVariant&pvid=' + pvid + '&pid=' + pid;
+	var datapost = 'action=getProductVariant&pid='+pid;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -252,19 +243,11 @@ function unit_measurement(pvid)
 		success: function(response){
 			var result = JSON.parse(response);
 			if (result.length > 0) {
-				var html = '<div class="col-md-5">';
-				$.each(result, function (i, stock) {
-					//alert(stock.product_variant_id);
-					html += '<div class="row align-items-start border-bottom py-2">';
-						html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
-						html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
-						html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
-					html += '</div>';
-					$('#stock_limit').val(stock.variant_stock);
+				var html = '<option value="">Select...</option>';
+				$.each(result, function (i, variants) {
+					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname + '</option>';
 				});
-				html += '</div>';
-				
-				$('#stock-check-div').html(html);
+				$('#product_variant_id').html(html);
 			}
 		}
 	});

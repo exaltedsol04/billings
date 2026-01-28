@@ -54,11 +54,12 @@
 									<th class="text-center">Mobile</th>
 									<th class="text-center">Status</th>
 									<th>Availability Status</th>
+									<th class="text-center">Action</th>
 								  </tr>
 								</thead>
 								<tbody>
 									<?php
-									$fields = "s.id, s.name, s.store_name, s.email, s.mobile, s.status, s.categories, c.id as category_id, c.name as category_name";
+									$fields = "s.id, s.admin_id, s.name, s.store_name, s.email, s.mobile, s.status, s.categories, c.id as category_id, c.name as category_name";
 									$tables = SELLERS . " s INNER JOIN " . CATEGORIES . " c ON c.id = s.categories";
 									$where = "WHERE 1 ORDER BY s.name";
 									$params = [];
@@ -79,6 +80,12 @@
 										<td class="text-center"><?PHP echo $selectValue->mobile; ?></td>
 										<td><?PHP echo $selectValue->status == 1 ? 'Active' : 'Inactive'; ?></td>
 										<td></td>
+										<td><a href="<?php echo SITE_URL.'seller-edit'; ?>?seller_id=<?php echo($selectValue->id);?>">
+										<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success" title = "Edit seller" data-bs-toggle="tooltip">
+											<i class="fadeIn animated bx bx-edit-alt"></i>
+										</div>
+										
+										</td>
 									  </tr>
 										<?PHP
 												$i++;
