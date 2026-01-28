@@ -43,7 +43,7 @@
   <link href="sass/semi-dark.css" rel="stylesheet">
   <link href="sass/bordered-theme.css" rel="stylesheet">
   <link href="sass/responsive.css" rel="stylesheet">
-<?php if($page=='online-completed-orders.php') {  ?>
+<?php if($page=='online-completed-orders.php' || $page=='online-processing-orders.php') {  ?>
 	<!-- Date Range Picker CSS -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <?php } ?>
