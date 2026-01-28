@@ -4,6 +4,75 @@
 	$pageAccessRoleIds = [1,3];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
+	
+	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	{
+		$fromDate = $_POST['fromDate'];
+		$toDate = $_POST['toDate'];
+		//$whereDateRange = "AND os.created_at >= :fromDate AND os.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+		
+		if($_SESSION['ROLE_ID'] == 1)
+		{
+			if(!empty($_POST['order_type']))
+			{
+				$whereDateRange = "AND o.order_type=:order_type  AND os.created_at >= :fromDate AND os.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+				$params = [
+					':active_status' => 3,
+					':fromDate' => $_POST['fromDate'],
+					':toDate'   => $_POST['toDate'],
+					':order_type'   => $_POST['order_type']
+				];
+			}
+			else{
+				$whereDateRange = "AND os.created_at >= :fromDate AND os.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+				$params = [
+					':active_status' => 3,
+					':fromDate' => $_POST['fromDate'],
+					':toDate'   => $_POST['toDate']
+				];
+			}
+		}
+		else{
+			if(!empty($_POST['order_type']))
+			{
+				$whereDateRange = "AND o.order_type=:order_type  AND os.created_at >= :fromDate AND os.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+				$params = [
+					':active_status' => 3,
+					':seller_id'=> $_SESSION['SELLER_ID'],
+					':fromDate' => $_POST['fromDate'],
+					':toDate'   => $_POST['toDate'],
+					':order_type'   => $_POST['order_type']
+				];
+			}
+			else
+			{
+				$whereDateRange = "AND os.created_at >= :fromDate AND os.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+				$params = [
+					':active_status' => 3,
+					':seller_id'=> $_SESSION['SELLER_ID'],
+					':fromDate' => $_POST['fromDate'],
+					':toDate'   => $_POST['toDate']
+				];
+			}
+		}
+	}
+	else
+	{
+		$whereDateRange = 'AND DATE(os.created_at) = CURDATE()';
+		if($_SESSION['ROLE_ID'] == 1)
+		{
+			$params = [
+				':active_status' => 3
+			];
+		}
+		else{
+			$params = [
+				':seller_id'=> $_SESSION['SELLER_ID'],
+				':active_status'=> 3
+			];
+		}
+	}
+		
 
 	ob_end_flush();
 ?>
@@ -32,6 +101,38 @@
 					</div>
 				</div>
 				<!--end breadcrumb-->
+				<h6 class="mb-0 text-uppercase">Search panel</h6>
+						<hr>
+						<div class="card">
+							<div class="card-body">
+								<form class="row g-4" method="post" action="">
+									<div class="col-md-4">
+										<label for="input1" class="form-label">From date</label>
+										<input type="text" name="fromDate" id="fromDate" class="form-control" placeholder="Start Date" readonly>
+									</div>
+									<div class="col-md-4">
+										<label for="input5" class="form-label">To date</label>
+										<input type="text" name="toDate" id="toDate" class="form-control" placeholder="End Date" readonly>
+									</div>
+									
+									<div class="col-md-4">
+										<label for="input5" class="form-label">Order type</label>
+										<select class="form-select select2-dropdown" tabindex="1" name="order_type">
+											<option value="">Select..</option>
+											<option value="slot">Slot</option>
+											<option value="instant">Instant</option>
+										</select>
+									</div>
+									
+									<div class="col-md-12">
+									  <div class="d-md-flex d-grid justify-content-md-between">
+										<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
+										<button type="submit" class="btn btn-grd btn-grd-danger px-4" name="btnUser" value="SAVE">Search</button>
+									  </div>
+									</div>
+								</form>
+							</div>
+						</div>
      
 				<div class="card">
 					<div class="card-body">
@@ -66,26 +167,28 @@
 								<?php
 									if($_SESSION['ROLE_ID'] == 1) {
 										$where = "WHERE oi.active_status=:active_status
+										". $whereDateRange ."
 											  GROUP BY oi.order_id
 											  ORDER BY 
 												  CASE 
 													  WHEN o.order_type = 'slot' THEN o.from_time
 													  ELSE o.created_at
 												  END DESC";
-										$params = [':active_status'=> 3];	
+										//$params = [':active_status'=> 3];	
 									} else {
 										$where = "WHERE oi.seller_id=:seller_id 
 											  AND oi.active_status=:active_status
+											  ". $whereDateRange ."
 											  GROUP BY oi.order_id
 											  ORDER BY 
 												  CASE 
 													  WHEN o.order_type = 'slot' THEN o.from_time
 													  ELSE o.created_at
 												  END DESC";
-										$params = [
+										/*$params = [
 											':seller_id'=> $_SESSION['SELLER_ID'],
 											':active_status'=> 3
-										];
+										];*/
 									}
 									
 									$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.created_at, o.active_status, SUM(oi.sub_total) AS orders_items_sub_total, u.name AS customer_name, osl.status AS orders_status_list_status, os.created_at AS orders_statuses_created_at";
@@ -132,12 +235,15 @@
 												}
 												
 												// package man
-												/*$fields = "";
-												$tables = ORDERS . " o
-												INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
-												LEFT JOIN " . USERS . " u ON u.id = o.user_id
-												INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = o.active_status
-												LEFT JOIN " . ORDERS_STATUSES . " os ON os.order_id = o.id AND os.status = o.active_status";*/
+												$fieldsPac = "ad.username";
+												$wherePac = "WHERE poa.order_id=:order_id";
+												
+												$tablesPac = PACKAGING_OPERATORS . " po
+												INNER JOIN " . PACKAGING_OPERATORS_ASSIGN . " poa ON poa.packaging_operator_id = po.id
+												LEFT JOIN " . ADMIN_MASTER . " ad ON ad.id = po.admin_id";
+												$paramsPac = [ ':order_id'=> $arr->id];
+												
+												$sqlPacQuery = $general_cls_call->select_join_query($fieldsPac, $tablesPac, $wherePac, $paramsPac, 1);
 										?>
 										  <tr id="dataRow<?php echo($arr->id);?>">
 											<td><?PHP echo $arr->id; ?></td>
@@ -149,7 +255,7 @@
 											<td><?php echo $to_be_delivered; ?></td>
 											<td><?php echo $remaining_delivery_time; ?></td>
 											<td><?php echo $arr->orders_status_list_status; ?></td>
-											<td></td>
+											<td><?php echo !empty($sqlPacQuery->username) ? $sqlPacQuery->username : 'N/A' ?></td>
 											<td><?php echo !empty($arr->delivery_boys_name) ? $sqldeliv->delivery_boys_name : 'N/A' ?></td>
 											<td class="text-center"><a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
 											<span class="material-icons-outlined fs-5">visibility</span>
@@ -190,7 +296,47 @@
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/adminFooter.php"); ?>
 <!-- ######### FOOTER END ############### -->
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script>
+$(function () {
+
+  let start = moment().startOf('today');
+  let end   = moment().endOf('today');
+
+  function setDates(start, end) {
+    $('#fromDate').val(start.format('YYYY-MM-DD'));
+    $('#toDate').val(end.format('YYYY-MM-DD'));
+  }
+
+	// Apply picker on FROM field (controls both)
+	$('#fromDate').daterangepicker({
+		startDate: start,
+		endDate: end,
+		autoUpdateInput: false,
+		parentEl: 'body',          // ⭐ FIX POSITION
+		opens: 'right',            // open next to input
+		drops: 'down',             // force downward
+		locale: {
+			cancelLabel: 'Clear'
+		}
+	});
+
+
+  // When range selected
+  $('#fromDate').on('apply.daterangepicker', function (ev, picker) {
+      setDates(picker.startDate, picker.endDate);
+  });
+
+  // Clear
+  $('#fromDate').on('cancel.daterangepicker', function () {
+      $('#fromDate, #toDate').val('');
+  });
+
+  // Set default
+  setDates(start, end);
+});
+
 $(document).ready(function(){
 	if ($.fn.DataTable.isDataTable('#example2')) {
 		$('#example2').DataTable().destroy();
