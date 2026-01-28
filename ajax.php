@@ -612,7 +612,7 @@
 			} else {
 				$data['status'] = 400;
 				$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
-					<div class="text-white"><strong>Error!</strong> No operator found.</div>
+					<div class="text-white"><strong>Error!</strong> No status found.</div>
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 				</div>';
 			} 	
@@ -661,7 +661,7 @@
 			
 				$data['status'] = 200;
 				$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
-					<div class="text-white"><strong>Success!</strong> Operator assigned successfully.</div>
+					<div class="text-white"><strong>Success!</strong> Order status changed successfully.</div>
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 				</div>';
 				

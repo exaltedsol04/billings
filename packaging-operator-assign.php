@@ -50,6 +50,8 @@
 								<td></td>
 								<td></td>
 								<td></td>
+								<td></td>
+								<td></td>
 							</tr>
 						  <tr>
 							<th style="width:100px">Order Id</th>
@@ -57,7 +59,9 @@
 							<th class="text-center">Total Amount</th>
 							<th class="text-center">Order Date</th>
 							<th class="text-center">Delivery</th>
-							<th>Delivery Type/Slot</th>
+							<th>Delivery Type</th>
+							<th>To be delivered</th>
+							<th>Remaining Delivery Time</th>
 							<th>Order Status</th>
 							<th class="text-center">Action</th>
 						  </tr>
@@ -85,12 +89,12 @@
 											  ELSE o.created_at
 										  END DESC";
 								$params = [
-									':seller_id'=> $_SESSION['USER_ID'],
+									':seller_id'=> $_SESSION['SELLER_ID'],
 									':active_status'=> 2
 								];
 							}
 							
-							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.created_at, SUM(oi.sub_total) AS orders_items_sub_total, u.name AS customer_name, osl.status AS orders_status_list_status";
+							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, SUM(oi.sub_total) AS orders_items_sub_total, u.name AS customer_name, osl.status AS orders_status_list_status";
 
 							$tables = ORDERS . " o
 							INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
@@ -107,14 +111,25 @@
 								
 								foreach($sqlQuery as $k=>$arr)
 								{
-									$final_total = 0;											
-									$deliveryTime = trim($arr->delivery_time);
+									$final_total = 0;
+									
+									$delivery_time		= $arr->created_at;
+									$to_be_delivered	= $arr->instant_delivery_time;
+									$delivery_max_time = $general_cls_call->add_minutes($arr->created_at,  $arr->instant_delivery_time);
+									if($arr->order_type=='slot') {
+										$delivery_time = $arr->from_time;
+										$to_be_delivered = $general_cls_call->time_diff($arr->from_time, $arr->to_time);
+										$delivery_max_time = $arr->to_time;
+									}
+									$current_time = date('Y-m-d H:i:s');		
+									$remaining_delivery_time = $general_cls_call->time_diff($current_time, $delivery_max_time);										
+									/*$deliveryTime = trim($arr->delivery_time);
 									if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
 									{
 										$deliveryType = $matches[1];
 									} else {
 										$deliveryType = $general_cls_call->time_ago($deliveryTime);
-									}
+									}*/
 									$final_total = $arr->orders_items_sub_total;
 									if($_SESSION['ROLE_ID'] == 1) {
 										$final_total += $arr->packing_charge;
@@ -124,12 +139,14 @@
 								<td><?PHP echo $arr->id; ?></td>
 								<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>
 								<td class="text-center">₹<?PHP echo $final_total; ?></td>
-								<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at); ?></td>
+								<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>'; ?></td>
 								<td class="text-center">--</td>
-								<td><?PHP echo  $deliveryType; ?></td>
+								<td><?PHP echo $arr->order_type; ?></td>
+								<td><?php echo $to_be_delivered; ?></td>
+								<td><?php echo $remaining_delivery_time; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
 								<td class="d-flex align-items-center gap-3">
-									<a href="javascript:void(0)" class="text-success font-text2" onclick="assignOperator(<?php echo($arr->id);?>)">
+									<!--<a href="javascript:void(0)" class="text-success font-text2" onclick="assignOperator(<?php echo($arr->id);?>)">
 										<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success">
 											<i class="lni lni-checkmark-circle fs-5"></i>
 										</div>
@@ -138,6 +155,9 @@
 										<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning">
 											<span class="material-icons-outlined fs-5">visibility</span>
 										</div>
+									</a>-->
+									<a href="<?php echo SITE_URL.'online-order-packaging-operator-assign'; ?>?order_id=<?php echo($arr->id);?>">
+										<button type="button" class="btn btn-success raised d-flex gap-2" title = "Assign order" data-bs-toggle="tooltip"><i class="lni lni-checkmark-circle fs-5"></i>Assign</button>
 									</a>
 								</td>
 							  </tr>

@@ -58,7 +58,7 @@
 									<th class="text-center">Total Amount</th>
 									<th class="text-center">Order Date</th>
 									<th class="text-center">Delivery</th>
-									<th>Delivery Type/Slot</th>
+									<th>Delivery Type</th>
 									<th>To be delivered</th>
 									<th>Remaining Delivery Time</th>
 									<th>Deliver min/hrs</th>
@@ -121,13 +121,13 @@
 											$current_time = date('Y-m-d H:i:s');		
 											$remaining_delivery_time = $general_cls_call->time_diff($current_time, $delivery_max_time);
 											
-											$deliveryTime = trim($arr->delivery_time);
+											/*$deliveryTime = trim($arr->delivery_time);
 											if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
 											{
 												$deliveryType = $matches[1];
 											} else {
 												$deliveryType = $general_cls_call->time_ago($deliveryTime);
-											}
+											}*/
 											//calculate time
 											//calculate total
 											$final_total = $arr->orders_items_sub_total;
@@ -146,9 +146,9 @@
 										<td><?PHP echo $arr->id; ?></td>
 										<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>
 										<td class="text-center">₹<?PHP echo $final_total; ?></td>
-										<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at); ?></td>
+										<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>'; ?></td>
 										<td class="text-center"><span class="d-none"><?PHP echo $delivery_time; ?></span><?PHP echo $general_cls_call->change_date_format($delivery_time, 'j M Y g:i A'); ?></td>
-										<td><?PHP echo  $deliveryType; ?></td>
+										<td><?PHP echo $arr->order_type; ?></td>
 										<td><?php echo $to_be_delivered; ?></td>
 										<td><?php echo $remaining_delivery_time; ?></td>
 										<td><?php echo $deliver_in; ?></td>

@@ -5,7 +5,7 @@
           <img src="assets/images/logo-icon.png" class="logo-img" alt="">
         </div>
         <div class="logo-name flex-grow-1">
-          <h5 class="mb-0">Maxton</h5>
+          <h5 class="mb-0"><?php echo SITE_TITLE; ?></h5>
         </div>
         <div class="sidebar-close">
           <span class="material-icons-outlined">close</span>
@@ -112,7 +112,7 @@
 				<li><a href="<?php echo SITE_URL.'barcode'; ?>"><i class="material-icons-outlined">arrow_right</i>Barcode</a></li>
 			  </ul>
 			</li>
-			<li <?php if($page=='packaging-operator-add.php' || $page=='packaging-operator-list.php' || $page=='packaging-operator-assign.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='packaging-operator-add.php' || $page=='packaging-operator-list.php' || $page=='packaging-operator-assign.php' || $page=='online-order-packaging-operator-assign.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">inventory_2</i>
 				</div>

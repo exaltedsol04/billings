@@ -71,19 +71,19 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Assigned Order Details</a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Details</a>
 								</li>
 							</ol>
 						</nav>
 					</div>
-					<?php if($orderData->active_status == 3) { ?>
+					<?php if($orderData->active_status == 2) { ?>
 					<div class="ms-auto">
 						<div class="btn-group">
 							<button type="button" class="btn btn-primary">Action</button>
 							<button type="button" class="btn btn-primary split-bg-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">	<span class="visually-hidden">Toggle Dropdown</span>
 							</button>
 							<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end">	
-								<a class="dropdown-item" href="javascript:;" onclick="orderStatusChange(<?php echo($orderData->id);?>)">Change Status</a>
+								<a class="dropdown-item" href="javascript:;" onclick="assignOperator(<?php echo($orderData->id);?>)">Assign Operator</a>
 							</div>
 						</div>
 					</div>
@@ -379,11 +379,11 @@
 </div>
 <!--end main wrapper-->
 <!-- Modal -->
-	<div class="modal fade" id="orderStatusModal">
+	<div class="modal fade" id="assignModal">
 	  <div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 		  <div class="modal-header border-bottom-0 py-2 bg-grd-info">
-			<h5 class="modal-title btn-grd">Change Order Status</h5>
+			<h5 class="modal-title btn-grd">Assign Packaging Operator</h5>
 			<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
 			  <i class="material-icons-outlined">close</i>
 			</a>
@@ -392,8 +392,8 @@
 			<div class="form-body">
 			  <form name="frm" action="" method="post" class="row g-3">
 				<div class="col-md-12">
-				  <label for="order_status_id" class="form-label">Choose status</label>
-				  <select id="order_status_id" class="form-select select2-dropdown mx-auto">
+				  <label for="operator_id" class="form-label">Choose operator</label>
+				  <select id="operator_id" class="form-select select2-dropdown mx-auto">
 				  </select>
 				</div>
 				<div class="col-md-12" id="no_operator"></div>
@@ -402,7 +402,7 @@
 					<input type="hidden" id="order_id" name="order_id">
 					
 					<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
-					<button type="button" id="orderStatusChangeSave" class="btn btn-grd btn-grd-danger px-4">Update Status</button>
+					<button type="button" id="assignOperatorSave" class="btn btn-grd btn-grd-danger px-4">Assign Operator</button>
 				  </div>
 				</div>
 			  </form>
@@ -415,14 +415,14 @@
 	<?PHP include_once("includes/adminFooter.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
-function orderStatusChange(orderId)
+function assignOperator(orderId)
 {
 	$('#no_operator').html('');
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
 		data: {
-		  action: 'orderStatusList',
+		  action: 'operatorList',
 		  order_id: orderId
 		},
 		dataType: "json",
@@ -432,54 +432,59 @@ function orderStatusChange(orderId)
 				$.each(response.rec, function (i, r) {
 					html += '<option value="'+ r.id +'"> '+ r.name +' </option>';
 				});
-				$('#orderStatusModal').find('#order_status_id').html(html);
-				$('#orderStatusModal').find('#order_id').val(orderId);
-				$('#orderStatusModal').modal('show');
+				$('#assignModal').find('#operator_id').html(html);
+				$('#assignModal').find('#order_id').val(orderId);
+				$('#assignModal').modal('show');
 			} else if (response.status == 400) {
-				$('#orderStatusModal').find('#order_status_id').html(html);
-				$('#orderStatusModal').find('#no_operator').html(response.msg);
-				$('#orderStatusModal').modal('show');
+				$('#assignModal').find('#operator_id').html(html);
+				$('#assignModal').find('#no_operator').html(response.msg);
+				$('#assignModal').modal('show');
 			} else {
-				$('#orderStatusModal').find('#order_status_id').html('');
-				$('#orderStatusModal').find('#no_operator').html('');
-				$('#orderStatusModal').modal('hide');
+				$('#assignModal').find('#operator_id').html('');
+				$('#assignModal').find('#no_operator').html('');
+				$('#assignModal').modal('hide');
 			}
 		}
 	});
 }
-$(document).on('click', '#orderStatusChangeSave', function (e) {
+$(document).on('click', '#assignOperatorSave', function (e) {
   e.preventDefault();
 
-  // Example data (change to your fields)
-  let order_status_id = $('#order_status_id').val();
-  
+  let operator_id = $('#operator_id').val();
   $('#no_operator').html('');
-  if(order_status_id == '')
+  if(operator_id == '')
   {
-	  $('#no_operator').html('<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show"><div class="text-white"><strong>Error!</strong> Please choose status.</div><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+	  $('#no_operator').html('<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show"><div class="text-white"><strong>Error!</strong> Please choose operator.</div><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
 	  return false;
   }
-  
+  // Example data (change to your fields)
+  let operatorId = $('#operator_id').val();
   let orderId    = $('#order_id').val();
+
   $.ajax({
     url: "<?PHP echo SITE_URL; ?>ajax",
     type: 'POST',
     data: {
-      action: 'order_status_change_save',
-      order_status_id: order_status_id,
+      action: 'assign_operator_save',
+      packaging_operator_id: operatorId,
       order_id: orderId
     },
 	dataType: "json",
     beforeSend: function () {
-      $('#orderStatusChangeSave').prop('disabled', true).text('Assigning...');
+      $('#assignOperatorSave').prop('disabled', true).text('Assigning...');
     },
     success: function (response) {
 		//var result = JSON.parse(response);
 		if (response.status == 200) {
 			console.log(response);
 			$('#msg').html(response.msg);
-			$('#orderStatusModal').find('#order_status_id').html('');
-			$('#orderStatusModal').modal('hide');
+			$('#assignModal').find('#operator_id').html('');
+			$('#assignModal').modal('hide');
+			window.open(
+				"<?= SITE_URL ?>print_packaging_operator_invoice?order_id=" + orderId,
+				"_blank"
+			);
+			
 			setTimeout(() => {
 				window.location.reload();
 			}, 2000);
@@ -490,7 +495,7 @@ $(document).on('click', '#orderStatusChangeSave', function (e) {
       alert('Something went wrong');
     },
     complete: function () {
-      $('#orderStatusChangeSave').prop('disabled', false).text('Update Status');
+      $('#assignOperatorSave').prop('disabled', false).text('Assign Operator');
     }
   });
 

@@ -4,7 +4,7 @@
 	//echo $page;die;
 ?>
 <!doctype html>
-<html lang="en" data-bs-theme="<?php echo $_SESSION['ROLE_ID']==1 ? 'light' : 'semi-dark'; ?>">
+<html lang="en" data-bs-theme="<?php echo $_SESSION['ROLE_ID']==1 ? 'light' : ($_SESSION['ROLE_ID']==5 ? 'blue-theme' : 'semi-dark'); ?>">
 
 <head>
   <meta charset="utf-8">
@@ -27,6 +27,8 @@
   <?php } ?>
   <!--bootstrap css-->
   <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+
+
   <link rel="stylesheet" href="assets/css/extra-icons.css">
   <?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php' || $page=='barcode.php' || $page=='approved-purchase-report.php' || $page=='available-online-report.php' || $page=='invoices-view.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view'  || $page=='seller-list.php' || $page=='online-orders.php' || $page=='online-completed-orders.php'  || $page=='online-processing-orders.php' || $page=='packaging-operator-list.php' || $page=='packaging-operator-assign.php' || $page=='online-assigned-orders.php' || $page=='online-packaging-operator-orders.php') {  ?>	
   <link href="assets/plugins/datatable/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
@@ -41,7 +43,10 @@
   <link href="sass/semi-dark.css" rel="stylesheet">
   <link href="sass/bordered-theme.css" rel="stylesheet">
   <link href="sass/responsive.css" rel="stylesheet">
-
+<?php if($page=='online-completed-orders.php') {  ?>
+	<!-- Date Range Picker CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<?php } ?>
 </head>
 
 <body>

@@ -39,12 +39,13 @@
 								<form class="row g-4" method="post">
 									<div class="col-md-6">
 										<label for="input1" class="form-label">From date</label>
-										<input type="text" class="form-control" id="input1" name="from_date" value="">
+										<input type="text" id="fromDate" class="form-control" placeholder="Start Date" readonly>
 									</div>
 									<div class="col-md-6">
 										<label for="input5" class="form-label">To date</label>
-										<input type="text" name="to_date" value="" class="form-control" id="input5">
+										<input type="text" id="toDate" class="form-control" placeholder="End Date" readonly>
 									</div>
+									
 									<div class="col-md-12">
 									  <div class="d-md-flex d-grid justify-content-md-between">
 										<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
@@ -74,7 +75,7 @@
 									<th class="text-center">Total Amount</th>
 									<th class="text-center">Order Date</th>
 									<th class="text-center">Delivery</th>
-									<th>Delivery Type/Slot</th>
+									<th>Delivery Type</th>
 									<th>To be delivered</th>
 									<th>Deliver min/hrs</th>
 									<th>Order Status</th>
@@ -135,13 +136,13 @@
 													$delivery_max_time = $arr->to_time;
 												}
 											
-												$deliveryTime = trim($arr->delivery_time);
+												/*$deliveryTime = trim($arr->delivery_time);
 												if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
 												{
 													$deliveryType = $matches[1];
 												} else {
 													$deliveryType = $general_cls_call->time_ago($deliveryTime);
-												}
+												}*/
 												// calculate final amount
 												$final_total = $arr->orders_items_sub_total;
 												if($_SESSION['ROLE_ID'] == 1) {
@@ -160,9 +161,9 @@
 											<td><?PHP echo $arr->id; ?></td>
 											<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>
 											<td class="text-center">₹<?PHP echo $final_total; ?></td>
-											<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>';; ?></td>
+											<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>'; ?></td>
 											<td class="text-center">--</td>
-											<td><?PHP echo  $deliveryType; ?></td>
+											<td><?PHP echo  $arr->order_type; ?></td>
 											<td><?php echo $to_be_delivered; ?></td>
 											<td><?php echo $deliver_in; ?></td>
 											<td><?php echo $arr->orders_status_list_status; ?></td>
@@ -204,7 +205,50 @@
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/adminFooter.php"); ?>
 <!-- ######### FOOTER END ############### -->
+
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script>
+
+$(function () {
+
+  let start = moment().startOf('month');
+  let end   = moment().endOf('month');
+
+  function setDates(start, end) {
+    $('#fromDate').val(start.format('YYYY-MM-DD'));
+    $('#toDate').val(end.format('YYYY-MM-DD'));
+  }
+
+	// Apply picker on FROM field (controls both)
+	$('#fromDate').daterangepicker({
+		startDate: start,
+		endDate: end,
+		autoUpdateInput: false,
+		parentEl: 'body',          // ⭐ FIX POSITION
+		opens: 'right',            // open next to input
+		drops: 'down',             // force downward
+		locale: {
+			cancelLabel: 'Clear'
+		}
+	});
+
+
+  // When range selected
+  $('#fromDate').on('apply.daterangepicker', function (ev, picker) {
+      setDates(picker.startDate, picker.endDate);
+  });
+
+  // Clear
+  $('#fromDate').on('cancel.daterangepicker', function () {
+      $('#fromDate, #toDate').val('');
+  });
+
+  // Set default
+  setDates(start, end);
+});
+
+
 $(document).ready(function(){
 	if ($.fn.DataTable.isDataTable('#example2')) {
 		$('#example2').DataTable().destroy();

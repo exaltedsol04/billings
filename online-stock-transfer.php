@@ -141,8 +141,12 @@
 									INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 									INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-									$where = "WHERE pr.status=1 AND pr.seller_id ='" .$_SESSION['USER_ID']. "' GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
-									$params = [];
+									$where = "WHERE pr.status=:status AND pr.stock_type=:stock_type AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+									$params = [
+										':status' => 1,
+										':stock_type' => 1,
+										':seller_id' => $_SESSION['USER_ID'],
+									];
 									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 									if($sqlQuery[0] != '')
 									{
@@ -151,7 +155,7 @@
 											$barcode = $arr->barcode;
 											$barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 								?>
-											<option value="<?PHP echo $arr->product_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->unit_name.'@@@'.$arr->pvid.'@@@'.$arr->price; ?>" <?php   echo ($_POST['product'] == $arr->product_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->unit_name.'@@@'.$arr->pvid.'@@@'.$arr->price) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
+											<option value="<?PHP echo $arr->product_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->stock_unit_name.'@@@'.$arr->pvid.'@@@'.$arr->price; ?>" <?php   echo ($_POST['product'] == $arr->product_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->stock_unit_name.'@@@'.$arr->pvid.'@@@'.$arr->price) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
 								<?PHP
 										}
 									}
@@ -167,7 +171,7 @@
 							<input type="hidden" id="stock_limit" name="stock_limit" value="<?php echo isset($_POST['stock_limit']) ? $_POST['stock_limit'] : '' ?>">
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid align-items-center gap-3">
-									<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-primary px-5">Transfer</button>
+									<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-primary px-5">Assign</button>
 								</div>
 							</div>
 						</form>

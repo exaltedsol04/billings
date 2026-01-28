@@ -17,7 +17,7 @@
 		
 		//--------------------------
 		
-		if($_SESSION['USER_ID'] == 1)
+		if($_SESSION['ROLE_ID'] == 1)
 		{
 			$where = "WHERE orders_id=:orders_id";
 			$params = [
