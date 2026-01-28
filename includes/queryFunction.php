@@ -484,7 +484,62 @@
 			return $dt->format('Y-m-d H:i:s');
 		}
 		
-		function callAPI($method, $url, $data = [], $headers = [])
+		function checkAuth()
+		{
+			$headers = getallheaders();
+			$token = str_replace('Bearer ', '', $headers['Authorization'] ?? '');
+			
+			$dataArr = $this->select_query("*", PACKAGING_OPERATORS, "WHERE api_token=:token AND token_expiry > NOW()", array(':token'=>$token), 1);
+			
+			if (!$dataArr) {
+				http_response_code(401);
+				exit(json_encode(["status"=>false, "message"=>"Unauthorized"]));
+			}
+			$data['packaging_operator_id'] = $dataArr->id;
+			$data['packaging_operator_admin_id'] = $dataArr->admin_id;
+			return $data;
+		}
+		function callAPI($method, $url, $data = [], $token = null)
+		{
+			$ch = curl_init();
+
+			$headers = [
+				"Content-Type: application/json"
+			];
+
+			// Add token if exists
+			if ($token) {
+				$headers[] = "Authorization: Bearer " . $token;
+			}
+
+			if ($method == "POST") {
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+			}
+
+			if ($method == "GET" && !empty($data)) {
+				$url .= "?" . http_build_query($data);
+			}
+
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+			$response = curl_exec($ch);
+
+			if (curl_errno($ch)) {
+				return ["status"=>false, "error"=>curl_error($ch)];
+			}
+
+			curl_close($ch);
+			
+			//print_r($response);
+
+			return json_decode($response, true);
+		}
+
+		
+		/*function callAPI($method, $url, $data = [], $headers = [])
 		{
 			$ch = curl_init();
 
@@ -507,7 +562,7 @@
 			//print_r($data);
 
 			return json_decode($response, true);
-		}
+		}*/
 
 
 	}

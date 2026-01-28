@@ -6,7 +6,9 @@
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	//ob_start();
 	
-	$dataArray = $general_cls_call->callAPI("POST", SITE_URL."api/online-packaging-operator-orders", ["operator_id"=>$_SESSION['PACKAGING_OPERATOR_ID']]);
+	//print_r($_SESSION['PACKAGING_OPERATOR_ID']);die;
+	
+	$dataArray = $general_cls_call->callAPI("POST", SITE_URL."api/online-packaging-operator-orders", ["operator_id"=>$_SESSION['PACKAGING_OPERATOR_ID']], $_SESSION['API_TOKEN']);
 	
 	//echo "<pre>";print_r($dataArray);die;
 	//ob_end_flush();

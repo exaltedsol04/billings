@@ -21,8 +21,23 @@
 				}
 				
 				if($_SESSION['ROLE_ID'] == 5) {
-					$operator = $general_cls_call->select_query("id", PACKAGING_OPERATORS, "WHERE admin_id=:admin_id", array(':admin_id'=>$user->id), 1);
+					// Create random secure token
+					$api_token = bin2hex(random_bytes(32)); // 64 char token
+					// Expiry (optional)
+					$token_expiry = date('Y-m-d H:i:s', strtotime('+7 days'));
+					$setValues="api_token=:api_token, token_expiry=:token_expiry";
+					$updateExecute=array(
+						':api_token'		=>$general_cls_call->specialhtmlremover($api_token),
+						':token_expiry'		=> $token_expiry,
+						':admin_id'			=> $user->id
+					);
+					$whereClause=" WHERE admin_id=:admin_id";
+					$general_cls_call->update_query(PACKAGING_OPERATORS, $setValues, $whereClause, $updateExecute);
+					
+					$operator = $general_cls_call->select_query("id, api_token, admin_id", PACKAGING_OPERATORS, "WHERE admin_id=:admin_id", array(':admin_id'=>$user->id), 1);
+					
 					$_SESSION['PACKAGING_OPERATOR_ID'] = $operator->id;
+					$_SESSION['API_TOKEN'] = $operator->api_token;
 				}
 				
 				$_SESSION['USERNAME'] = $user->username;

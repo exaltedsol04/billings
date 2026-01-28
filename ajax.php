@@ -672,7 +672,7 @@
 		
 		case "packaging_operator_order_status":
 			extract($_POST);
-			$dataArray = $general_cls_call->callAPI("POST", SITE_URL."api/packaging-operator-orders-save", ["status"=>$order_status_id, 'order_id'=>$order_id, "user_id"=>$_SESSION['USER_ID'], 'role_id'=>$_SESSION['ROLE_ID']]);
+			$dataArray = $general_cls_call->callAPI("POST", SITE_URL."api/packaging-operator-orders-save", ["status"=>$order_status_id, 'order_id'=>$order_id, 'role_id'=>$_SESSION['ROLE_ID']], $_SESSION['API_TOKEN']);
 			//echo $data['msg'];
 			//echo "<pre>";print_r($dataArray);die;
 			if($dataArray['status'] == 200)

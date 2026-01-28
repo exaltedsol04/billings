@@ -86,6 +86,11 @@ ALTER TABLE `bl_order_items` CHANGE `active_status` `active_status` INT(10) NOT 
 ALTER TABLE `bl_packaging_operators_assign` CHANGE `assign_by` `assign_by` INT(10) NOT NULL COMMENT 'admins table id';
 ALTER TABLE `bl_packaging_operators_assign` CHANGE `packaging_operator_id` `packaging_operator_id` INT(10) NOT NULL COMMENT 'packaging_operators table id';
 
+============== 28-01-2026========================
+ALTER TABLE `bl_packaging_operators` ADD `api_token` VARCHAR(100) NOT NULL AFTER `status`, ADD `token_expiry` DATETIME NULL DEFAULT NULL AFTER `api_token`; 
+
+INSERT INTO `bl_order_status_lists` (`id`, `status`) VALUES ('4', 'Packed');
+
 
 
 

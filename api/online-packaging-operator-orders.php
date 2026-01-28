@@ -1,13 +1,20 @@
 <?PHP 
 	//error_reporting(0);
 	include_once '../init.php';
-	//============= for api =========
-	header('Content-Type: application/json');
-	//echo $_POST['operator_id'];die;
-	$operatorId = $_POST['operator_id'];
 	
+	$authData = $general_cls_call->checkAuth();
+	header("Content-Type: application/json");
+	// Read JSON body
+	$data = json_decode(file_get_contents("php://input"), true);
 
-	if ($operatorId == 0) {
+	$operatorId = $data['operator_id'] ?? 0;
+
+	if (!$operatorId) {
+		echo json_encode(["status"=>false, "message"=>"Operator ID missing"]);
+		exit;
+	}	
+
+	if (!$operatorId) {
 		$data['status'] = 400;
 		$data['message'] = 'operator_id required';
 	}
