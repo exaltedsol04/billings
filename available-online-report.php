@@ -59,14 +59,14 @@
 								];
 							  
 							  $qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
-							  
-							  $qty_used = !empty($qty_used) ? $qty_used : 0;
+							 
+							  $qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
 					?>
                      <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $k+1 ?></td>
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td><?PHP echo $arr->total_stock - $qry_used ?></td>
+						<td><?PHP echo $arr->total_stock - $qty_used ?></td>
 						<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
 					</tr>
 						<?PHP
