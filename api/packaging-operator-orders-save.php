@@ -1,19 +1,26 @@
 <?PHP 
 	//error_reporting(0);
 	include_once '../init.php';
+	echo $_SESSION['TOKEN_TYPE'];die;
+	/*$authData = $general_cls_call->checkAuth($_SESSION['TOKEN_TYPE']);
 	
-	$authData = $general_cls_call->checkAuth();
-	header("Content-Type: application/json");
-	// Read JSON body
-	$data = json_decode(file_get_contents("php://input"), true);
-	
-	//print_r($data);die;
-	
-	$order_status_id = $data['status'] ?? 0;
-	$order_id = $data['order_id'] ?? 0;
-	$role_id = $data['role_id'] ?? 0;
-	//$order_status_id = $_POST['status'];
-	//$order_id = $_POST['order_id'];
+	if($authData['token_type'] == 'app') {
+		$order_status_id = 4;
+	    $order_id = $_POST['order_id'] ?? 0;
+	    $role_id = 5;
+	} else {
+		header("Content-Type: application/json");
+	    // Read JSON body
+	    $data = json_decode(file_get_contents("php://input"), true);
+		print_r($data);die;
+	    $order_status_id = $data['status'] ?? 0;
+    	$order_id = $data['order_id'] ?? 0;
+    	$role_id = $data['role_id'] ?? 0;
+	}*/
+	/*echo $order_status_id.'<br/>';
+	echo $order_id.'<br/>';
+	echo $role_id.'<br/>';
+	print_r($authData);die;*/
 	
 	$setValues="status=:status";
 	$updateExecute=array(
@@ -21,39 +28,48 @@
 		':order_id'		=> $order_id
 	);
 	$whereClause=" WHERE order_id = :order_id";
-	$general_cls_call->update_query(PACKAGING_OPERATORS_ASSIGN, $setValues, $whereClause, $updateExecute);
-	
-	//insert order statuses
-	$field = "order_id, status, created_by, user_type, created_at";
-	$value = ":order_id, :status, :created_by, :user_type, :created_at";
-	$addExecute=array(
-		':order_id'				=> $order_id,
-		':status'				=> $order_status_id,
-		//':created_by'			=> $_POST['user_id'],
-		':created_by'			=> $authData['packaging_operator_admin_id'],
-		':user_type'			=> $role_id,
-		':created_at'			=> date("Y-m-d H:i:s")
-	);
-	$general_cls_call->insert_query(ORDERS_STATUSES, $field, $value, $addExecute);				
-	//update orders
-	$setValues="active_status=:active_status";
-	$updateExecute=array(
-		':active_status'	=> $order_status_id,
-		':order_id'			=> $order_id
-	);
-	$whereClause=" WHERE id = :order_id";
-	$general_cls_call->update_query(ORDERS, $setValues, $whereClause, $updateExecute);
-	//update orders items
-	$setValues="active_status=:active_status";
-	$updateExecute=array(
-		':active_status'	=> $order_status_id,
-		':order_id'			=> $order_id
-	);
-	$whereClause=" WHERE order_id = :order_id";
-	$general_cls_call->update_query(ORDERS_ITEMS, $setValues, $whereClause, $updateExecute);
-
-	$data['status'] = 200;
-	$data['msg'] = 'Packaging completed successfully.';
+	$okOne = $general_cls_call->update_query(PACKAGING_OPERATORS_ASSIGN, $setValues, $whereClause, $updateExecute);
+	if($okOne) {
+		//insert order statuses
+		$field = "order_id, status, created_by, user_type, created_at";
+		$value = ":order_id, :status, :created_by, :user_type, :created_at";
+		$addExecute=array(
+			':order_id'				=> $order_id,
+			':status'				=> $order_status_id,
+			//':created_by'			=> $_POST['user_id'],
+			':created_by'			=> $authData['packaging_operator_admin_id'],
+			':user_type'			=> $role_id,
+			':created_at'			=> date("Y-m-d H:i:s")
+		);
+		$okTwo = $general_cls_call->insert_query(ORDERS_STATUSES, $field, $value, $addExecute);		
+	}
+	if($okTwo) {	
+		//update orders
+		$setValues="active_status=:active_status";
+		$updateExecute=array(
+			':active_status'	=> $order_status_id,
+			':order_id'			=> $order_id
+		);
+		$whereClause=" WHERE id = :order_id";
+		$okThree = $general_cls_call->update_query(ORDERS, $setValues, $whereClause, $updateExecute);
+	}
+	if($okThree) {	
+		//update orders items
+		$setValues="active_status=:active_status";
+		$updateExecute=array(
+			':active_status'	=> $order_status_id,
+			':order_id'			=> $order_id
+		);
+		$whereClause=" WHERE order_id = :order_id";
+		$okFour = $general_cls_call->update_query(ORDERS_ITEMS, $setValues, $whereClause, $updateExecute);
+	}
+	if($okFour) {
+		$data['status'] = 200;
+		$data['msg'] = 'Packaging completed successfully.';
+	} else {
+		$data['status'] = 400;
+		$data['msg'] = 'Something went wrong.';
+	}	
 	echo json_encode($data);exit;
 
 ?>

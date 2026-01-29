@@ -1,14 +1,20 @@
 <?PHP 
-	//error_reporting(0);
+	error_reporting(0);
 	include_once '../init.php';
+			
+	$authData = $general_cls_call->checkAuth($_SESSION['TOKEN_TYPE']);
+	//print_r($authData);die;
 	
-	$authData = $general_cls_call->checkAuth();
-	header("Content-Type: application/json");
-	// Read JSON body
-	$data = json_decode(file_get_contents("php://input"), true);
-
-	$operatorId = $data['operator_id'] ?? 0;
-
+	if($authData['token_type'] == 'app') {
+		$operatorId = $authData['packaging_operator_id'] ?? 0;
+	} else {
+		header("Content-Type: application/json");
+		// Read JSON body
+		$data = json_decode(file_get_contents("php://input"), true);
+		$operatorId = $data['operator_id'] ?? 0;
+	}	
+	
+	//echo $operatorId;die;
 	if (!$operatorId) {
 		echo json_encode(["status"=>false, "message"=>"Operator ID missing"]);
 		exit;

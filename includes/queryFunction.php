@@ -483,21 +483,61 @@
 
 			return $dt->format('Y-m-d H:i:s');
 		}
+		function getBearerToken()
+        {
+            $headers = [];
+        
+            if (function_exists('getallheaders')) {
+                $headers = getallheaders();
+            }
+        
+            // 1. Normal
+            if (!empty($headers['Authorization'])) {
+                return str_replace('Bearer ', '', $headers['Authorization']);
+            }
+        
+            // 2. Apache
+            if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+                return str_replace('Bearer ', '', $_SERVER['HTTP_AUTHORIZATION']);
+            }
+        
+            // 3. Nginx
+            if (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+                return str_replace('Bearer ', '', $_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+            }
+        
+            return null;
+        }
+
 		
-		function checkAuth()
+		function checkAuth($token_type = '')
 		{
-			$headers = getallheaders();
-			$token = str_replace('Bearer ', '', $headers['Authorization'] ?? '');
+			if($token_type == 'web') {
+				$token = $_SESSION['API_TOKEN'];
+			} else {
+				$token = $this->getBearerToken();
+			}
+            if (!$token) {
+                http_response_code(401);
+                exit(json_encode(["status"=>false, "message"=>"Token missing"]));
+            }
 			
 			$dataArr = $this->select_query("*", PACKAGING_OPERATORS, "WHERE api_token=:token AND token_expiry > NOW()", array(':token'=>$token), 1);
-			
+				//print_r($dataArr);die;
 			if (!$dataArr) {
 				http_response_code(401);
 				exit(json_encode(["status"=>false, "message"=>"Unauthorized"]));
 			}
-			$data['packaging_operator_id'] = $dataArr->id;
-			$data['packaging_operator_admin_id'] = $dataArr->admin_id;
-			return $data;
+			if (!$dataArr) {
+                http_response_code(401);
+                exit(json_encode(["status"=>false, "message"=>"Unauthorized"]));
+            }
+        
+            return [
+                'packaging_operator_id'         => $dataArr->id,
+                'token_type'                    => $dataArr->token_type,
+                'packaging_operator_admin_id'   => $dataArr->admin_id
+            ];
 		}
 		function callAPI($method, $url, $data = [], $token = null)
 		{
@@ -533,7 +573,7 @@
 
 			curl_close($ch);
 			
-			//print_r($response);
+		//	print_r($response);
 
 			return json_decode($response, true);
 		}

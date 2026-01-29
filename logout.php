@@ -2,9 +2,10 @@
 	include_once 'init.php';
 	
 	if($_SESSION['ROLE_ID'] == 5) {
-		$setValues="api_token=:api_token";
+		$setValues="api_token=:api_token, token_type=:token_type";
 		$updateExecute=array(
 			':api_token'	=> NULL,
+			':token_type'	=> NULL,
 			':id'			=> $_SESSION['PACKAGING_OPERATOR_ID']
 		);
 		$whereClause=" WHERE id=:id";

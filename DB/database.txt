@@ -88,6 +88,7 @@ ALTER TABLE `bl_packaging_operators_assign` CHANGE `packaging_operator_id` `pack
 
 ============== 28-01-2026========================
 ALTER TABLE `bl_packaging_operators` ADD `api_token` VARCHAR(100) NOT NULL AFTER `status`, ADD `token_expiry` DATETIME NULL DEFAULT NULL AFTER `api_token`; 
+ALTER TABLE `bl_packaging_operators` ADD `token_type` VARCHAR(50) NOT NULL AFTER `token_expiry`;
 
 INSERT INTO `bl_order_status_lists` (`id`, `status`) VALUES ('4', 'Packed');
 

@@ -38,6 +38,7 @@
 					
 					$_SESSION['PACKAGING_OPERATOR_ID'] = $operator->id;
 					$_SESSION['API_TOKEN'] = $operator->api_token;
+					$_SESSION['TOKEN_TYPE'] = 'web';
 				}
 				
 				$_SESSION['USERNAME'] = $user->username;
