@@ -31,12 +31,16 @@
 					$qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
 				 
 					$qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
-					$result['data'][] =
-						[ 
-							'product_id' => $arr->p_id,
-							'product_variant_id' => $arr->product_variant_id,
-							'stock' => $arr->total_stock - $qty_used
-						];
+					$stock_available = $arr->total_stock - $qty_used;
+					if($stock_available > 0)
+					{
+						$result['data'][] =
+							[ 
+								'product_id' => $arr->p_id,
+								'product_variant_id' => $arr->product_variant_id,
+								'stock' => $arr->total_stock - $qty_used
+							];
+					}
 								  
 			}
 			$result['status'] = 200;
