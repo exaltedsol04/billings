@@ -523,13 +523,14 @@
 		function checkAuth()
 		{
 			// WEB → from session
-			if (!empty($_SESSION['API_TOKEN'])) {
+		    if (!empty($_SESSION['API_TOKEN'])) {
 				$token = $_SESSION['API_TOKEN'];
 			} 
 			// APP → from header
 			else {
 				$token = $this->getBearerToken();
 			}
+			//$token = '35f941263a511579bac9402baabd4cf107076b9b9e57c6dbcc79440562b181d5';
 	
             if (!$token) {
                 http_response_code(401);
@@ -590,6 +591,7 @@
 			//print_r($response);
 
 			return json_decode($response, true);
+			
 		}
 
 		
