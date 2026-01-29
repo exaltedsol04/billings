@@ -37,7 +37,7 @@
                     </thead>
                     <tbody>
 					<?php 
-						$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode";
+						$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode ,pv.id as product_variant_id";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
@@ -45,17 +45,28 @@
 						$where = "WHERE pr.stock_type=2 AND pr.status=1 AND pr.seller_id ='" .$_SESSION['USER_ID']. "' GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
 						$params = [];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+						//echo "<pre>";print_r($sqlQuery);die;
 						if($sqlQuery[0] != '')
 						{
 							$i = 1;
 							foreach($sqlQuery as $k=>$arr)
 							{	
+							  $whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status AND seller_id=:seller_id";
+							  $paramsOrdItm = [
+									':product_variant_id' => $arr->product_variant_id,
+									':seller_id' => $_SESSION['SELLER_ID'],
+									'active_status' => 7
+								];
+							  
+							  $qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
+							  
+							  $qty_used = !empty($qty_used) ? $qty_used : 0;
 					?>
                      <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $k+1 ?></td>
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td><?PHP echo $arr->total_stock ?></td>
+						<td><?PHP echo $arr->total_stock - $qry_used ?></td>
 						<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
 					</tr>
 						<?PHP
