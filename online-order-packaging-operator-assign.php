@@ -77,7 +77,7 @@
 						</nav>
 					</div>
 					<?php if($orderData->active_status == 2) { ?>
-					<div class="ms-auto">
+					<!--<div class="ms-auto">
 						<div class="btn-group">
 							<button type="button" class="btn btn-primary">Action</button>
 							<button type="button" class="btn btn-primary split-bg-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">	<span class="visually-hidden">Toggle Dropdown</span>
@@ -86,7 +86,7 @@
 								<a class="dropdown-item" href="javascript:;" onclick="assignOperator(<?php echo($orderData->id);?>)">Assign Operator</a>
 							</div>
 						</div>
-					</div>
+					</div>-->
 					<?php } ?>
 				</div>
 				<!--end breadcrumb-->
@@ -186,17 +186,30 @@
                     <h5 class="mb-0 fw-bold">Total :</h5>
                     <h5 class="mb-0 fw-bold">₹<?php echo number_format($orderData->packing_charge + $subtotal) ?></h5>
                   </div>
+				   <?php if($orderData->active_status == 2) { ?>
+					<div class="col-12 mt-4">
+						<a href="javascript:;" onclick="assignOperator(<?php echo($orderData->id);?>)">
+							<div class="d-grid">
+								<button type="button" class="btn btn-primary">Assign Operator</button>
+							</div>
+						</a>
+					</div>
+					<?php 
+					}
+				  ?>
                 </div>
+				 
               </div>
+			 
             </div>
-           </div>
+			</div>
          </div><!--end row-->
 
 
          <h5 class="fw-bold mb-4">Billing Details</h5>
          <div class="card">
             <div class="card-body">
-              <div class="row g-3 row-cols-1 row-cols-lg-4">
+              <div class="row g-3 row-cols-1 row-cols-lg-3">
                 <div class="col">
                   <div class="d-flex align-items-start gap-3 border p-3 rounded">
                     <div class="detail-icon fs-5">
@@ -221,7 +234,7 @@
                   </div>
                 </div>
 
-                <div class="col">
+                <!--<div class="col">
                   <div class="d-flex align-items-start gap-3 border p-3 rounded">
                     <div class="detail-icon fs-5">
                       <i class="bi bi-telephone-fill"></i>
@@ -231,7 +244,7 @@
                       <a href="javascript:;" class="mb-0"><?php echo $orderData->mobile ? $orderData->mobile : 'NA'; ?></a>
                     </div>
                   </div>
-                </div>
+                </div>-->
 
                 <div class="col">
                   <div class="d-flex align-items-start gap-3 border p-3 rounded">

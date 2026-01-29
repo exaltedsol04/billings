@@ -53,7 +53,14 @@
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td class="text-center">
+						<?php 
+						if(!empty($arr->barcode))
+						{
+						?>
 							<a href = "javascript:void(0)" onclick="printBarcode('<?php echo($arr->barcode);?>')" title = "Click here to Print Barcode"><i class="material-icons-outlined">printer</i></a>
+							<?php 
+						}
+						?>
 						</td>
 					</tr>
 						<?PHP

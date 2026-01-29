@@ -30,8 +30,21 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
 	];
 	$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 	
-	
+//-----	package man data====
+$fields = "po.*";
+$tables = PACKAGING_OPERATORS . " po
+INNER JOIN " . PACKAGING_OPERATORS_ASSIGN . " poa ON poa.packaging_operator_id = po.id";
+$where = "WHERE poa.order_id=:order_id";
+$params = [
+	':order_id' => $_GET['order_id']
+  ];
+$sqlPacQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
+//echo "<pre>";print_r($sqlPacQuery);die;
+
+// for QR code 
+$qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode( $_GET['order_id']);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -167,6 +180,7 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
     <div class="divider"></div>
 	<div class="center bold" style="font-size:20px;margin-bottom:10px;">Order Id #<?php echo $_GET['order_id']; ?></div>
     <div class="small">
+	    Packaging Person: <?php echo $sqlPacQuery->name;?> (<?php echo $sqlPacQuery->mobile;?>)<br>
         Place of Supply & State Code: 27 MH<br>
 		<?php 
 		if(!empty($customer->name))
@@ -257,7 +271,12 @@ $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' =
             <td></td>
             <td class="right">₹<?= $tot_amt  ?></td>
         </tr>
-    </table>
+	</table>
+	<div class="divider"></div>
+	<div class="qr">
+        <!--real QR image -->
+        <img src="<?= $qrUrl ?>" alt="QR Code">
+    </div>
 
 </div>
 

@@ -611,7 +611,7 @@
 			$fields = "id, status";
 			$tables = ORDERS_STATUS_LISTS;
 			$where = "WHERE id=:id";
-			$params = [':id'=>5];
+			$params = [':id'=>4];
 			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);		
 			
 			if (!empty($sqlQuery)) {
@@ -749,6 +749,107 @@
 					];
 				}
 				echo json_encode($stockArr);
+		break;
+		case "purchaseAccept":
+				$accept_status = $_POST['accept_status'];
+				$stock_transaction_id = $_POST['stock_transaction_id'];
+				$qty = $_POST['qty'];
+				//echo $status.' '.$stock_transaction_id;
+				$field = "stock";
+				$where = "WHERE id=:id";
+				$params = [
+					':id' => $stock_transaction_id
+				];
+				$stock_data = $general_cls_call->select_query($field, PRODUCT_STOCK_TRANSACTION, $where, $params, 1);
+				//echo $stock_data->stock;
+				if($accept_status==1)
+				{
+					$setValues="status=:status, seller_accept_status=:seller_accept_status";
+					$updateExecute=array(
+						':status'	=> 1,
+						':seller_accept_status'	=> 1,
+						':id'		=> $stock_transaction_id
+					);
+					$whereClause=" WHERE id = :id";
+					$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+					
+					$data['status'] = 200;
+					$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+						<div class="text-white"><strong>Success!</strong> Status updated successfully</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>';
+				}
+				elseif($accept_status==2 || $accept_status==4)
+				{
+					if($qty <= $stock_data->stock)
+					{
+						$res['status_name'] = $accept_status==2 ? 'Damage' : 'Short fall';
+						$res['previous_qty'] = $stock_data->stock;
+						$res['updated_qty'] = $qty;
+						$seller_accept_remark = json_encode($res);
+						
+						
+						$setValues="status=:status, stock=:stock, seller_accept_status=:seller_accept_status, seller_accept_remark=:seller_accept_remark";
+						$updateExecute=array(
+							':status'	=> 1,
+							':seller_accept_status'	=> $accept_status,
+							':stock'	=> $qty,
+							':seller_accept_remark'	=> $seller_accept_remark,
+							':id'		=> $stock_transaction_id
+						);
+						$whereClause=" WHERE id=:id";
+						$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+						
+						$data['status'] = 200;
+						$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+						<div class="text-white"><strong>Success!</strong> Stock updated successfully</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>';
+					}
+					else{
+						$data['status'] = 400;
+						$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+							<div class="text-white"><strong>Error!</strong> Input quantity exceed than stock available</div>
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>';
+					}
+				}
+				elseif($accept_status==3)
+				{
+					if($qty >= $stock_data->stock)
+					{
+						$res['status_name'] = 'Exceed';
+						$res['previous_qty'] = $stock_data->stock;
+						$res['updated_qty'] = $qty;
+						$seller_accept_remark = json_encode($res);
+						
+						$setValues="status=:status, stock=:stock, seller_accept_status=:seller_accept_status, seller_accept_remark=:seller_accept_remark";
+						$updateExecute=array(
+							':status'	=> 1,
+							':seller_accept_status'	=> $accept_status,
+							':stock'	=> $qty,
+							':seller_accept_remark'	=> $seller_accept_remark,
+							':id'		=> $stock_transaction_id
+						);
+						$whereClause=" WHERE id=:id";
+						$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+						
+						$data['status'] = 200;
+						$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+						<div class="text-white"><strong>Success!</strong> Stock updated successfully</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>';
+					}
+					else{
+						$data['status'] = 400;
+						$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+							<div class="text-white"><strong>Error!</strong> Input quantity less than stock available</div>
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>';
+					}
+				}
+				
+			echo json_encode($data);
 		break;
     }
 ?>

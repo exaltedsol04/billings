@@ -94,6 +94,7 @@
 			  </a>
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'purchase-request'; ?>"><i class="material-icons-outlined">arrow_right</i>Request</a></li>
+				<li><a href="<?php echo SITE_URL.'purchase-accept'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Accept</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Report</a></li>
 				<li><a href="<?php echo SITE_URL.'approved-purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Purchase</a></li>
 			  </ul>
