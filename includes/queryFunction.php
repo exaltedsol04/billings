@@ -509,14 +509,28 @@
             return null;
         }
 
-		
-		function checkAuth($token_type = '')
+		function getRequestData()
 		{
-			if($token_type == 'web') {
+			$data = json_decode(file_get_contents("php://input"), true);
+
+			if (!empty($data)) {
+				return $data; // JSON (App)
+			}
+
+			return $_POST; // Form-data (Web)
+		}
+
+		function checkAuth()
+		{
+			// WEB → from session
+			if (!empty($_SESSION['API_TOKEN'])) {
 				$token = $_SESSION['API_TOKEN'];
-			} else {
+			} 
+			// APP → from header
+			else {
 				$token = $this->getBearerToken();
 			}
+	
             if (!$token) {
                 http_response_code(401);
                 exit(json_encode(["status"=>false, "message"=>"Token missing"]));
@@ -573,7 +587,7 @@
 
 			curl_close($ch);
 			
-		//	print_r($response);
+			//print_r($response);
 
 			return json_decode($response, true);
 		}

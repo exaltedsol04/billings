@@ -1,9 +1,8 @@
 <?PHP 
 	//error_reporting(0);
 	include_once '../init.php';
-	echo $_SESSION['TOKEN_TYPE'];die;
-	/*$authData = $general_cls_call->checkAuth($_SESSION['TOKEN_TYPE']);
-	
+
+	$authData = $general_cls_call->checkAuth();	
 	if($authData['token_type'] == 'app') {
 		$order_status_id = 4;
 	    $order_id = $_POST['order_id'] ?? 0;
@@ -12,16 +11,16 @@
 		header("Content-Type: application/json");
 	    // Read JSON body
 	    $data = json_decode(file_get_contents("php://input"), true);
-		print_r($data);die;
+		//print_r($data);
 	    $order_status_id = $data['status'] ?? 0;
     	$order_id = $data['order_id'] ?? 0;
     	$role_id = $data['role_id'] ?? 0;
-	}*/
+	}
+	
 	/*echo $order_status_id.'<br/>';
 	echo $order_id.'<br/>';
 	echo $role_id.'<br/>';
-	print_r($authData);die;*/
-	
+	echo json_encode($data);exit;*/
 	$setValues="status=:status";
 	$updateExecute=array(
 		':status'		=> $order_status_id,
