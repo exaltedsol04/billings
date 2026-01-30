@@ -52,7 +52,7 @@
 								<form class="row g-4" method="post" action="">
 									<div class="col-md-4">
 										<label for="input5" class="form-label">Vendor</label>
-										<select name="vendor_id" id="vendor_id" class="form-select select2-dropdown" tabindex="1">
+										<select name="vendor_id" id="vendor_id" class="form-select select2-dropdown" tabindex="1" required>
 										<option value="">Select...</option>
 										<?php 
 											$fields = "*";
