@@ -40,7 +40,7 @@
 		$paramsOrder = [
 				':orders_id' => $_GET['order_id']
 			];
-		$sqlOrder = $general_cls_call->select_query("id", ORDERS, $whereOrder, $paramsOrder, 1);
+		$sqlOrder = $general_cls_call->select_query("id, orders_id, mobile, address", ORDERS, $whereOrder, $paramsOrder, 1);
 				
 		//echo "<pre>";print_r($sqlQuery);die;
 		
@@ -58,6 +58,8 @@
 		// get the packing charge
 		
 		$packing = $general_cls_call->select_query("packing_charge", ORDERS, "WHERE orders_id=:orders_id", [':orders_id' => $_GET['order_id']], 1);
+		
+		
 		
 	}
 ?>
@@ -107,21 +109,28 @@
 							 </address>
 							</div>
 						  </div>
+						  <?php 
+						  if(!empty($sqlOrder->address) && !empty($sqlOrder->mobile))
+						  {
+						  ?>
 						  <div class="col">
 						   <div class="">
 							 <small>to</small>
 							 <address class="m-t-5 m-b-5">
-								<?php echo $sqlQuery[0]->address ?><br>
-								Phone: <?php echo $sqlQuery[0]->mobile ?><br>
+								<?php echo $sqlOrder->address ?><br>
+								Phone: <?php echo $sqlOrder->mobile ?><br>
 							 </address>
 							</div>
 						 </div>
+						 <?php 
+						  }
+						 ?>
 						 <div class="col">
 						   <div class="">
 							 <small>Invoice</small>
 							 <div class=""><b><?PHP echo $general_cls_call->change_date_format($sqlQuery[0]->created_at, 'j M Y g:i A'); ?></b></div>
 							 <div class="invoice-detail">
-								#<?php echo $sqlOrder->id ;?><br>
+								#<?php echo $sqlOrder->orders_id ;?><br>
 							 </div>
 						   </div>
 						 </div>

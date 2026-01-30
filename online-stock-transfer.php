@@ -73,6 +73,17 @@
 				);
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 				
+				//------- add stock to product variant table-----
+				$product_variant_stock = $product_variant_dtls->stock;
+				$setValuesPv = "stock=:stock";
+				$updateExecutePv=array(
+					':stock' => $product_variant_stock + $stock,
+					':product_id'	=> $product_id,
+					':id'	=> $product_variant_id
+				);
+				$whereClausePv=" WHERE  product_id=:product_id AND id=:id";
+				$general_cls_call->update_query(PRODUCT_VARIANTS, $setValuesPv, $whereClausePv, $updateExecutePv);
+				
 				$sucMsg = "Stock Inserted Successfully";
 			}
 		}
