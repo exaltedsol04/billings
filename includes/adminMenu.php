@@ -57,6 +57,7 @@
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'purchase-stock-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Add</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a></li>
+				<li><a href="<?php echo SITE_URL.'approved-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Stock List</a></li>
 			  </ul>
 			</li>
 			

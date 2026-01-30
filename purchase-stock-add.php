@@ -7,7 +7,7 @@
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
 	{	
 		extract($_POST);
-		if($product != '' && $stock !='')
+		if($product != '' && $stock !='' && $purchase_price !='')
 		{
 			//echo "<pre>";print_r($_POST);die;
 			if($_POST['selling_price'] > $_POST['purchase_price'])
@@ -18,8 +18,8 @@
 				//$product_variant_id = $explode_product[1];
 				
 				$remarks = !empty($remarks) ? $remarks : null;
-				$field = "vendor_id, product_id, product_variant_id, stock, status, remarks, created_at, updated_at";
-				$value = ":vendor_id, :product_id, :product_variant_id, :stock, :status, :remarks, :created_at, :updated_at";
+				$field = "vendor_id, product_id, product_variant_id, stock, status,  purchase_price, remarks, created_at, updated_at";
+				$value = ":vendor_id, :product_id, :product_variant_id, :stock, :status, :purchase_price, :remarks, :created_at, :updated_at";
 					
 					//parent_id
 				$addExecute=array(
@@ -28,11 +28,12 @@
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
 					':stock'				=> $stock,
 					':status'				=> 0,
+					':purchase_price'		=> $general_cls_call->specialhtmlremover($purchase_price),
 					':remarks'				=> $remarks,
 					':created_at' 			=> date('Y-m-d H:i:s'),
 					':updated_at'		    => date('Y-m-d H:i:s')
 				);
-				//$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
+				$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
 				$sucMsg = "Stock Inserted Successfully";
 			}
 			else{
@@ -139,28 +140,16 @@
 									<option value="">Select...</option>
 								</select>
 							</div>
-							
-							<div class="col-md-6">
+
+							<div class="col-md-6 purchase-div"  style="display:none">
 								<label for="input5" class="form-label">Purchase price</label>
-								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+								<input type="text" class="form-control" id="purchase_price" name="purchase_price" placeholder="Purchase price" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 								<span class="text-danger" id="err_stock"></span>
 							</div>
-							<div class="col-md-6">
-								<label for="input5" class="form-label">Selling price</label>
-								<select name="" id="" class="form-select select2-dropdown" tabindex="1">
-									<option value="">Select...</option>
-								</select>
+							<div class="col-md-6 selling-div"  style="display:none">
+								<label for="input5" class="form-label"></label>
+								<div id="selling_price_div" class="w-100"></div>
 							</div>
-							<!--<div class="prices-div" style="">
-								<div class="col-md-6">
-									<label for="input5" class="form-label">Purchase price</label>
-									<input type="text" class="form-control" name="purchase_price" id="purchase_price" placeholder="Purchase price" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-									<span class="text-danger" id="err_stock"></span>
-								</div>
-								<div class="col-md-6 d-flex align-items-end">
-									<div id="selling_price_div" class="w-100"></div>
-								</div>
-							</div>-->
 							<div class="col-md-12">
 								<label for="input5" class="form-label">Vendors</label>
 								<select name="vendor_id" id="vendor_id" class="form-select select2-dropdown" tabindex="1">
@@ -214,7 +203,8 @@
 function select_product(product)
 {
 	$('#selling_price_div').html('');
-	$('.prices-div').hide();
+	$('.purchase-div').hide();
+	$('.selling-div').hide();
 	
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
@@ -245,19 +235,9 @@ function get_selling_price(val)
 		success: function(response){
 			//alert(response.status);alert(response.discount_price);
 			$('#selling_price').val(response.discount_price);
-			$('.prices-div').show();
-			/*var html = '<div class="col-md-5">';
-				html += '<div class="row align-items-start border-bottom py-2">';
-					html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">Selling price</span>';
-					html += '<span class="col-md-3 text-nowrap" style="color:#A300A3">₹' + response.discount_price + '</span>';
-				html += '</div>';
-			html += '</div>';*/
-			
-			/*var html = '<div class="border-bottom py-2"><span class="fw-bold" style="color:#A300A3">Selling price:</span><span style="color:#A300A3"> ₹ ' + response.discount_price + '</span></div>';*/
-			
-			var html = '<div class="text-end"><span class="fw-bold" style="color:#A300A3">Selling price:</span><span style="color:#A300A3">' + response.discount_price + '</span></div>';
-			
-
+			$('.purchase-div').show();
+			$('.selling-div').show();
+			var html = '<div class="text-left;"><span class="fw-bold" style="color:#A300A3; font-size:20px;">Selling price:</span><span style="color:#A300A3; font-size:20px;"> ₹ ' + response.discount_price + '</span></div>';
 			$('#selling_price_div').html(html);
 		}
 	});
