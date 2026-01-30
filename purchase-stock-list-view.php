@@ -196,7 +196,6 @@
 						</div>
 					</div>
 				</div>
-			<input type="text" id="msgval" value="<?php !empty($sucMsg) ?>">
     </div>
   </main>
   <!--end main wrapper-->
