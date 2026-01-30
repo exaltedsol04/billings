@@ -158,8 +158,8 @@
 							<td></td>
 							<td></td>
 						</tr>
-                      <tr  class="text-center">
-						<th>Sl. No.</th>
+                      <tr>
+						<th class="text-center">Sl. No.</th>
 						<th>Barcode</th>
 						<th>Product Name</th>
 						<th>Qty.</th>
@@ -198,12 +198,12 @@
 								$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
 								$unitname = $unit_dtls->name;
 					?>
-									  <tr id="dataRow<?php echo($arr->id);?>"  class="text-center">
+									  <tr id="dataRow<?php echo($arr->id);?>">
 										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
 										<td><?PHP echo $key+1; ?></td>
 										<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
-										<td><input type="text" value="<?PHP echo $arr->pqty ?>" class="form-control form-control-sm qty"></td>
+										<td><input type="text" value="<?PHP echo $arr->pqty ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9]/g, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
 										<td><?PHP echo $arr->measurement.' '.$unitname; ?></td>
 										<td><?PHP echo $arr->username; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
@@ -281,6 +281,16 @@ $(document).on('click', '.approveBtn', function(e){
 
     let url = $(this).attr('href');
     let qty = $(this).closest('tr').find('.qty').val();
+	
+	let row = $(this).closest('tr');
+	let errorBox = row.find('.qty-error');
+	errorBox.hide().text('');
+	if(qty == '' || qty == 0)
+	{
+		errorBox.text('Stock required').show();
+        qtyInput.focus();
+		return false;
+	}
 
     window.location.href = url + '&qty=' + qty;
 });

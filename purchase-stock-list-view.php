@@ -10,14 +10,34 @@
 	
 	if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '2'))
 	{		
-		$setValues="status=:status, updated_at=:updated_at";
-		$whereClause=" WHERE id=:id";
-		$updateExecute=array(
-			':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
-			':updated_at'=> date("Y-m-d H:i:s"),
-			':id'=>$_GET['id']
-		);
-		$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
+		if($_GET['mode'] == 1)
+		{
+			if($_GET['qty'] !='')
+			{
+				//echo $_GET['qty'];die;
+				$setValues="status=:status, stock=:stock, updated_at=:updated_at";
+				$whereClause=" WHERE id=:id";
+				$updateExecute=array(
+					':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
+					':stock'=>$general_cls_call->specialhtmlremover($_GET['qty']),
+					':updated_at'=> date("Y-m-d H:i:s"),
+					':id'=>$_GET['id']
+				);
+				$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
+			}
+		}
+		
+		if($_GET['mode'] == 2)
+		{
+			$setValues="status=:status, updated_at=:updated_at";
+			$whereClause=" WHERE id=:id";
+			$updateExecute=array(
+				':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
+				':updated_at'=> date("Y-m-d H:i:s"),
+				':id'=>$_GET['id']
+			);
+			$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
+		}
 		//header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php')."?m=1");
 		if($updateRec)
 		{
@@ -72,16 +92,15 @@
 				<!--end breadcrumb-->
 				<?PHP 
 				if(isset($sucMsg) && $sucMsg != '')
-					{
+				{
 				?>
 					<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
 						<div class="text-white"><strong>Success</strong> <?PHP echo $sucMsg; ?></div>
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 					</div>
 				<?PHP
-					}
+				}
 				?>
-     
 				<div class="card">
 					<div class="card-body">
 						<div class="table-responsive">
@@ -121,7 +140,7 @@
 										<td class="text-center"><?PHP echo $k+1; ?></td>
 										<td><?PHP echo $selectValue->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
-										<td class="text-center"><?PHP echo $selectValue->stock; ?></td>
+										<td class="text-center"><input type="text" value="<?PHP echo $selectValue->stock ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9]/g, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
 										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td><?php echo !empty($selectValue->remarks) ? $selectValue->remarks : '--';?></td>
@@ -140,7 +159,7 @@
 													</button>
 													
 													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=1&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-success text-bold">Approve</span></a>
+															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=1&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to inward" data-bs-toggle="tooltip"><span class="text-success text-bold">Inward</span></a>
 															
 															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=2&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
 													</div>
@@ -177,7 +196,7 @@
 						</div>
 					</div>
 				</div>
-
+			<input type="text" id="msgval" value="<?php !empty($sucMsg) ?>">
     </div>
   </main>
   <!--end main wrapper-->
@@ -203,3 +222,22 @@
 <!-- ######### FOOTER END ############### -->
 </body>
 </html>
+<script>
+$(document).on('click', '.approveBtn', function(e){
+    e.preventDefault();
+
+    let url = $(this).attr('href');
+    let qty = $(this).closest('tr').find('.qty').val();
+	
+	let row = $(this).closest('tr');
+	let errorBox = row.find('.qty-error');
+	errorBox.hide().text('');
+	if(qty == '' || qty == 0)
+	{
+		errorBox.text('Stock is required').show();
+        qtyInput.focus();
+		return false;
+	}
+    window.location.href = url + '&qty=' + qty;
+});
+</script>
