@@ -1,0 +1,52 @@
+Connection
+-------------------
+includes/connection.php - change credential with else part AND define("FOLDER_PATH", ""); keep blank if project run in root neither define("FOLDER_PATH", "billings/");
+includes/databaseTable.php - keep define("TABLE_PREFIX", ""); if no prefix 
+
+New TABLES
+----
+vendors
+product_stock_transaction
+packaging_operators
+packaging_operators_assign
+admin_stock_purchase_list
+==============================================
+How assign order
+--------------
+1) Received order come seller end Menu > Packaging Operator > Assign Order,
+in this page click on Action
+TABLE 
+> orders, check active_status field (2 - Received order)
+> order_items, check active_status field (2 - Received order) and seller_id field should be your login seller id which will be from sellers table
+> You see the order then when go for assign there should be operators in drop-down list which not assign any order with status field "3" in "packaging_operators_assign" table, 
+> so if you want same order multiple time then you need to update 
+> "orders" table active_status = 2, order_items table active_status = 2, order_statuses table keep only status = 2 other row remove with the order_id, remove "packaging_operators_assign" data with the order_id -- all will execute with order_id
+
+
+Alter script
+----------------
+
+ALTER TABLE `orders` ADD `order_type` VARCHAR(100) NOT NULL COMMENT 'instant, slot' AFTER `cod_payment_status`, ADD `instant_delivery_time` INT(10) NOT NULL COMMENT 'in minutes' AFTER `order_type`, ADD `from_time` DATETIME NULL DEFAULT NULL AFTER `instant_delivery_time`, ADD `to_time` DATETIME NULL DEFAULT NULL AFTER `from_time`;
+
+INSERT INTO `roles` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VALUES (NULL, 'Packaging Operator', 'web', NULL, NULL); 
+
+ALTER TABLE `order_items` CHANGE `active_status` `active_status` INT(10) NOT NULL; 
+
+INSERT INTO `order_status_lists` (`id`, `status`) VALUES ('4', 'Packed');
+
+==================== 30-01-2026===================
+ALTER TABLE `product_stock_transaction` ADD `seller_accept_status` TINYINT(1) NULL DEFAULT NULL COMMENT '1=allright; 2=damage; 3=short fault;4=exceed' AFTER `status`;
+ALTER TABLE `product_stock_transaction` ADD `seller_accept_remark` VARCHAR(225) NOT NULL AFTER `seller_accept_status`;
+ALTER TABLE `product_stock_transaction` CHANGE `status` `status` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '0=pending, 1=instant approved,2=reject, 3= admin purchase request approved';
+ALTER TABLE `admin_stock_purchase_list` ADD `purchase_price` DOUBLE(11,2) NOT NULL DEFAULT '0.00' AFTER `product_stock_transaction_id`;
+
+
+
+
+
+
+
+
+
+
+
