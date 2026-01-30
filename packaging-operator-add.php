@@ -96,7 +96,7 @@
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Mobile</label>
-								<input type="text" class="form-control" name="mobile" placeholder="Mobile/Username" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+								<input type="text" class="form-control" name="mobile" placeholder="Mobile/Username" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required maxlength="10">
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Password</label>
