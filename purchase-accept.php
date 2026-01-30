@@ -194,18 +194,6 @@ $(document).on('click', '#acceptSave', function(){
 			setTimeout(() => {
 				window.location.reload();
 			}, "2000");
-			
-			/*$('#actionstatus').val('paynow');
-			$('#supplier_id').val('');
-			$('#check-stock-pay-div').html('');
-			var order_id = JSON.parse(response);
-			clearCart();
-			$('#paymentmode-modal').modal('hide');
-			clearCart();
-			window.open(
-				"<?= SITE_URL ?>print_cart_invoice?order_id=" + order_id,
-				"_blank"
-			);*/
 		}
 	});
 })

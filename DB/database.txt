@@ -98,7 +98,8 @@ ALTER TABLE `bl_product_stock_transaction` ADD `seller_accept_remark` VARCHAR(22
 
 ALTER TABLE `bl_product_stock_transaction` CHANGE `status` `status` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '0=pending, 1=instant approved,2=reject, 3= admin purchase request approved';
 
-
+===========================30-01-2026===================
+ALTER TABLE `bl_admin_stock_purchase_list` ADD `purchase_price` DOUBLE(11,2) NOT NULL DEFAULT '0.00' AFTER `product_stock_transaction_id`;
 
 
 

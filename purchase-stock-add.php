@@ -10,28 +10,34 @@
 		if($product != '' && $stock !='')
 		{
 			//echo "<pre>";print_r($_POST);die;
-			$explode_product = explode("@@@", $product);
-			
-			$product_id = $explode_product[0];
-			//$product_variant_id = $explode_product[1];
-			
-			$remarks = !empty($remarks) ? $remarks : null;
-			$field = "vendor_id, product_id, product_variant_id, stock, status, remarks, created_at, updated_at";
-			$value = ":vendor_id, :product_id, :product_variant_id, :stock, :status, :remarks, :created_at, :updated_at";
+			if($_POST['selling_price'] > $_POST['purchase_price'])
+			{
+				$explode_product = explode("@@@", $product);
 				
-				//parent_id
-			$addExecute=array(
-				':vendor_id'			=> $general_cls_call->specialhtmlremover($vendor_id),
-				':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
-				':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
-				':stock'				=> $stock,
-				':status'				=> 0,
-				':remarks'				=> $remarks,
-				':created_at' 			=> date('Y-m-d H:i:s'),
-				':updated_at'		    => date('Y-m-d H:i:s')
-			);
-			$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
-			$sucMsg = "Stock Inserted Successfully";
+				$product_id = $explode_product[0];
+				//$product_variant_id = $explode_product[1];
+				
+				$remarks = !empty($remarks) ? $remarks : null;
+				$field = "vendor_id, product_id, product_variant_id, stock, status, remarks, created_at, updated_at";
+				$value = ":vendor_id, :product_id, :product_variant_id, :stock, :status, :remarks, :created_at, :updated_at";
+					
+					//parent_id
+				$addExecute=array(
+					':vendor_id'			=> $general_cls_call->specialhtmlremover($vendor_id),
+					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
+					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
+					':stock'				=> $stock,
+					':status'				=> 0,
+					':remarks'				=> $remarks,
+					':created_at' 			=> date('Y-m-d H:i:s'),
+					':updated_at'		    => date('Y-m-d H:i:s')
+				);
+				//$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
+				$sucMsg = "Stock Inserted Successfully";
+			}
+			else{
+				$erMsg = "Purchase price always less than selling price";
+			}
 			
 		}
 		else{
@@ -129,10 +135,32 @@
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Unit</label>
-								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1">
+								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1" onchange="get_selling_price(this.value)">
 									<option value="">Select...</option>
 								</select>
 							</div>
+							
+							<div class="col-md-6">
+								<label for="input5" class="form-label">Purchase price</label>
+								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+								<span class="text-danger" id="err_stock"></span>
+							</div>
+							<div class="col-md-6">
+								<label for="input5" class="form-label">Selling price</label>
+								<select name="" id="" class="form-select select2-dropdown" tabindex="1">
+									<option value="">Select...</option>
+								</select>
+							</div>
+							<!--<div class="prices-div" style="">
+								<div class="col-md-6">
+									<label for="input5" class="form-label">Purchase price</label>
+									<input type="text" class="form-control" name="purchase_price" id="purchase_price" placeholder="Purchase price" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+									<span class="text-danger" id="err_stock"></span>
+								</div>
+								<div class="col-md-6 d-flex align-items-end">
+									<div id="selling_price_div" class="w-100"></div>
+								</div>
+							</div>-->
 							<div class="col-md-12">
 								<label for="input5" class="form-label">Vendors</label>
 								<select name="vendor_id" id="vendor_id" class="form-select select2-dropdown" tabindex="1">
@@ -155,7 +183,7 @@
 								</select>
 								<span class="text-danger" id="err_stock"></span>
 							</div>
-							
+							<input type="hidden" id="selling_price" name="selling_price">
 							<div class="col-md-12">
 								<label for="input5" class="form-label">Remarks</label>
 								<textarea name="remarks" id="remarks" class="form-control"></textarea>
@@ -185,6 +213,9 @@
 <script>
 function select_product(product)
 {
+	$('#selling_price_div').html('');
+	$('.prices-div').hide();
+	
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
 	var datapost = 'action=getProductVariant&pid='+pid;
@@ -201,6 +232,33 @@ function select_product(product)
 				});
 				$('#product_variant_id').html(html);
 			}
+		}
+	});
+}
+function get_selling_price(val)
+{
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: {action:'getVendorSellingPrice', val:val},
+		dataType: "json",
+		success: function(response){
+			//alert(response.status);alert(response.discount_price);
+			$('#selling_price').val(response.discount_price);
+			$('.prices-div').show();
+			/*var html = '<div class="col-md-5">';
+				html += '<div class="row align-items-start border-bottom py-2">';
+					html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">Selling price</span>';
+					html += '<span class="col-md-3 text-nowrap" style="color:#A300A3">₹' + response.discount_price + '</span>';
+				html += '</div>';
+			html += '</div>';*/
+			
+			/*var html = '<div class="border-bottom py-2"><span class="fw-bold" style="color:#A300A3">Selling price:</span><span style="color:#A300A3"> ₹ ' + response.discount_price + '</span></div>';*/
+			
+			var html = '<div class="text-end"><span class="fw-bold" style="color:#A300A3">Selling price:</span><span style="color:#A300A3">' + response.discount_price + '</span></div>';
+			
+
+			$('#selling_price_div').html(html);
 		}
 	});
 }

@@ -851,5 +851,16 @@
 				
 			echo json_encode($data);
 		break;
+		
+		case "getVendorSellingPrice":
+			 $product_variant_id = $_POST['val'];
+			 $where = "WHERE id =:id";
+			 $params = [':id'=> $product_variant_id];
+			 $prices = $general_cls_call->select_query("discounted_price", PRODUCT_VARIANTS, $where, $params, 1);
+			 $data['status'] = 200;
+			 $data['discount_price'] = $prices->discounted_price;
+			 echo json_encode($data);
+			 
+		break;
     }
 ?>
