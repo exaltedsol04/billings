@@ -134,6 +134,7 @@
 				<div class="col-md-12 qty-div"  style="display:none">
 				  <label for="operator_id" class="form-label">Quantity</label>
 				  <input type="text" class="form-control" id="qty"  placeholder="Quantity"  oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+				  <div id="error_qty"></div>
 				</div>
 				<input type="hidden" id="product_stock_transaction_id">
 				<div class="col-md-12">
@@ -164,6 +165,14 @@ $(document).on('click', '#acceptSave', function(){
 	//alert(status);
 	let stock_transaction_id = $('#product_stock_transaction_id').val();
 	let qty = $('#qty').val();
+	if(status==2 || status==3 || status==4)
+	{
+		if(qty == '')
+		{
+			$('#error_qty').html('<span class="text-danger">Enter quantity</span>');
+			return false;
+		}
+	}
 	
 	//var datapost = $('#cart-list-form').serialize();
 	$.ajax({
@@ -181,6 +190,11 @@ $(document).on('click', '#acceptSave', function(){
 			{
 				$('#msgText').html(response.msg);
 			}
+			
+			setTimeout(() => {
+				window.location.reload();
+			}, "2000");
+			
 			/*$('#actionstatus').val('paynow');
 			$('#supplier_id').val('');
 			$('#check-stock-pay-div').html('');
@@ -198,6 +212,7 @@ $(document).on('click', '#acceptSave', function(){
 function accept_purchase(id)
 {
 	$('#msgText').html('');
+	$('#error_qty').html('');
 	$('#status_id').val('').trigger('change');
 	$('#qty').val('');
 	
@@ -209,6 +224,7 @@ function select_status(val)
 	if(val==2 || val == 3 || val == 4)
 	{
 		$('.qty-div').show();
+		$('#error_qty').html('');
 	}
 	else{
 		$('.qty-div').hide();
