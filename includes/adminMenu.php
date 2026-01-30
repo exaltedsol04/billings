@@ -48,7 +48,7 @@
 			  </ul>
 			</li>
 			
-			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view.php'   || $page=='approved-stock-list.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
 				</div>
@@ -77,6 +77,13 @@
 				<a href="<?php echo SITE_URL.'seller-list'; ?>">
 					<div class="parent-icon"><i class="material-icons-outlined">inventory</i></div>
 					<div class="menu-title">Sellers</div>
+				</a>
+			</li>
+			
+			<li <?php if($page=='deliveryboy-list.php') { echo ('class="mm-active"');} ?>>
+				<a href="<?php echo SITE_URL.'deliveryboy-list'; ?>">
+					<div class="parent-icon"><i class="material-icons-outlined">inventory</i></div>
+					<div class="menu-title">Delivery Boys</div>
 				</a>
 			</li>
 
