@@ -3,6 +3,19 @@
 	$pageAccessRoleIds = [1];
 	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
+	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	{
+		//echo $vendor_id = $_POST['vendor_id'];die;
+		$whereSrc = "asp.vendor_id=:vendor_id";
+		$paramsSrc = [
+			':vendor_id' => $_POST['vendor_id']
+		];
+		
+	}
+	else{
+		$whereSrc = "1";
+		$paramsSrc = [];
+	}
 
 	ob_end_flush();
 ?>
@@ -32,6 +45,42 @@
 					</div>
 				</div>
 				<!--end breadcrumb-->
+				<h6 class="mb-0 text-uppercase">Search panel</h6>
+						<hr>
+						<div class="card">
+							<div class="card-body">
+								<form class="row g-4" method="post" action="">
+									<div class="col-md-4">
+										<label for="input5" class="form-label">Vendor</label>
+										<select name="vendor_id" id="vendor_id" class="form-select select2-dropdown" tabindex="1">
+										<option value="">Select...</option>
+										<?php 
+											$fields = "*";
+											$where = "WHERE 1";
+											$params = [];
+											$sqlQuery = $general_cls_call->select_query($fields, VENDORS, $where, $params, 2);
+											if($sqlQuery[0] != '')
+											{
+												foreach($sqlQuery as $arr)
+												{
+										?>
+												<option value="<?php echo $arr->id ?>" <?php echo ($_POST['vendor_id'] == $arr->id) ? 'selected' : '' ?>><?php echo $arr->name ?></option>
+										<?php 
+												}
+											}
+										?>
+									</select>
+									</div>
+									
+									<div class="col-md-12">
+									  <div class="d-md-flex d-grid justify-content-md-between">
+										<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
+										<button type="submit" class="btn btn-grd btn-grd-danger px-4" name="btnUser" value="SAVE">Search</button>
+									  </div>
+									</div>
+								</form>
+							</div>
+						</div>
      
 				<div class="card">
 					<div class="card-body">
@@ -69,10 +118,10 @@
 									INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 									INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-									$where = "WHERE 1 GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0 ORDER BY asp.created_at DESC";
+									$where = "WHERE ". $whereSrc ." GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0 ORDER BY asp.created_at DESC";
 									
 									
-									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $paramsSrc, 2);
 									//echo "<pre>";print_r($sqlQuery);die;
 									if($sqlQuery[0] != '')
 									{
