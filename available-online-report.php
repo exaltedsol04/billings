@@ -1,18 +1,25 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
+
 	ob_start();
 	ob_end_flush();
 	
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP include_once("includes/sellerMenu.php"); ?>
+	<!-- ######### MENU END ############### -->
 
 <main class="main-wrapper">
 	<div class="card">
@@ -42,8 +49,12 @@
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-						$where = "WHERE pr.stock_type=2 AND pr.status=1 AND pr.seller_id ='" .$_SESSION['USER_ID']. "' GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
-						$params = [];
+						$where = "WHERE pr.stock_type=:stock_type AND pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+						$params = [
+							':stock_type' 		=> 2,
+							':status'			=> 1,
+							':seller_id'		=> $_SESSION['SELLER_ID']
+						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 						//echo "<pre>";print_r($sqlQuery);die;
 						if($sqlQuery[0] != '')
@@ -73,15 +84,6 @@
 								$i++;
 							}
 						}
-						else
-						{
-					?>
-                      <tr>
-                        <td colspan="5">No record found.
-						</td>
-					  </tr>
-					<?PHP
-						}	
 					?>
                    </tbody>
                   </table>
@@ -91,7 +93,7 @@
       </main>
 
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	
   </body>

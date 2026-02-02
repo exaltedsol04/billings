@@ -1,9 +1,14 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1,3,5];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => false,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1,3,5]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	ob_start();
-	ob_end_flush();
 	
 	// dashboard work
 	$admin_product_stock= 0;
@@ -17,7 +22,7 @@
 	$admin_product_data = $general_cls_call->select_query_sum(PRODUCTS, "WHERE 1", array(), 'id');
 	$admin_product_stock = $admin_product_data->total;
 	
-	$admin_parchase_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE status!=:status", array('status'=>2), 'stock');
+	$admin_parchase_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE status!=:status", array(':status'=>2), 'stock');
 	$admin_purchase_stock = $admin_parchase_data->total;
 	
 	$admin_total_sell_data = $general_cls_call->select_query_sum(POS_ORDERS, "WHERE 1", array(), 'total_amount');
@@ -25,17 +30,17 @@
 	//echo $admin_total_sell; die;
 	
 	// users
-	$available_stock_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE  status!=:status AND seller_id=:seller_id", array('status'=>2, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
+	$available_stock_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE  status!=:status AND seller_id=:seller_id", array(':status'=>2, ':seller_id'=> $_SESSION['SELLER_ID']), 'stock');
 	
 	$user_available_stock = $available_stock_data->total;
 	
-	$parchase_stock_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE transaction_type=:transaction_type AND status=:status AND seller_id=:seller_id", array('transaction_type'=> 1, 'status'=>0, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
+	$parchase_stock_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE transaction_type=:transaction_type AND status=:status AND seller_id=:seller_id", array(':transaction_type'=> 1, ':status'=>0, ':seller_id'=> $_SESSION['SELLER_ID']), 'stock');
 	
 	$user_purchase_stock = $parchase_stock_data->total;
 	
 	// total order
 	
-	if($_SESSION['USER_ID'] == 1)
+	if($_SESSION['ROLE_ID'] == 1)
 	{
 		$wheretotOrder = "WHERE 1";
 		$paramstotStatus = [];
@@ -51,15 +56,24 @@
 	
 	//echo $user_purchase_stock; die;
 	//echo $total_orders;die;
+	ob_end_flush();
 ?>
 
  <!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			} elseif ($_SESSION['ROLE_ID'] == 5) {
+				$menuFile = 'packagingOperatorMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
 
     
@@ -190,7 +204,7 @@
 
 
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 
 

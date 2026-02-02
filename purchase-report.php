@@ -1,17 +1,23 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	ob_start();
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP include_once("includes/sellerMenu.php"); ?>
+	<!-- ######### MENU END ############### -->
 
 <main class="main-wrapper">
     
@@ -49,7 +55,7 @@
 						$params = [
 							':status' => 0,
 							':transaction_type' => 1,
-							':seller_id' => $_SESSION['USER_ID']
+							':seller_id' => $_SESSION['SELLER_ID']
 						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 
@@ -106,7 +112,7 @@
       </main>
 
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	
   </body>

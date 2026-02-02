@@ -12,8 +12,10 @@ $seller = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_i
 $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' => $order->user_id], 1);
 
 //--------------------------
-	$fields = "poi.*, po.*";
+	$fields = "poi.*, po.*, u.name as stock_unit_name, pv.measurement";
 	$tables = POS_ORDERS_ITEMS . " poi
+	INNER JOIN " . PRODUCT_VARIANTS . " pv ON poi.product_variant_id = pv.id
+	INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 	INNER JOIN " . POS_ORDERS . " po ON po.id = poi.pos_order_id";
 	//$where = "WHERE po.id= :order_id";
 	$where = "WHERE po.id=:id";
@@ -91,6 +93,17 @@ $barcode = 	$product_variant_data->barcode;
     th {
         border-bottom: 1px dashed #000;
     }
+	.bb tr {
+        border-bottom: 1px solid #000;
+		padding:2px;
+		
+    }
+	.bb td {
+		padding-bottom:5px
+	}
+	.bb tr:first-child, .bb tr:last-child {
+        border-bottom: 0px;
+    }
 
     .right {
         text-align: right;
@@ -143,7 +156,7 @@ $barcode = 	$product_variant_data->barcode;
 
 </style>
 </head>
-
+<!---->
 <body onload="window.print()">
 
 <div class="receipt">
@@ -183,14 +196,15 @@ $barcode = 	$product_variant_data->barcode;
             <tr>
                 <th>HSN</th>
                 <th>Item Description</th>
-                <th class="right">Price</th>
-                <th class="right">Qty</th>
-                <th class="right">Value</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th>Value</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="bb">
             <tr>
-                <td colspan="5">CGST 0.00% &nbsp; SGST 0.00%</td>
+                <td colspan="6">CGST 0.00% &nbsp; SGST 0.00%</td>
             </tr>
 			<?php 
 				$sl =1;
@@ -204,10 +218,11 @@ $barcode = 	$product_variant_data->barcode;
 			?>
             <tr>
                 <td><?= $barcode ?></td>
-                <td><?= $general_cls_call->cart_product_name($product->name) ?></td>
-                <td class="right">₹<?= $arr->unit_price ?></td>
-                <td class="right"><?= $arr->quantity ?></td>
-                <td class="right">₹<?= $arr->total_price ?></td>
+                <td><?= $general_cls_call->explode_name($product->name) ?></td>
+                <td>₹<?= $arr->unit_price ?></td>
+                <td><?= $arr->quantity ?></td>
+                <td><?= $arr->measurement.' '.$arr->stock_unit_name ?></td>
+                <td>₹<?= $arr->total_price ?></td>
             </tr>
             <?php 
 				$sl++;
@@ -267,7 +282,7 @@ $barcode = 	$product_variant_data->barcode;
 
     <div class="qr">
         <!-- Replace src with real QR image -->
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=RelianceSmartReceipt">
+        <img src="<?php echo IMG_PATH . 'qr.png'?>">
     </div>
 
     <div class="footer">

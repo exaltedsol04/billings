@@ -12,9 +12,9 @@
 	else
 	{
 		define("SERVER_NAME","localhost");
-		define("USER_NAME","exalteds_stock");
-		define("PASSWORD","Exalted@2019");
-		define("DATABASE_NAME","exalteds_stock");
+		define("USER_NAME","ecoleafs_dbuser");
+		define("PASSWORD","kLw0NOwA!OvHV");
+		define("DATABASE_NAME","ecoleafs_ecoleaf_live");
 	}
 
 	

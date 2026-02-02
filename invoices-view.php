@@ -1,11 +1,15 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1,3];
-	
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
-	ob_start();
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1,3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 
-	ob_end_flush();
+	ob_start();
 	//echo $_SESSION['USER_ID'];die;
 	$order_id = '';
 	if(isset($_GET['order_id']))
@@ -20,7 +24,7 @@
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 		";
 		
-		if($_SESSION['USER_ID'] == 1)
+		if($_SESSION['ROLE_ID'] == 1)
 		{
 			$where = "WHERE poi.pos_order_id=:pos_order_id ORDER BY poi.id";
 				$params = [
@@ -31,7 +35,7 @@
 			$where = "WHERE po.pos_user_id=:pos_user_id AND poi.pos_order_id=:pos_order_id ORDER BY poi.id";
 				$params = [
 				':pos_order_id'	=>	$order_id,
-				':pos_user_id'	=>	$_SESSION['USER_ID']
+				':pos_user_id'	=>	$_SESSION['SELLER_ID']
 			];
 		}
 		
@@ -40,14 +44,22 @@
 				
 		//echo "<pre>";print_r($sqlQuery);die;
 	}
+
+	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -59,9 +71,8 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Invoices View</a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Invoices View</li>
 							</ol>
 						</nav>
 					</div>
@@ -110,17 +121,7 @@
 												$i++;
 											}
 										}
-										else
-										{
 									?>
-									  <tr>
-										<td colspan="7">
-										 No record found.
-										</td>
-									  </tr>
-						<?PHP
-							}	
-						?>
 								</tbody>
 							</table>
 						</div>
@@ -148,7 +149,7 @@
 </div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 </body>
 </html>

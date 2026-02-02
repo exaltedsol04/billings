@@ -92,7 +92,7 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urle
     table {
         width: 98%;
         border-collapse: collapse;
-        font-size: 10px;
+        font-size: 12px;
     }
 
     th, td {
@@ -102,6 +102,17 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urle
 
     th {
         border-bottom: 1px dashed #000;
+    }
+	.bb tr {
+        border-bottom: 1px solid #000;
+		padding:2px;
+		
+    }
+	.bb td {
+		padding-bottom:5px
+	}
+	.bb tr:first-child, .bb tr:last-child {
+        border-bottom: 0px;
     }
 
     .right {
@@ -155,7 +166,7 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urle
 
 </style>
 </head>
-
+<!-- -->
 <body onload="window.print()">
 
 <div class="receipt">
@@ -200,14 +211,15 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urle
             <tr>
                 <th>HSN</th>
                 <th>Item Description</th>
-                <th class="right">Price</th>
-                <th class="right">Qty</th>
-                <th class="right">Value</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th>Value</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="bb">
             <tr>
-                <td colspan="5">CGST 0.00% &nbsp; SGST 0.00%</td>
+                <td colspan="6">CGST 0.00% &nbsp; SGST 0.00%</td>
             </tr>
 			<?php 
 				$sl =1;
@@ -217,9 +229,10 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urle
 				{
 					foreach($sqlQuery as $arr)
 					{
-						$fields = "pv.id as product_variant_id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name as product_name, p.image, p.barcode";
+						$fields = "pv.id as product_variant_id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name as product_name, p.image, p.barcode, u.name as stock_unit_name";
 						$tables = PRODUCT_VARIANTS . " pv
-						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
+						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id
+						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
 						$where = "WHERE pv.id=:id";
 						$params = [
 							':id'=>$arr->product_variant_id
@@ -228,10 +241,11 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urle
 			?>
             <tr>
                 <td><?= !empty($product_data->barcode) ?  $product_data->barcode : ' '; ?></td>
-                <td><?= $general_cls_call->cart_product_name($product_data->product_name) ?></td>
-                <td class="right">₹<?= $arr->discounted_price ?></td>
-                <td class="right"><?= $arr->quantity ?></td>
-                <td class="right">₹<?= $arr->quantity * $arr->discounted_price ?></td>
+                <td><?= $general_cls_call->explode_name($product_data->product_name) ?></td>
+                <td>₹<?= $arr->discounted_price ?></td>
+                <td><?= $arr->quantity ?></td>
+                <td><?= $product_data->measurement.''.$product_data->stock_unit_name ?></td>
+                <td>₹<?= $arr->quantity * $arr->discounted_price ?></td>
             </tr>
             <?php 
 				$sl++;

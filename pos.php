@@ -1,7 +1,14 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => true,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
+
 	ob_start();
 
 /*=========== ACCOUNT SETTINGS START ===========*/
@@ -19,8 +26,8 @@
 			$value = ":pos_user_id, :user_id, :store_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :created_at, :updated_at";
 			
 			$addExecute=array(
-				':pos_user_id'			=> $general_cls_call->specialhtmlremover($user_hidden_id),
-				':user_id'				=> $_SESSION['USER_ID'],
+				':pos_user_id'			=> $_SESSION['SELLER_ID'],
+				':user_id'				=> $general_cls_call->specialhtmlremover($user_hidden_id),
 				':store_id'				=> $general_cls_call->specialhtmlremover($store_id),
 				':total_amount'			=> $general_cls_call->specialhtmlremover($cart_total_amt),
 				':discount_amount'			=> '0.00',
@@ -70,11 +77,11 @@
 	
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
+		<?PHP include_once("includes/sellerMenu.php"); ?>
 	<!-- ######### HEADER END ############### -->
 
 <main class="main-wrapper">
@@ -93,8 +100,11 @@
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-						$where = "WHERE pr.status=1 AND pr.seller_id ='" .$_SESSION['USER_ID']. "' GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
-						$params = [];
+						$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+						$params = [
+							':status' => 1,
+							':seller_id' => $_SESSION['SELLER_ID'],
+						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 						//echo "<pre>";print_r($sqlQuery);die;
 						if($sqlQuery[0] != '')
@@ -220,14 +230,15 @@
 			<div class="modal fade" id="paymentmode-modal">
                   <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                      <div class="modal-header border-bottom-0 py-2 bg-grd-primary">
+                      <div class="modal-header border-bottom-0 py-2 bg-grd-success">
                         <h5 class="modal-title btn-grd">Payment Mode</h5>
                         <a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
                           <i class="material-icons-outlined">close</i>
                         </a>
                       </div>
                       <div class="modal-body">
-						<div class="d-flex justify-content-center">
+						<div class="form-body">
+							<div class="row g-3">
 							<div class="col-lg-12 col-md-12 col-sm-12">
 									<div class="card-body">
 										<span id="show-stock-div" style="display:none;"></span>
@@ -245,15 +256,17 @@
 
 									</div>
 							</div>
+							<div class="col-md-12">
+							<div class="d-md-flex d-grid justify-content-md-between">
+								<button type="button" class="btn btn-outline-danger px-5" data-bs-dismiss="modal">Cancel</button>
+								<button type="button" class="btn btn-grd btn-grd-success px-5" onclick="pay_now()">Pay Now</button>
+							 </div>
+						  </div>
+						  </div>
 						</div>
 					</div>
 					
-                      <div class="modal-footer border-top-0">
-                        <button type="button" class="btn btn-grd btn-grd-danger"
-                          data-bs-dismiss="modal">Cancel</button>
-						  
-                        <button type="button" class="btn btn-grd btn-grd-primary px-5" onclick="pay_now()">Pay Now</button>
-                      </div>
+                      
                     </div>
                   </div>
                 </div>
@@ -261,7 +274,7 @@
 </main>
 
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	<script src="assets/plugins/es/cart.js"></script>
 

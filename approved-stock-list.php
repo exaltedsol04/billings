@@ -1,19 +1,25 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	ob_start();
 	
 
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
+	<!-- ######### MENU START ############### -->
 		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -25,9 +31,8 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Approved Stock List</a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Approved Stock List</li>
 							</ol>
 						</nav>
 					</div>
@@ -90,17 +95,7 @@
 												$i++;
 											}
 										}
-										else
-										{
 									?>
-									  <tr>
-										<td colspan="4">
-										 No record found.
-										</td>
-									  </tr>
-						<?PHP
-							}	
-						?>
 								</tbody>
 							</table>
 						</div>
@@ -128,25 +123,10 @@
 </div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
-$(document).ready(function(){
-	if ($.fn.DataTable.isDataTable('#example2')) {
-		$('#example2').DataTable().destroy();
-	}
-	
-	$('#example2').DataTable({
-		order: [[8, 'desc']],
-		columnDefs: [
-        {
-            targets: 0,        // 1st column
-            orderable: true,  // allow manual ordering
-            orderSequence: ['asc', 'desc'] // manual toggle only
-        }
-    ] 
-	});
-});
+
 </script>
 </body>
 </html>

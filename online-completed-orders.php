@@ -1,8 +1,14 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => true,
+		'pageAccessRoleIds' => [1,3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	
-	$pageAccessRoleIds = [1,3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
 	
 		if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
@@ -47,12 +53,18 @@
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -73,7 +85,7 @@
 				<!--end breadcrumb-->
 				<h6 class="mb-0 text-uppercase">Search panel</h6>
 						<hr>
-						<div class="card">
+						<div class="card rounded-4 border-top border-4 border-primary border-gradient-1">
 							<div class="card-body">
 								<form class="row g-4" method="post" action="">
 									<div class="col-md-6">
@@ -87,8 +99,8 @@
 									
 									<div class="col-md-12">
 									  <div class="d-md-flex d-grid justify-content-md-between">
-										<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
-										<button type="submit" class="btn btn-grd btn-grd-danger px-4" name="btnUser" value="SAVE">Search</button>
+										<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+										<button type="submit" class="btn btn-grd btn-grd-success px-4" name="btnUser" value="SAVE">Search</button>
 									  </div>
 									</div>
 								</form>
@@ -168,7 +180,7 @@
 												$final_total = 0;
 												
 												$delivery_time		= $arr->created_at;
-												$to_be_delivered	= $arr->instant_delivery_time;
+												$to_be_delivered	= $arr->instant_delivery_time.' mins';
 												$delivery_max_time = $general_cls_call->add_minutes($arr->created_at,  $arr->instant_delivery_time);
 												if($arr->order_type=='slot') {
 													$delivery_time = $arr->from_time;
@@ -243,7 +255,7 @@
 </div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 
 <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>

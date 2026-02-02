@@ -68,7 +68,7 @@
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
 	<!-- ######### HEADER START ############### -->
@@ -215,7 +215,7 @@
 </main>
 
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	<script src="assets/plugins/es/cart.js"></script>
 	

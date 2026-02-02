@@ -1,7 +1,14 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1,3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => false,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1,3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
+	
 	ob_start();
 	
 	// dashboard work
@@ -122,15 +129,18 @@
 ?>
 
  <!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
-
-
-    
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
   <!--start main wrapper-->
   <main class="main-wrapper">
@@ -256,7 +266,7 @@
 
 
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 
 

@@ -1,20 +1,32 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1,3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	
-	$pageAccessRoleIds = [1,3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
 	
 	ob_end_flush();
 	
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -111,7 +123,7 @@
 											$final_total = 0;
 											
 											$delivery_time		= $arr->created_at;
-											$to_be_delivered	= $arr->instant_delivery_time;
+											$to_be_delivered	= $arr->instant_delivery_time.' mins';
 											$delivery_max_time = $general_cls_call->add_minutes($arr->created_at,  $arr->instant_delivery_time);
 											if($arr->order_type=='slot') {
 												$delivery_time = $arr->from_time;
@@ -155,7 +167,7 @@
 										<td><?php echo $arr->orders_status_list_status; ?></td>
 										<td class="text-center"><a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
 											<span class="material-icons-outlined fs-5">visibility</span>
-										</div></td>
+										</div></a></td>
 									  </tr>
 										<?PHP
 												$i++;
@@ -189,7 +201,7 @@
 </div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
 $(document).ready(function(){

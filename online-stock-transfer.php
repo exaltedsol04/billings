@@ -1,7 +1,14 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'],$pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => false,
+		'select2' => true,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
+
 	ob_start();
 	/*=========== ACCOUNT SETTINGS START ===========*/
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
@@ -33,7 +40,7 @@
 					
 					//parent_id
 				$addExecute=array(
-					':seller_id'			=> $_SESSION['USER_ID'],
+					':seller_id'			=> $_SESSION['SELLER_ID'],
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					
@@ -54,7 +61,7 @@
 				
 				
 				$addExecute=array(
-					':seller_id'			=> $_SESSION['USER_ID'],
+					':seller_id'			=> $_SESSION['SELLER_ID'],
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					
@@ -75,14 +82,23 @@
 				
 				//------- add stock to product variant table-----
 				$product_variant_stock = $product_variant_dtls->stock;
-				$setValuesPv = "stock=:stock";
+				$setValuesPv = "stock=:stock, status=:status";
 				$updateExecutePv=array(
 					':stock' => $product_variant_stock + $stock,
+					':status' => 1,
 					':product_id'	=> $product_id,
 					':id'	=> $product_variant_id
 				);
 				$whereClausePv=" WHERE  product_id=:product_id AND id=:id";
 				$general_cls_call->update_query(PRODUCT_VARIANTS, $setValuesPv, $whereClausePv, $updateExecutePv);
+				
+				$setValuesPr = "status=:status";
+				$updateExecutePr=array(
+					':status' => 1,
+					':id'	=> $product_id
+				);
+				$whereClausePr=" WHERE  id=:id";
+				$general_cls_call->update_query(PRODUCTS, $setValuesPr, $whereClausePr, $updateExecutePr);
 				
 				$sucMsg = "Stock Inserted Successfully";
 			}
@@ -106,11 +122,11 @@
 ?>
 
 <!-- ######### HEADER START ############### -->
-	<?PHP include_once("includes/adminHeader.php"); ?>
+	<?PHP include_once("includes/header.php"); ?>
 <!-- ######### HEADER END ############### -->
   
 <!-- ######### HEADER START ############### -->
-	<?PHP include_once("includes/adminMenu.php"); ?>
+	<?PHP include_once("includes/sellerMenu.php"); ?>
 <!-- ######### HEADER END ############### -->
 
   <!--start main wrapper-->
@@ -189,8 +205,9 @@
 							<input type="hidden" id="hid_product_id">
 							<span id="stock-check-div"></span>
 							<div class="col-md-12">
-								<div class="d-md-flex d-grid align-items-center gap-3">
-									<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-primary px-5">Assign</button>
+								<div class="d-md-flex d-grid justify-content-md-between">
+									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+									<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5">Assign</button>
 								</div>
 							</div>
 						</form>
@@ -203,7 +220,7 @@
   </main>
   <!--end main wrapper-->
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 </body>
 

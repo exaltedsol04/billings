@@ -1,19 +1,31 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
-	
-	$pageAccessRoleIds = [1,3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1,3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
+
 	ob_start();
 
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -56,7 +68,7 @@
 								</thead>
 								<tbody>
 									<?php
-									if($_SESSION['USER_ID'] == 1)
+									if($_SESSION['ROLE_ID'] == 1)
 									{
 										$where = "WHERE 1 ORDER BY created_at DESC";
 										$params = [];
@@ -64,7 +76,7 @@
 									else{
 										$where = "WHERE pos_user_id=:pos_user_id  ORDER BY created_at DESC";
 										$params = [
-											':pos_user_id'	=>	$_SESSION['USER_ID']
+											':pos_user_id'	=>	$_SESSION['SELLER_ID']
 										];
 									}
 									
@@ -88,7 +100,9 @@
 										<td class="text-center"><?PHP echo $customer->mobile; ?></td>
 										<td><span class="d-none"><?PHP echo $selectValue->created_at; ?></span><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td class="text-center">₹<?PHP echo $pos_order_item->total; ?></td>
-										<td class="text-center"><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>&mode=1"><i class="lni lni-keyword-research"></i></a></td>
+										<td class="text-center"><a href="<?php echo SITE_URL.'invoices-view'; ?>?order_id=<?php echo($selectValue->id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
+											<span class="material-icons-outlined fs-5">visibility</span>
+										</div></a></td>
 									  </tr>
 										<?PHP
 												$i++;
@@ -122,7 +136,7 @@
 </div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
 $(document).ready(function(){

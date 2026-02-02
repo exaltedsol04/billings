@@ -1,24 +1,29 @@
 <?PHP 
-	//error_reporting(0);
-	include_once 'init.php';
-	
-	$pageAccessRoleIds = [5];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
-	//ob_start();
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [5]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
+
+	ob_start();
 	
 	//print_r($_SESSION['PACKAGING_OPERATOR_ID']);die;
 	
 	$dataArray = $general_cls_call->callAPI("POST", SITE_URL."api/online-packaging-operator-orders", ["operator_id"=>$_SESSION['PACKAGING_OPERATOR_ID']], $_SESSION['API_TOKEN']);
 	
 	//echo "<pre>";print_r($dataArray);die;
-	//ob_end_flush();
+	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
+		<?PHP include_once("includes/packagingOperatorMenu.php"); ?>
 	<!-- ######### HEADER END ############### -->
 	
   <!--start main wrapper-->
@@ -163,7 +168,7 @@
 	</div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
 function orderStatusChange(orderId)

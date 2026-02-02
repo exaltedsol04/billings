@@ -1,7 +1,13 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1,3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1,3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	ob_start();
 	/*=========== ACCOUNT SETTINGS START ===========*/
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
@@ -48,12 +54,18 @@
 ?>
 
 <!-- ######### HEADER START ############### -->
-	<?PHP include_once("includes/adminHeader.php"); ?>
+	<?PHP include_once("includes/header.php"); ?>
 <!-- ######### HEADER END ############### -->
   
-<!-- ######### HEADER START ############### -->
-	<?PHP include_once("includes/adminMenu.php"); ?>
-<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
   <!--start main wrapper-->
   <main class="main-wrapper">
@@ -64,9 +76,8 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> User Profile</a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">User Profile</li>
 							</ol>
 						</nav>
 					</div>
@@ -121,9 +132,10 @@
 										<input type="password" name="txtConfirmPassword" class="form-control" id="input6">
 									</div>
 									<div class="col-md-12">
-										<div class="d-md-flex d-grid align-items-center gap-3">
-											<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-primary px-5">Update Profile</button>
-										</div>
+									  <div class="d-md-flex d-grid justify-content-md-between">
+										<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+										<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5">Update Profile</button>
+									  </div>
 									</div>
 								</form>
 							</div>
@@ -138,7 +150,7 @@
   </main>
   <!--end main wrapper-->
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	
 

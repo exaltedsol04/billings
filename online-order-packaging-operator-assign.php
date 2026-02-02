@@ -1,13 +1,15 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1,3];
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => false,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1,3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	
-	//echo $_SESSION['SELLER_ID'];die;
-	
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
-
-	ob_end_flush();
 	//echo $_SESSION['USER_ID'];die;
 	$order_id = '';
 	if(isset($_GET['order_id']))
@@ -26,7 +28,7 @@
 			];
 		}
 		
-		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status";
+		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, o.payment_method, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status";
 		$tables = ORDERS . " o
 		INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
 		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id
@@ -52,14 +54,22 @@
 		}		
 		$sqlQuery = $general_cls_call->select_query("*", ORDERS_ITEMS, $where, $params, 2);
 	}
+
+	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -183,8 +193,12 @@
                     </div>
                   </div>
                   <div class="d-flex justify-content-between border-top pt-4">
-                    <h5 class="mb-0 fw-bold">Total :</h5>
-                    <h5 class="mb-0 fw-bold">₹<?php echo number_format($orderData->packing_charge + $subtotal) ?></h5>
+                    <h5 class="fw-bold">Total :</h5>
+                    <h5 class="fw-bold">₹<?php echo number_format($orderData->packing_charge + $subtotal) ?></h5>
+                  </div>
+				  <div class="d-flex justify-content-between border-top pt-4">
+                    <h5 class="fw-semi-bold">Payment Method :</h5>
+                    <h5 class="fw-semi-bold"><?php echo $orderData->payment_method; ?></h5>
                   </div>
 				   <?php if($orderData->active_status == 2) { ?>
 					<div class="col-12 mt-4">
@@ -395,7 +409,7 @@
 	<div class="modal fade" id="assignModal">
 	  <div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
-		  <div class="modal-header border-bottom-0 py-2 bg-grd-info">
+		  <div class="modal-header border-bottom-0 py-2 bg-grd-success">
 			<h5 class="modal-title btn-grd">Assign Packaging Operator</h5>
 			<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
 			  <i class="material-icons-outlined">close</i>
@@ -414,8 +428,8 @@
 				  <div class="d-md-flex d-grid justify-content-md-between">
 					<input type="hidden" id="order_id" name="order_id">
 					
-					<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
-					<button type="button" id="assignOperatorSave" class="btn btn-grd btn-grd-danger px-4">Assign Operator</button>
+					<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+					<button type="button" id="assignOperatorSave" class="btn btn-grd btn-grd-success px-4">Assign Operator</button>
 				  </div>
 				</div>
 			  </form>
@@ -425,7 +439,7 @@
 	  </div>
 	</div>
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
 function assignOperator(orderId)

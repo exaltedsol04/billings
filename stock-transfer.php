@@ -1,17 +1,23 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => true,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	ob_start();
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP include_once("includes/sellerMenu.php"); ?>
+	<!-- ######### MENU END ############### -->
 
 <main class="main-wrapper">
     <div class="main-content">
@@ -77,7 +83,7 @@
 							foreach($sqlQuery as $arr)
 							{	
 					?>
-						<option value="<?PHP echo $arr->admin_id ?>"><?PHP echo $arr->name; ?></option>
+						<option value="<?PHP echo $arr->id ?>"><?PHP echo $arr->name; ?></option>
 					<?PHP
 							}
 						}
@@ -149,7 +155,7 @@
 </main>
 
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	<script src="assets/plugins/es/stock-transfer.js"></script>
 	<link rel="stylesheet" href="assets/plugins/notifications/css/lobibox.min.css">

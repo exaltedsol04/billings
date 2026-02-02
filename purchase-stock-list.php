@@ -1,7 +1,13 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => true,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	ob_start();
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
 	{
@@ -20,12 +26,12 @@
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
+	<!-- ######### MENU START ############### -->
 		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -37,9 +43,8 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Purchase Stock List</a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Purchase Stock List</li>
 							</ol>
 						</nav>
 					</div>
@@ -47,7 +52,7 @@
 				<!--end breadcrumb-->
 				<h6 class="mb-0 text-uppercase">Search panel</h6>
 						<hr>
-						<div class="card">
+						<div class="card rounded-4 border-top border-4 border-primary border-gradient-1">
 							<div class="card-body">
 								<form class="row g-4" method="post" action="">
 									<div class="col-md-4">
@@ -74,8 +79,8 @@
 									
 									<div class="col-md-12">
 									  <div class="d-md-flex d-grid justify-content-md-between">
-										<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
-										<button type="submit" class="btn btn-grd btn-grd-danger px-4" name="btnUser" value="SAVE">Search</button>
+										<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+										<button type="submit" class="btn btn-grd btn-grd-success px-5" name="btnUser" value="SAVE">Search</button>
 									  </div>
 									</div>
 								</form>
@@ -117,7 +122,7 @@
 									INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 									INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
-									INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
+									LEFT JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
 									$where = "WHERE ". $whereSrc ." GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0 ORDER BY asp.created_at DESC";
 									
 									
@@ -172,7 +177,9 @@
 										<td><?php echo $pending_stock; ?></td>
 										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
 										<td><span class="d-none"><?PHP echo $selectValue->created_at; ?></span><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_variant_id);?>"><i class="lni lni-keyword-research"></i></a></td>
+										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_variant_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
+											<span class="material-icons-outlined fs-5">visibility</span>
+										</div></a></td>
 									</tr>
 										<?PHP
 												$i++;
@@ -216,7 +223,7 @@
 </div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
 $(document).ready(function(){

@@ -1,21 +1,36 @@
 <?PHP 
-	//error_reporting(0);
-	include_once 'init.php';
-	
-	$pageAccessRoleIds = [3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
+
 	ob_start();
-	
-	
+	//total orders
+	$incompleted_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.id";
+	$incompleted_orders_params = [
+		':active_status'	=> 1,
+		':seller_id'		=> $_SESSION['SELLER_ID']
+	];
+	$fields = "o.id";
+	$tables = ORDERS . " o
+	INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id";
+	//total orders
+	$incompletedOrdersArr = $general_cls_call->select_join_query($fields, $tables, $incompleted_orders_where, $incompleted_orders_params, 2);
+	$incompleted_orders = count($incompletedOrdersArr);
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP include_once("includes/sellerMenu.php"); ?>
+	<!-- ######### MENU END ############### -->
 	
   <!--start main wrapper-->
   <main class="main-wrapper">
@@ -35,6 +50,22 @@
 		<!--end breadcrumb-->
 		<div class="row">
 			<div class="col-md-12" id="msg"></div>
+		</div>
+		<div class="row row-cols-1 row-cols-xl-6">
+			<a href="<?php echo SITE_URL.'online-orders'; ?>">
+			<div class="col d-flex">
+			  <div class="card rounded-4 w-100 bg-grd-primary bg-gradient text-white">
+				<div class="card-body">
+				  <div class="d-flex align-items-start justify-content-between mb-1">
+					<div class="">
+					  <h5 class="mb-0 text-white"><?= $incompleted_orders ? $incompleted_orders : 0; ?></h5>
+					  <p class="mb-0">Incompleted orders</p>
+					</div>
+				  </div>
+				</div>
+			  </div>
+			</div>
+			</a>
 		</div>
 		<div class="card">
 			<div class="card-body">
@@ -62,6 +93,7 @@
 							<th>Delivery Type</th>
 							<th>To be delivered</th>
 							<th>Remaining Delivery Time</th>
+							<th>Paymeny Method</th>
 							<th>Order Status</th>
 							<th class="text-center">Action</th>
 						  </tr>
@@ -70,7 +102,8 @@
 						<?php
 							if($_SESSION['ROLE_ID'] == 1)
 							{
-								$where = "WHERE oi.active_status=:active_status
+								//$where = "WHERE oi.active_status=:active_status
+								$where = "WHERE o.active_status=:active_status
 									  GROUP BY oi.order_id
 									  ORDER BY 
 										  CASE 
@@ -80,8 +113,9 @@
 								$params = [':active_status'=> 2];	
 							}
 							else{
-								$where = "WHERE oi.seller_id=:seller_id 
-									  AND oi.active_status=:active_status
+								//$where = "WHERE oi.active_status=:active_status 
+								$where = "WHERE o.active_status=:active_status 
+									  AND oi.seller_id=:seller_id
 									  GROUP BY oi.order_id
 									  ORDER BY 
 										  CASE 
@@ -94,7 +128,7 @@
 								];
 							}
 							
-							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, SUM(oi.sub_total) AS orders_items_sub_total, u.name AS customer_name, osl.status AS orders_status_list_status";
+							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, SUM(oi.sub_total) AS orders_items_sub_total, o.payment_method, u.name AS customer_name, osl.status AS orders_status_list_status";
 
 							$tables = ORDERS . " o
 							INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
@@ -114,7 +148,7 @@
 									$final_total = 0;
 									
 									$delivery_time		= $arr->created_at;
-									$to_be_delivered	= $arr->instant_delivery_time;
+									$to_be_delivered	= $arr->instant_delivery_time .' mins';
 									$delivery_max_time = $general_cls_call->add_minutes($arr->created_at,  $arr->instant_delivery_time);
 									if($arr->order_type=='slot') {
 										$delivery_time = $arr->from_time;
@@ -144,6 +178,7 @@
 								<td><?PHP echo $arr->order_type; ?></td>
 								<td><?php echo $to_be_delivered; ?></td>
 								<td><?php echo $remaining_delivery_time; ?></td>
+								<td><?php echo $arr->payment_method; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
 								<td class="d-flex align-items-center gap-3">
 									<!--<a href="javascript:void(0)" class="text-success font-text2" onclick="assignOperator(<?php echo($arr->id);?>)">
@@ -210,7 +245,7 @@
 	</div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
 function assignOperator(orderId)

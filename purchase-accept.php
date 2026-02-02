@@ -1,16 +1,22 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => true,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	ob_start();
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
+		<?PHP include_once("includes/sellerMenu.php"); ?>
 	<!-- ######### HEADER END ############### -->
 
 <main class="main-wrapper">
@@ -49,7 +55,7 @@
 						$params = [
 							':status' => 3,
 							':transaction_type' => 1,
-							':seller_id' => $_SESSION['USER_ID']
+							':seller_id' => $_SESSION['SELLER_ID']
 						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 
@@ -83,15 +89,6 @@
 								$i++;
 							}
 						}
-						else
-						{
-					?>
-                      <tr>
-                        <td colspan="6">No record found.</div>
-						</td>
-					  </tr>
-					<?PHP
-						}	
 					?>
                    </tbody>
                   </table>
@@ -106,7 +103,7 @@
 	<div class="modal fade" id="acceptModal">
 	  <div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
-		  <div class="modal-header border-bottom-0 py-2 bg-grd-info">
+		  <div class="modal-header border-bottom-0 py-2 bg-grd-success">
 			<h5 class="modal-title btn-grd">Accept Purchase</h5>
 			<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
 			  <i class="material-icons-outlined">close</i>
@@ -141,8 +138,8 @@
 				  <div class="d-md-flex d-grid justify-content-md-between">
 					<input type="hidden" id="order_id" name="order_id">
 					
-					<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
-					<button type="button" id="acceptSave" class="btn btn-grd btn-grd-danger px-4">Save</button>
+					<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+					<button type="button" id="acceptSave" class="btn btn-grd btn-grd-success px-4">Save</button>
 				  </div>
 				</div>
 			  </form>
@@ -153,7 +150,7 @@
 	</div>
 
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	
   </body>

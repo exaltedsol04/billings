@@ -46,7 +46,7 @@
 			$params = [
 				':status'	=>	1,
 				':stock_type'	=>	1,
-				':seller_id'	=>	$_SESSION['USER_ID'],
+				':seller_id'	=>	$_SESSION['SELLER_ID'],
 				':barcode'	=>	$barcode
 			];
 			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
@@ -65,7 +65,7 @@
 				// get unit 
 				//$stock_unit_id = $general_cls_call->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$val->stock_unit_id), 1);
 				
-				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val->product_variant_id, 'status'=>1, 'product_id'=> $val->product_id, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
+				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val->product_variant_id, 'status'=>1, 'product_id'=> $val->product_id, 'seller_id'=> $_SESSION['SELLER_ID']), 'stock');
 				
 				if($stock_used->total > 0)
 				{
@@ -128,7 +128,7 @@
 				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id", array(':id'=> $val), 1);
 				
 				// check from product_stock_transaction 
-				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id AND stock_type=:stock_type", array(':product_variant_id'=> $val, 'status'=>1, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['USER_ID'], 'stock_type'=>1), 'stock');
+				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id AND stock_type=:stock_type", array(':product_variant_id'=> $val, 'status'=>1, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['SELLER_ID'], 'stock_type'=>1), 'stock');
 				//echo $stock_used->price; die;
 				$remainingStock = $stock_used->total;
 				//echo $remainingStock; die;
@@ -197,7 +197,7 @@
 			$value = ":pos_user_id, :user_id, :store_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :created_at, :updated_at";
 			
 			$addExecute=array(
-				':pos_user_id'			=> $_SESSION['USER_ID'],
+				':pos_user_id'			=> $_SESSION['SELLER_ID'],
 				':user_id'				=> $_POST['user_hidden_id'],
 				':store_id'				=> $general_cls_call->specialhtmlremover($store_id),
 				':total_amount'			=> $_POST['cart_total_amt'],
@@ -254,7 +254,7 @@
 					
 					//parent_id
 					$addExecute=array(
-						':seller_id'			=> $_SESSION['USER_ID'],
+						':seller_id'			=> $_SESSION['SELLER_ID'],
 						':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
 						':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 						
@@ -286,7 +286,7 @@
 				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id", array(':id'=> $val), 1);
 				
 				// check from product_stock_transaction 
-				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id AND stock_type=:stock_type", array(':product_variant_id'=> $val, 'status'=>1, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['USER_ID'], 'stock_type'=>1), 'stock');
+				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id AND stock_type=:stock_type", array(':product_variant_id'=> $val, 'status'=>1, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['SELLER_ID'], 'stock_type'=>1), 'stock');
 				//echo $stock_used->price; die;
 				$remainingStock = $stock_used->total;
 				//echo $remainingStock; die;
@@ -345,7 +345,7 @@
 				
 				
 				$addExecute=array(
-					':seller_id'			=> $_SESSION['USER_ID'],
+					':seller_id'			=> $_SESSION['SELLER_ID'],
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					
@@ -420,7 +420,7 @@
 				$wh = "WHERE product_id=:product_id AND status=:status AND seller_id =:seller_id GROUP BY product_variant_id HAVING SUM(stock) > 0";
 				$para = [
 					':product_id' => $pid,
-					':seller_id' => $_SESSION['USER_ID'],
+					':seller_id' => $_SESSION['SELLER_ID'],
 					':status' => 1
 				];
 				
@@ -447,7 +447,7 @@
 						':product_id'	=>	$product_variant_dtls->product_id,
 						':status'	=>	1,
 						':stock_type'	=>	1,
-						':seller_id'	=>	$_SESSION['USER_ID']
+						':seller_id'	=>	$_SESSION['SELLER_ID']
 					];
 					// check from product_stock_transaction 
 					$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $where, $params, 'stock');
@@ -725,7 +725,7 @@
 						':product_id'	=>	$product_variant_dtls->product_id,
 						':status'	=>	1,
 						':stock_type'	=>	1,
-						':seller_id'	=>	$_SESSION['USER_ID']
+						':seller_id'	=>	$_SESSION['SELLER_ID']
 					];
 					// check from product_stock_transaction 
 					$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $where, $params, 'stock');
@@ -775,7 +775,7 @@
 					
 					$data['status'] = 200;
 					$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
-						<div class="text-white"><strong>Success!</strong> Status updated successfully</div>
+						<div class="text-white"><strong>Success!</strong> Stock updated successfully</div>
 						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 					</div>';
 				}

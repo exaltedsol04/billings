@@ -1,19 +1,18 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	ob_start();
-		/*if(isset($_GET['m']) && $_GET['m']==1) 
-		{
-			$msg= '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
-				<div class="text-white"><strong>Success</strong> Status update successfully.</div>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-		  </div>';
-		}*/
 	/*=========== STATUS CHANGE START ================*/
 		if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '2' || $_GET['mode'] == '3'))
 		{
-			//echo $_GET['id'].' '.$_GET['mode'];die;
+			//echo $_GET['id'].' '.$_GET['mode'].' '.$_GET['qty'];die;
 			// get product and product variant_ab
 			$product_stk_dtls = $general_cls_call->select_query("*", PRODUCT_STOCK_TRANSACTION, "WHERE id =:id ", array(':id'=> $_GET['id']), 1);
 			
@@ -93,12 +92,12 @@
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
+	<!-- ######### MENU START ############### -->
 		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -114,9 +113,8 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Purchase Request List</a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Purchase Request List</li>
 							</ol>
 						</nav>
 					</div>
@@ -232,16 +230,7 @@
 												$i++;
 											}
 										}
-										else
-										{
 									?>
-									  <tr>
-										<td colspan="7" class="text-center">No record found.
-										</td>
-									  </tr>
-						<?PHP
-							}	
-						?>
 								</tbody>
 							</table>
 						</div>
@@ -271,7 +260,7 @@
 </div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 </body>
 </html>

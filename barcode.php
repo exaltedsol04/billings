@@ -1,17 +1,24 @@
-<?PHP  error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [3];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP  
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
+	
 	ob_start();
 	ob_end_flush();
 	
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
+		<?PHP include_once("includes/sellerMenu.php"); ?>
 	<!-- ######### HEADER END ############### -->
 
 <main class="main-wrapper">
@@ -39,8 +46,11 @@
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id";
-						$where = "WHERE pr.status=1 AND pr.seller_id ='" .$_SESSION['USER_ID']. "' GROUP BY pr.product_variant_id";
-						$params = [];
+						$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id";
+						$params = [
+							':status'			=> 1,
+							':seller_id'		=> $_SESSION['SELLER_ID']
+						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 						if($sqlQuery[0] != '')
 						{
@@ -52,12 +62,12 @@
 						<td><?PHP echo $i; ?></td>
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td class="text-center">
+						<td class="d-flex align-items-center justify-content-center">
 						<?php 
 						if(!empty($arr->barcode))
 						{
 						?>
-							<a href = "javascript:void(0)" onclick="printBarcode('<?php echo($arr->barcode);?>')" title = "Click here to Print Barcode"><i class="material-icons-outlined">printer</i></a>
+							<a href="javascript:void(0)" class="wh-42 bg-grd-success text-white rounded-circle d-flex align-items-center justify-content-center" onclick="printBarcode('<?php echo($arr->barcode);?>')" title = "Click here to Print Barcode" data-bs-toggle="tooltip"><i class="material-icons-outlined">print</i></a>
 							<?php 
 						}
 						?>
@@ -67,15 +77,6 @@
 								$i++;
 							}
 						}
-						else
-						{
-					?>
-                      <tr>
-                        <td colspan="3">No record found.</div>
-						</td>
-					  </tr>
-					<?PHP
-						}	
 					?>
                    </tbody>
                   </table>
@@ -88,7 +89,7 @@
     <svg id="barcode"></svg>
 </div>
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 	
 	<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>

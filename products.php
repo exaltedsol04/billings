@@ -1,24 +1,31 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1];
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => true,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	ob_start();
-	
-	ob_end_flush();
 	
 	$orWhere = '';
 	if(isset($_GET['sid'])  && $_GET['sid'] != 'admin')
 	{
 		$seller_id = $_GET['sid'];
-		$orWhere = "AND pr.seller_id ='" .$seller_id. "'";
+		$orWhere = "AND pr.seller_id =:seller_id";
 		
 		$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode, u.name as unit_name";
 		$tables = PRODUCT_STOCK_TRANSACTION . " pr
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-		$where = "WHERE pr.status=1 ".$orWhere." GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
-		$params = [];
+		$where = "WHERE pr.status=:status ".$orWhere." GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+		$params = [
+			':status'			=> 1,
+			':seller_id'		=> $seller_id
+		];
 		$sqlQueryP = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 		//echo "<pre>";print_r($sqlQueryP);die;
 	}
@@ -33,9 +40,11 @@
 		$sqlQueryP = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 		//echo "<pre>";print_r($sqlQueryP);die;
 	}
+	
+	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
      
 	<!-- ######### HEADER START ############### -->
@@ -52,9 +61,8 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Products List</a>
 								</li>
-								<li class="breadcrumb-item active" aria-current="page">Product List</li>
 							</ol>
 						</nav>
 					</div>
@@ -140,16 +148,6 @@
 											$i++;
 										}
 									}
-									else
-									{
-								?>
-											  <tr>
-												<td colspan="5">
-												No record found.
-												</td>
-											  </tr>
-								<?PHP
-									}	
 								?>
 								</tbody>
 							</table>
@@ -183,7 +181,7 @@
 
 <!--end main wrapper-->
 	<!-- ######### FOOTER START ############### -->
-		<?PHP include_once("includes/adminFooter.php"); ?>
+		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
 
 </body>

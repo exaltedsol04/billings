@@ -1,8 +1,3 @@
-<?PHP
-	$page = basename($_SERVER["PHP_SELF"]);
-	
-	//echo $page;die;
-?>
 <!doctype html>
 <html lang="en" data-bs-theme="<?php echo $_SESSION['ROLE_ID']==1 ? 'light' : ($_SESSION['ROLE_ID']==5 ? 'blue-theme' : 'semi-dark'); ?>">
 
@@ -21,7 +16,7 @@
   <link rel="stylesheet" type="text/css" href="assets/plugins/metismenu/metisMenu.min.css">
   <link rel="stylesheet" type="text/css" href="assets/plugins/metismenu/mm-vertical.css">
   <link rel="stylesheet" type="text/css" href="assets/plugins/simplebar/css/simplebar.css">
-  <?php if($page=='purchase-request.php' || $page=='stock-transfer.php' || $page=='products.php' || $page=='pos.php' || $page=='online-stock-transfer.php'  || $page=='purchase-stock-add.php' || $page=='online-processing-orders.php' || $page=='purchase-accept.php' || $page=='purchase-stock-list.php' || $page=='deliveryboy-list.php') {  ?>	
+  <?php if (!empty($pageParam['select2'])) {  ?>	
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
   <?php } ?>
@@ -30,7 +25,7 @@
 
 
   <link rel="stylesheet" href="assets/css/extra-icons.css">
-  <?php if($page=='products.php' || $page=='invoices.php' || $page=='purchase-approved-list.php' || $page=='purchase-rejected-list.php' || $page=='purchase-report.php' || $page=='purchase-request.php' || $page=='purchase-request-list.php' || $page=='stock-transfer.php' || $page=='pos.php' || $page=='available-stock-report.php' || $page=='barcode.php' || $page=='approved-purchase-report.php' || $page=='available-online-report.php' || $page=='invoices-view.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view'  || $page=='seller-list.php' || $page=='online-orders.php' || $page=='online-completed-orders.php'  || $page=='online-processing-orders.php' || $page=='packaging-operator-list.php' || $page=='packaging-operator-assign.php' || $page=='online-assigned-orders.php' || $page=='online-packaging-operator-orders.php' || $page=='approved-stock-list.php' || $page=='deliveryboy-list.php') {  ?>	
+  <?php if (!empty($pageParam['dataTables'])) {  ?>	
   <link href="assets/plugins/datatable/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
   <?php } ?>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -43,7 +38,7 @@
   <link href="sass/semi-dark.css" rel="stylesheet">
   <link href="sass/bordered-theme.css" rel="stylesheet">
   <link href="sass/responsive.css" rel="stylesheet">
-<?php if($page=='online-completed-orders.php' || $page=='online-processing-orders.php') {  ?>
+<?php if (!empty($pageParam['daterangepicker'])) {  ?>
 	<!-- Date Range Picker CSS -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <?php } ?>

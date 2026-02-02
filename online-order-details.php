@@ -1,22 +1,19 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1,3,5];
-	
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
-	ob_start();
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => false,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1,3,5]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 
-	ob_end_flush();
+	ob_start();;
 	//echo $_SESSION['USER_ID'];die;
 	$order_id = '';
 	if(isset($_GET['order_id']))
 	{
-		/*$fields = "o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, oi.status, oi.active_status, oi.product_name, oi.variant_name, oi.quantity, oi.discounted_price, oi.sub_total, oi.cancellation_reason, oi.canceled_at, oi.seller_id, s.name as seller_name, s.city_id, s.street";
-		$tables = ORDERS_ITEMS . " oi
-		INNER JOIN " . ORDERS . " o ON o.orders_id = oi.orders_id
-		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id";*/
-		
-		//--------------------------
-		
 		if($_SESSION['ROLE_ID'] == 1)
 		{
 			$where = "WHERE orders_id=:orders_id";
@@ -58,18 +55,25 @@
 		// get the packing charge
 		
 		$packing = $general_cls_call->select_query("packing_charge", ORDERS, "WHERE orders_id=:orders_id", [':orders_id' => $_GET['order_id']], 1);
-		
-		
-		
 	}
+
+	ob_end_flush()
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			} elseif ($_SESSION['ROLE_ID'] == 5) {
+				$menuFile = 'packagingOperatorMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -238,7 +242,7 @@
 </div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 </body>
 </html>

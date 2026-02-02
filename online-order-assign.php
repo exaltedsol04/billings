@@ -1,13 +1,15 @@
-<?PHP error_reporting(0);
-	include_once 'init.php';
-	$pageAccessRoleIds = [1,3];
+<?PHP 
+	/*******Start Auth Section*******/
+	$pageParam = [
+		'dataTables' => true,
+		'select2' => false,
+		'daterangepicker' => false,
+		'pageAccessRoleIds' => [1,3]
+	];
+	include_once 'includes/authCheck.php';
+	/*******End Auth Section*******/
 	
-	//echo $_SESSION['SELLER_ID'];die;
-	
-	$general_cls_call->validation_check($_SESSION['USER_ID'], $_SESSION['ROLE_ID'], $pageAccessRoleIds, SITE_URL);// VALIDATION CHEK
 	ob_start();
-
-	ob_end_flush();
 	//echo $_SESSION['USER_ID'];die;
 	$order_id = '';
 	if(isset($_GET['order_id']))
@@ -52,14 +54,22 @@
 		}		
 		$sqlQuery = $general_cls_call->select_query("*", ORDERS_ITEMS, $where, $params, 2);
 	}
+
+	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminHeader.php"); ?>
+		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
-	<!-- ######### HEADER START ############### -->
-		<?PHP include_once("includes/adminMenu.php"); ?>
-	<!-- ######### HEADER END ############### -->
+	<!-- ######### MENU START ############### -->
+		<?PHP 
+			$menuFile = 'sellerMenu.php';
+			if ($_SESSION['ROLE_ID'] == 1) {
+				$menuFile = 'adminMenu.php';
+			}
+			include_once("includes/" . $menuFile);
+		?>
+	<!-- ######### MENU END ############### -->
 
 
   <!--start main wrapper-->
@@ -377,7 +387,7 @@
 	<div class="modal fade" id="orderStatusModal">
 	  <div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
-		  <div class="modal-header border-bottom-0 py-2 bg-grd-info">
+		  <div class="modal-header border-bottom-0 py-2 bg-grd-success">
 			<h5 class="modal-title btn-grd">Change Order Status</h5>
 			<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
 			  <i class="material-icons-outlined">close</i>
@@ -396,8 +406,8 @@
 				  <div class="d-md-flex d-grid justify-content-md-between">
 					<input type="hidden" id="order_id" name="order_id">
 					
-					<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
-					<button type="button" id="orderStatusChangeSave" class="btn btn-grd btn-grd-danger px-4">Update Status</button>
+					<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+					<button type="button" id="orderStatusChangeSave" class="btn btn-grd btn-grd-success px-4">Update Status</button>
 				  </div>
 				</div>
 			  </form>
@@ -407,7 +417,7 @@
 	  </div>
 	</div>
 <!-- ######### FOOTER START ############### -->
-	<?PHP include_once("includes/adminFooter.php"); ?>
+	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
 function orderStatusChange(orderId)
