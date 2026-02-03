@@ -44,6 +44,20 @@
 			  </ul>
 			</li>
 			
+			<li <?php if($page=='vendor-add.php') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">storefront</i>
+				</div>
+				<div class="menu-title">Vendor</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'vendor-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Add</a>
+				</li>
+				<li><a href="<?php echo SITE_URL.'vendor-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a>
+				</li>
+			  </ul>
+			</li>
+			
 			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view.php'   || $page=='approved-stock-list.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
