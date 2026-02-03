@@ -64,7 +64,8 @@
 	}
 	else
 	{
-		$whereDateRange = 'AND DATE(os.created_at) = CURDATE()';
+		//$whereDateRange = 'AND DATE(os.created_at) = CURDATE()';
+		$whereDateRange = '';
 		if($_SESSION['ROLE_ID'] == 1)
 		{
 			$params = [

@@ -110,7 +110,6 @@
 									<th>Available Stock</th>
 									<th>Pending Status</th>
 									<th>Measurement</th>
-									<th>Purchase Date</th>
 									<th>Action</th>
 								  </tr>
 								</thead>
@@ -176,7 +175,6 @@
 										<td><?PHP echo $selectValue->total_stock; ?></td>
 										<td><?php echo $pending_stock; ?></td>
 										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-										<td><span class="d-none"><?PHP echo $selectValue->created_at; ?></span><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_variant_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
 											<span class="material-icons-outlined fs-5">visibility</span>
 										</div></a></td>

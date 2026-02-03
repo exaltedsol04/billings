@@ -107,6 +107,10 @@ ALTER TABLE `bl_packaging_operators` CHANGE `token_type` `token_type` VARCHAR(50
 ALTER TABLE `bl_product_stock_transaction` CHANGE `seller_accept_remark` `seller_accept_remark` VARCHAR(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL; 
 
 
+========================== 03-02-2026==========================
+ALTER TABLE `bl_vendors` ADD `product_ids` VARCHAR(225) NULL DEFAULT NULL AFTER `mobile`, ADD `city` VARCHAR(100) NULL DEFAULT NULL AFTER `product_ids`, ADD `pincode` VARCHAR(100) NULL DEFAULT NULL AFTER `city`, ADD `address` TEXT NULL DEFAULT NULL AFTER `pincode`;
+
+
 
 
 

@@ -141,7 +141,7 @@
 
 							<div class="col-md-6 purchase-div"  style="display:none">
 								<label for="input5" class="form-label">Purchase price</label>
-								<input type="text" class="form-control" id="purchase_price" name="purchase_price" placeholder="Purchase price" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+								<input type="text" class="form-control" id="purchase_price" name="purchase_price" placeholder="Purchase price" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<div class="col-md-6 selling-div"  style="display:none">

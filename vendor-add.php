@@ -13,21 +13,47 @@
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
 	{	
 		extract($_POST);
-		print_r($_POST['products'], []);
-		echo "<pre>";print_r($_POST);die;
-		$field = "name, email, mobile,  status, created_at, updated_at";
-		$value = ":name, :email, :mobile, :status, :created_at, :updated_at";
-				
-		$addExecute=array(
-			':name'			=> $general_cls_call->specialhtmlremover($name),
-			':email'			=> $general_cls_call->specialhtmlremover($email),
-			':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
-			':status'				=> 1,
-			':created_at' 			=> date('Y-m-d H:i:s'),
-			':updated_at'		    => date('Y-m-d H:i:s')
-		);
-		$general_cls_call->insert_query(VENDORS, $field, $value, $addExecute);
-		$sucMsg = "Vendor Created Successfully";
+		//echo "<pre>";print_r($_POST);die;
+		if(empty($vendor_id) && $vendor_id == '')
+		{
+			$field = "name, email, mobile,  status, city, pincode, address, product_ids, created_at, updated_at";
+			$value = ":name, :email, :mobile, :status, :city, :pincode, :address, :product_ids, :created_at, :updated_at";
+					
+			$addExecute=array(
+				':name'			=> $general_cls_call->specialhtmlremover($name),
+				':email'			=> $general_cls_call->specialhtmlremover($email),
+				':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
+				':city'	=> $general_cls_call->specialhtmlremover($city),
+				':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
+				':address'	=> $general_cls_call->specialhtmlremover($address),
+				':product_ids'	=> $general_cls_call->specialhtmlremover(implode(",", $products)),
+				':status'				=> 1,
+				':created_at' 			=> date('Y-m-d H:i:s'),
+				':updated_at'		    => date('Y-m-d H:i:s')
+			);
+		
+		
+			$general_cls_call->insert_query(VENDORS, $field, $value, $addExecute);
+			$sucMsg = "Vendor Created Successfully";
+		}
+		else
+		{
+			$setValues=" name=:name, email=:email, mobile=:mobile, city=:city, pincode=:pincode, address=:address, product_ids=:product_ids, updated_at=:updated_at";
+			$updateExecute=array(
+				':name'		=> $general_cls_call->specialhtmlremover($name),
+				':email'	=> $general_cls_call->specialhtmlremover($email),
+				':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
+				':city'	=> $general_cls_call->specialhtmlremover($city),
+				':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
+				':address'	=> $general_cls_call->specialhtmlremover($address),
+				':product_ids'	=> $general_cls_call->specialhtmlremover(implode(",", $products)),
+				':updated_at'  => date('Y-m-d H:i:s'),
+				':id'	    => $vendor_id
+			);
+			$whereClause=" WHERE id = :id";
+			$general_cls_call->update_query(VENDORS, $setValues, $whereClause, $updateExecute);
+			};
+			$sucMsg = "Vendor Updated Successfully";
 	}
 	
 	if(isset($_GET['vendor_id']) && $_GET['vendor_id']!='')
@@ -94,9 +120,12 @@
 								<input type="text" class="form-control" name="name" id="name" placeholder="Name" required value="<?php echo isset($sqlQueryVen->name) ? $sqlQueryVen->name : '' ?>">
 							</div>
 							<div class="col-md-6">
-								<label for="input5" class="form-label">Address</label>
-								<textarea name="address" class="form-control"><?php echo isset($sqlQueryVen->address) ? $sqlQueryVen->address : '' ?></textarea>
-								
+								<label for="input5" class="form-label">Email</label>
+								<input type="email" class="form-control" name="email" id="email" placeholder="Email" required value="<?php echo isset($sqlQueryVen->email) ? $sqlQueryVen->email : '' ?>">
+							</div>
+							<div class="col-md-6">
+								<label for="input5" class="form-label">Mobile</label>
+								<input type="text" class="form-control" name="mobile" id="mobile" placeholder="Mobile" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" required value="<?php echo isset($sqlQueryVen->mobile) ? $sqlQueryVen->mobile : '' ?>">
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">City</label>
@@ -104,11 +133,17 @@
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Pincode</label>
-								<input type="text" class="form-control" name="pincode" id="pincode" placeholder="Pincode" required value="<?php echo isset($sqlQueryVen->pincode) ? $sqlQueryVen->pincode : '' ?>">
+								<input type="text" class="form-control" name="pincode" id="pincode" placeholder="Pincode" required value="<?php echo isset($sqlQueryVen->pincode) ? $sqlQueryVen->pincode : '' ?>" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 							</div>
-							<div class="col-md-6">
+							<div class="col-md-12">
+								<label for="input5" class="form-label">Address</label>
+								<textarea name="address" class="form-control" required><?php echo isset($sqlQueryVen->address) ? $sqlQueryVen->address : '' ?></textarea>
+								
+							</div>
+							
+							<div class="col-md-12">
 								<label for="multiple-select-field" class="form-label">Products</label>
-								<select class="form-select" id="multiple-select-field" data-placeholder="Choose products" multiple name="products">
+								<select class="form-select" id="multiple-select-field" data-placeholder="Choose products" multiple name="products[]" required>
 									<option value="">Select..</option>
 									<?php 
 									$fieldsP = "*";
@@ -118,21 +153,21 @@
 									foreach($sqlQueryP as $val)
 									{
 										$barcode = !empty($val->barcode) ? '(' .$val->barcode .')' : '';
+										$selected = '';
+										$expProductIds = explode(",", $sqlQueryVen->product_ids);
+										if(in_array($val->id, $expProductIds))
+										{
+											$selected = 'selected';
+										}
 									?>
-									<option value="<?php echo $val->id ;?>"><?php echo $barcode .$val->name ; ?></option>
+									<option value="<?php echo $val->id ;?>" <?php echo $selected; ?>><?php echo $barcode .$val->name ; ?></option>
 									<?php 
 									}
 									?>
 								</select>
 							</div>
-							<div class="col-md-6">
-								<label for="input5" class="form-label">Email</label>
-								<input type="email" class="form-control" name="email" id="email" placeholder="Email" required value="<?php echo isset($sqlQueryVen->email) ? $sqlQueryVen->email : '' ?>">
-							</div>
-							<div class="col-md-6">
-								<label for="input5" class="form-label">Mobile</label>
-								<input type="text" class="form-control" name="mobile" id="mobile" placeholder="Mobile" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" required value="<?php echo isset($sqlQueryVen->mobile) ? $sqlQueryVen->mobile : '' ?>">
-							</div>
+							<input type="hidden" value="<?php echo $_GET['vendor_id'] ?>" name="vendor_id">
+							
 
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">

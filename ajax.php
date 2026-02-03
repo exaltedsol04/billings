@@ -862,5 +862,37 @@
 			 echo json_encode($data);
 			 
 		break;
+		case "updatedelete":
+			$setValues="status=:status";
+			$updateExecute=array(
+				':status'	=> 2,
+				':id'	    => $_POST['id']
+			);
+			$whereClause=" WHERE id = :id";
+			$update = $general_cls_call->update_query($_POST['table'], $setValues, $whereClause, $updateExecute);
+			if($update)
+			{
+				echo 'l';
+			}
+		break;
+		
+		case "updatestatus":
+		
+			$statusData = $general_cls_call->select_query("status", $_POST['table'], "WHERE id=:id", array(':id'=>$_POST['id']), 1);
+			
+			$status = $statusData->status == 1 ? 0 : 1;
+		
+			$setValues="status=:status";
+			$updateExecute=array(
+				':status'	=> $status,
+				':id'	    => $_POST['id']
+			);
+			$whereClause=" WHERE id = :id";
+			$update = $general_cls_call->update_query($_POST['table'], $setValues, $whereClause, $updateExecute);
+			if($update)
+			{
+				echo 'l';
+			}
+		break;
     }
 ?>

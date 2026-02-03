@@ -2,7 +2,7 @@
 	/*******Start Auth Section*******/
 	$pageParam = [
 		'dataTables' => true,
-		'select2' => true,
+		'select2' => false,
 		'daterangepicker' => false,
 		'pageAccessRoleIds' => [1]
 	];
@@ -22,6 +22,20 @@
 		$whereSrc = "1";
 		$paramsSrc = [];
 	}
+	
+	/*if(!empty($_GET['vendor_id']) && $_GET['vendor_id'] !='')
+	{
+		
+		$setValues="status=:status";
+		$updateExecute=array(
+			':status'	=> $_GET['status'],
+			':id'	    => $_GET['vendor_id']
+		);
+		$whereClause=" WHERE id = :id";
+		$general_cls_call->update_query(VENDORS, $setValues, $whereClause, $updateExecute);
+		
+		$sucMsg = "Status Updated Successfully";
+	}*/
 
 	ob_end_flush();
 ?>
@@ -48,45 +62,22 @@
 							</ol>
 						</nav>
 					</div>
+					
+					
 				</div>
 				<!--end breadcrumb-->
-				<h6 class="mb-0 text-uppercase">Search panel</h6>
-						<hr>
-						<div class="card rounded-4 border-top border-4 border-primary border-gradient-1">
-							<div class="card-body">
-								<form class="row g-4" method="post" action="">
-									<div class="col-md-4">
-										<label for="input5" class="form-label">Vendor</label>
-										<select name="vendor_id" id="vendor_id" class="form-select select2-dropdown" tabindex="1" required>
-										<option value="">Select...</option>
-										<?php 
-											$fields = "*";
-											$where = "WHERE 1";
-											$params = [];
-											$sqlQuery = $general_cls_call->select_query($fields, VENDORS, $where, $params, 2);
-											if($sqlQuery[0] != '')
-											{
-												foreach($sqlQuery as $arr)
-												{
-										?>
-												<option value="<?php echo $arr->id ?>" <?php echo ($_POST['vendor_id'] == $arr->id) ? 'selected' : '' ?>><?php echo $arr->name ?></option>
-										<?php 
-												}
-											}
-										?>
-									</select>
-									</div>
-									
-									<div class="col-md-12">
-									  <div class="d-md-flex d-grid justify-content-md-between">
-										<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
-										<button type="submit" class="btn btn-grd btn-grd-success px-5" name="btnUser" value="SAVE">Search</button>
-									  </div>
-									</div>
-								</form>
-							</div>
+				<span id="updatemsg"></span>
+				<?PHP
+						if(isset($sucMsg) && $sucMsg != '')
+						{
+					?>
+						<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+							<div class="text-white"><strong>Success</strong> <?PHP echo $sucMsg; ?></div>
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
-     
+					<?PHP
+						}
+					?>
 				<div class="card">
 					<div class="card-body">
 						<div class="table-responsive">
@@ -96,8 +87,6 @@
 										<td></td>
 										<td><input type="text" class="form-control" id="search-one" placeholder="Search by Vendor"></td>
 										<td><input type="text" class="form-control" id="search-two" placeholder="Search by name"></td>
-										
-										
 										<td></td>
 										<td></td>
 									</tr>
@@ -107,14 +96,17 @@
 									<th>Email</th>
 									<th>Mobile</th>
 									<th>Created Date</th>
+									<th>Status</th>
 									<th>Action</th>
 								  </tr>
 								</thead>
 								<tbody>
 									<?php
 									$fieldsVen = "*";
-									$whereVen = "WHERE 1";
-									$paramsVen = [];
+									$whereVen = "WHERE status!=:status";
+									$paramsVen = [
+										':status'=>2
+									];
 									$sqlQueryVen = $general_cls_call->select_query($fieldsVen, VENDORS, $whereVen, $paramsVen, 2);
 									//echo "<pre>";print_r($sqlQueryVen);die;
 									if($sqlQueryVen[0] != '')
@@ -130,34 +122,67 @@
 										<td><?php echo $selectValue->mobile; ?></td>
 										
 										<td><span class="d-none"><?PHP echo $selectValue->created_at; ?></span><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td><a href="<?php echo SITE_URL.'vendor-add'; ?>?vendor_id=<?php echo($selectValue->id);?>">
-										<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success" title = "Edit seller" data-bs-toggle="tooltip">
-											<i class="fadeIn animated bx bx-edit-alt"></i>
+										<td>
+										<?php 
+										if($selectValue->status == 1)
+										{
+										?>
+										<div class="ms-auto">
+											<div class="btn-group">
+												<p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Active</p>
+											</div>
 										</div>
-										
-										</td>
-									</tr>
-										<?PHP
-												$i++;
-											}
+										<?php 
 										}
 										else
 										{
-									?>
-									  <tr>
-										<td colspan="10">
-										 No record found.
+										?>
+										<div class="ms-auto">
+											<div class="btn-group">
+												<p class="dash-lable mb-0 bg-danger bg-opacity-10 text-danger rounded-2">Inactive</p>
+											</div>
+										</div>
+										<?php 
+										}
+										?>
 										</td>
-									  </tr>
-						<?PHP
-							}	
-						?>
+										<td>
+											<div class="dropdown">
+												<button class="btn btn-sm btn-filter dropdown-toggle dropdown-toggle-nocaret"
+												  type="button" data-bs-toggle="dropdown">
+												  <i class="bi bi-three-dots"></i>
+												</button>
+												<ul class="dropdown-menu">
+												  <li><a href="<?php echo SITE_URL.'vendor-add'; ?>?vendor_id=<?php echo($selectValue->id);?>" class="dropdown-item" title="Click here to edit">Edit</a></li>
+												  <li><a href="javascript:void(0);" class="dropdown-item" title="Click here to delete"  onclick="deleteData('<?PHP echo VENDORS; ?>', <?PHP echo $selectValue->id; ?>)">Delete</a></li>
+												  <?php 
+												  if($selectValue->status == 1)
+												  {
+												  ?>
+												  <li><a href="javascript:vois(0);" class="dropdown-item" title="Click here to inactive"  onclick="status_change('<?PHP echo VENDORS; ?>', <?PHP echo $selectValue->id; ?>)">Inactive</a></li>
+												  <?php 
+												  }elseif($selectValue->status == 0)
+												  {
+												  ?><li><a href="javascript:void(0);" class="dropdown-item" title="Click here to active" onclick="status_change('<?PHP echo VENDORS; ?>', <?PHP echo $selectValue->id; ?>)">Active</a></li>
+												  <?php 
+												  }
+												  ?>
+												</ul>
+											</div>
+										</td>
+									</tr>
+										<?PHP
+											$i++;
+										}
+									}
+										
+									?>
+									  
 								</tbody>
 							</table>
 						</div>
 					</div>
 				</div>
-
     </div>
   </main>
   <!--end main wrapper-->
@@ -198,6 +223,10 @@ $(document).ready(function(){
     ] 
 	});
 });
+
+
+
+
 </script>
 </body>
 </html>

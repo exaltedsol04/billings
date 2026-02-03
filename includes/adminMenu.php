@@ -44,7 +44,7 @@
 			  </ul>
 			</li>
 			
-			<li <?php if($page=='vendor-add.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='vendor-add.php' || $page=='vendor-list.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">storefront</i>
 				</div>
@@ -69,7 +69,7 @@
 				<li><a href="<?php echo SITE_URL.'purchase-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a></li>
 				<li><a href="<?php echo SITE_URL.'admin-pending-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Pending Stock</a></li>
 				<li><a href="<?php echo SITE_URL.'admin-approved-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Stock</a></li>
-				<li><a href="<?php echo SITE_URL.'admin-rejected-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Rejected Stock</a></li>
+				<!--<li><a href="<?php echo SITE_URL.'admin-rejected-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Rejected Stock</a></li>-->
 				<li><a href="<?php echo SITE_URL.'approved-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Stock List</a></li>
 			 </ul>
 			</li>
@@ -99,17 +99,7 @@
 					<div class="menu-title">Delivery Boys</div>
 				</a>
 			</li>
-				<li <?php if($page=='online-assigned-orders.php' || $page=='online-order-assign.php') { echo ('class="mm-active"');} ?>>
-				  <a href="javascript:;" class="has-arrow">
-					<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
-					</div>
-					<div class="menu-title">ORDER ASSIGNMENT</div>
-				  </a>
-				  <ul>
-					<li><a href="<?php echo SITE_URL.'online-assigned-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Assigned order</a></li>
-					</li>
-				  </ul>
-				</li>
+				
 				<li <?php if($page=='order-summary.php' || $page=='online-orders.php' || $page=='online-order-details.php' || $page=='online-completed-orders.php' || $page=='online-processing-orders.php' || $page=='online-incomplete-orders.php') { echo ('class="mm-active"');} ?>>
 				  <a href="javascript:;" class="has-arrow">
 					<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>

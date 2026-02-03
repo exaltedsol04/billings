@@ -59,9 +59,10 @@
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 		LEFT JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-		$where = "WHERE asp.product_variant_id=:product_variant_id";
+		$where = "WHERE asp.product_variant_id=:product_variant_id AND asp.product_stock_transaction_id=:product_stock_transaction_id";
 		$params = [
-			':product_variant_id' => $_GET['pvid']
+			':product_variant_id' => $_GET['pvid'],
+			':product_stock_transaction_id'=>0
 		];
 		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 				
@@ -154,7 +155,21 @@
 										<td class="text-center"><?PHP echo $k+1; ?></td>
 										<td><?PHP echo $selectValue->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
-										<td class="text-center"><input type="text" value="<?PHP echo $selectValue->stock ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9]/g, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
+										<td class="text-center">
+										<?php 
+										if($selectValue->status == 0)
+										{
+										?>
+										<input type="text" value="<?PHP echo $selectValue->stock ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9]/g, '')"><small class="text-danger qty-error" style="display:none;"></small>
+										<?php 
+										}
+										else{
+										?>
+										<?PHP echo $selectValue->stock ?>
+										<?php 
+										}
+										?>
+										</td>
 										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
 										<td>₹ <?php echo $selectValue->purchase_price ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
