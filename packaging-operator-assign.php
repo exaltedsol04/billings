@@ -177,7 +177,7 @@
 								<td class="text-center">--</td>
 								<td><?PHP echo $arr->order_type; ?></td>
 								<td><?php echo $to_be_delivered; ?></td>
-								<td><?php echo $remaining_delivery_time; ?></td>
+								<td><?php echo $remaining_delivery_time == 'NA' ? 'Timeout' : $remaining_delivery_time; ?></td>
 								<td><?php echo $arr->payment_method; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
 								<td class="d-flex align-items-center gap-3">
