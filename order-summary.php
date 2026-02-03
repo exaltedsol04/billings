@@ -55,6 +55,12 @@
 		$returned_orders_params = [
 			':active_status'	=> 8
 		];		
+		
+		//incomplete orders
+		$incompleted_orders_where = "WHERE oi.active_status = :active_status GROUP BY o.id";
+		$incompleted_orders_params = [
+			':active_status'	=> 1
+		];
 	} else{
 		//total orders
 		$total_orders_where = "WHERE oi.seller_id=:seller_id GROUP BY o.orders_id";
@@ -97,6 +103,13 @@
 			':active_status'	=> 8,
 			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
+		
+		//incomplete orders
+		$incompleted_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.id";
+		$incompleted_orders_params = [
+			':active_status'	=> 1,
+			':seller_id'		=> $_SESSION['SELLER_ID']
+		];
 	}
 	$fields = "o.id";
 	$tables = ORDERS . " o
@@ -123,6 +136,9 @@
 	$returnedOrdersArr = $general_cls_call->select_join_query($fields, $tables, $returned_orders_where, $returned_orders_params, 2);
 	$returned_orders = count($returnedOrdersArr);
 	
+	// incomplete order
+	$incompletedOrdersArr = $general_cls_call->select_join_query($fields, $tables, $incompleted_orders_where, $incompleted_orders_params, 2);
+	$incompleted_orders = count($incompletedOrdersArr);
 
 	ob_end_flush();
 	//echo $total_orders;die;
@@ -252,6 +268,21 @@
 					<div class="">
 					  <h5 class="mb-0 text-white"><?= $returned_orders ? $returned_orders : 0; ?></h5>
 					  <p class="mb-0">Returned orders</p>
+					</div>
+				  </div>
+				</div>
+			  </div>
+			</div>
+			</a>
+			
+			<a href="<?php echo SITE_URL.'online-incomplete-orders'; ?>">
+			<div class="col d-flex">
+			  <div class="card rounded-4 w-100 bg-grd-royal bg-gradient text-white">
+				<div class="card-body">
+				  <div class="d-flex align-items-start justify-content-between mb-1">
+					<div class="">
+					  <h5 class="mb-0 text-white"><?= $incompleted_orders ? $incompleted_orders : 0; ?></h5>
+					  <p class="mb-0">Incompleted</p>
 					</div>
 				  </div>
 				</div>

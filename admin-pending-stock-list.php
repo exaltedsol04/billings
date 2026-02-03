@@ -51,22 +51,22 @@
 		header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php').'?pvid='. $_GET['pvid']);
 	}
 	
-	if(isset($_GET['pvid']))
-	{
+	//if(isset($_GET['pvid']))
+	//{
 		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid";
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 		LEFT JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-		$where = "WHERE asp.product_variant_id=:product_variant_id";
+		$where = "WHERE asp.status=:status";
 		$params = [
-			':product_variant_id' => $_GET['pvid']
-		];
+				':status'=>0
+			];
 		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 				
 		//echo "<pre>";print_r($sqlQuery);die;
-	}
+	//}
 
 	ob_end_flush();
 ?>
@@ -163,7 +163,7 @@
 											<div class="ms-auto">
 												  <div class="btn-group">
 												  <?php 
-													if($selectValue->status == 0)
+													if($selectValue->status == 0 || $selectValue->status == 2)
 													{
 													?>
 													<button type="button" class="btn btn-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?>">
@@ -176,19 +176,13 @@
 													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
 															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=1&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to inward" data-bs-toggle="tooltip"><span class="text-success text-bold">Inward</span></a>
 															
-															<!--<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=2&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>-->
+															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=2&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
 													</div>
 													<?php 
 													}
-													elseif($selectValue->status == 1){
+													else{
 													?>
 													 <p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Completed</p>
-													<?php 
-													}
-													elseif($selectValue->status == 2)
-													{
-													?>
-													<p class="dash-lable mb-0 bg-danger bg-opacity-10 text-danger rounded-2">Reject
 													<?php 
 													}
 													?>
@@ -233,6 +227,22 @@
 </body>
 </html>
 <script>
+$(document).ready(function(){
+	if ($.fn.DataTable.isDataTable('#example2')) {
+		$('#example2').DataTable().destroy();
+	}
+	
+	$('#example2').DataTable({
+		order: [[6, 'desc']],
+		columnDefs: [
+        {
+            targets: 0,        // 1st column
+            orderable: true,  // allow manual ordering
+            orderSequence: ['asc', 'desc'] // manual toggle only
+        }
+    ] 
+	});
+});
 $(document).on('click', '.approveBtn', function(e){
     e.preventDefault();
 
