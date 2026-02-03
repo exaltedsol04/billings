@@ -14,10 +14,16 @@
 			if (password_verify($general_cls_call->specialhtmlremover($txtPassword), $user->password)) {
 				$_SESSION['USER_ID'] = $user->id;
 				$_SESSION['ROLE_ID'] = $user->role_id;
+				
+				if($_SESSION['ROLE_ID'] == 1) {
+					$dashboard = 'admin-dashboard';
+				}
+				
 				if($_SESSION['ROLE_ID'] == 3) {
 					
 					$seller = $general_cls_call->select_query("id", SELLERS, "WHERE admin_id=:admin_id", array(':admin_id'=>$user->id), 1);
 					$_SESSION['SELLER_ID'] = $seller->id;
+					$dashboard = 'seller-dashboard';
 				}
 				
 				if($_SESSION['ROLE_ID'] == 5) {
@@ -39,6 +45,7 @@
 					$_SESSION['PACKAGING_OPERATOR_ID'] = $operator->id;
 					$_SESSION['API_TOKEN'] = $operator->api_token;
 					$_SESSION['TOKEN_TYPE'] = 'web';
+					$dashboard = 'dashboard';
 				}
 				
 				$_SESSION['USERNAME'] = $user->username;
@@ -60,7 +67,7 @@
 				   setcookie ('userid1', " ",time()-(60*60*24*30));
 				   setcookie ('password1', " ",time()-(60*60*24*30));   
 				}
-				header("location:".SITE_URL."dashboard");
+				header("location:".SITE_URL. $dashboard);
 			}
 			else
 			{

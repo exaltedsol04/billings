@@ -4,7 +4,7 @@
 		'dataTables' => false,
 		'select2' => false,
 		'daterangepicker' => false,
-		'pageAccessRoleIds' => [1,3,5]
+		'pageAccessRoleIds' => [1]
 	];
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
@@ -65,12 +65,7 @@
       
 	<!-- ######### MENU START ############### -->
 		<?PHP 
-			$menuFile = 'sellerMenu.php';
-			if ($_SESSION['ROLE_ID'] == 1) {
-				$menuFile = 'adminMenu.php';
-			} elseif ($_SESSION['ROLE_ID'] == 5) {
-				$menuFile = 'packagingOperatorMenu.php';
-			}
+			$menuFile = 'adminMenu.php';
 			include_once("includes/" . $menuFile);
 		?>
 	<!-- ######### MENU END ############### -->

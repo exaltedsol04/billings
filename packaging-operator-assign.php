@@ -52,7 +52,7 @@
 			<div class="col-md-12" id="msg"></div>
 		</div>
 		<div class="row row-cols-1 row-cols-xl-6">
-			<a href="<?php echo SITE_URL.'online-orders'; ?>">
+			<a href="<?php echo SITE_URL.'online-incomplete-orders'; ?>">
 			<div class="col d-flex">
 			  <div class="card rounded-4 w-100 bg-grd-primary bg-gradient text-white">
 				<div class="card-body">

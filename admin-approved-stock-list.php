@@ -161,31 +161,8 @@
 										<td><?php echo !empty($selectValue->remarks) ? $selectValue->remarks : '--';?></td>
 										<td class="text-center">
 											<div class="ms-auto">
-												  <div class="btn-group">
-												  <?php 
-													if($selectValue->status == 0 || $selectValue->status == 2)
-													{
-													?>
-													<button type="button" class="btn btn-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?>">
-													<?PHP echo $selectValue->status==1 ? 'Approved' : ($selectValue->status==2 ? 'Rejected' : 'Pending'); ?>
-													</button>
-													<button type="button" class="btn btn-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?> split-bg-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?> dropdown-toggle dropdown-toggle-split"
-													  data-bs-toggle="dropdown"> <span class="visually-hidden">Toggle Dropdown</span>
-													</button>
-													
-													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
-															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=1&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to inward" data-bs-toggle="tooltip"><span class="text-success text-bold">Inward</span></a>
-															
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=2&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
-													</div>
-													<?php 
-													}
-													else{
-													?>
-													 <p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Completed</p>
-													<?php 
-													}
-													?>
+												<div class="btn-group">
+													<p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Completed</p>
 												</div>
 											</div>
 										</td>

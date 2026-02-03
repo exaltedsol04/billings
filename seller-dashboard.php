@@ -4,7 +4,7 @@
 		'dataTables' => false,
 		'select2' => false,
 		'daterangepicker' => false,
-		'pageAccessRoleIds' => [1,3,5]
+		'pageAccessRoleIds' => [3]
 	];
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
@@ -56,6 +56,29 @@
 	
 	//echo $user_purchase_stock; die;
 	//echo $total_orders;die;
+	// available stock 
+	$wherePos = "WHERE stock_type=:stock_type AND seller_id=:seller_id AND status=:status";
+							 
+	$paramsPos = [
+		':stock_type' => 1,
+		':seller_id' => $_SESSION['SELLER_ID'],
+		':status' => 1
+	];
+	$pos_stock = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
+	
+	// assign stock 
+	
+	$fields = "distinct(oi.order_id)";
+	$tables = ORDERS . " o
+	INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id";
+	$whereReceive = "WHERE oi.active_status=:active_status AND oi.seller_id=:seller_id";
+	$paramsReceive = [
+		':seller_id' => $_SESSION['SELLER_ID'],
+		':active_status' => 2
+	];
+	$sqlQueryRec = $general_cls_call->select_join_query($fields, $tables, $whereReceive, $paramsReceive, 2);
+	
+	$count_received = count($sqlQueryRec);
 	ob_end_flush();
 ?>
 
@@ -66,11 +89,6 @@
 	<!-- ######### MENU START ############### -->
 		<?PHP 
 			$menuFile = 'sellerMenu.php';
-			if ($_SESSION['ROLE_ID'] == 1) {
-				$menuFile = 'adminMenu.php';
-			} elseif ($_SESSION['ROLE_ID'] == 5) {
-				$menuFile = 'packagingOperatorMenu.php';
-			}
 			include_once("includes/" . $menuFile);
 		?>
 	<!-- ######### MENU END ############### -->
@@ -95,67 +113,7 @@
       </div>
       <!--end breadcrumb-->
 
-	<?php if($_SESSION['ROLE_ID'] == 1) { ?>
-      <div class="row">
-        <div class="col-12 col-lg-4 col-xxl-4 d-flex">
-          <div class="card rounded-4 w-100">
-            <div class="card-body">
-              <div class="">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <h5 class="mb-0">Products</h5>
-                </div>
-                <p class="mb-4">You are the best seller of this monnth</p>
-                <div class="d-flex align-items-center justify-content-between">
-                  <div class="">
-                    <h3 class="mb-0 text-indigo"><?= $admin_product_stock ? $admin_product_stock : 0; ?></h3>
-                    <p class="mb-3"></p>
-                    <a href="<?php echo SITE_URL.'products'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-12 col-lg-4 col-xxl-4 d-flex">
-          <div class="card rounded-4 w-100">
-            <div class="card-body">
-              <div class="">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <h5 class="mb-0">Purchase Request</h5>
-                </div>
-                <p class="mb-4">You are the best seller of this monnth</p>
-                <div class="d-flex align-items-center justify-content-between">
-                  <div class="">
-                    <h3 class="mb-0 text-indigo"><?php echo $admin_purchase_stock ? $admin_purchase_stock : 0; ?></h3>
-                    <p class="mb-3"></p>
-                    <a href="<?php echo SITE_URL.'purchase-request-list'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-12 col-lg-4 col-xxl-4 d-flex">
-          <div class="card rounded-4 w-100">
-            <div class="card-body">
-              <div class="">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <h5 class="mb-0">Total Sale</h5>
-                </div>
-                <p class="mb-4">You are the best seller of this monnth</p>
-                <div class="d-flex align-items-center justify-content-between">
-                  <div class="">
-                    <h3 class="mb-0 text-indigo">₹<?= $admin_total_sell ? $admin_total_sell : 0; ?></h3>
-                    <p class="mb-3"></p>
-                    <a href="<?php echo SITE_URL.'invoices'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <?php } if($_SESSION['ROLE_ID'] == 3) { ?>
-        <div class="row">
+	<div class="row">
         <div class="col-12 col-lg-4 col-xxl-4 d-flex">
           <div class="card rounded-4 w-100">
             <div class="card-body">
@@ -166,7 +124,7 @@
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo"><?= $user_available_stock ? $user_available_stock : 0; ?></h3>
+                    <h3 class="mb-0 text-indigo"><?= $pos_stock->total ? $pos_stock->total : 0; ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'stock-transfer'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>
@@ -205,7 +163,7 @@
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo"><?php echo $user_purchase_stock ? $user_purchase_stock : 0; ?></h3>
+                    <h3 class="mb-0 text-indigo"><?php echo $count_received ? $count_received : 0; ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'purchase-request'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>
@@ -214,10 +172,6 @@
             </div>
           </div>
         </div>
-        
-		<?php } ?>
-
-      </div><!--end row-->
     </div>
   </main>
   <!--end main wrapper-->
