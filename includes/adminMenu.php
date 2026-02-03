@@ -53,8 +53,10 @@
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'purchase-stock-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Add</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a></li>
+				<li><a href="<?php echo SITE_URL.'admin-pending-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Pending Stock</a></li>
+				<li><a href="<?php echo SITE_URL.'admin-approved-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Stock</a></li>
 				<li><a href="<?php echo SITE_URL.'approved-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Stock List</a></li>
-			  </ul>
+			 </ul>
 			</li>
 			
 			<li <?php if($page=='purchase-request-list.php' || $page=='purchase-approved-list' || $page=='purchase-rejected-list') { echo ('class="mm-active"');} ?>>
