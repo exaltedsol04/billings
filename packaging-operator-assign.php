@@ -148,7 +148,10 @@
 									$final_total = 0;
 									
 									$delivery_time		= $arr->created_at;
-									$to_be_delivered	= $arr->instant_delivery_time .' mins';
+									
+									$to_be_delivered = $general_cls_call->convert_to_hour_min($arr->instant_delivery_time);
+									
+									
 									$delivery_max_time = $general_cls_call->add_minutes($arr->created_at,  $arr->instant_delivery_time);
 									if($arr->order_type=='slot') {
 										$delivery_time = $arr->from_time;
@@ -173,12 +176,12 @@
 								<td><?PHP echo $arr->id; ?></td>
 								<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>
 								<td class="text-center">₹<?PHP echo $final_total; ?></td>
-								<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>'; ?></td>
+								<td class="text-center"><?PHP echo '<span class="badge bg-grd-success dash-lable">'.$general_cls_call->time_ago($arr->created_at).'</span>'. '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>'; ?></td>
 								<td class="text-center">--</td>
-								<td><?PHP echo $arr->order_type; ?></td>
-								<td><?php echo $to_be_delivered; ?></td>
+								<td class="<?php echo $arr->order_type == 'instant' ? 'text-success' : '' ; ?> text-center"><?PHP echo $arr->order_type; ?></td>
+								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $to_be_delivered; ?></span></td>
 								<td><?php echo $remaining_delivery_time == 'NA' ? 'Timeout' : $remaining_delivery_time; ?></td>
-								<td><?php echo $arr->payment_method; ?></td>
+								<td class="<?php echo $arr->payment_method == 'Razorpay' ? 'text-success' : '' ; ?> text-center"><?php echo $arr->payment_method == 'Razorpay' ? 'Online': $arr->payment_method; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
 								<td class="d-flex align-items-center gap-3">
 									<!--<a href="javascript:void(0)" class="text-success font-text2" onclick="assignOperator(<?php echo($arr->id);?>)">

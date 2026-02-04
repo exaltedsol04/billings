@@ -593,33 +593,24 @@
 			return json_decode($response, true);
 			
 		}
-
-		
-		/*function callAPI($method, $url, $data = [], $headers = [])
+		function convert_to_hour_min($data='')
 		{
-			$ch = curl_init();
-
-			if ($method == "POST") {
-				curl_setopt($ch, CURLOPT_POST, true);
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-			}
-
-			if ($method == "GET" && !empty($data)) {
-				$url .= "?" . http_build_query($data);
-			}
-
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-			$response = curl_exec($ch);
-			curl_close($ch);
+			$minutes = (int)$data;
+			$hours = floor($minutes / 60);
+			$mins  = $minutes % 60;
 			
-			//print_r($data);
+			$timeText = '';
 
-			return json_decode($response, true);
-		}*/
+			if ($hours > 0) {
+				$timeText .= $hours . ' hr' . ($hours > 1 ? 's ' : ' ');
+			}
 
+			if ($mins > 0) {
+				$timeText .= $mins . ' min';
+			}
+			
+			return $timeText;
+		}
 
 	}
 ?>
