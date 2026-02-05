@@ -109,7 +109,7 @@
 									<th>Debit Stock</th>
 									<th>Available Stock</th>
 									<th>Pending Status</th>
-									<th>Measurement</th>
+									<!--<th>Measurement</th>-->
 									<th>Action</th>
 								  </tr>
 								</thead>
@@ -122,7 +122,7 @@
 									INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 									LEFT JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-									$where = "WHERE ". $whereSrc ." GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0 ORDER BY asp.created_at DESC";
+									$where = "WHERE ". $whereSrc ." GROUP BY asp.product_id  ORDER BY asp.created_at DESC";
 									
 									
 									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $paramsSrc, 2);
@@ -132,50 +132,87 @@
 										$i = 1;
 										foreach($sqlQuery as $k=>$selectValue)
 										{
+											$product_variant_arr = [];
+											$placeholders = [];
+											$paramsOrdItm = [];
+											
 											$barcode = $selectValue->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 											
 											// credit stock 
-											$whereCredit = "WHERE product_id= :product_id AND product_variant_id= :product_variant_id AND  product_stock_transaction_id= :product_stock_transaction_id";
+											$whereCredit = "WHERE product_id= :product_id AND  product_stock_transaction_id= :product_stock_transaction_id AND status=:status";
 											
 											$paramsCredit = [
 												':product_id' => $selectValue->product_id,
-												':product_variant_id' => $selectValue->product_variant_id,
-												':product_stock_transaction_id' => 0
+												':product_stock_transaction_id' => 0,
+												':status' => 1
 											];
 											$stock_credit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereCredit, $paramsCredit, 'stock');
 											
-											// credit debit 
-											$whereDebit = "WHERE product_id=:product_id AND product_variant_id =:product_variant_id AND product_stock_transaction_id!=:product_stock_transaction_id";
+											// dedit debit admin_stock_transaction 
+											$whereDebit = "WHERE product_id=:product_id AND product_stock_transaction_id!=:product_stock_transaction_id AND status=:status";
 											
 											$paramsDebit = [
 												':product_id'=> $selectValue->product_id,
-												':product_variant_id'=> $selectValue->product_variant_id,
-												':product_stock_transaction_id'=>0
+												':product_stock_transaction_id'=>0,
+												':status'=>1
 											];
-											$stock_debit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereDebit, $paramsDebit, 'stock');
+											$admin_stock_debit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereDebit, $paramsDebit, 'stock');
+											
+											// debit stock from order item
+											$order_item_stock = 0;
+											$product_variants = $general_cls_call->select_query("id", PRODUCT_VARIANTS, "WHERE product_id =:product_id", array(':product_id'=> $selectValue->product_id,), 2);
+											
+											foreach($product_variants as $k=>$variants)
+											{
+												$whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status";
+												  $paramsOrdItm = [
+														':product_variant_id' => $variants->id,
+														'active_status' => 7
+													];
+												  
+												  $qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
+												 
+												  $qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
+												  
+												  $order_item_stock = $order_item_stock + $qty_used; 
+											}
+											//echo "<pre>";print_r($product_variant_arr);die;
 											
 											
+											$admin_stock_debit = abs($stock_debit) + $order_item_stock;
 											// pending stock
-											$whereStatus = "WHERE product_id=:product_id AND product_variant_id =:product_variant_id AND status=:status";
+											$whereStatus = "WHERE product_id=:product_id AND product_stock_transaction_id =:product_stock_transaction_id AND status=:status";
 											
 											$paramsStatus = [
 												':product_id'=> $selectValue->product_id,
-												':product_variant_id'=> $selectValue->product_variant_id,
+												':product_stock_transaction_id'=>0,
 												':status'=>0
 											];
 											$pending_stock = $general_cls_call->select_query_count( ADMIN_STOCK_PURCHASE_LIST, $whereStatus, $paramsStatus);
+											
+											//---------------------
+											
+											/*$fieldsVend = "distinct(vendor_id) , v.name as vendor_names";
+											$tablesVend = ADMIN_STOCK_PURCHASE_LIST . " asp
+											INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
+											$whereVend = "WHERE asp.product_id=:product_id AND asp.product_stock_transaction_id=:product_stock_transaction_id";
+											$paramsVend = [
+												':product_id'=>$selectValue->product_id,
+												':product_stock_transaction_id'=>0
+											];
+											$sqlVendors = $general_cls_call->select_join_query($fieldsVend, $tablesVend, $whereVend, $paramsVend, 2);*/
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
 									    <td style="width:100px"><?php echo $k+1 ;?></td>
 										<td style="width:100px"><?PHP echo $selectValue->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
 										<td><?php echo $stock_credit->total; ?></td>
-										<td><?php echo !empty($stock_debit->total) ? abs($stock_debit->total) : '0'; ?></td>
-										<td><?PHP echo $selectValue->total_stock; ?></td>
+										<td><?php echo $admin_stock_debit; ?></td>
+										<td><?PHP echo $stock_credit->total-$admin_stock_debit; ?></td>
 										<td><?php echo $pending_stock; ?></td>
-										<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_variant_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
+										<!--<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>-->
+										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
 											<span class="material-icons-outlined fs-5">visibility</span>
 										</div></a></td>
 									</tr>
@@ -187,7 +224,7 @@
 										{
 									?>
 									  <tr>
-										<td colspan="10">
+										<td colspan="9">
 										 No record found.
 										</td>
 									  </tr>
@@ -230,7 +267,7 @@ $(document).ready(function(){
 	}
 	
 	$('#example2').DataTable({
-		order: [[8, 'desc']],
+		order: [[7, 'desc']],
 		columnDefs: [
         {
             targets: 0,        // 1st column

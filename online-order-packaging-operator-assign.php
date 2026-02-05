@@ -425,6 +425,14 @@
 				</div>
 				<div class="col-md-12" id="no_operator"></div>
 				<div class="col-md-12">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" value="" id="packed_status">
+						<label class="form-check-label" for="packed_status">
+						  Packed status
+						</label>
+					</div>
+				</div>
+				<div class="col-md-12">
 				  <div class="d-md-flex d-grid justify-content-md-between">
 					<input type="hidden" id="order_id" name="order_id">
 					
@@ -487,14 +495,15 @@ $(document).on('click', '#assignOperatorSave', function (e) {
   // Example data (change to your fields)
   let operatorId = $('#operator_id').val();
   let orderId    = $('#order_id').val();
-
+  let packed_status    = $('#packed_status').prop('checked');
   $.ajax({
     url: "<?PHP echo SITE_URL; ?>ajax",
     type: 'POST',
     data: {
       action: 'assign_operator_save',
       packaging_operator_id: operatorId,
-      order_id: orderId
+      order_id: orderId,
+      packed_status: packed_status
     },
 	dataType: "json",
     beforeSend: function () {
@@ -507,10 +516,14 @@ $(document).on('click', '#assignOperatorSave', function (e) {
 			$('#msg').html(response.msg);
 			$('#assignModal').find('#operator_id').html('');
 			$('#assignModal').modal('hide');
-			window.open(
-				"<?= SITE_URL ?>print_packaging_operator_invoice?order_id=" + orderId,
-				"_blank"
-			);
+			
+			//if(packed_status == false)
+			//{
+				window.open(
+					"<?= SITE_URL ?>print_packaging_operator_invoice?order_id=" + orderId,
+					"_blank"
+				);
+			//}
 			
 			setTimeout(() => {
 				window.location.reload();

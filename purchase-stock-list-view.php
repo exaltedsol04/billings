@@ -59,9 +59,9 @@
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 		LEFT JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-		$where = "WHERE asp.product_variant_id=:product_variant_id AND asp.product_stock_transaction_id=:product_stock_transaction_id";
+		$where = "WHERE asp.product_id=:product_id AND asp.product_stock_transaction_id=:product_stock_transaction_id";
 		$params = [
-			':product_variant_id' => $_GET['pvid'],
+			':product_id' => $_GET['pvid'],
 			':product_stock_transaction_id'=>0
 		];
 		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);

@@ -506,7 +506,7 @@
 			$where = "WHERE po.status = :status
 			AND a.created_by = :created_by
 			AND a.role_id = :role_id
-			AND (poa.status IS NULL OR poa.status != :poastatus)";
+			AND (poa.status IS NULL OR poa.status != :poastatus) GROUP BY po.id";
 			$params = [
 			  ':status'      => 1,
 			  ':role_id'     => 5,
@@ -539,7 +539,7 @@
 		
 		case "assign_operator_save":
 			extract($_POST);
-			
+			//echo "<pre>";print_r($_POST);die;
 			$check_exists = $general_cls_call->select_query("id, status", PACKAGING_OPERATORS_ASSIGN, "WHERE order_id =:order_id", array(':order_id'=> $order_id), 1);
 			if(!empty($check_exists)) {
 				$data['status'] = 200;
@@ -548,6 +548,8 @@
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 				</div>';
 			} else {
+				
+				$status = $packed_status == 'true' ? 4 : 3;
 				$field = "order_id, packaging_operator_id, assign_by, status, created_at, updated_at";
 				$value = ":order_id, :packaging_operator_id, :assign_by, :status, :created_at, :updated_at";
 				
@@ -555,7 +557,7 @@
 					':order_id'					=> $order_id,
 					':packaging_operator_id'	=> $packaging_operator_id,
 					':assign_by'				=> $_SESSION['SELLER_ID'],
-					':status'					=> 3,
+					':status'					=> $status,
 					':created_at'				=> date("Y-m-d H:i:s"),
 					':updated_at'				=> date("Y-m-d H:i:s")
 				);
@@ -573,10 +575,23 @@
 						':created_at'			=> date("Y-m-d H:i:s")
 					);
 					$general_cls_call->insert_query(ORDERS_STATUSES, $field, $value, $addExecute);
+					if($status == 4)
+					{
+						$fieldOs = "order_id, status, created_by, user_type, created_at";
+						$valueOs = ":order_id, :status, :created_by, :user_type, :created_at";
+						$addExecuteOs=array(
+							':order_id'				=> $order_id,
+							':status'				=> 4,
+							':created_by'			=> $_SESSION['USER_ID'],
+							':user_type'			=> $_SESSION['ROLE_ID'],
+							':created_at'			=> date("Y-m-d H:i:s")
+						);
+						$general_cls_call->insert_query(ORDERS_STATUSES, $fieldOs, $valueOs, $addExecuteOs);
+					}
 					//update orders
 					$setValues="active_status=:active_status";
 					$updateExecute=array(
-						':active_status'	=> 3,
+						':active_status'	=> $status,
 						':order_id'			=> $order_id
 					);
 					$whereClause=" WHERE id = :order_id";
@@ -584,7 +599,7 @@
 					//update orders items
 					$setValues="active_status=:active_status";
 					$updateExecute=array(
-						':active_status'	=> 3,
+						':active_status'	=> $status,
 						':order_id'			=> $order_id
 					);
 					$whereClause=" WHERE order_id = :order_id";
