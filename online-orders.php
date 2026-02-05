@@ -133,8 +133,6 @@
 											$current_time = date('Y-m-d H:i:s');		
 											$remaining_delivery_time = $general_cls_call->time_diff($current_time, $delivery_max_time);
 											
-											//$remaining_delivery_time = $general_cls_call->countdown_time_diff($current_time, $delivery_max_time);
-											
 											/*$deliveryTime = trim($arr->delivery_time);
 											if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
 											{
@@ -164,8 +162,9 @@
 										<td class="text-center"><span class="d-none"><?PHP echo $delivery_time; ?></span><?PHP echo $general_cls_call->change_date_format($delivery_time, 'j M Y g:i A'); ?></td>
 										<td><?PHP echo $arr->order_type; ?></td>
 										<td><?php echo $to_be_delivered; ?></td>
-										<!--<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>-->
-										<td><?php echo $remaining_delivery_time; ?></td>
+										
+										<td class="countdown" data-time="<?= $arr->to_time ?>"><?php echo $remaining_delivery_time; ?></td>
+										
 										<td><?php echo $deliver_in; ?></td>
 										<td><?php echo $arr->orders_status_list_status; ?></td>
 										<td class="text-center"><a href="<?php echo SITE_URL.'online-order-details'; ?>?order_id=<?php echo($arr->orders_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
@@ -207,6 +206,40 @@
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
+function startCountdowns() {
+
+    document.querySelectorAll('.countdown').forEach(function(el) {
+
+        let endTime = new Date(el.dataset.time.replace(' ', 'T')).getTime();
+
+        function updateTimer() {
+            let now = new Date().getTime();
+            let diff = endTime - now;
+
+            if (diff <= 0) {
+                el.innerHTML = "<span style='color:red;font-weight:bold'>Expired</span>";
+                return;
+            }
+
+            let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            let hrs  = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            let mins = Math.floor((diff / (1000 * 60)) % 60);
+            let secs = Math.floor((diff / 1000) % 60);
+
+            let text = "";
+            if (days > 0) text += days + "d ";
+            if (hrs > 0) text += hrs + "h ";
+            if (mins > 0) text += mins + "m ";
+            text += secs + "s";
+
+            el.innerHTML = text;
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    });
+}
+
 $(document).ready(function(){
 	if ($.fn.DataTable.isDataTable('#example2')) {
 		$('#example2').DataTable().destroy();
@@ -222,27 +255,10 @@ $(document).ready(function(){
         }
     ]
 	});
-	
-	
-	/*function loadTable() {
-        $(".table-responsive").load(location.href + " .table-responsive>*", function () {
-
-            $('#example2').DataTable({
-                destroy: true,
-				pageLength: 50,
-                order: [[4, 'asc']],
-                columnDefs: [{
-                    targets: 0,
-                    orderable: true,
-                    orderSequence: ['asc', 'desc']
-                }]
-            });
-
-        });
-    }
-	
-	loadTable(); 
-	setInterval(loadTable, 500);*/
+	startCountdowns();
+	$('#example2').on('draw.dt', function () {
+		startCountdowns();
+	});
 });
 </script>
 </body>
