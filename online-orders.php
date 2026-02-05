@@ -131,16 +131,8 @@
 												$delivery_max_time = $arr->to_time;
 											}
 											$current_time = date('Y-m-d H:i:s');		
-											$remaining_delivery_time = $general_cls_call->time_diff($current_time, $delivery_max_time);
+											//$remaining_delivery_time = $general_cls_call->time_diff($current_time, $delivery_max_time);
 											
-											/*$deliveryTime = trim($arr->delivery_time);
-											if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
-											{
-												$deliveryType = $matches[1];
-											} else {
-												$deliveryType = $general_cls_call->time_ago($deliveryTime);
-											}*/
-											//calculate time
 											//calculate total
 											$final_total = $arr->orders_items_sub_total;
 											if($_SESSION['ROLE_ID'] == 1) {
@@ -163,7 +155,7 @@
 										<td><?PHP echo $arr->order_type; ?></td>
 										<td><?php echo $to_be_delivered; ?></td>
 										
-										<td class="countdown" data-time="<?= $arr->to_time ?>"><?php echo $remaining_delivery_time; ?></td>
+										<td class="countdown" data-time="<?= $delivery_max_time ?>"><?php //echo $remaining_delivery_time; ?></td>
 										
 										<td><?php echo $deliver_in; ?></td>
 										<td><?php echo $arr->orders_status_list_status; ?></td>
@@ -217,7 +209,7 @@ function startCountdowns() {
             let diff = endTime - now;
 
             if (diff <= 0) {
-                el.innerHTML = "<span style='color:red;font-weight:bold'>Expired</span>";
+                el.innerHTML = '<span class="badge bg-grd-info dash-lable">Timeout</span>';
                 return;
             }
 
@@ -226,11 +218,12 @@ function startCountdowns() {
             let mins = Math.floor((diff / (1000 * 60)) % 60);
             let secs = Math.floor((diff / 1000) % 60);
 
-            let text = "";
-            if (days > 0) text += days + "d ";
-            if (hrs > 0) text += hrs + "h ";
-            if (mins > 0) text += mins + "m ";
-            text += secs + "s";
+            let text = '<span class="badge bg-grd-danger dash-lable"><div class="time-wrapper">';
+            if (days > 0) text += '<div class="time-box"><span class="num">' + days + '</span><span class="label">Days</span></div>';
+            if (hrs > 0) text += '<div class="time-box"><span class="num">' + hrs + '</span><span class="label">Hr</span></div>';
+            if (mins > 0) text += '<div class="time-box"><span class="num">' + mins + '</span><span class="label">Min</span></div>';
+            text += '<div class="time-box"><span class="num">' + secs + '</span><span class="label">Sec</span></div>';
+			text += '</div></span>';
 
             el.innerHTML = text;
         }
