@@ -11,5 +11,8 @@
 		'3'=> 'Exceed',
 		'4'=> 'Short fall'
 	];
+	
+	$auto_update = 2; // if 1 auto on and 2 then off
+	$auto_time= 10000; // time set for assign operator
  
 ?>

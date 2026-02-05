@@ -38,6 +38,7 @@
   <link href="sass/semi-dark.css" rel="stylesheet">
   <link href="sass/bordered-theme.css" rel="stylesheet">
   <link href="sass/responsive.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/es.css">
 <?php if (!empty($pageParam['daterangepicker'])) {  ?>
 	<!-- Date Range Picker CSS -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />

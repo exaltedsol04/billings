@@ -511,7 +511,7 @@
 			  ':status'      => 1,
 			  ':role_id'     => 5,
 			  ':poastatus'   => 3,
-			  ':created_by'  => $_SESSION['USER_ID']
+			  ':created_by'  => $_SESSION['SELLER_ID']
 			];
 			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);		
 			
@@ -554,7 +554,7 @@
 				$addExecute=array(
 					':order_id'					=> $order_id,
 					':packaging_operator_id'	=> $packaging_operator_id,
-					':assign_by'				=> $_SESSION['USER_ID'],
+					':assign_by'				=> $_SESSION['SELLER_ID'],
 					':status'					=> 3,
 					':created_at'				=> date("Y-m-d H:i:s"),
 					':updated_at'				=> date("Y-m-d H:i:s")
@@ -893,6 +893,129 @@
 			{
 				echo 'l';
 			}
+		break;
+		case "auto_assign_operator":
+			
+			//$where = "WHERE oi.active_status=:active_status 
+			$where = "WHERE o.active_status=:active_status 
+				  AND oi.seller_id=:seller_id
+				  GROUP BY oi.order_id
+				  ORDER BY 
+					  CASE 
+						  WHEN o.order_type = 'slot' THEN o.from_time
+						  ELSE o.created_at
+					  END ASC";
+			$params = [
+				':seller_id'=> $_SESSION['SELLER_ID'],
+				':active_status'=> 2
+			];
+			
+			
+			$fields = "o.id";
+
+			$tables = ORDERS . " o
+			INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id";
+			
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+			
+			$order_ids = [];
+			if(!empty($sqlQuery[0]))
+			{
+				foreach($sqlQuery as $k=>$arr)
+				{
+					$order_id = $arr->id;
+					$check_exists = $general_cls_call->select_query("id, status", PACKAGING_OPERATORS_ASSIGN, "WHERE order_id =:order_id", array(':order_id'=> $order_id), 1);
+					if(empty($check_exists))
+					{
+						//echo $order_id = $arr->id;die;
+						$fields = "po.id, po.name, po.mobile";
+
+						$tables = PACKAGING_OPERATORS . " po
+						INNER JOIN " . ADMIN_MASTER . " a ON a.id = po.admin_id
+						LEFT JOIN " . PACKAGING_OPERATORS_ASSIGN . " poa 
+							ON poa.packaging_operator_id = po.id";
+
+						$where = "WHERE po.status = :status
+						AND a.created_by = :created_by
+						AND a.role_id = :role_id
+						AND (poa.status IS NULL OR poa.status != :poastatus)
+						ORDER BY 
+						CASE 
+							WHEN po.id > (
+								SELECT IFNULL(poa2.packaging_operator_id, 0)
+								FROM " . PACKAGING_OPERATORS_ASSIGN . " poa2
+								WHERE poa2.status != :poastatus
+								ORDER BY poa2.id DESC
+								LIMIT 1
+							) THEN 0
+							ELSE 1
+						END,
+						po.id ASC
+						LIMIT 1";
+
+						$params = [
+							':status'     => 1,
+							':role_id'    => 5,
+							':poastatus'  => 3,
+							':created_by' => $_SESSION['SELLER_ID']
+						];
+
+						$poQuery = $general_cls_call->select_join_query($fields,$tables,$where,$params,1);
+						$packaging_operator_id = '';
+						//echo "<pre>";print_r($poQuery);die;
+						$packaging_operator_id = !empty($poQuery->id) ? $poQuery->id : '';
+						
+						if($packaging_operator_id !='')
+						{
+							$field = "order_id, packaging_operator_id, assign_by, status, auto_assign, created_at, updated_at";
+							$value = ":order_id, :packaging_operator_id, :assign_by, :status, :auto_assign, :created_at, :updated_at";
+							
+							$addExecute=array(
+								':order_id'					=> $order_id,
+								':packaging_operator_id'	=> $packaging_operator_id,
+								':assign_by'				=> $_SESSION['SELLER_ID'],
+								':status'					=> 3,
+								':auto_assign'				=> 1,
+								':created_at'				=> date("Y-m-d H:i:s"),
+								':updated_at'				=> date("Y-m-d H:i:s")
+							);
+							
+							$ok = $general_cls_call->insert_query(PACKAGING_OPERATORS_ASSIGN, $field, $value, $addExecute);
+							
+							
+							$fields = "order_id, status, created_by, user_type, created_at";
+							$values = ":order_id, :status, :created_by, :user_type, :created_at";
+							$addExecutes=array(
+								':order_id'				=> $order_id,
+								':status'				=> 3,
+								':created_by'			=> $_SESSION['USER_ID'],
+								':user_type'			=> $_SESSION['ROLE_ID'],
+								':created_at'			=> date("Y-m-d H:i:s")
+							);
+							$general_cls_call->insert_query(ORDERS_STATUSES, $fields, $values, $addExecutes);
+							//update orders
+							$setValues="active_status=:active_status";
+							$updateExecute=array(
+								':active_status'	=> 3,
+								':order_id'			=> $order_id
+							);
+							$whereClause=" WHERE id = :order_id";
+							$general_cls_call->update_query(ORDERS, $setValues, $whereClause, $updateExecute);
+							//update orders items
+							$setValues="active_status=:active_status";
+							$updateExecute=array(
+								':active_status'	=> 3,
+								':order_id'			=> $order_id
+							);
+							$whereClause=" WHERE order_id = :order_id";
+							$general_cls_call->update_query(ORDERS_ITEMS, $setValues, $whereClause, $updateExecute);
+							
+							$order_ids[] = $order_id;
+						}
+					}
+				}
+			}
+			echo json_encode($order_ids);
 		break;
     }
 ?>

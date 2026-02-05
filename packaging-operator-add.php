@@ -23,7 +23,7 @@
 			':password'		=> $general_cls_call->specialhtmlremover($newHashPassword),
 			':role_id'		=> 5,
 			':status'		=> 1,
-			':created_by'	=> $_SESSION['USER_ID'],
+			':created_by'	=> $_SESSION['SELLER_ID'],
 			':created_at' 	=> date('Y-m-d H:i:s'),
 			':updated_at'	=> date('Y-m-d H:i:s')
 		);

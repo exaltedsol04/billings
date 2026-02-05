@@ -1,0 +1,21 @@
+.time-wrapper{
+    display:flex;
+    gap:5px;
+    justify-content:space-between;
+    text-align:center;
+    padding:2px;
+}
+
+.time-box{
+    flex:1;
+}
+
+.num{
+    font-size:12px;
+    display:block;
+}
+
+.label{
+    font-size:12px;
+    color:#fff;
+}

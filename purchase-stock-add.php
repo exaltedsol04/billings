@@ -13,7 +13,7 @@
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
 	{	
 		extract($_POST);
-		if($product != '' && $stock !='' && $purchase_price !='')
+		if($product != '' && $stock !='' && $purchase_price !='' && $vendor_id !='')
 		{
 			//echo "<pre>";print_r($_POST);die;
 			if($_POST['selling_price'] > $_POST['purchase_price'])

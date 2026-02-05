@@ -159,7 +159,7 @@
 										$delivery_max_time = $arr->to_time;
 									}
 									$current_time = date('Y-m-d H:i:s');		
-									$remaining_delivery_time = $general_cls_call->time_diff($current_time, $delivery_max_time);										
+									$remaining_delivery_time = $general_cls_call->countdown_time_diff($current_time, $delivery_max_time);										
 									/*$deliveryTime = trim($arr->delivery_time);
 									if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
 									{
@@ -180,7 +180,10 @@
 								<td class="text-center">--</td>
 								<td class="<?php echo $arr->order_type == 'instant' ? 'text-success' : '' ; ?> text-center"><?PHP echo $arr->order_type; ?></td>
 								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $to_be_delivered; ?></span></td>
-								<td><?php echo $remaining_delivery_time == 'NA' ? 'Timeout' : $remaining_delivery_time; ?></td>
+								<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>
+								
+								<!--<td class="countdown-timer" data-endtime="<?= strtotime($remaining_delivery_time) ?>"></td>-->
+								
 								<td class="<?php echo $arr->payment_method == 'Razorpay' ? 'text-success' : '' ; ?> text-center"><?php echo $arr->payment_method == 'Razorpay' ? 'Online': $arr->payment_method; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
 								<td class="d-flex align-items-center gap-3">
@@ -251,6 +254,12 @@
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
+
+/*$(document).ready(function () {
+    setTimeout(function () {
+		$(".table-responsive").load(location.href + " .table-responsive>*");
+    }, 5000);
+});*/
 function assignOperator(orderId)
 {
 	$('#no_operator').html('');
@@ -342,17 +351,74 @@ $(document).ready(function(){
 		$('#example2').DataTable().destroy();
 	}
 	
-	$('#example2').DataTable({
+	/*$('#example2').DataTable({
 		order: [[4, 'asc']],
 		columnDefs: [
         {
-            targets: 0,        // 1st column
-            orderable: true,  // allow manual ordering
-            orderSequence: ['asc', 'desc'] // manual toggle only
+            targets: 0,      
+            orderable: true,  
+            orderSequence: ['asc', 'desc'] 
         }
     ]
-	});
+	});*/
+	
+	function loadTable() {
+        $(".table-responsive").load(location.href + " .table-responsive>*", function () {
+
+            $('#example2').DataTable({
+                destroy: true,
+				pageLength: 50,
+                order: [[4, 'asc']],
+                columnDefs: [{
+                    targets: 0,
+                    orderable: true,
+                    orderSequence: ['asc', 'desc']
+                }]
+            });
+
+        });
+    }
+
+    loadTable(); 
+
+    setInterval(loadTable, 1000);
+	<?php 
+	if($auto_update == 1)
+	{
+	?>
+		setInterval(insertPackageOperator, <?php echo $auto_time ;?>);
+	<?php 
+	}
+	?>
 });
+function insertPackageOperator()
+{
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: {
+		  action: 'auto_assign_operator'
+		},
+		dataType: "json",
+		success: function(response){
+			//alert(response);
+
+			$.each(response, function(i, id){
+				if(id !='')
+				{
+					window.open(
+						"<?= SITE_URL ?>print_auto_packaging_operator_invoice?order_id=" + id,
+						"_blank"
+					);
+				}
+			});
+		}
+	});
+}
+
+
+
+
 </script>
 </body>
 </html>
