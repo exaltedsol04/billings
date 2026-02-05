@@ -133,6 +133,8 @@
 											$current_time = date('Y-m-d H:i:s');		
 											$remaining_delivery_time = $general_cls_call->time_diff($current_time, $delivery_max_time);
 											
+											//$remaining_delivery_time = $general_cls_call->countdown_time_diff($current_time, $delivery_max_time);
+											
 											/*$deliveryTime = trim($arr->delivery_time);
 											if (preg_match('/(\d{1,2}:\d{2}\s?(AM|PM)\s*-\s*\d{1,2}:\d{2}\s?(AM|PM))/i', $deliveryTime, $matches))
 											{
@@ -162,6 +164,7 @@
 										<td class="text-center"><span class="d-none"><?PHP echo $delivery_time; ?></span><?PHP echo $general_cls_call->change_date_format($delivery_time, 'j M Y g:i A'); ?></td>
 										<td><?PHP echo $arr->order_type; ?></td>
 										<td><?php echo $to_be_delivered; ?></td>
+										<!--<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>-->
 										<td><?php echo $remaining_delivery_time; ?></td>
 										<td><?php echo $deliver_in; ?></td>
 										<td><?php echo $arr->orders_status_list_status; ?></td>
@@ -219,6 +222,27 @@ $(document).ready(function(){
         }
     ]
 	});
+	
+	
+	/*function loadTable() {
+        $(".table-responsive").load(location.href + " .table-responsive>*", function () {
+
+            $('#example2').DataTable({
+                destroy: true,
+				pageLength: 50,
+                order: [[4, 'asc']],
+                columnDefs: [{
+                    targets: 0,
+                    orderable: true,
+                    orderSequence: ['asc', 'desc']
+                }]
+            });
+
+        });
+    }
+	
+	loadTable(); 
+	setInterval(loadTable, 500);*/
 });
 </script>
 </body>
