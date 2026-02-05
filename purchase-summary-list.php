@@ -30,7 +30,7 @@
 			];
 		}
 		
-		$fieldsV = "v.id as vendor_id, v.name";
+		$fieldsV = "v.id as vendor_id, v.name ,SUM(asp.stock * asp.purchase_price) as total_price";
 
 		$tablesV = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
@@ -112,14 +112,16 @@
 
 								<h2 class="accordion-header" id="heading<?= $k ?>">
 									<button 
-										class="accordion-button <?= $k != 0 ? 'collapsed' : '' ?>" 
+										class="accordion-button <?= $k != 0 ? 'collapsed' : '' ?> bg-grd-info rounded text-white" 
 										type="button"
 										data-bs-toggle="collapse"
 										data-bs-target="#collapse<?= $k ?>"
 										aria-expanded="<?= $k == 0 ? 'true' : 'false' ?>"
 										aria-controls="collapse<?= $k ?>">
-
-										<?= $vendors->name ?>
+										<div class="w-100 d-flex justify-content-between align-items-center pe-4">
+											<span><?= $vendors->name ?></span>
+											<span class="badge bg-warning fs-6 text-dark">Total purchase amount ₹<?= number_format($vendors->total_price,2) ?></span>
+										</div>
 									</button>
 								</h2>
 
@@ -160,11 +162,11 @@
 													{
 													?>
 														<tr>
-															<td><?php echo $val->product_name ?></td>
+															<td class="text-center"><?php echo $val->product_name ?></td>
 															<td><?php echo $val->measurement.' '.$val->unit_name ?></td>
 															<td><?php echo $val->stock ?></td>
 															<td>₹<?php echo $val->purchase_price ?></td>
-															<td>₹<?php echo $val->discounted_price ?></td>
+															<td>₹<?php echo $val->stock*$val->purchase_price ?></td>
 														</tr>
 													<?php 
 													}
@@ -255,7 +257,7 @@ $(document).ready(function(){
 	
 	$('.datatable').each(function(){
         $(this).DataTable({
-            pageLength: 50,
+            pageLength: 10,
             //order: [[3, 'asc']]
         });
     });
