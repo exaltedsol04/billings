@@ -247,7 +247,7 @@ $(function () {
   });
 
   // Set default
-  setDates(start, end);
+  setDates('', '');
 });
 
 
