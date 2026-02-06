@@ -10,7 +10,9 @@
 	/*******End Auth Section*******/
 	ob_start();
 	/*=========== CODE START ===========*/
-	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	//if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+		
+	if($_SERVER['REQUEST_METHOD'] == "POST")
 	{	
 		extract($_POST);
 		//if($product != '' && $stock !='' && $purchase_price !='' && $vendor_id !='')
@@ -104,91 +106,8 @@
 					<?PHP
 						}
 					?>
-						<!--<form class="row g-4" action="" method="post">
-							<div class="col-md-3">
-								<label for="input1" class="form-label">Products</label>
-									<select name="product" id="product" class="form-select select2-dropdown" tabindex="1" onchange="select_product(this.value)">
-									<option value="">Select...</option>
-									<?PHP
-										$fields = "*";
-										$tables = PRODUCTS;
-										$where = "WHERE 1 ORDER BY name";
-										$params = [];
-										$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
-										//echo "<pre>"; print_r($sqlQuery);die;
-										if($sqlQuery[0] != '')
-										{
-											foreach($sqlQuery as $arr)
-											{	
-												$barcode = $arr->barcode;
-												
-												$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
-									?>
-												<option value="<?PHP echo $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name); ?>" <?php echo ($_POST['product'] == $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name)) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name); ?></option>
-									<?PHP
-											}
-										}
-									?>
-								</select>
-							</div>
-							<div class="col-md-3">
-								<label for="input5" class="form-label">Stock Quantity</label>
-								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-								<span class="text-danger" id="err_stock"></span>
-							</div>
-							<div class="col-md-3">
-								<label for="input5" class="form-label">Unit</label>
-								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1" onchange="get_selling_price(this.value)">
-									<option value="">Select...</option>
-								</select>
-							</div>
-
-							<div class="col-md-3 purchase-div"  style="display:none">
-								<label for="input5" class="form-label">Purchase price</label>
-								<input type="text" class="form-control" id="purchase_price" name="purchase_price" placeholder="Purchase price" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
-								<span class="text-danger" id="err_stock"></span>
-							</div>
-							<div class="col-md-3 selling-div"  style="display:none">
-								<label for="input5" class="form-label"></label>
-								<div id="selling_price_div" class="w-100"></div>
-							</div>
-							<div class="col-md-3">
-								<label for="input5" class="form-label">Vendors</label>
-								<select name="vendor_id" id="vendor_id" class="form-select select2-dropdown" tabindex="1">
-									<option value="">Select...</option>
-									<?php 
-										$fields = "*";
-										$where = "WHERE 1";
-										$params = [];
-										$sqlQuery = $general_cls_call->select_query($fields, VENDORS, $where, $params, 2);
-										if($sqlQuery[0] != '')
-										{
-											foreach($sqlQuery as $arr)
-											{
-									?>
-											<option value="<?php echo $arr->id ?>" <?php echo ($_POST['vendor_id'] == $arr->id) ? 'selected' : '' ?>><?php echo $arr->name ?></option>
-									<?php 
-											}
-										}
-									?>
-								</select>
-								<span class="text-danger" id="err_stock"></span>
-							</div>
-							<input type="hidden" id="selling_price" name="selling_price">
-							<div class="col-md-3">
-								<label for="input5" class="form-label">Remarks</label>
-								<textarea name="remarks" id="remarks" class="form-control"></textarea>
-								<span class="text-danger" id="err_stock"></span>
-							</div>
-							<input type="hidden" id="stock_limit" name="stock_limit" value="<?php echo isset($_POST['stock_limit']) ? $_POST['stock_limit'] : '' ?>">
-							<div class="col-md-12">
-								<div class="d-md-flex d-grid justify-content-md-between">
-									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
-									<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5">Purchase Stock</button>
-								</div>
-							</div>
-						</form>-->
-						<form class="row g-4" action="" method="post">
+						
+					<form class="row g-4" action="" method="post" id="save_stock">
 						<div id="rows-wrapper">
 
 							<div class="row item-row mb-2">
@@ -274,19 +193,16 @@
 
 						</div>
 
-						<!--<button type="button" id="addMore" class="btn btn-primary mt-2">
+						<div class="col-md-12">
+								<div class="d-md-flex d-grid justify-content-md-between">
+									<button type="button" id="addMore" class="btn btn-primary mt-2">
 							+ Add More
-						</button>-->
-							<div class="col-md-12">
-									<div class="d-md-flex d-grid justify-content-md-between">
-										<button type="button" id="addMore" class="btn btn-primary mt-2">
-								+ Add More
-							</button>
-							<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5">Purchase Stock</button>
-								</div>
+						</button>
+						<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 save-purchase-stock">Purchase Stock</button>
 							</div>
+						</div>
 						
-						</form>
+					</form>
 						<!----END-------->
 				</div>
             </div>
@@ -315,7 +231,7 @@ $(document).ready(function () {
 //function select_product(product)
 function select_product(el)
 {
-	$('#selling_price_div').html('');
+	//$('#selling_price_div').html('');
 	//$('.purchase-div').hide();
 	$('.selling-div').hide();
 	
@@ -373,11 +289,13 @@ function get_selling_price(el)
 
 $(document).on('input', '.purchase_price', function () {
 	let row = $(this).closest('.item-row');
+	row.find('.selling_price_div').html('');
 	let max = row.find('.hid_purchase_price').val();
     this.value = this.value.replace(/[^0-9.]/g, '');
 	let val = parseFloat(this.value);
 	if (val > max) {
         this.value = max;
+		row.find('.selling_price_div').html('<div class="text-danger">Selling price not exceed: ₹' + max + '</div>');
     }
 });
 
@@ -391,6 +309,7 @@ $('#addMore').click(function () {
     newRow.find('input').val('');
     newRow.find('select').val('');
 	
+	newRow.find('.selling_price_div').html('');
 	/*setTimeout(function () {
 			$('.form-select');
 			setTimeout(function () {
@@ -435,6 +354,57 @@ $(document).on('click', '.removeRow', function () {
     if ($('.item-row').length > 1) {
         $(this).closest('.item-row').remove();
     }
+});  
+
+$(document).on('click', '.save-purchase-stock', function (e) {
+	e.preventDefault();
+	let isValid = true;
+    let firstError = null;
+
+    $('.item-row').each(function () {
+
+        let row = $(this);
+
+        // fields to validate inside this row 
+        let inputs = row.find('select[name="product[]"], input[name="stock[]"], select[name="product_variant_id[]"], input[name="purchase_price[]"], select[name="vendor_id[]"]');
+
+        inputs.each(function () {
+
+            let field = $(this);
+
+            if ($.trim(field.val()) === '') {
+
+                field.addClass('is-invalid');   // red border
+
+                if (!firstError) {
+                    firstError = field;
+                }
+
+                isValid = false;
+
+            } else {
+                field.removeClass('is-invalid');
+            }
+
+        });
+
+    });
+
+    // ❌ stop submit
+    if (!isValid) {
+
+        $('html, body').animate({
+            scrollTop: firstError.offset().top - 120
+        }, 400);
+
+        firstError.focus();
+
+        return;
+    }
+
+    // ✅ submit if all valid
+    $('#save_stock')[0].submit();
+    //document.getElementById('save_stock').submit(); // native submit
 });
 
 </script>
