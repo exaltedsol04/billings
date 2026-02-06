@@ -6,7 +6,9 @@ $order_id = $_GET['order_id'];
 
 $order = $general_cls_call->select_query("*", POS_ORDERS, "WHERE id=:id", [':id' => $order_id], 1);
 //echo "<pre>"; print_r($order);die;
-$seller = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", [':admin_id' => $order->store_id], 1);
+//$seller = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", [':admin_id' => $order->store_id], 1);
+
+$seller = $general_cls_call->select_query("*", SELLERS, "WHERE id=:id", [':id' => $order->pos_user_id], 1);
 //echo "<pre>"; print_r($seller);die;
 
 $customer = $general_cls_call->select_query("*", USERS, "WHERE id=:id", [':id' => $order->user_id], 1);

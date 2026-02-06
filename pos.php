@@ -22,13 +22,13 @@
 			$sellers_details = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 1);
 			$store_id = $sellers_details->admin_id;
 			
-			$field = "pos_user_id, user_id, store_id, total_amount, discount_amount, discount_percentage, payment_method, created_at, updated_at";
-			$value = ":pos_user_id, :user_id, :store_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :created_at, :updated_at";
+			
+			$field = "pos_user_id, user_id, total_amount, discount_amount, discount_percentage, payment_method, created_at, updated_at";
+			$value = ":pos_user_id, :user_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :created_at, :updated_at";
 			
 			$addExecute=array(
 				':pos_user_id'			=> $_SESSION['SELLER_ID'],
 				':user_id'				=> $general_cls_call->specialhtmlremover($user_hidden_id),
-				':store_id'				=> $general_cls_call->specialhtmlremover($store_id),
 				':total_amount'			=> $general_cls_call->specialhtmlremover($cart_total_amt),
 				':discount_amount'			=> '0.00',
 				':discount_percentage'		=> '0.00',
