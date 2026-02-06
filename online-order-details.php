@@ -37,9 +37,9 @@
 		$paramsOrder = [
 				':orders_id' => $_GET['order_id']
 			];
-		$sqlOrder = $general_cls_call->select_query("id, orders_id, mobile, address", ORDERS, $whereOrder, $paramsOrder, 1);
+		$sqlOrder = $general_cls_call->select_query("id, orders_id, mobile, address, total, delivery_charge, packing_charge, final_total, payment_method", ORDERS, $whereOrder, $paramsOrder, 1);
 				
-		//echo "<pre>";print_r($sqlQuery);die;
+		//echo "<pre>";print_r($sqlOrder);die;
 		
 		// get seller details
 		$fieldSeller = "c.name as city_name, c.zone, c.state, s.name as seller_name, s.store_name, s.mobile, s.street as seller_street";
@@ -55,6 +55,33 @@
 		// get the packing charge
 		
 		$packing = $general_cls_call->select_query("packing_charge", ORDERS, "WHERE orders_id=:orders_id", [':orders_id' => $_GET['order_id']], 1);
+		
+		
+		$sub_total = 0;
+		$packing_charge = 0;
+		$delivery_charge = 0;
+		$final_total = 0;
+		$discount = 0;
+		$total_amount = 0;
+		
+		if($sqlOrder->payment_method=='wallet')
+		{
+			$sub_total = $sqlOrder->total;
+			$packing_charge = $sqlOrder->packing_charge;
+			$delivery_charge = $sqlOrder->delivery_charge;
+			$final_total = $sqlOrder->total;
+			$discount  = ($sqlOrder->total + $packing_charge) - $final_total;
+			$total_amount = $final_total;
+		}
+		else{
+			$sub_total = $sqlOrder->total;
+			$packing_charge = $sqlOrder->packing_charge;
+			$delivery_charge = $sqlOrder->delivery_charge;
+			$final_total = $sqlOrder->final_total;
+			$discount  = ($sqlOrder->total + $packing_charge + $delivery_charge) - $final_total;
+			$total_amount = $final_total;
+		}
+		
 	}
 
 	ob_end_flush()
@@ -202,7 +229,7 @@
 						 </table>
 					    </div>
 
-					    <div class="row bg-light align-items-center m-0">
+					    <!--<div class="row bg-light align-items-center m-0">
 							<div class="col col-auto p-4">
 							   <p class="mb-0">Paking charge</p>
 							   <h4 class="mb-0">₹<?php echo !empty($packing->packing_charge) ? $packing->packing_charge : 0 ?></h4>
@@ -217,7 +244,74 @@
 							 <p class="mb-0 text-white">TOTAL</p>
 							 <h4 class="mb-0 text-white">₹<?php echo number_format($packing->packing_charge + $subtotal) ?></h4>
 							</div>
-					    </div><!--end row-->
+					    </div>-->
+						
+						<!--<div class="row bg-light align-items-center m-0">
+							<div class="col col-auto p-4"></div>
+							<div class="col col-auto p-4"></div>
+							<div class="col col-auto me-auto p-4">
+							</div>
+							<div class="col col-auto p-4">
+								<p class="mb-0">Sub total : <strong>₹<?php echo number_format($subtotal) ?></strong></p>
+							    
+								
+								<p class="mb-0">Paking charge : <strong>₹<?php echo  $packing_charge; ?></strong></p>
+							
+								<p class="mb-0">Delivery charge : <strong>₹<?php echo $delivery_charge; ?></strong></p>
+								
+								<p class="mb-0">Discount : <strong>₹<?php echo $discount; ?></strong></p>
+								
+								<p class="mb-0">Final total : <strong>₹<?php echo $final_total; ?></strong></p>
+								
+								<p class="mb-0">Total amount : <strong>₹<?php echo $total_amount; ?></strong></p>
+							</div>
+					    </div>-->
+						<div class="d-flex justify-content-end mt-3">
+
+							<div class="bg-light p-3 rounded shadow-sm" style="min-width:320px">
+
+								<table class="table table-sm table-borderless mb-0">
+
+									<tr>
+										<td>Sub total</td>
+										<td class="text-center">:</td>
+										<td class="text-end">₹<?php echo $subtotal; ?></td>
+									</tr>
+
+									<tr>
+										<td>Packing charge</td>
+										<td class="text-center">:</td>
+										<td class="text-end text-danger">+ ₹<?php echo $packing_charge; ?></td>
+									</tr>
+
+									<tr>
+										<td>Delivery charge</td>
+										<td class="text-center">:</td>
+										<td class="text-end text-danger">+ ₹<?php echo $delivery_charge; ?></td>
+									</tr>
+
+									<tr>
+										<td>Discount</td>
+										<td class="text-center">:</td>
+										<td class="text-end text-success">- ₹<?php echo $discount; ?></td>
+									</tr>
+
+									<tr class="border-top fs-5">
+										<td class="fw-bold">Total amount</td>
+										<td class="text-center fw-bold">:</td>
+										<td class="text-end fw-bold">
+											₹<?php echo $total_amount; ?>
+										</td>
+									</tr>
+
+								</table>
+
+							</div>
+
+						</div>
+
+						
+						<!--end row-->
 					</div>
 				
 

@@ -114,7 +114,7 @@
 
 								<div class="col-md-3">
 								<label for="input1" class="form-label">Products</label>
-									<select name="product[]" class="form-select form-control"  tabindex="1" onchange="select_product(this)">
+									<select name="product[]" class="form-select"  tabindex="1" onchange="select_product(this)">
 										<option value="">Select product</option>
 										<?PHP
 										$fields = "*";
@@ -137,29 +137,31 @@
 										}
 									?>
 									</select>
+									<span class="error_product text-danger"></span>
 								</div>
 
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Stock Quantity</label>
 									<input type="text" class="form-control" name="stock[]" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-									<span class="text-danger" id="err_stock"></span>
+									<span class="text-danger err_stock"></span>
 								</div>
 
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Unit</label>
-									<select name="product_variant_id[]" id="product_variant_id" class="form-select unit-select" tabindex="1" onchange="get_selling_price(this)">
+									<select name="product_variant_id[]" class="form-select unit-select" tabindex="1" onchange="get_selling_price(this)">
 										<option value="">Select...</option>
 									</select>
+									<span class="text-danger err_unit"></span>
 								</div>
 								<div class="col-md-3 purchase-div">
 									<label for="input5" class="form-label">Purchase price</label>
 									<input type="text" class="form-control purchase_price" id="purchase_price" name="purchase_price[]" placeholder="Purchase price">
 									<input type="hidden" class="hid_purchase_price">
-									<span id="selling_price_div" class="w-100 selling_price_div"></span>
+									<span id="selling_price_div" class="w-100 selling_price_div error_purchase text-danger"></span>
 								</div>
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Vendors</label>
-									<select name="vendor_id[]" id="vendor_id" class="form-select" tabindex="1">
+									<select name="vendor_id[]" class="form-select" tabindex="1">
 										<option value="">Select...</option>
 										<?php 
 											$fields = "*";
@@ -177,7 +179,7 @@
 											}
 										?>
 									</select>
-									<span class="text-danger" id="err_stock"></span>
+									<span class="text-danger err_vendor"></span>
 								</div>
 								<div class="col-md-11">
 									<label for="input5" class="form-label">Remarks</label>
@@ -219,13 +221,9 @@
 
 </html>
 <script>
+
 $(document).ready(function () {
-
-    /*$('#rows-wrapper').find('select:not(.normal)').select2({
-        dropdownParent: $('#rows-wrapper'),
-        width: '100%'
-    });*/
-
+	initSelect2($('.item-row'));
 });
 
 //function select_product(product)
@@ -301,8 +299,25 @@ $(document).on('input', '.purchase_price', function () {
 
 
 $('#addMore').click(function () {
+	let firstRow = $('.item-row:first');
 
-	//$('.select2-dropdown').select2('destroy');
+    // destroy select2 before clone
+    firstRow.find('select').select2('destroy');
+
+    let newRow = firstRow.clone();
+
+    newRow.find('input, textarea').val('');
+    newRow.find('select').val(null);
+    newRow.find('.selling_price_div').html('');
+    newRow.find('.is-invalid').removeClass('is-invalid');
+
+    $('#rows-wrapper').append(newRow);
+
+    // init select2 again (only rows)
+    initSelect2($('.item-row'));
+});
+
+$('#addMoreSSSS').click(function () {
 	
     let newRow = $('.item-row:first').clone();
 
@@ -310,44 +325,12 @@ $('#addMore').click(function () {
     newRow.find('select').val('');
 	
 	newRow.find('.selling_price_div').html('');
-	/*setTimeout(function () {
-			$('.form-select');
-			setTimeout(function () {
-				$('.form-select').select2({
-					minimumResultsForSearch: 0,
-					width: '100%'
-				});
-			}, 100);
-		}, 100);*/
-
-    $('#rows-wrapper').append(newRow);
 	
+	newRow.find('input, select, textarea').removeClass('is-invalid');
 	
-	/*setTimeout(function () {
-		newRow.find('select:not(.normal)').select2({
-			dropdownParent: newRow,
-			width: '100%'
-		});
-
-	}, 50);*/
+	$('#rows-wrapper').append(newRow);
 	
-	/*$('.select2-dropdown').select2({
-        minimumResultsForSearch: 0,
-        width: '100%'
-    });*/
-	// re-init select2 for ALL rows
-	
-	
-	/*$('select:not(.normal)').each(function () {
-		$(this).select2({
-			dropdownParent: $(this).parent()
-		});
-	});*/
-    /*setTimeout(function () {
-        newRow.find('.select2-dropdown').select2({
-            width: '100%'
-        });
-    }, 50);*/
+	initSelect2($('.item-row'));
 });
 
 $(document).on('click', '.removeRow', function () {
@@ -364,33 +347,50 @@ $(document).on('click', '.save-purchase-stock', function (e) {
     $('.item-row').each(function () {
 
         let row = $(this);
-
+		row.find('.selling_price_div').html('');
         // fields to validate inside this row 
         let inputs = row.find('select[name="product[]"], input[name="stock[]"], select[name="product_variant_id[]"], input[name="purchase_price[]"], select[name="vendor_id[]"]');
 
-        inputs.each(function () {
+       inputs.each(function () {
 
-            let field = $(this);
+			let field = $(this);
+			let value = $.trim(field.val());
 
-            if ($.trim(field.val()) === '') {
+			if (value === '' || value == null) {
 
-                field.addClass('is-invalid');   // red border
+				if (field.is('select')) {
 
-                if (!firstError) {
-                    firstError = field;
-                }
+					// ⭐ correct select2 highlight
+					field.data('select2').$container
+						.find('.select2-selection')
+						.addClass('is-invalid');
 
-                isValid = false;
+				} else {
 
-            } else {
-                field.removeClass('is-invalid');
-            }
+					field.addClass('is-invalid');
+				}
 
-        });
+				if (!firstError) firstError = field;
+				isValid = false;
+
+			} else {
+
+				if (field.is('select')) {
+
+					field.data('select2').$container
+						.find('.select2-selection')
+						.removeClass('is-invalid');
+
+				} else {
+
+					field.removeClass('is-invalid');
+				}
+			}
+		});
 
     });
 
-    // ❌ stop submit
+   
     if (!isValid) {
 
         $('html, body').animate({
@@ -402,9 +402,28 @@ $(document).on('click', '.save-purchase-stock', function (e) {
         return;
     }
 
-    // ✅ submit if all valid
-    $('#save_stock')[0].submit();
-    //document.getElementById('save_stock').submit(); // native submit
+   $('#save_stock')[0].submit();
+    
+});
+$(document).on('change', 'select', function () {
+    let field = $(this);
+
+    if (field.val()) {
+        if (field.data('select2')) {
+            field.data('select2').$container
+                .find('.select2-selection')
+                .removeClass('is-invalid');
+        }
+    }
 });
 
+function initSelect2(rows) {
+    rows.find('select:not(.normal)').each(function () {
+        $(this).select2({
+            width: '100%',
+            minimumResultsForSearch: 0,
+            dropdownParent: $(this).closest('.item-row') // ⭐ KEY FIX
+        });
+    });
+}
 </script>
