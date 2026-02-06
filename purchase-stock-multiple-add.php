@@ -285,7 +285,41 @@ function get_selling_price(el)
 	});
 }
 
+
 $(document).on('input', '.purchase_price', function () {
+
+    let row = $(this).closest('.item-row');
+    row.find('.selling_price_div').html('');
+
+    let max = parseFloat(row.find('.hid_purchase_price').val()) || 0;
+
+    let value = this.value;
+
+    // allow only numbers + decimal
+    value = value.replace(/[^0-9.]/g, '');
+
+    // prevent multiple decimals
+    value = value.replace(/(\..*?)\..*/g, '$1');
+
+    // limit 2 digits after decimal
+    if (value.includes('.')) {
+        let parts = value.split('.');
+        parts[1] = parts[1].substring(0, 2);
+        value = parts.join('.');
+    }
+
+    let num = parseFloat(value);
+
+    // max check
+    if (!isNaN(num) && num > max) {
+        value = max.toFixed(2);
+        row.find('.selling_price_div')
+            .html('<div class="text-danger">Selling price not exceed: ₹' + max.toFixed(2) + '</div>');
+    }
+
+    this.value = value;
+});
+/*$(document).on('input', '.purchase_price', function () {
 	let row = $(this).closest('.item-row');
 	row.find('.selling_price_div').html('');
 	let max = row.find('.hid_purchase_price').val();
@@ -295,7 +329,7 @@ $(document).on('input', '.purchase_price', function () {
         this.value = max;
 		row.find('.selling_price_div').html('<div class="text-danger">Selling price not exceed: ₹' + max + '</div>');
     }
-});
+});*/
 
 
 $('#addMore').click(function () {
