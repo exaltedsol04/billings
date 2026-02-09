@@ -14,5 +14,11 @@
 	
 	$auto_update = 2; // if 1 auto on and 2 then off
 	$auto_time= 10000; // time set for assign operator
+	
+	$deductreason = [
+		'1'=> 'Processing',
+		'2'=> 'Damage',
+		'3'=> 'Wrong entry'
+	];
  
 ?>

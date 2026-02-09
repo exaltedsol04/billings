@@ -78,6 +78,18 @@
 			  </ul>
 			</li>
 			
+			<li <?php if($page=='deduct-stock-add.php' || $page=='deduct-stock-list.php') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">indeterminate_check_box</i>
+				</div>
+				<div class="menu-title">Deduct Stock</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'deduct-stock-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Deduct</a></li>
+				<li><a href="<?php echo SITE_URL.'deduct-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a></li>
+			  </ul>
+			</li>
+			
 			
 			<li <?php if($page=='packaging-operator-add.php' || $page=='packaging-operator-list.php' || $page=='packaging-operator-assign.php' || $page=='online-order-packaging-operator-assign.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
