@@ -62,14 +62,18 @@
 							</tr>
 						  <tr>
 							<th style="width:100px">Order Id</th>
-							<th>Packaging operator name</th>
+							<th>Customer name</th>
 							<th class="text-center">Total Amount</th>
 							<th class="text-center">Order Date</th>
 							<th class="text-center">Delivery</th>
 							<th>Delivery Type</th>
 							<th>To be delivered</th>
 							<th>Remaining Delivery Time</th>
-							<th>Order Status</th>
+							<th>Processed</th>
+							<th>Packaging operator name</th>
+							<th>Packed</th>
+							<th>Out for delivery</th>
+							<th>Delivery man</th>
 							<th class="text-center">Status</th>
 						  </tr>
 						</thead>
@@ -91,12 +95,13 @@
 								];
 							}
 							
-							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.payment_method, o.total, po.name AS packaging_operator_name, osl.status AS orders_status_list_status";
+							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.payment_method, o.total, o.active_status, o.delivery_boy_id, po.name AS packaging_operator_name, osl.status AS orders_status_list_status, u.name AS customer_name";
 
 							$tables = PACKAGING_OPERATORS_ASSIGN . " poa
 							INNER JOIN " . ORDERS . " o ON o.id = poa.order_id
 							LEFT JOIN " . PACKAGING_OPERATORS . " po ON po.id = poa.packaging_operator_id
-							INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = poa.status";
+							INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = poa.status
+							LEFT JOIN " . USERS . " u ON u.id = o.user_id";
 							
 							$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 								
@@ -132,10 +137,21 @@
 									if($_SESSION['ROLE_ID'] == 1) {
 										$final_total += $arr->packing_charge;
 									}
+									
+									// get delivery boy 
+									$fieldsDboy = "db.name as delivery_man";
+									$tablesDboy = DELIVERY_BOYS . " db
+									INNER JOIN " . USERS . " u ON u.id = db.admin_id";
+									$whereDboy = "WHERE db.id =:id";
+									$paramsDboy = [
+											'id'=> $arr->delivery_boy_id
+									  ];
+									$sqlDboy = $general_cls_call->select_join_query($fieldsDboy, $tablesDboy, $whereDboy, $paramsDboy, 1);
 							?>
 							  <tr id="dataRow<?php echo($arr->id);?>">
 								<td><?PHP echo $arr->id; ?></td>
-								<td><?PHP echo !empty($arr->packaging_operator_name) ? $arr->packaging_operator_name : 'N/A'; ?></td>
+								<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>
+								
 								<!--<td class="text-center">₹<?PHP echo $final_total; ?></td>-->
 								<td class="text-center">₹<?PHP echo  ($arr->payment_method == 'waller') ? $arr->total : $arr->final_total; ?></td>
 								<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>'; ?></td>
@@ -143,7 +159,28 @@
 								<td><?PHP echo $arr->order_type; ?></td>
 								<td><?php echo $to_be_delivered; ?></td>
 								<td><?php echo $remaining_delivery_time; ?></td>
-								<td><?php echo $arr->orders_status_list_status; ?></td>
+								<!--<td><?php echo $arr->orders_status_list_status; ?></td>-->
+								<td style="white-space: nowrap;"><?php echo $arr->active_status >= 3 ?  '<span
+                        class="lable-table bg-success-subtle text-success rounded border border-success-subtle font-text2 fw-bold">Completed<i
+                          class="bi bi-check2 ms-2"></i></span>' : ''; ?></td>
+								<td><?PHP echo !empty($arr->packaging_operator_name) ? $arr->packaging_operator_name : '<span
+                        class="lable-table bg-primary-subtle text-primary rounded border border-primary-subtle font-text2 fw-bold">Waiting<i
+                          class="bi bi-clock ms-2"></i></i></span>'; ?></td>
+								<td style="white-space: nowrap;"><?php echo $arr->active_status == 3 ?  '<span
+                        class="lable-table bg-warning-subtle text-warning rounded border border-warning-subtle font-text2 fw-bold">Process<i
+                          class="bi bi-info-circle ms-2"></i></span>' : ($arr->active_status > 3 ? '<span
+                        class="lable-table bg-success-subtle text-success rounded border border-success-subtle font-text2 fw-bold">Completed<i
+                          class="bi bi-check2 ms-2"></i></span>': '') ?></td>
+								<td style="white-space: nowrap;"><?php echo $arr->active_status > 2 && $arr->active_status < 4 ? '<span
+                        class="lable-table bg-danger-subtle text-danger rounded border border-danger-subtle font-text2 fw-bold">Pending<i
+                          class="bi bi-x-lg ms-2"></i></span>' : ($arr->active_status == 4 ? '<span
+                        class="lable-table bg-warning-subtle text-warning rounded border border-warning-subtle font-text2 fw-bold">Process<i
+                          class="bi bi-info-circle ms-2"></i></span>': '<span
+                        class="lable-table bg-success-subtle text-success rounded border border-success-subtle font-text2 fw-bold">Completed<i
+                          class="bi bi-check2 ms-2"></i></span>') ?></td>
+						  <td style="white-space: nowrap;"><?php echo !empty($sqlDboy->delivery_man) ? $sqlDboy->delivery_man : '<span
+                        class="lable-table bg-primary-subtle text-primary rounded border border-primary-subtle font-text2 fw-bold">Waiting<i
+                          class="bi bi-clock ms-2"></i></i></span>'  ?></td>
 								<td class="d-flex align-items-center gap-3">
 									<!--<a href="javascript:void(0)" class="text-success font-text2" onclick="orderStatusChange(<?php echo($arr->id);?>)">
 										<div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success">
