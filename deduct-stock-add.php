@@ -144,10 +144,10 @@
 
 							<div class="col-md-3">
 								<label for="input5" class="form-label">Deduct Quantity</label>
-								<input type="text" class="form-control" name="stock" id="stock" placeholder="Deduct quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+								<input type="text" class="form-control deduct-qty" name="stock" id="stock" placeholder="Deduct quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
 								<span class="text-danger" id="err_stock"></span>
 							</div>
-
+							<input type="hidden" id="hid_deduct_qty">
 							<div class="col-md-6">
 								<label for="input2" class="form-label">Reason</label>
 								<select name="reason" id="reason_id" class="form-select select2-dropdown" tabindex="1" onchange="get_reason(this.value)" required>
@@ -161,7 +161,7 @@
 									}
 									?>
 								</select>
-								<span class="text-danger" id="err_stock"></span>
+								
 							</div>
 							
 							<div class="col-md-6  prodessing-man" style="display:none">
@@ -171,12 +171,12 @@
 									<option value="1">processing man 1</option>
 									<option value="2">“processing man 2</option>
 								</select>
-								<span class="text-danger" id="err_stock"></span>
+								
 							</div>
 							<div class="col-md-12">
 								<label for="input5" class="form-label">Remarks</label>
 								<textarea name="remarks" id="remarks" class="form-control"></textarea>
-								<span class="text-danger" id="err_stock"></span>
+								
 							</div>
 							<input type="hidden" id="stock_limit" name="stock_limit" value="<?php echo isset($_POST['stock_limit']) ? $_POST['stock_limit'] : '' ?>">
 							<div class="col-md-12">
@@ -201,6 +201,39 @@
 
 </html>
 <script>
+$(document).on('input', '.deduct-qty', function () {
+
+    //let row = $(this).closest('.item-row');
+    //row.find('.selling_price_div').html('');
+
+    let max = $('#hid_deduct_qty').val();
+
+    let value = this.value;
+    
+    // allow only numbers + decimal
+    value = value.replace(/[^0-9]/g, '');
+
+    // prevent multiple decimals
+    value = value.replace(/(\..*?)\..*/g, '$1');
+
+    // limit 2 digits after decimal
+    
+
+    let num = parseFloat(value);
+
+    // max check
+    if (value > max) {
+		$('.deduct-qty').val(max);
+		$('#err_stock').html('<div class="text-danger">Stock not exceed: ' + max + '</div>');
+    }
+	else if(value == '0')
+	{
+		$('.deduct-qty').val(max);
+	}
+	else{
+		$('#err_stock').html('');
+	}
+});
 function select_product(product)
 {
 	$('#selling_price_div').html('');
@@ -235,8 +268,12 @@ function get_qry(val)
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
 		data: datapost,
+		dataType: "json",
 		success: function(response){
-			var result = JSON.parse(response);
+			//var result = JSON.parse(response);
+			//alert(response[0].stock);
+			$('.deduct-qty').val(response[0].stock);
+			$('#hid_deduct_qty').val(response[0].stock);
 			
 		}
 	});

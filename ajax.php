@@ -1082,23 +1082,23 @@
 			INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 			INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-			$where = "WHERE pr.product_id=:product_id AND  pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+			$where = "WHERE pr.product_variant_id=:product_variant_id AND  pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
 			$params = [
 				':status'			=> 1,
 				':seller_id'		=> $_SESSION['SELLER_ID'],
-				':product_id'		=> $_POST['pid']
+				':product_variant_id'	=> $_POST['pvid']
 			];
-			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
 			$varianrArr = [];
-			if($sqlQuery[0] != '')
-			{
-				foreach($sqlQuery as $arr)
-				{
+			//if($sqlQuery[0] != '')
+			//{
+				//foreach($sqlQuery as $arr)
+				//{
 					$wherePos = "WHERE product_id=:product_id AND product_variant_id=:product_variant_id AND  stock_type=:stock_type AND seller_id=:seller_id AND status=:status";
 							 
 					$paramsPos = [
-						':product_id' => $arr->product_id,
-						':product_variant_id' => $arr->pvid,
+						':product_id' => $sqlQuery->product_id,
+						':product_variant_id' => $sqlQuery->pvid,
 						':stock_type' => 1,
 						':seller_id' => $_SESSION['SELLER_ID'],
 						':status' => 1
@@ -1111,8 +1111,8 @@
 							'stock' => $pos_stock->total
 						];
 					}
-				}
-			}
+				//}
+			//}
 			echo json_encode($varianrArr); 
 		break;
     }
