@@ -14,46 +14,77 @@
 	{	
 		extract($_POST);
 		//echo "<pre>";print_r($_POST);die;
+		
 		if(empty($vendor_id) && $vendor_id == '')
 		{
-			$field = "name, email, mobile,  status, city, pincode, address, product_ids, created_at, updated_at";
-			$value = ":name, :email, :mobile, :status, :city, :pincode, :address, :product_ids, :created_at, :updated_at";
-					
-			$addExecute=array(
-				':name'			=> $general_cls_call->specialhtmlremover($name),
-				':email'			=> $general_cls_call->specialhtmlremover($email),
-				':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
-				':city'	=> $general_cls_call->specialhtmlremover($city),
-				':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
-				':address'	=> $general_cls_call->specialhtmlremover($address),
-				':product_ids'	=> $general_cls_call->specialhtmlremover(implode(",", $products)),
-				':status'				=> 1,
-				':created_at' 			=> date('Y-m-d H:i:s'),
-				':updated_at'		    => date('Y-m-d H:i:s')
-			);
-		
-		
-			$general_cls_call->insert_query(VENDORS, $field, $value, $addExecute);
-			$sucMsg = "Vendor Created Successfully";
+			$whereMobile = "WHERE mobile=:mobile";
+			$paramsMobile = [
+				':mobile' => $mobile
+			];
+			$unique_mobile = $general_cls_call->select_query_count(VENDORS, $whereMobile, $paramsMobile);
+			if($unique_mobile == 0)
+			{
+				$field = "name, email, mobile,  status, city, pincode, address, product_ids, created_at, updated_at";
+				$value = ":name, :email, :mobile, :status, :city, :pincode, :address, :product_ids, :created_at, :updated_at";
+						
+				$addExecute=array(
+					':name'			=> $general_cls_call->specialhtmlremover($name),
+					':email'			=> $general_cls_call->specialhtmlremover($email),
+					':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
+					':city'	=> $general_cls_call->specialhtmlremover($city),
+					':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
+					':address'	=> $general_cls_call->specialhtmlremover($address),
+					':product_ids'	=> $general_cls_call->specialhtmlremover(implode(",", $products)),
+					':status'				=> 1,
+					':created_at' 			=> date('Y-m-d H:i:s'),
+					':updated_at'		    => date('Y-m-d H:i:s')
+				);
+			
+			
+				$general_cls_call->insert_query(VENDORS, $field, $value, $addExecute);
+				$sucMsg = "Vendor Created Successfully";
+			}
+			else{
+				$erMsg = "Mobile number should be unique";
+			}
 		}
 		else
 		{
-			$setValues=" name=:name, email=:email, mobile=:mobile, city=:city, pincode=:pincode, address=:address, product_ids=:product_ids, updated_at=:updated_at";
-			$updateExecute=array(
-				':name'		=> $general_cls_call->specialhtmlremover($name),
-				':email'	=> $general_cls_call->specialhtmlremover($email),
-				':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
-				':city'	=> $general_cls_call->specialhtmlremover($city),
-				':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
-				':address'	=> $general_cls_call->specialhtmlremover($address),
-				':product_ids'	=> $general_cls_call->specialhtmlremover(implode(",", $products)),
-				':updated_at'  => date('Y-m-d H:i:s'),
-				':id'	    => $vendor_id
-			);
-			$whereClause=" WHERE id = :id";
-			$general_cls_call->update_query(VENDORS, $setValues, $whereClause, $updateExecute);
-			};
-			$sucMsg = "Vendor Updated Successfully";
+			$whereMobile = "WHERE mobile=:mobile AND id!=:id";
+			$paramsMobile = [
+				':mobile' => $mobile,
+				':id' => $vendor_id
+			];
+			$unique_mobile = $general_cls_call->select_query_count(VENDORS, $whereMobile, $paramsMobile);
+			if($unique_mobile == 0)
+			{
+				$setValues=" name=:name, email=:email, mobile=:mobile, city=:city, pincode=:pincode, address=:address, product_ids=:product_ids, updated_at=:updated_at";
+				$updateExecute=array(
+					':name'		=> $general_cls_call->specialhtmlremover($name),
+					':email'	=> $general_cls_call->specialhtmlremover($email),
+					':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
+					':city'	=> $general_cls_call->specialhtmlremover($city),
+					':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
+					':address'	=> $general_cls_call->specialhtmlremover($address),
+					':product_ids'	=> $general_cls_call->specialhtmlremover(implode(",", $products)),
+					':updated_at'  => date('Y-m-d H:i:s'),
+					':id'	    => $vendor_id
+				);
+				$whereClause=" WHERE id = :id";
+				$general_cls_call->update_query(VENDORS, $setValues, $whereClause, $updateExecute);
+				$sucMsg = "Vendor Updated Successfully";
+			}
+			else{
+				$erMsg = "Mobile number should be unique";
+			}
+		}
+			
+		
+		
+		
+		//else{
+			//$erMsg = "Mobile number should be unique";
+		//}
 	}
 	
 	if(isset($_GET['vendor_id']) && $_GET['vendor_id']!='')
@@ -117,27 +148,27 @@
 							
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Name</label>
-								<input type="text" class="form-control" name="name" id="name" placeholder="Name" required value="<?php echo isset($sqlQueryVen->name) ? $sqlQueryVen->name : '' ?>">
+								<input type="text" class="form-control" name="name" id="name" placeholder="Name" required value="<?php echo isset($sqlQueryVen->name) ? $sqlQueryVen->name : $_POST['name'] ?>">
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Email</label>
-								<input type="email" class="form-control" name="email" id="email" placeholder="Email" required value="<?php echo isset($sqlQueryVen->email) ? $sqlQueryVen->email : '' ?>">
+								<input type="email" class="form-control" name="email" id="email" placeholder="Email" required value="<?php echo isset($sqlQueryVen->email) ? $sqlQueryVen->email : $_POST['email'] ?>">
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Mobile</label>
-								<input type="text" class="form-control" name="mobile" id="mobile" placeholder="Mobile" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" required value="<?php echo isset($sqlQueryVen->mobile) ? $sqlQueryVen->mobile : '' ?>">
+								<input type="text" class="form-control" name="mobile" id="mobile" placeholder="Mobile" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" required value="<?php echo isset($sqlQueryVen->mobile) ? $sqlQueryVen->mobile : $_POST['mobile'] ?>">
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">City</label>
-								<input type="text" class="form-control" name="city" id="city" placeholder="City" required value="<?php echo isset($sqlQueryVen->city) ? $sqlQueryVen->city : '' ?>">
+								<input type="text" class="form-control" name="city" id="city" placeholder="City" required value="<?php echo isset($sqlQueryVen->city) ? $sqlQueryVen->city : $_POST['city'] ?>">
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Pincode</label>
-								<input type="text" class="form-control" name="pincode" id="pincode" placeholder="Pincode" required value="<?php echo isset($sqlQueryVen->pincode) ? $sqlQueryVen->pincode : '' ?>" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+								<input type="text" class="form-control" name="pincode" id="pincode" placeholder="Pincode" required value="<?php echo isset($sqlQueryVen->pincode) ? $sqlQueryVen->pincode : $_POST['pincode'] ?>" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 							</div>
 							<div class="col-md-12">
 								<label for="input5" class="form-label">Address</label>
-								<textarea name="address" class="form-control" required><?php echo isset($sqlQueryVen->address) ? $sqlQueryVen->address : '' ?></textarea>
+								<textarea name="address" class="form-control" required><?php echo isset($sqlQueryVen->address) ? $sqlQueryVen->address : $_POST['address'] ?></textarea>
 								
 							</div>
 							
