@@ -275,7 +275,7 @@
 									<tr>
 										<td>Sub total</td>
 										<td class="text-center">:</td>
-										<td class="text-end">₹<?php echo $subtotal; ?></td>
+										<td class="text-end">₹<?php echo $sub_total; ?></td>
 									</tr>
 
 									<tr>
@@ -293,7 +293,7 @@
 									<tr>
 										<td>Discount</td>
 										<td class="text-center">:</td>
-										<td class="text-end text-success">- ₹<?php echo $discount; ?></td>
+										<td class="text-end text-success">- ₹<?php echo number_format($discount, 2); ?></td>
 									</tr>
 
 									<tr class="border-top fs-5">

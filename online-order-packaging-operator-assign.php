@@ -28,7 +28,7 @@
 			];
 		}
 		
-		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, o.payment_method, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status";
+		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, o.total, o.delivery_charge, o.payment_method, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status";
 		$tables = ORDERS . " o
 		INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
 		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id
@@ -53,6 +53,32 @@
 			];
 		}		
 		$sqlQuery = $general_cls_call->select_query("*", ORDERS_ITEMS, $where, $params, 2);
+		
+		
+		$sub_total = 0;
+		$packing_charge = 0;
+		$delivery_charge = 0;
+		$final_total = 0;
+		$discount = 0;
+		$total_amount = 0;
+		
+		if($orderArr->payment_method=='wallet')
+		{
+			$sub_total = $orderArr[0]->total;
+			$packing_charge = $orderArr[0]->packing_charge;
+			$delivery_charge = $orderArr[0]->delivery_charge;
+			$final_total = $orderArr[0]->total;
+			$discount  = ($orderArr[0]->total + $packing_charge) - $final_total;
+			$total_amount = $final_total;
+		}
+		else{
+			$sub_total = $orderArr[0]->total;
+			$packing_charge = $orderArr[0]->packing_charge;
+			$delivery_charge = $orderArr[0]->delivery_charge;
+			$final_total = $orderArr[0]->order_total;
+			$discount  = ($orderArr[0]->total + $packing_charge + $delivery_charge) - $final_total;
+			$total_amount = $final_total;
+		}
 	}
 
 	ob_end_flush();
@@ -185,16 +211,27 @@
                   <div>
                     <div class="d-flex justify-content-between">
                       <p class="fw-semi-bold">Items subtotal :</p>
-                      <p class="fw-semi-bold">₹<?php echo number_format($subtotal) ?></p>
+                      <!--<p class="fw-semi-bold">₹<?php echo number_format($subtotal) ?></p>-->
+					  <p class="fw-semi-bold">₹<?php echo $sub_total; ?></p>
                     </div>
                     <div class="d-flex justify-content-between">
                       <p class="fw-semi-bold">Packing charge :</p>
-                      <p class="text-success fw-semi-bold">₹<?php echo $orderData->packing_charge ? $orderData->packing_charge : 0; ?></p>
+                      <!--<p class="text-success fw-semi-bold">₹<?php echo $orderData->packing_charge ? $orderData->packing_charge : 0; ?></p>-->
+					  <p class="text-danger fw-semi-bold">+ ₹<?php echo $packing_charge; ?></p>
+                    </div>
+					<div class="d-flex justify-content-between">
+                      <p class="fw-semi-bold">Delivery charge :</p>
+                      <p class="text-danger fw-semi-bold">+ ₹<?php echo $delivery_charge; ?></p>
+                    </div>
+					<div class="d-flex justify-content-between">
+                      <p class="fw-semi-bold">Discount :</p>
+                      <p class="text-success fw-semi-bold">- ₹<?php echo number_format($discount, 2); ?></p>
                     </div>
                   </div>
                   <div class="d-flex justify-content-between border-top pt-4">
                     <h5 class="fw-bold">Total :</h5>
-                    <h5 class="fw-bold">₹<?php echo number_format($orderData->packing_charge + $subtotal) ?></h5>
+                    <!--<h5 class="fw-bold">₹<?php echo number_format($orderData->packing_charge + $subtotal) ?></h5>-->
+					 <h5 class="mb-0 fw-bold">₹<?php echo $total_amount; ?></h5>
                   </div>
 				  <div class="d-flex justify-content-between border-top pt-4">
                     <h5 class="fw-semi-bold">Payment Method :</h5>
@@ -342,6 +379,10 @@
               </div><!--end row-->
             </div>
          </div>
+		 <?php 
+		 if(!empty($orderData->delivery_boy_name))
+		 {
+		 ?>
 		 <h5 class="fw-bold mb-4">Delivery Boy Details</h5>
          <div class="card">
             <div class="card-body">
@@ -384,7 +425,9 @@
               </div><!--end row-->
             </div>
          </div>
-
+		<?php 
+		}
+		?>
     </div>
   </main>
   <!--end main wrapper-->
