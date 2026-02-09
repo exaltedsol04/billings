@@ -230,7 +230,16 @@ function select_product(product)
 
 function get_qry(val)
 {
-	
+	var datapost = 'action=getDeductProductVariantQry&pvid='+val;
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			var result = JSON.parse(response);
+			
+		}
+	});
 }
 
 function get_selling_price(val)

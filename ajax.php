@@ -1065,9 +1065,50 @@
 					if($pos_stock->total != 0)
 					{
 						$varianrArr[] = [
-							'id' => $arr->id,
+							'id' => $arr->product_variant_id,
 							'measurement' => $arr->measurement,
 							'unitname' => $arr->stock_unit_name
+						];
+					}
+				}
+			}
+			echo json_encode($varianrArr); 
+		break;
+		
+		case "getDeductProductVariantQry";
+			 
+			$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode, pv.id as pvid";
+			$tables = PRODUCT_STOCK_TRANSACTION . " pr
+			INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+			INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			$where = "WHERE pr.product_id=:product_id AND  pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+			$params = [
+				':status'			=> 1,
+				':seller_id'		=> $_SESSION['SELLER_ID'],
+				':product_id'		=> $_POST['pid']
+			];
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+			$varianrArr = [];
+			if($sqlQuery[0] != '')
+			{
+				foreach($sqlQuery as $arr)
+				{
+					$wherePos = "WHERE product_id=:product_id AND product_variant_id=:product_variant_id AND  stock_type=:stock_type AND seller_id=:seller_id AND status=:status";
+							 
+					$paramsPos = [
+						':product_id' => $arr->product_id,
+						':product_variant_id' => $arr->pvid,
+						':stock_type' => 1,
+						':seller_id' => $_SESSION['SELLER_ID'],
+						':status' => 1
+					];
+					$pos_stock = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
+					
+					if($pos_stock->total != 0)
+					{
+						$varianrArr[] = [
+							'stock' => $pos_stock->total
 						];
 					}
 				}
