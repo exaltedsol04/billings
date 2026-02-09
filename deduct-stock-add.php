@@ -166,7 +166,7 @@
 							
 							<div class="col-md-6  prodessing-man" style="display:none">
 								<label for="input5" class="form-label">Procession man</label>
-								<select name="processing_user_id"  class="form-select select2-dropdown" tabindex="1">
+								<select name="processing_user_id"  class="form-select select2-dropdown" tabindex="1" id="processing_user_id">
 									<option value="">Select...</option>
 									<option value="1">processing man 1</option>
 									<option value="2">“processing man 2</option>
@@ -301,6 +301,11 @@ function get_reason(val)
 	if(val== 1)
 	{
 		$('.prodessing-man').show();
+		 $('#processing_user_id').prop('required', true);
+	}
+	else{
+		$('.prodessing-man').hide();
+		$('#processing_user_id').prop('required', false);
 	}
 }
 </script>
