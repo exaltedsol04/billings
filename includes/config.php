@@ -1,4 +1,12 @@
 <?php
+	//FIREBASE PROJECT ID 
+	define('FIREBASE_PROJECT_ID', 'ecofresh-ca549');
+	
+	//RAZORPAY CREDENTIAL
+	define('RAZORPAY_KEY_ID', 'rzp_test_xxxxx');
+	define('RAZORPAY_KEY_SECRET', 'xxxxxxxxxx');
+	define('RAZORPAY_WEBHOOK_SECRET', 'your_webhook_secret');
+	
 	/* used in online-packaging-operator-orders*/
 	$operator_array[] = [
 		'id' => 4,
