@@ -284,9 +284,16 @@ function unit_measurement(pvid)
 				$.each(result, function (i, stock) {
 					//alert(stock.product_variant_id);
 					html += '<div class="row align-items-start border-bottom py-2">';
-						html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
-						html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
-						html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
+						html += '<span class="col-md-10 fw-bold text-break text-nowrap" style="color:#A300A3">Product name: ' +stock.product_name + '</span>';
+						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + stock.variant_name + '</span>';
+					html += '</div>';
+					html += '<div class="row align-items-start border-bottom py-2">';
+						html += '<span class="col-md-10 fw-bold text-nowrap" style="color:#A300A3">POS stock</span>';
+						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + stock.variant_stock + '</span>';
+					html += '</div>';
+					html += '<div class="row align-items-start border-bottom py-2">';
+						html += '<span class="col-md-10 fw-bold text-nowrap" style="color:#A300A3">Online stock</span>';
+						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + stock.variant_stock_online + '</span>';
 					html += '</div>';
 					$('#stock_limit').val(stock.variant_stock);
 				});

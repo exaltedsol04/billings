@@ -73,7 +73,7 @@
 				<div class="menu-title">PRODUCT</div>
 			  </a>
 			  <ul>
-				<li><a href="<?php echo SITE_URL.'barcode'; ?>"><i class="material-icons-outlined">arrow_right</i>Product List</a></li>
+				<!--<li><a href="<?php echo SITE_URL.'barcode'; ?>"><i class="material-icons-outlined">arrow_right</i>Product List</a></li>-->
 				<li><a href="<?php echo SITE_URL.'barcode'; ?>"><i class="material-icons-outlined">arrow_right</i>Print Barcode</a></li>
 			  </ul>
 			</li>

@@ -90,12 +90,14 @@
 										<td></td>
 										<td></td>
 										<td></td>
+										<td></td>
 									</tr>
 								  <tr>
 									<th>S. No.</th>
 									<th>Product Name</th>
 									<th class="text-center">Quantity</th>
 									<th class="text-center">Measurement</th>
+									<th class="text-center">Type</th>
 									<th class="text-center">Unit Price</th>
 									<th class="text-center">Total Price</th>
 								  </tr>
@@ -113,6 +115,7 @@
 										<td><?PHP echo $general_cls_call->cart_product_name($selectValue->name); ?></td>
 										<td class="text-center"><?PHP echo $selectValue->quantity; ?></td>
 										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
+										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $selectValue->type; ?></span></td>
 										<td class="text-center">₹<?PHP echo $selectValue->unit_price; ?></td>
 										<td class="text-center">₹<?PHP echo $selectValue->total_price; ?></td>
 										

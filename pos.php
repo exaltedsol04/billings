@@ -95,14 +95,15 @@
 				<select name="product" id="product" onchange=check_product_stock_onchange(this.value) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
-						$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, p.name, p.image, p.barcode";
+						$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, p.name, p.image, p.barcode, pv.type";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-						$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+						$where = "WHERE pr.status=:status AND pr.stock_type=:stock_type AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
 						$params = [
 							':status' => 1,
+							':stock_type'	=>	1,
 							':seller_id' => $_SESSION['SELLER_ID'],
 						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
@@ -122,7 +123,7 @@
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 					?>
-								<option value="<?PHP echo $arr->product_variant_id.'@@@'.$arr->selling_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->stock_unit_name; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->product_variant_id.'@@@'.$arr->selling_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->stock_unit_name.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
 					<?PHP
 							}
 						}
@@ -175,6 +176,7 @@
 					  <th>Sl. No.</th>
 					  <th class="text-center" style="width:160px">Qty</th>
 					  <th>Measurement</th>
+					  <th>Type</th>
 					  <th>Product</th>
 					  <th class="text-center">Price</th>
 					  <th class="text-center">Total Price</th>

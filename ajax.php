@@ -391,9 +391,14 @@
 		
 		case "productprint":
 				$barcode = $_POST['barcode'];
+				$pvid = $_POST['product_variant_id'];
 				$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode";
-				$tables = PRODUCT_VARIANTS . " pv INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id"; $where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";
-				$params = [];
+				$tables = PRODUCT_VARIANTS . " pv INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id"; 
+				$where = "WHERE p.barcode=:barcode AND pv.id=:id ORDER BY p.name";
+				$params = [
+					':barcode' => $barcode,
+					':id' => $pvid
+				];
 				$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
 				//echo "<pre>";print_r($sqlQuery);die;
 				
@@ -406,6 +411,7 @@
 				$stockArr = [
 						"measurement" => $measurement,
 						"unitname" => $unitname,
+						"productname" => $general_cls_call->cart_product_name($sqlQuery->name)
 					];
 				echo json_encode($stockArr);
 		break;
@@ -416,9 +422,10 @@
 				$stockArr = [];
 				
 				$fld = "distinct(product_variant_id)";
-				$wh = "WHERE product_id=:product_id AND status=:status AND seller_id =:seller_id GROUP BY product_variant_id HAVING SUM(stock) > 0";
+				$wh = "WHERE product_id=:product_id AND status=:status AND seller_id =:seller_id AND stock_type=:stock_type GROUP BY product_variant_id HAVING SUM(stock) > 0";
 				$para = [
 					':product_id' => $pid,
+					':stock_type'	=>	1,
 					':seller_id' => $_SESSION['SELLER_ID'],
 					':status' => 1
 				];
@@ -466,7 +473,7 @@
 					$stockArr[] = [
 						"product_name" => $product_name,
 						"product_variant_id" => $val->product_variant_id,
-						"variant_name" => $p_variant_name,
+						"variant_name" => $p_variant_name .' ('. $product_variant_dtls->type .')',
 						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
 					];
 				}
@@ -732,9 +739,10 @@
 					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
 					//echo "<pre>";print_r($product_variant_dtls);die;
 					
-					$where = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
+					// available pos stock
+					$wherePos = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
 					
-					$params = [
+					$paramsPos = [
 						':product_variant_id'	=>	$val,
 						':product_id'	=>	$product_variant_dtls->product_id,
 						':status'	=>	1,
@@ -742,7 +750,30 @@
 						':seller_id'	=>	$_SESSION['SELLER_ID']
 					];
 					// check from product_stock_transaction 
-					$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $where, $params, 'stock');
+					$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
+					
+					// available online stock
+					$whereOnline = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
+					
+					$paramsOnline = [
+						':product_variant_id'	=>	$val,
+						':product_id'	=>	$product_variant_dtls->product_id,
+						':status'	=>	1,
+						':stock_type'	=>	2,
+						':seller_id'	=>	$_SESSION['SELLER_ID']
+					];
+					// check from product_stock_transaction 
+					$stock_used_online = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $whereOnline, $paramsOnline, 'stock');
+					
+					$whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status AND seller_id=:seller_id";
+					$paramsOrdItm = [
+						':product_variant_id' => $val,
+						':seller_id' => $_SESSION['SELLER_ID'],
+						'active_status' => 7
+					];
+					$qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
+					 
+					$qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
 					
 					// after cart add check stock
 					
@@ -755,11 +786,13 @@
 					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
 					
 					$available_stock = $stock_used->total;
+					//$available_stock_online = $stock_used_online->total;
 					
 					$stockArr[] = [
 						"product_name" => $product_name,
 						"variant_name" => $p_variant_name,
 						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
+						"variant_stock_online" => $stock_used_online->total == null ? 0 : $stock_used_online->total-$qty_used,
 					];
 				}
 				echo json_encode($stockArr);
@@ -1042,7 +1075,7 @@
 		
 		case "getDeductProductVariant";
 			 
-			$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode, pv.id as pvid";
+			$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode, pv.id as pvid, pv.type";
 			$tables = PRODUCT_STOCK_TRANSACTION . " pr
 			INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 			INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
@@ -1075,7 +1108,8 @@
 						$varianrArr[] = [
 							'id' => $arr->product_variant_id,
 							'measurement' => $arr->measurement,
-							'unitname' => $arr->stock_unit_name
+							'unitname' => $arr->stock_unit_name,
+							'ptype' => $arr->type
 						];
 					}
 				}

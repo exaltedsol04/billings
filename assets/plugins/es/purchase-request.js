@@ -29,6 +29,7 @@ let add_to_cart = () => {
 	let productId = myArray[3];
 	let productBarcode = myArray[4];
 	let productMeasurement = myArray[5];
+	let productType = myArray[6];
 	let qty = 1;
 	let search = purchaseBasket.find((x) => x.id === selectedItem);
 	//alert('ok');
@@ -41,6 +42,7 @@ let add_to_cart = () => {
 	  price: productPrice,
 	  pid: productId,
       qty: parseInt(qty),
+	  ptype: productType,
 	  item: 1
     });
   } else {
@@ -81,7 +83,7 @@ let generatePurchaseItems = () => {
   if (purchaseBasket.length !== 0) {
     return (PurchaseCart.innerHTML = purchaseBasket
       .map((x, index) => {
-        let { id, item, qty, price, measurement, name, pid } = x;
+        let { id, item, qty, price, measurement, name, pid, ptype} = x;
 
 		$('#loader').hide();
 		$('#removeCart').show();
@@ -113,6 +115,7 @@ let generatePurchaseItems = () => {
 					</div>
 				  </td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${measurement}</td>
+				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><span class="badge bg-grd-primary dash-lable">${ptype}</span></td>
 				   <td class="text-center">₹ ${price}</td>						  
 				  <td class="text-center">₹ ${(qty * price).toFixed(2)}</td>
 				  <td class="text-center">
@@ -129,7 +132,7 @@ let generatePurchaseItems = () => {
    
    $('#removeCart, #loader').hide();
     PurchaseCart.innerHTML = `<tr>
-						  <td colspan="7" class="text-center">No Record Found.</td>
+						  <td colspan="8" class="text-center">No Record Found.</td>
     </td></tr>`;
   }
   
@@ -269,7 +272,7 @@ let TotalAmount = () => {
       .reduce((x, y) => x + y, 0);
 
     return (totalAmountShow.innerHTML = `<tr>
-						  <td colspan="5">Sum</td>
+						  <td colspan="6">Sum</td>
 						  <td id="cartAmount" class="cartAmount text-center">₹ ${amount.toFixed(2)}</td>
 						</tr>`);
   } else return;

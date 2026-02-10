@@ -112,9 +112,10 @@
 										INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 										INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 										INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-										$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+										$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id AND pr.stock_type=:stock_type GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
 										$params = [
 											':status' => 1,
+											':stock_type' => 1,
 											':seller_id' => $_SESSION['SELLER_ID'],
 										];
 										$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
@@ -253,7 +254,7 @@ function select_product(product)
 			if (result.length > 0) {
 				var html = '<option value="">Select...</option>';
 				$.each(result, function (i, variants) {
-					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname + '</option>';
+					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname + '  (' + variants.ptype +' )</option>';
 				});
 				$('#product_variant_id').html(html);
 			}
