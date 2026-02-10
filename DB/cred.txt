@@ -1,20 +1,17 @@
-
+https://retail.ecoleaf.store/
+Admin
+----
+admin@ecofresh.in
+admin@ecofresh.in
  
-Cpanel
--------------
-Domain: pos.trumilan.com/cpanel
-UserName: postrumilan
-PassWord: mjQjLJx-hiai.xoC
- 
-Database
------------------
-Database: postrumilan_billings
-Database Username: postrumilan_billings
-Database Password: billings2026
+Seller
+----
+farmer@ecofresh.in
+farmer@ecofresh.in
 
 ----------------------------------------------------------
-Login credential
-https://pos.trumilan.com/
+Cpanel
 
-admin@billing.in / 123456
-seller@billing.in / 123456
+https://retail.ecoleaf.store/cpanel
+UserName: ecoleafs
+PassWord: kLw0NOwA!OvH
