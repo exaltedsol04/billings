@@ -85,6 +85,7 @@
 							<td></td>
 							<td></td>
 							<td></td>
+							<td></td>
 						</tr>
                       <tr  class="text-center">
 						<th>Sl.no.</th>
@@ -92,6 +93,7 @@
 						<th>Name</th>
 						<th>Request Qty.</th>
 						<th>Measurement</th>
+						<th>Type</th>
 						<th>Status</th>
                       </tr>
                     </thead>
@@ -138,6 +140,8 @@
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td><?PHP echo $arr->pqty ?></td>
 						<td><?PHP echo $arr->measurement . ' ' .$unitdata->name; ?></td>
+						<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ?></span></td>
+						
 						<td>
 						<?PHP echo $arr->status == 1 ? '<p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Approved</p>' : '<p class="dash-lable mb-0 bg-warning bg-opacity-10 text-warning rounded-2">Pending</p>' ; ?></td>
                       </tr>

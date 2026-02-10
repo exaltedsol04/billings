@@ -30,6 +30,7 @@ function add_to_cart(product) {
 	let productImage = myArray[3];
 	let productBarcode = myArray[4];
 	let productMeasurement = myArray[5];
+	let productType = myArray[6];
 	let qty = 1;
 	let search = basket.find((x) => x.id === selectedItem);
 
@@ -41,6 +42,7 @@ function add_to_cart(product) {
 	  price: productPrice,
 	  pimage: productImage,
       qty: parseInt(qty),
+	  ptype: productType,
 	  item: 1
     });
   } else {
@@ -80,7 +82,7 @@ let generateCartItems = () => {
   if (basket.length !== 0) {
     return (ShoppingCart.innerHTML = basket
       .map((x, index) => {
-        let { id, item, qty, price, measurement, name, pimage } = x;
+        let { id, item, qty, price, measurement, name, pimage, ptype} = x;
 		$('#loader').hide();
 		let progress = 0;
 		$('#removeCart').show();
@@ -98,6 +100,7 @@ let generateCartItems = () => {
 					</div>
 				  </td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${measurement}</td>
+				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><span class="badge bg-grd-primary dash-lable">${ptype}</span></td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}</td>
 				  <input type="hidden" value="${id}" name="product_variant_id[]">
 				  <td class="text-center">₹ ${price}</td>						  
@@ -113,7 +116,7 @@ let generateCartItems = () => {
    $('#removeCart, #loader').hide();
    let progress = 0;
     ShoppingCart.innerHTML = `<tr>
-						  <td colspan="7" class="text-center">Cart is Empty</td>
+						  <td colspan="8" class="text-center">Cart is Empty</td>
     </td></tr>`;
   }
   
@@ -268,7 +271,7 @@ let TotalAmount = () => {
       .reduce((x, y) => x + y, 0);
 
     return (totalAmountShow.innerHTML = `<tr>
-						  <td colspan="5">Sum</td>
+						  <td colspan="6">Sum</td>
 						  <td id="cartAmount" class="cartAmount text-center">₹ ${amount.toFixed(2)}</td>
 						  <input type="hidden" name="cart_total_amt" value="${amount.toFixed(2)}">
 						</tr>`);

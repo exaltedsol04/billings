@@ -42,7 +42,7 @@
                     </thead>
                     <tbody>
 					<?php 
-						$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, pv.measurement, p.name, p.barcode";
+						$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, pv.measurement, p.name, p.barcode, pv.id as product_variant_id";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id";
@@ -67,7 +67,7 @@
 						if(!empty($arr->barcode))
 						{
 						?>
-							<a href="javascript:void(0)" class="wh-42 bg-grd-success text-white rounded-circle d-flex align-items-center justify-content-center" onclick="printBarcode('<?php echo($arr->barcode);?>')" title = "Click here to Print Barcode" data-bs-toggle="tooltip"><i class="material-icons-outlined">print</i></a>
+							<a href="javascript:void(0)" class="wh-42 bg-grd-success text-white rounded-circle d-flex align-items-center justify-content-center" onclick="printBarcode('<?php echo($arr->barcode);?>','<?php echo $arr->product_variant_id ?>')" title = "Click here to Print Barcode" data-bs-toggle="tooltip"><i class="material-icons-outlined">print</i></a>
 							<?php 
 						}
 						?>
@@ -94,7 +94,8 @@
 	
 	<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 	<script type="text/javascript">
-		function printBarcode(ID) {
+		function printBarcode(ID,pvid) {
+			//alert(ID);alert(pvid);
 			let printWindow = window.open('', '_blank');
 
 			printWindow.document.write(`
@@ -166,6 +167,7 @@
 
 		<script>
 			var ID = "${ID}";
+			var pvid = "${pvid}";
 
 			// Generate barcode
 			JsBarcode("#barcode", ID, {
@@ -180,7 +182,7 @@
 			$.ajax({
 				type: "POST",
 				url: "<?= SITE_URL ?>ajax",
-				data: { action: "productprint", barcode: ID },
+				data: { action: "productprint", barcode: ID, product_variant_id: pvid },
 				dataType: "json",
 				success: function(res) {
 					//alert(res);
@@ -188,6 +190,7 @@
 					//var da = JSON.parse(res);
 					//alert(da.measurement);
 					if(res.measurement && res.unitname){
+						//$('.product').text(res.productname);
 						$('#measurementdata').text(res.measurement + ' ' + res.unitname);
 					} else {
 						$('#measurementdata').text('N/A');

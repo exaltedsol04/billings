@@ -33,6 +33,7 @@
 							<td><input type="text" class="form-control" id="search-two" placeholder="Search by product name"></td>
 							<td></td>
 							<td></td>
+							<td></td>
 						</tr>
                       <tr  class="text-center">
 						<th>Sl. No.</th>
@@ -40,11 +41,12 @@
 						<th>Name</th>
 						<th>Available stock.</th>
 						<th>Measurement</th>
+						<th>Type</th>
                       </tr>
                     </thead>
                     <tbody>
 					<?php 
-						$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode ,pv.id as product_variant_id";
+						$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode ,pv.id as product_variant_id, pv.type";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
@@ -79,6 +81,7 @@
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td><?PHP echo $arr->total_stock - $qty_used ?></td>
 						<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
+						<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
 					</tr>
 						<?PHP
 								$i++;
