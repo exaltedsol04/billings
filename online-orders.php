@@ -3,13 +3,48 @@
 	$pageParam = [
 		'dataTables' => true,
 		'select2' => false,
-		'daterangepicker' => false,
+		'daterangepicker' => true,
 		'pageAccessRoleIds' => [1,3]
 	];
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
 	
 	ob_start();
+	
+	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+		{
+			$fromDate = $_POST['fromDate'];
+			$toDate = $_POST['toDate'];
+			$whereDateRange = "o.created_at >= :fromDate AND o.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+			
+			if($_SESSION['ROLE_ID'] == 1)
+			{
+				$params = [
+					':fromDate' => $_POST['fromDate'],
+					':toDate'   => $_POST['toDate']
+				];
+			}
+			else{
+				$params = [
+					':seller_id'=> $_SESSION['SELLER_ID'],
+					':fromDate' => $_POST['fromDate'],
+					':toDate'   => $_POST['toDate']
+				];
+			}
+		}
+		else
+		{
+			$whereDateRange = 'DATE(o.created_at) = CURDATE()';
+			if($_SESSION['ROLE_ID'] == 1)
+			{
+				$params = [];
+			}
+			else{
+				$params = [
+					':seller_id'=> $_SESSION['SELLER_ID'],
+				];
+			}
+		}
 	
 	ob_end_flush();
 	
@@ -45,6 +80,29 @@
 					</div>
 				</div>
 				<!--end breadcrumb-->
+				<h6 class="mb-0 text-uppercase">Search panel</h6>
+						<hr>
+						<div class="card rounded-4 border-top border-4 border-primary border-gradient-1">
+							<div class="card-body">
+								<form class="row g-4" method="post" action="">
+									<div class="col-md-6">
+										<label for="input1" class="form-label">From date</label>
+										<input type="text" name="fromDate" id="fromDate" class="form-control" placeholder="Start Date" readonly>
+									</div>
+									<div class="col-md-6">
+										<label for="input5" class="form-label">To date</label>
+										<input type="text" name="toDate" id="toDate" class="form-control" placeholder="End Date" readonly>
+									</div>
+									
+									<div class="col-md-12">
+									  <div class="d-md-flex d-grid justify-content-md-between">
+										<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+										<button type="submit" class="btn btn-grd btn-grd-success px-4" name="btnUser" value="SAVE">Search</button>
+									  </div>
+									</div>
+								</form>
+							</div>
+						</div>
      
 				<div class="card">
 					<div class="card-body">
@@ -82,25 +140,25 @@
 								<?php
 									if($_SESSION['ROLE_ID'] == 1)
 									{
-										$where = "WHERE 1
+										$where = "WHERE ". $whereDateRange ."
 											  GROUP BY oi.order_id
 											  ORDER BY 
 												  CASE 
 													  WHEN o.order_type = 'slot' THEN o.from_time
 													  ELSE o.created_at
 												  END DESC";
-										$params = [];	
+										//$params = [];	
 									} else{
-										$where = "WHERE oi.seller_id = :seller_id
+										$where = "WHERE oi.seller_id = :seller_id AND ". $whereDateRange ."
 											  GROUP BY oi.order_id
 											  ORDER BY 
 												  CASE 
 													  WHEN o.order_type = 'slot' THEN o.from_time
 													  ELSE o.created_at
 												  END DESC";
-										$params = [
-											':seller_id'=> $_SESSION['SELLER_ID']
-										];
+										//$params = [
+											//':seller_id'=> $_SESSION['SELLER_ID']
+										//];
 									}
 									$fields = "o.id, o.orders_id, o.total, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.created_at, o.active_status, o.payment_method, SUM(oi.sub_total) AS orders_items_sub_total, u.name AS customer_name, osl.status AS orders_status_list_status, os.created_at AS orders_statuses_created_at";
 
@@ -198,7 +256,46 @@
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script>
+$(function () {
+
+  let start = moment().startOf('today');
+  let end   = moment().endOf('today');
+
+  function setDates(start, end) {
+    $('#fromDate').val(start.format('YYYY-MM-DD'));
+    $('#toDate').val(end.format('YYYY-MM-DD'));
+  }
+
+	// Apply picker on FROM field (controls both)
+	$('#fromDate').daterangepicker({
+		startDate: start,
+		endDate: end,
+		autoUpdateInput: false,
+		parentEl: 'body',          // ⭐ FIX POSITION
+		opens: 'right',            // open next to input
+		drops: 'down',             // force downward
+		locale: {
+			cancelLabel: 'Clear'
+		}
+	});
+
+
+  // When range selected
+  $('#fromDate').on('apply.daterangepicker', function (ev, picker) {
+      setDates(picker.startDate, picker.endDate);
+  });
+
+  // Clear
+  $('#fromDate').on('cancel.daterangepicker', function () {
+      $('#fromDate, #toDate').val('');
+  });
+
+  // Set default
+  setDates(start, end);
+});
 function startCountdowns() {
 
     document.querySelectorAll('.countdown').forEach(function(el) {

@@ -3,14 +3,34 @@
 	$pageParam = [
 		'dataTables' => true,
 		'select2' => false,
-		'daterangepicker' => false,
+		'daterangepicker' => true,
 		'pageAccessRoleIds' => [3]
 	];
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
 
 	ob_start();
-	
+	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+		{
+			$fromDate = $_POST['fromDate'];
+			$toDate = $_POST['toDate'];
+			$whereDateRange = "AND poa.created_at >= :fromDate AND poa.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+			$params = [
+				':status' => 3,
+				':seller_id'=> $_SESSION['SELLER_ID'],
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
+			];
+			
+		}
+		else
+		{
+			$whereDateRange = 'AND DATE(poa.created_at) = CURDATE()';
+			$params = [
+				':seller_id'=> $_SESSION['SELLER_ID'],
+				':status'=> 3
+			];
+		}
 	
 	ob_end_flush();
 ?>
@@ -40,6 +60,29 @@
 			</div>
 		</div>
 		<!--end breadcrumb-->
+		<h6 class="mb-0 text-uppercase">Search panel</h6>
+						<hr>
+						<div class="card rounded-4 border-top border-4 border-primary border-gradient-1">
+							<div class="card-body">
+								<form class="row g-4" method="post" action="">
+									<div class="col-md-6">
+										<label for="input1" class="form-label">From date</label>
+										<input type="text" name="fromDate" id="fromDate" class="form-control" placeholder="Start Date" readonly>
+									</div>
+									<div class="col-md-6">
+										<label for="input5" class="form-label">To date</label>
+										<input type="text" name="toDate" id="toDate" class="form-control" placeholder="End Date" readonly>
+									</div>
+									
+									<div class="col-md-12">
+									  <div class="d-md-flex d-grid justify-content-md-between">
+										<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+										<button type="submit" class="btn btn-grd btn-grd-success px-4" name="btnUser" value="SAVE">Search</button>
+									  </div>
+									</div>
+								</form>
+							</div>
+						</div>
 		<div class="row">
 			<div class="col-md-12" id="msg"></div>
 		</div>
@@ -79,21 +122,18 @@
 						</thead>
 						<tbody>
 						<?php
-							if($_SESSION['ROLE_ID'] == 1)
-							{
-								$where = "WHERE poa.status=:status
-									  ORDER BY poa.created_at DESC";
-								$params = [':status'=> 3];	
-							}
-							else{
-								$where = "WHERE poa.assign_by=:seller_id 
-									  AND poa.status=:status
-									  ORDER BY poa.created_at DESC";
-								$params = [
-									':seller_id'=> $_SESSION['SELLER_ID'],
-									':status'=> 3
-								];
-							}
+							
+							/*$where = "WHERE poa.assign_by=:seller_id 
+								  AND poa.status=:status
+								  ORDER BY poa.created_at DESC";
+							$params = [
+								':seller_id'=> $_SESSION['SELLER_ID'],
+								':status'=> 3
+							];*/
+							
+							$where = "WHERE poa.assign_by=:seller_id 
+								  ".$whereDateRange." AND poa.status=:status";
+							
 							
 							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.payment_method, o.total, o.active_status, o.delivery_boy_id, po.name AS packaging_operator_name, osl.status AS orders_status_list_status, u.name AS customer_name";
 
@@ -246,7 +286,47 @@
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script>
+$(function () {
+
+  let start = moment().startOf('today');
+  let end   = moment().endOf('today');
+
+  function setDates(start, end) {
+    $('#fromDate').val(start.format('YYYY-MM-DD'));
+    $('#toDate').val(end.format('YYYY-MM-DD'));
+  }
+
+	// Apply picker on FROM field (controls both)
+	$('#fromDate').daterangepicker({
+		startDate: start,
+		endDate: end,
+		autoUpdateInput: false,
+		parentEl: 'body',          // ⭐ FIX POSITION
+		opens: 'right',            // open next to input
+		drops: 'down',             // force downward
+		locale: {
+			cancelLabel: 'Clear'
+		}
+	});
+
+
+  // When range selected
+  $('#fromDate').on('apply.daterangepicker', function (ev, picker) {
+      setDates(picker.startDate, picker.endDate);
+  });
+
+  // Clear
+  $('#fromDate').on('cancel.daterangepicker', function () {
+      $('#fromDate, #toDate').val('');
+  });
+
+  // Set default
+  setDates(start, end);
+});
+
 function orderStatusChange(orderId)
 {
 	$('#no_operator').html('');

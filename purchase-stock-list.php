@@ -191,21 +191,31 @@
 											];
 											$pending_stock = $general_cls_call->select_query_count( ADMIN_STOCK_PURCHASE_LIST, $whereStatus, $paramsStatus);
 											
-											//---------------------
+											//----get the vendors name------
 											
-											/*$fieldsVend = "distinct(vendor_id) , v.name as vendor_names";
-											$tablesVend = ADMIN_STOCK_PURCHASE_LIST . " asp
-											INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-											$whereVend = "WHERE asp.product_id=:product_id AND asp.product_stock_transaction_id=:product_stock_transaction_id";
-											$paramsVend = [
-												':product_id'=>$selectValue->product_id,
-												':product_stock_transaction_id'=>0
-											];
-											$sqlVendors = $general_cls_call->select_join_query($fieldsVend, $tablesVend, $whereVend, $paramsVend, 2);*/
+											$whereVar = "WHERE product_id =:product_id";
+											$paramsVar = [':product_id'=> $selectValue->product_id];
+											$p_variants = $general_cls_call->select_query("distinct(product_variant_id)", ADMIN_STOCK_PURCHASE_LIST, $whereVar, $paramsVar, 2);
+											
+											$vendors_arr = [];
+											
+											foreach($p_variants as $pvi)
+											{
+												$fieldsVend = "distinct(vendor_id) , v.name as vendor_names";
+												$tablesVend = ADMIN_STOCK_PURCHASE_LIST . " asp
+												INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
+												$whereVend = "WHERE asp.product_id=:product_id AND asp.product_variant_id=:product_variant_id";
+												$paramsVend = [
+													':product_id'=>$selectValue->product_id,
+													':product_variant_id'=>$pvi->product_variant_id
+												];
+												$sqlVendors = $general_cls_call->select_join_query($fieldsVend, $tablesVend, $whereVend, $paramsVend, 2);
+												$vendors_arr[] = implode(', ', array_column($sqlVendors, 'vendor_names'));
+											}
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
 									    <td style="width:100px"><?php echo $k+1 ;?></td>
-										<td style="width:100px"><?PHP echo $selectValue->vendor; ?></td>
+										<td><?PHP echo implode(', ', $vendors_arr); ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
 										<td><?php echo $stock_credit->total; ?></td>
 										<td><?php echo $admin_stock_debit; ?></td>

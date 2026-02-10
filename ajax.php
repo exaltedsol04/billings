@@ -768,6 +768,8 @@
 				$accept_status = $_POST['accept_status'];
 				$stock_transaction_id = $_POST['stock_transaction_id'];
 				$qty = $_POST['qty'];
+				$product_id = $_POST['product_id'];
+				$product_variant_id = $_POST['product_variant_id'];
 				//echo $status.' '.$stock_transaction_id;
 				$field = "stock";
 				$where = "WHERE id=:id";
@@ -830,7 +832,13 @@
 				}
 				elseif($accept_status==3)
 				{
-					if($qty >= $stock_data->stock)
+					// check available stock 
+			        $stock_available = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $product_variant_id, 'status'=>1, 'product_id'=> $product_id), 'stock');
+					
+					
+					//if($qty >= $stock_data->stock)
+					//echo $stock_available->total. . $qty; die;
+					if($stock_available->total >= $qty)
 					{
 						$res['status_name'] = 'Exceed';
 						$res['previous_qty'] = $stock_data->stock;

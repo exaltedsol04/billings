@@ -46,7 +46,7 @@
                     </thead>
                     <tbody>
 					<?php 
-						$fields = "pr.id, pr.product_id, pr.status, pr.stock as pqty, pv.stock_unit_id, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode";
+						$fields = "pr.id, pr.product_id, pr.status, pr.stock as pqty, pv.stock_unit_id, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, pv.id as product_variant_id";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id";
@@ -82,7 +82,7 @@
 						<td><?PHP echo $arr->pqty ?></td>
 						<td><?PHP echo $arr->measurement . ' ' .$unitdata->name; ?></td>
 						<td>
-						<a href="javascript:void(0);" onclick="accept_purchase(<?php echo $arr->id ;?>)">
+						<a href="javascript:void(0);" onclick="accept_purchase(<?php echo $arr->id ;?>, <?php echo $arr->product_id ;?>, <?php echo $arr->product_variant_id ;?>)">
 						<button type="button" class="btn btn-success raised d-flex gap-2" title = "Accept" data-bs-toggle="tooltip"><i class="lni lni-checkmark-circle fs-5"></i>Accept</button></a></td>
                       </tr>
 						<?PHP
@@ -137,6 +137,8 @@
 				<div class="col-md-12">
 				  <div class="d-md-flex d-grid justify-content-md-between">
 					<input type="hidden" id="order_id" name="order_id">
+					<input type="hidden" id="hid_product_id" name="hid_product_id">
+					<input type="hidden" id="hid_product_variant_id" name="hid_product_variant_id">
 					
 					<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
 					<button type="button" id="acceptSave" class="btn btn-grd btn-grd-success px-4">Save</button>
@@ -171,11 +173,14 @@ $(document).on('click', '#acceptSave', function(){
 		}
 	}
 	
+	let product_id = $('#hid_product_id').val();
+	let product_variant_id = $('#hid_product_variant_id').val();
+	
 	//var datapost = $('#cart-list-form').serialize();
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
-		data: {action:'purchaseAccept', accept_status:status,stock_transaction_id:stock_transaction_id,qty:qty},
+		data: {action:'purchaseAccept', accept_status:status,stock_transaction_id:stock_transaction_id,qty:qty,product_id:product_id,product_variant_id:product_variant_id},
 		dataType: "json",
 		success: function(response){
 			//alert(response.status);
@@ -194,14 +199,17 @@ $(document).on('click', '#acceptSave', function(){
 		}
 	});
 })
-function accept_purchase(id)
+function accept_purchase(id,pid,pvid)
 {
+	//alert(id);alert(pid);alert(pvid);
 	$('#msgText').html('');
 	$('#error_qty').html('');
 	$('#status_id').val('').trigger('change');
 	$('#qty').val('');
 	
 	$('#product_stock_transaction_id').val(id);
+	$('#hid_product_id').val(pid);
+	$('#hid_product_variant_id').val(pvid);
 	$('#acceptModal').modal('show');
 }
 function select_status(val)

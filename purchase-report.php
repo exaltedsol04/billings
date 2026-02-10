@@ -88,16 +88,9 @@
 								$i++;
 							}
 						}
-						else
-						{
+					
 					?>
-                      <tr>
-                        <td colspan="6">No record found.</div>
-						</td>
-					  </tr>
-					<?PHP
-						}	
-					?>
+                    
                    </tbody>
                   </table>
 				  

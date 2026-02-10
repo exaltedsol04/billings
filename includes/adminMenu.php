@@ -102,7 +102,7 @@
 				</a>
 			</li>
 				
-				<li <?php if($page=='order-summary.php' || $page=='online-orders.php' || $page=='online-order-details.php' || $page=='online-completed-orders.php' || $page=='online-processing-orders.php' || $page=='online-incomplete-orders.php') { echo ('class="mm-active"');} ?>>
+				<li <?php if($page=='order-summary.php' || $page=='online-orders.php' || $page=='online-order-details.php' || $page=='online-completed-orders.php' || $page=='online-processing-orders.php' || $page=='online-incomplete-orders.php' || $page=='online-sales-report') { echo ('class="mm-active"');} ?>>
 				  <a href="javascript:;" class="has-arrow">
 					<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
 					</div>
@@ -118,7 +118,7 @@
 					</li>
 					<li><a href="<?php echo SITE_URL.'online-incomplete-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Incomplete orders</a>
 					</li>
-				 </ul>
+				</ul>
 				</li>
 			
 			<li>
