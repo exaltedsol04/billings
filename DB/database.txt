@@ -113,6 +113,10 @@ ALTER TABLE `bl_vendors` ADD `product_ids` VARCHAR(225) NULL DEFAULT NULL AFTER 
 ================== 04-02-2026===============================
 ALTER TABLE `2026_packaging_operators_assign` ADD `auto_assign` TINYINT(1) NULL DEFAULT '0' COMMENT '0=no ,1=yes' AFTER `status`;
 
+=========== 11-02-2026==========
+
+ALTER TABLE `2026_product_stock_transaction` ADD `loose_stock_quantity` DOUBLE(11,2) NOT NULL DEFAULT '0.00' AFTER `product_id`; 
+
 
 
 
