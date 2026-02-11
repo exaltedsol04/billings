@@ -481,7 +481,7 @@
 		break;
 		case "getProductVariant";
 			 
-			$fields = "pv.id, pv.measurement, u.name as unit_name";
+			$fields = "pv.id, pv.measurement, u.name as unit_name, pv.type";
 			$tables = PRODUCT_VARIANTS . " pv
 			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
 			
@@ -498,7 +498,8 @@
 					$varianrArr[] = [
 						'id' => $arr->id,
 						'measurement' => $arr->measurement,
-						'unitname' => $arr->unit_name
+						'unitname' => $arr->unit_name,
+						'ptype' => $arr->type
 					];
 				}
 			}

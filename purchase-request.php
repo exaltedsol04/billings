@@ -26,16 +26,23 @@
 				$unit_price = $product_variant_dtls->discounted_price;
 				$total_price = $_POST['qty'][$k] * $unit_price;
 				
+				$loose_stock_quantity = 0.00;
+				$variant_type = $product_variant_dtls->type;
+				if($variant_type == 'loose')
+				{
+					$variant_measurement = $product_variant_dtls->measurement;
+					$loose_stock_quantity = $_POST['qty'][$k] * $variant_measurement;
+				}
 				
 				
-				$field = "seller_id, product_variant_id, product_id,  stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id";
-				$value = ":seller_id, :product_variant_id, :product_id, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
+				$field = "seller_id, product_variant_id, product_id, loose_stock_quantity, stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id";
+				$value = ":seller_id, :product_variant_id, :product_id, :loose_stock_quantity, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
 				
 				$addExecute=array(
 					':seller_id'			=> $_SESSION['SELLER_ID'],
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
-					
+					':loose_stock_quantity'			=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
 					':stock'				=> ($_POST['qty'][$k]),
 					':created_date'			=> date("Y-m-d H:i:s"),
 					':status'				=> 0,

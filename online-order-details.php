@@ -39,7 +39,7 @@
 			];
 		$sqlOrder = $general_cls_call->select_query("id, orders_id, mobile, address, total, delivery_charge, packing_charge, final_total, payment_method", ORDERS, $whereOrder, $paramsOrder, 1);
 				
-		//echo "<pre>";print_r($sqlOrder);die;
+		//echo "<pre>";print_r($sqlQuery);die;
 		
 		// get seller details
 		$fieldSeller = "c.name as city_name, c.zone, c.state, s.name as seller_name, s.store_name, s.mobile, s.street as seller_street";
@@ -175,6 +175,7 @@
 								  <th>Sl.No</th>
 								  <th>Products</th>
 								  <th class="text-center" style="width: 0%;">Variant name</th>
+								  <th class="text-center" style="width: 0%;">Type</th>
 								  <th class="text-center" style="width: 0%;">Quantity</th>
 								  <th class="text-center" style="width: 0%;">Discount price</th>
 								  <th class="text-center" style="width: 0%;">Sub total</th>
@@ -205,11 +206,15 @@
 									$activeStatusValue = $selectValue->active_status;
 									
 									$activeStatusName = $general_cls_call->select_query("status", ORDERS_STATUS_LISTS, "WHERE id=:id", [':id' => $activeStatusValue], 1);
+									
+									$product_variant_type = $general_cls_call->select_query("type", PRODUCT_VARIANTS, "WHERE id=:id", [':id' => $selectValue->product_variant_id], 1);
+									
 							?>
 							   <tr>
 								  <td><?php echo $k+1; ?></td>
 								  <td><?php echo $general_cls_call->cart_product_name($selectValue->product_name);  ?></td>
 								  <td class="text-center"><?php echo $selectValue->variant_name; ?></td>
+								  <td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $product_variant_type->type ?></span></td>
 								  <td class="text-center"><?php echo $selectValue->quantity; ?></td>
 								  <td class="text-center">₹<?php echo $selectValue->discounted_price ?></td>
 								  <td class="text-center">₹<?php echo $selectValue->quantity * $selectValue->discounted_price ?></td>
