@@ -95,18 +95,45 @@
 				<select name="product" id="product" onchange=check_product_stock_onchange(this.value) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
-						$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, p.name, p.image, p.barcode, pv.type";
+						$fields = "
+							pr.id,
+							pr.product_id,
+							pr.product_variant_id,
+							pv.id as pv_product_variant_id,
+							pr.status,
+							SUM(pr.stock) as total_stock,
+							SUM(pr.loose_stock_quantity) as total_loose_qty,
+							pr.selling_price,
+							u.name as stock_unit_name,
+							pv.measurement,
+							p.name,
+							p.image,
+							p.barcode,
+							pv.type,
+							p.type as product_type
+						";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
-						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pv.product_id = pr.product_id
 						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-						$where = "WHERE pr.status=:status AND pr.stock_type=:stock_type AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+
+						$where = "
+						WHERE pr.status = :status
+						AND pr.stock_type = :stock_type
+						AND pr.seller_id = :seller_id
+						GROUP BY pv.id
+						HAVING (
+							(p.type = 'loose' AND pv.measurement <= SUM(pr.loose_stock_quantity))
+							OR
+							(p.type != 'loose' AND SUM(pr.stock) > 0 AND pv.id = pr.product_variant_id)
+						)";
 						$params = [
 							':status' => 1,
-							':stock_type'	=>	1,
+							':stock_type' => 1,
 							':seller_id' => $_SESSION['SELLER_ID'],
 						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+
 						//echo "<pre>";print_r($sqlQuery);die;
 						if($sqlQuery[0] != '')
 						{
@@ -123,7 +150,7 @@
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 					?>
-								<option value="<?PHP echo $arr->product_variant_id.'@@@'.$arr->selling_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->stock_unit_name.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->pv_product_variant_id.'@@@'.$arr->selling_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.'@@@'.$arr->stock_unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
 					<?PHP
 							}
 						}
@@ -301,19 +328,26 @@ $(document).ready(function(){
     <?php } ?>
 	//Start Increase and Decrease
 	Object.keys(localStorage).forEach(key => {
+
 		if (key.startsWith('cart-stock-limit') && key.endsWith('-value')) {
-		  let inputId = key.replace('-value', '');
 
-		  // Ensure input exists
-		  if ($('#' + inputId).length === 0) {
-			$('#qty-total').append(`<input type="hidden" id="${inputId}">`);
-		  }
+			let inputId = key.replace('-value', '');
 
-		  // Set the value from localStorage (even if empty)
-		  let storedValue = localStorage.getItem(key);
-		  $('#' + inputId).val(storedValue !== null ? storedValue : '');
+			// extract PID from key
+			let pid = key.replace('cart-pid-', '').replace('-value', '');
+
+			// Ensure input exists
+			if ($('#' + inputId).length === 0) {
+				$('#qty-total').append(`<input type="text" class="${pid}" id="${inputId}">`);
+			}
+
+			// Set value from localStorage
+			let storedValue = localStorage.getItem(key);
+			$('#' + inputId).val(storedValue !== null ? storedValue : '');
 		}
+
 	});
+
 	//End Increase and Decrease
 });
 
@@ -342,16 +376,20 @@ function getProducts(val)
 					data[0].name + '@@@' +
 					data[0].image + '@@@' +
 					data[0].barcode + '@@@' +
-					data[0].measurement + ' ' + data[0].stock_unit_id;
+					data[0].measurement + '@@@' + 
+					data[0].stock_unit_id + '@@@' + 
+					data[0].product_type + '@@@' + 
+					data[0].product_id;
 					//Start Increase and Decrease
 					let pvqty = $('#qty_' + data[0].id).val();
 					if(typeof pvqty === 'undefined'){
 						pvqty = 0;
 					}
+					let pid = data[0].product_id;
 					let inputId = 'cart-stock-limit' + data[0].id;
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="hidden" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
@@ -379,13 +417,14 @@ function getProducts(val)
 					var html = '<div class="row row-cols-1 row-cols-lg-2">';
 					$.each(data, function (index, item) {
 					//Start Increase and Decrease
+					let pid = item.product_id;
 					let inputId = 'cart-stock-limit' + item.id;
 					// save state
 					localStorage.setItem(inputId + '-value', '');
 					localStorage.setItem(inputId, 'visible');
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="hidden" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
@@ -440,10 +479,18 @@ function getProducts(val)
 	}
 }
 
-function check_qty_stock(id, inc)
+function check_qty_stock(id, inc, productMeasurement, pid)
 {
+	let rw = productMeasurement;
+    $('.pid-'+pid).each(function () {
+        rw += parseFloat($(this).val()) || productMeasurement;
+    });
+	let pvqty = $('#qty_' + id).val();
+	if(typeof pvqty === 'undefined'){
+		pvqty = 0;
+	}
 	let barcode = 1;
-	var datapost = 'action=paynow&id='+id + '&barcode=' + barcode;
+	var datapost = 'action=paynow&id='+id + '&rw='+rw + '&barcode=' + barcode;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -451,19 +498,55 @@ function check_qty_stock(id, inc)
 		success: function(response){
 			var result = JSON.parse(response);
 			var stockCount = 0;
+			var pdoduct_type = '';
+			
 			if (result.length > 0) {
 				$.each(result, function (i, stock) {
 					stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
+					if(stock.product_type == 'loose') {
+						//pdoduct_type = stock.product_type;
+						//stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
+						//stockCount = parseInt(stock.variant_stock);
+					}
+					pdoduct_type = stock.product_type;
 				});
+				console.log(inc, stockCount);
 				if(inc >= stockCount)
 				{
 					//Start Increase and Decrease
 					let inputId = 'cart-stock-limit' + id;
-					$('#' + inputId).val(stockCount);
-					localStorage.setItem(inputId + '-value', stockCount);
-					$('.qty-input' + id).val(stockCount);
+					// save state
+					localStorage.setItem(inputId + '-value', '');
+					localStorage.setItem(inputId, 'visible');
+					
+					if ($('#' + inputId).length === 0) {
+					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
+					} else {
+					  $('#' + inputId).show();
+					}
+					var cart_item_count = stockCount;
+					
+					if(pdoduct_type == 'loose') {
+						cart_item_count = '';
+						if(stockCount <= 1) {
+							cart_item_count = pvqty;
+						}
+					}
+					console.log('---', pdoduct_type, cart_item_count);
+					$('#' + inputId).val(cart_item_count === 0 ? '' : cart_item_count);
+					localStorage.setItem(inputId + '-value', cart_item_count === 0 ? '' : cart_item_count);
+					
+					//$('#' + inputId).val(stockCount);
+					//localStorage.setItem(inputId + '-value', stockCount);
+					//$('.qty-input' + id).val(cart_item_count);
+					if(pdoduct_type == 'loose' && stockCount == 0) {
+						//localStorage.setItem(inputId + '-value', '');
+					}
+					
+					
 					//End Increase and Decrease
 					let msgStock = '<div style="text-align:center;">Available  stock is ' + stockCount + '</div>';
+					//let msgStock = '<div style="text-align:center;">Out of stock</div>';
 						Lobibox.notify('default', {
 							pauseDelayOnHover: true,
 							continueDelayOnInactiveTab: false,
@@ -472,7 +555,6 @@ function check_qty_stock(id, inc)
 							msg: msgStock
 						});
 				}
-				
 			} else {					
 				Lobibox.notify('default', {
 					pauseDelayOnHover: true,
@@ -489,6 +571,7 @@ function check_qty_stock(id, inc)
 
 function check_product_stock_onchange(product)
 {
+	//alert(product);
 	$('#check-stock-div').html('');
 	$('#check-stock-pay-div').html('');
 	const myArray = product.split("@@@");
@@ -498,12 +581,25 @@ function check_product_stock_onchange(product)
 
 function check_product_stock(id,parameter)
 {	
+//alert(parameter);
+	const myArray = parameter.split("@@@");
+	//alert(myArray);
+	let productMeasurement = parseFloat(myArray[5]);
+	let pid = parseInt(myArray[8]);
+	//let productType = parseInt(myArray[7]);
+	
 	let pvqty = $('#qty_' + id).val();
 	if(typeof pvqty === 'undefined'){
 		pvqty = 0;
 	}
+	//alert(productMeasurement);
+	let rw = productMeasurement;
+    $('.pid-'+pid).each(function () {
+        rw += parseFloat($(this).val()) || productMeasurement;
+    });
+
 	let barcode = 1;
-	var datapost = 'action=paynow&id='+id + '&barcode=' + barcode;
+	var datapost = 'action=paynow&id='+id + '&rw='+rw + '&barcode=' + barcode;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -514,8 +610,16 @@ function check_product_stock(id,parameter)
 			if (result.length > 0) {
 				var html = '<div class="col-md-5">';
 				$.each(result, function (i, stock) {
-					stockCount = parseInt(stockCount) + parseInt(stock.variant_stock)-parseInt(pvqty);
-					if(stockCount == 0)
+					stockCount = parseInt(stockCount) + parseInt(stock.variant_stock) - parseInt(pvqty);
+					if(stock.product_type == 'loose') {
+						//stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
+						stockCount = parseInt(stock.variant_stock);
+					}
+					
+					//stockCount = parseInt(stock.variant_stock);
+					console.log(stock.product_type,stockCount, stock.variant_stock, pvqty);
+					//alert(pvqty);
+					if(stockCount <= 0)
 					{
 						Lobibox.notify('default', {
 							pauseDelayOnHover: true,
@@ -546,7 +650,7 @@ function check_product_stock(id,parameter)
 					let inputId = 'cart-stock-limit' + id;
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="hidden" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}

@@ -30,7 +30,9 @@ function add_to_cart(product) {
 	let productImage = myArray[3];
 	let productBarcode = myArray[4];
 	let productMeasurement = myArray[5];
-	let productType = myArray[6];
+	let stock_unit_name = myArray[6];
+	let productType = myArray[7];
+	let productId = myArray[8];
 	let qty = 1;
 	let search = basket.find((x) => x.id === selectedItem);
 
@@ -38,11 +40,13 @@ function add_to_cart(product) {
     basket.push({
       id: selectedItem,
       measurement: productMeasurement,
+      stock_unit_name: stock_unit_name,
 	  name: productBarcode+productName,
 	  price: productPrice,
 	  pimage: productImage,
       qty: parseInt(qty),
 	  ptype: productType,
+	  pid: productId,
 	  item: 1
     });
   } else {
@@ -82,24 +86,30 @@ let generateCartItems = () => {
   if (basket.length !== 0) {
     return (ShoppingCart.innerHTML = basket
       .map((x, index) => {
-        let { id, item, qty, price, measurement, name, pimage, ptype} = x;
+        let { id, item, qty, price, measurement, stock_unit_name, name, pimage, ptype, pid} = x;
 		$('#loader').hide();
 		let progress = 0;
 		$('#removeCart').show();
+		//let inputId = 'cart-stock-limit' + id;
+		//let cart_stock_limit = $('#' + inputId).val();
+		//qty = cart_stock_limit == '' ? qty : parseInt(cart_stock_limit) + 1;
+			
         return `<tr id="dataRow${id}">
-					<td class="text-center">${index + 1}</td>
+					<td class="text-center">${index + 1}
+					<input type="text" class="pid-${pid}" value="${measurement * qty}" id="vid_${id}" name="pid[]">
+					</td>
 					<td>
 					<div class="input-group quantity-group">
 						<span class="input-group-btn">
-							<button type="button" class="btn btn-default btn-qty" style="cursor:pointer" onclick="decrement(${id})">−</button>
+							<button type="button" class="btn btn-default btn-qty" style="cursor:pointer" onclick="decrement(${id}, ${measurement}, \'${ptype}\', ${pid})">−</button>
 						</span>
 						<input type="number" class="form-control text-center qty-input${id}" value="${qty}" min="1" oninput="updateQty(${id}, this.value)" id="qty_${id}" name="qty[]">
 						<span class="input-group-btn">
-							<button type="button" class="btn btn-default btn-qty qty-increment" style="cursor:pointer" onclick="increment(${id})" >+</button>
+							<button type="button" class="btn btn-default btn-qty qty-increment" style="cursor:pointer" onclick="increment(${id}, ${measurement}, \'${ptype}\', ${pid})" >+</button>
 						</span>
 					</div>
 				  </td>
-				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${measurement}</td>
+				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${measurement} ${stock_unit_name}</td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><span class="badge bg-grd-primary dash-lable">${ptype}</span></td>
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}</td>
 				  <input type="hidden" value="${id}" name="product_variant_id[]">
@@ -128,7 +138,7 @@ generateCartItems();
  * ! used to increase the selected product item quantity by 1
  */
 
-let increment = (id) => {
+let increment = (id, msr, ptype, pid) => {
 	$("#loader").show();
 	let selectedItem = id;
 	let search = basket.find((x) => x.id === selectedItem);
@@ -140,34 +150,45 @@ let increment = (id) => {
 	} else {
 		let inputId = 'cart-stock-limit' + id;
 		// 2. Call stock check
-		check_qty_stock(id, search.qty + 1);
-		// 3. Read value AFTER stock check
-		let cart_stock_limit = $('#' + inputId).val();
-		//alert(cart_stock_limit);
-		// 4. Apply logic
-		if (cart_stock_limit !== '') {
-		  $('.qty-input' + id).val(cart_stock_limit);
-		  $('#dataRow' + id).find('.qty-increment').prop('disabled', true);
-		}
-		else if (search.qty <= cart_stock_limit || cart_stock_limit==='') {
-		  // only increment if input was NOT just created
-		  if(cart_stock_limit==='') {
-				search.qty += 1;
-				update(selectedItem);
-				localStorage.setItem("data", JSON.stringify(basket));
-		  }
-		}
+		check_qty_stock(id, search.qty + 1, msr, pid);
+		//setTimeout(function () {
+			// 3. Read value AFTER stock check
+			let cart_stock_limit = $('#' + inputId).val();
+			//alert(cart_stock_limit);
+			// 4. Apply logic
+			
+			if (cart_stock_limit !== '') {
+				//alert(cart_stock_limit);
+			  $('.qty-input' + id).val(cart_stock_limit);
+			  $('#dataRow' + id).find('.qty-increment').prop('disabled', true);
+			}
+			else if (search.qty <= cart_stock_limit || cart_stock_limit==='') {
+			  // only increment if input was NOT just created
+			  //alert(cart_stock_limit);
+			  if (!cart_stock_limit || cart_stock_limit.trim() === '') {
+				  //alert(cart_stock_limit);
+					search.qty += 1;
+					update(selectedItem);
+					localStorage.setItem("data", JSON.stringify(basket));
+			
+					$('.qty-input' + id).val(cart_stock_limit);
+
+			  }
+			}
+			//}, 500);
+		
 	}
 	setTimeout(function () {
 		generateCartItems();
-	}, 500);
+		
+	}, 100);
 };
 
 /**
  * ! used to decrease the selected product item quantity by 1
  */
 
-let decrement = (id) => {
+let decrement = (id, msr, ptype, pid) => {
 	$("#loader").show();	
 	let selectedItem = id;
 	let search = basket.find((x) => x.id === selectedItem);
@@ -177,9 +198,17 @@ let decrement = (id) => {
 	else {
 		search.qty -= 1;
 		$('#dataRow' + id).find('.qty-increment').prop('disabled', false);
+		let pId = 'cart-pid-' + pid;
 		let inputId = 'cart-stock-limit' + id;
-		$('#' + inputId).val('')
-		localStorage.setItem(inputId + '-value', '');
+		//alert(ptype);
+		if(ptype === 'loose') {
+			//alert(ptype);
+			$('.' + pId).val('');
+			localStorage.setItem(pId + '-value', '');
+		} else {
+			$('#' + inputId).val('');
+			localStorage.setItem(inputId + '-value', '');
+		}
 		if (search.qty == 0) {
 			$('#qty-total').find('#' + inputId).remove();
 		}
@@ -230,6 +259,7 @@ let update = (id) => {
   let search = basket.find((x) => x.id === id);
   //console.log(id, search.qty);
   $('#qty_'+id).val(search.qty);
+  //$('#vid_'+id).val(search.qty * );
   calculation();
   TotalAmount();
 };

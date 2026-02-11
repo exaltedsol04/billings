@@ -37,7 +37,7 @@
 		
 		case "productbarcord":
 			$barcode = $_POST['barcode'];
-			$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, p.name, p.image, p.barcode";
+			$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, pv.type, p.name, p.image, p.barcode";
 			$tables = PRODUCT_STOCK_TRANSACTION . " pr
 			INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 			INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
@@ -83,6 +83,8 @@
 						'stock'            => $val->total_stock,
 						'image'            => $val->image,
 						'stock_unit_id'    => $val->stock_unit_name,
+						'product_type'    	=> $val->type,
+						'product_id'    	=> $val->product_id,
 					];
 				}
 			}
@@ -109,83 +111,284 @@
 		break;
 		
 		case "paynow":
-			//echo "<pre>";print_r($_POST);die;
-			$stockArr =[];
-			$barcode = '';
-			if(isset($_POST['id']) && isset($_POST['barcode']))
-			{
-				$pv_id = $_POST['id'];
-				$barcode = $_POST['barcode'];
-				$product_variant_id = array(0=>$pv_id);
-			}
-			else{
-				$product_variant_id = $_POST['product_variant_id'];
-			}
-			//echo "<pre>";print_r($product_variant_id);die;
+
+		$stockArr = [];
+		$barcode  = '';
+
+		if (isset($_POST['id']) && isset($_POST['barcode'])) {
+			$pv_id = $_POST['id'];
+			$barcode = $_POST['barcode'];
+			$rw = $_POST['rw'];
+			$product_variant_id = [0 => $pv_id];
+		} else {
+			$product_variant_id = $_POST['product_variant_id'];
+		}
+
+		/*
+		=====================================================
+		STEP 1 → COLLECT ALL REQUESTED DATA FIRST
+		=====================================================
+		*/
+
+		$variant_rows = [];           // store variant info
+		$requested_loose_weight = []; // total weight per product
+
+		foreach ($product_variant_id as $k => $variant_id)
+		{
 			
-			foreach($product_variant_id as $k=>$val)
+			$qty = $_POST['qty'][$k] ?? 1;
+			if ($qty <= 0) continue;
+	//echo $variant_id;die;
+			$variant = $general_cls_call->select_query(
+				"*",
+				PRODUCT_VARIANTS,
+				"WHERE id = :id",
+				[':id' => $variant_id],
+				1
+			);
+
+			$product_id = $variant->product_id;
+
+			$variant_rows[] = [
+				'variant'   => $variant,
+				'product_id'=> $product_id,
+				'qty'       => $qty
+			];
+	//print_r($variant);die;
+			// collect total requested loose weight per product
+			if ($variant->type == 'loose')
 			{
-				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id", array(':id'=> $val), 1);
-				
-				// check from product_stock_transaction 
-				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id AND stock_type=:stock_type", array(':product_variant_id'=> $val, 'status'=>1, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['SELLER_ID'], 'stock_type'=>1), 'stock');
-				//echo $stock_used->price; die;
-				$remainingStock = $stock_used->total;
-				//echo $remainingStock; die;
-				//if($remainingStock <= 0)
-				// if only barcode send check stock
-				if($barcode == 1)
-				{
-					//echo 'stock->'.$remainingStock;die;
-					if($remainingStock > 0 || $remainingStock == '')
-					{
-						$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
-						$product_name = $general_cls_call->cart_product_name($product_dtls->name);
-						
-						$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
-						$unitname = $unit_dtls->name;
-						
-						$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
-						
-						$available_stock = $stock_used->total;
-						
-						$stockArr[] = [
-							"product_name" => $product_name,
-							"variant_name" => $p_variant_name,
-							"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
-						];
-					}
+				$weight = (float)$variant->measurement * $qty;
+
+				if (!isset($requested_loose_weight[$product_id])) {
+					$requested_loose_weight[$product_id] = 0;
 				}
+
+				//$requested_loose_weight[$product_id] += $weight;
+				$requested_loose_weight[$product_id] += $rw;
+			}
+		}
+//print_r($requested_loose_weight);
+
+		/*
+		=====================================================
+		STEP 2 → GET TOTAL LOOSE STOCK PER PRODUCT
+		=====================================================
+		*/
+
+		$total_loose_stock = [];
+
+		foreach ($requested_loose_weight as $product_id => $dummy)
+		{
+			//echo $product_id;die;
+			$stock = $general_cls_call->select_query_sum(
+				PRODUCT_STOCK_TRANSACTION,
+				"WHERE product_id = :product_id
+				 AND status = :status
+				 AND seller_id = :seller_id
+				 AND stock_type = :stock_type",
+				[
+					'status'     => 1,
+					'product_id' => $product_id,
+					'seller_id'  => $_SESSION['SELLER_ID'],
+					'stock_type' => 1
+				],
+				'loose_stock_quantity'
+			);
+
+			$total_loose_stock[$product_id] = (float)($stock->total ?? 0);
+		}
+
+	//print_r($requested_loose_weight);
+		/*
+		=====================================================
+		STEP 3 → VALIDATE EACH VARIANT
+		=====================================================
+		*/
+
+		foreach ($variant_rows as $row)
+		{
+			$variant    = $row['variant'];
+			$product_id = $row['product_id'];
+			$qty        = $row['qty'];
+
+			$remainingStock = 0;
+
+			/*
+			===============================
+			LOOSE PRODUCT VALIDATION
+			===============================
+			*/
+			if ($variant->type == 'loose')
+			{
+				$variant_size = (float)$variant->measurement;
+	//echo $product_id;die;
+				$total_stock  = $total_loose_stock[$product_id];
+				$total_used   = $requested_loose_weight[$product_id];
+	//echo $total_used.'---'.$total_stock;
+//$total_used  = round((float)$total_used, 4);
+//$total_stock = round((float)$total_stock, 4);
+				// if total used > stock → block
+				if ($total_used <= $total_stock)
+				{
+					// calculate max qty allowed for THIS variant
+					$other_weight = $total_used - ($variant_size * $qty);
+
+					$remaining_weight = max(0, $total_stock - $other_weight);
 					
-				// after cart add check stock
-				if($barcode == '')
-				{
-					if($remainingStock < $_POST['qty'][$k])
-					{
-						$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
-						$product_name = $general_cls_call->cart_product_name($product_dtls->name);
-						
-						$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
-						$unitname = $unit_dtls->name;
-						
-						$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
-						
-						$available_stock = $stock_used->total;
-						
-						$stockArr[] = [
-							"product_name" => $product_name,
-							"variant_name" => $p_variant_name,
-							"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
-						];
-						
-					}
+					//$remaining_weight = max(0, $total_stock - $total_used);
+
+					$remainingStock =
+						($variant_size > 0)
+						? floor($remaining_weight / $variant_size)
+						: 0;
+	//echo $other_weight.'---'.$remaining_weight.'----'.$remainingStock;die;
+					// product name
+					$product_dtls = $general_cls_call->select_query(
+						"*",
+						PRODUCTS,
+						"WHERE id = :id",
+						[':id'=> $product_id],
+						1
+					);
+
+					$product_name =
+						$general_cls_call->cart_product_name($product_dtls->name);
+
+					$unit_dtls = $general_cls_call->select_query(
+						"*",
+						UNITS,
+						"WHERE id = :id",
+						[':id'=> $variant->stock_unit_id],
+						1
+					);
+
+					$p_variant_name =
+						$variant->measurement.' '.$unit_dtls->name;
+
+					$stockArr[] = [
+						"product_name"  => $product_name,
+						"variant_name"  => $p_variant_name,
+						"variant_stock" => $remainingStock,
+						"product_type" => $variant->type,
+					"total_used" => $total_used,
+					"total_stock" => $total_stock,
+					"other_weight" => $other_weight,
+					"remaining_weight" => $remaining_weight,
+					"remainingStock" => $remainingStock,
+					];
+
+					continue;
 				}
-				
+				//echo $remainingStock;die;
 			}
-			
-			//echo "<pre>";print_r($stockArr);die;
-			echo json_encode($stockArr);
+
+			/*
+			===============================
+			NORMAL PRODUCT VALIDATION
+			===============================
+			*/
+			else
+			{
+				$stock_used = $general_cls_call->select_query_sum(
+					PRODUCT_STOCK_TRANSACTION,
+					"WHERE product_variant_id = :product_variant_id
+					 AND product_id = :product_id
+					 AND status = :status
+					 AND seller_id = :seller_id
+					 AND stock_type = :stock_type",
+					[
+						':product_variant_id'=> $variant->id,
+						'product_id'         => $product_id,
+						'status'             => 1,
+						'seller_id'          => $_SESSION['SELLER_ID'],
+						'stock_type'         => 1
+					],
+					'stock'
+				);
+
+				$remainingStock = (int)($stock_used->total ?? 0);
+
+				if ($qty > $remainingStock)
+				{
+					$product_dtls = $general_cls_call->select_query(
+						"*",
+						PRODUCTS,
+						"WHERE id = :id",
+						[':id'=> $product_id],
+						1
+					);
+
+					$product_name =
+						$general_cls_call->cart_product_name($product_dtls->name);
+
+					$unit_dtls = $general_cls_call->select_query(
+						"*",
+						UNITS,
+						"WHERE id = :id",
+						[':id'=> $variant->stock_unit_id],
+						1
+					);
+
+					$p_variant_name =
+						$variant->measurement.' '.$unit_dtls->name;
+
+					$stockArr[] = [
+						"product_name"  => $product_name,
+						"variant_name"  => $p_variant_name,
+						"variant_stock" => $remainingStock,
+						"product_type" => $variant->type,
+					];
+
+					continue;
+				}
+			}
+
+
+			/*
+			===============================
+			BARCODE CHECK
+			===============================
+			*/
+			if ($barcode == 1)
+			{
+				$product_dtls = $general_cls_call->select_query(
+					"*",
+					PRODUCTS,
+					"WHERE id = :id",
+					[':id'=> $product_id],
+					1
+				);
+
+				$product_name =
+					$general_cls_call->cart_product_name($product_dtls->name);
+
+				$unit_dtls = $general_cls_call->select_query(
+					"*",
+					UNITS,
+					"WHERE id = :id",
+					[':id'=> $variant->stock_unit_id],
+					1
+				);
+
+				$p_variant_name =
+					$variant->measurement.' '.$unit_dtls->name;
+
+				$stockArr[] = [
+					"product_name"  => $product_name,
+					"variant_name"  => $p_variant_name,
+					"variant_stock" => $remainingStock,
+					"product_type" => $variant->type
+				];
+			}
+		}
+		
+		echo json_encode($stockArr);
 		break;
+
+
+
+
 		
 		case "paynowsave":
 			 
