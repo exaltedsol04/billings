@@ -134,141 +134,95 @@ let generateCartItems = () => {
 
 generateCartItems();
 
-function getTotalWeightByPid(pid) {
-    return basket
-        .filter(item => item.pid == pid)
-        .reduce((sum, item) => sum + (item.qty * Number(item.measurement)), 0);
-}
-
-
 /**
  * ! used to increase the selected product item quantity by 1
  */
 
 let increment = (id, msr, ptype, pid) => {
+	$("#loader").show();
+	let selectedItem = id;
+	let search = basket.find((x) => x.id === selectedItem);
+	if (search === undefined) {
+		basket.push({
+		  id: selectedItem,
+		  qty: 1,
+		});
+	} else {
+		let inputId = 'cart-stock-limit' + id;
+		// 2. Call stock check
+		check_qty_stock(id, search.qty + 1, msr, pid);
+		//setTimeout(function () {
+			// 3. Read value AFTER stock check
+			let cart_stock_limit = $('#' + inputId).val();
+			//alert(cart_stock_limit);
+			// 4. Apply logic
+			
+			if (cart_stock_limit !== '') {
+				//alert(cart_stock_limit);
+			  $('.qty-input' + id).val(cart_stock_limit);
+			  $('#dataRow' + id).find('.qty-increment').prop('disabled', true);
+			}
+			else if (search.qty <= cart_stock_limit || cart_stock_limit==='') {
+			  // only increment if input was NOT just created
+			  //alert(cart_stock_limit);
+			  if (!cart_stock_limit || cart_stock_limit.trim() === '') {
+				  //alert(cart_stock_limit);
+					search.qty += 1;
+					update(selectedItem);
+					localStorage.setItem("data", JSON.stringify(basket));
+			
+					$('.qty-input' + id).val(cart_stock_limit);
 
-    $("#loader").show();
-
-    let selectedItem = id;
-    let search = basket.find(x => x.id === selectedItem);
-
-    if (!search) {
-        basket.push({
-            id: selectedItem,
-            qty: 1,
-            pid: pid,
-            measurement: Number(msr)
-        });
-        generateCartItems();
-        $("#loader").hide();
-        return;
-    }
-
-    let inputId = 'cart-stock-limit' + id;
-
-    check_qty_stock(id, search.qty + 1, msr, pid, function () {
-
-        let cart_stock_limit = $('#' + inputId).val();
-        let limit = cart_stock_limit === '' ? null : Number(cart_stock_limit);
-
-        /*
-        =================================
-        LOOSE PRODUCT → CHECK TOTAL WEIGHT
-        =================================
-        */
-        if (ptype === 'loose' && limit !== null) {
-
-            let currentWeight = getTotalWeightByPid(pid);
-            let nextWeight = currentWeight + Number(msr);
-
-            if (nextWeight > limit) {
-                //$('#dataRow' + id).find('.qty-increment').prop('disabled', true);
-                $("#loader").hide();
-                return;
-            }
-        }
-
-        /*
-        =================================
-        NORMAL PRODUCT → CHECK QTY LIMIT
-        =================================
-        */
-        if (ptype !== 'loose' && limit !== null) {
-
-            if (search.qty >= limit) {
-                $('#dataRow' + id).find('.qty-increment').prop('disabled', true);
-                $("#loader").hide();
-                return;
-            }
-        }
-
-        /*
-        =================================
-        SAFE TO INCREMENT
-        =================================
-        */
-        search.qty += 1;
-
-        update(selectedItem);
-        localStorage.setItem("data", JSON.stringify(basket));
-
-        generateCartItems();
-        $("#loader").hide();
-    });
+			  }
+			}
+			//}, 500);
+		
+	}
+	setTimeout(function () {
+		generateCartItems();
+		
+	}, 100);
 };
-
-
-
-
 
 /**
  * ! used to decrease the selected product item quantity by 1
  */
 
 let decrement = (id, msr, ptype, pid) => {
+	$("#loader").show();	
+	let selectedItem = id;
+	let search = basket.find((x) => x.id === selectedItem);
 
-    $("#loader").show();
-
-    let selectedItem = id;
-    let search = basket.find(x => x.id === selectedItem);
-
-    if (!search || search.qty === 0) {
-        $("#loader").hide();
-        return;
-    }
-
-    search.qty -= 1;
-
-    $('#dataRow' + id).find('.qty-increment').prop('disabled', false);
-
-    let inputId = 'cart-stock-limit' + id;
-
-    if (ptype === 'loose') {
-		let totalWeight = getTotalWeightByPid(pid);
-		localStorage.setItem(inputId + '-value', totalWeight);
-	} else {
-		localStorage.setItem(inputId + '-value', '');
+	if (search === undefined) return;
+	else if (search.qty === 0) return;
+	else {
+		search.qty -= 1;
+		$('#dataRow' + id).find('.qty-increment').prop('disabled', false);
+		let pId = 'cart-stock-limit' + pid;
+		let inputId = 'cart-stock-limit' + id;
+		//alert(ptype);
+		if(ptype === 'loose') {
+			//alert(ptype);
+			$('.' + pId).val('');
+			//$('#' + inputId).val(search.qty);
+			localStorage.setItem(pId + '-value', '');
+			//localStorage.setItem(inputId + '-value', '');
+		} else {
+			$('#' + inputId).val('');
+			localStorage.setItem(inputId + '-value', '');
+		}
+		if (search.qty == 0) {
+			$('#qty-total').find('#' + inputId).remove();
+		}
 	}
-
-
-    if (search.qty === 0) {
-        $('#qty-total').find('#' + inputId).remove();
-    }
-
-    update(selectedItem);
-
-    basket = basket.filter(x => x.qty !== 0);
-    localStorage.setItem("data", JSON.stringify(basket));
-
-    $('#check-stock-pay-div').html('');
-
-    setTimeout(function () {
-        generateCartItems();
-        $("#loader").hide();
-    }, 300);
+	update(selectedItem);
+	basket = basket.filter((x) => x.qty !== 0);
+	localStorage.setItem("data", JSON.stringify(basket));
+	$('#check-stock-pay-div').html(' ');
+	setTimeout(function () {
+		generateCartItems();
+	}, 500);
 };
-
-
 
 /**
  * ! used to update the selected product item quantity by value
@@ -327,7 +281,6 @@ let removeItem = (id) => {
 	}, 500);
 	let inputId = 'cart-stock-limit' + id;
 	localStorage.setItem(inputId + '-value', '');
-	//localStorage.setItem(inputId + '-pid', '');
 	$('#qty-total').find('#' + inputId).remove();
 	TotalAmount();
 	localStorage.setItem("data", JSON.stringify(basket));

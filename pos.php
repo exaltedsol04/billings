@@ -228,6 +228,7 @@
 				<div class="loader" id="loader1" style="display:none"></div>
 				<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 pull-right" onclick="cart_pay()">PAY</button>
 				<input type="hidden" id="user_hidden_id" name="user_hidden_id">
+				<input type="hidden" id="rw" name="rw">
 				<input type="hidden" name="action" value="paynow" id="actionstatus">
 			</div>
         </div>
@@ -333,20 +334,26 @@ $(document).ready(function(){
 
 			let inputId = key.replace('-value', '');
 
-			// extract PID from key
-			let pid = key.replace('cart-pid-', '').replace('-value', '');
+			// ✅ get correct product id
+			let pidKey = inputId + '-pid';
+			let pid = localStorage.getItem(pidKey);
 
-			// Ensure input exists
+			// fallback safety
+			if (!pid) return;
+
 			if ($('#' + inputId).length === 0) {
-				$('#qty-total').append(`<input type="text" class="${pid}" id="${inputId}">`);
+				$('#qty-total').append(
+					`<input type="text" class="cart-pid-${pid}" id="${inputId}">`
+				);
 			}
 
-			// Set value from localStorage
 			let storedValue = localStorage.getItem(key);
-			$('#' + inputId).val(storedValue !== null ? storedValue : '');
+			$('#' + inputId).val(storedValue ?? '');
 		}
 
 	});
+
+
 
 	//End Increase and Decrease
 });
@@ -395,6 +402,7 @@ function getProducts(val)
 					}
 					$('#' + inputId).val(pvqty === 0 ? '' : pvqty);
 					localStorage.setItem(inputId + '-value', pvqty === 0 ? '' : pvqty);
+					localStorage.setItem(inputId + '-pid', pid);
 					//End Increase and Decrease
 					
 					if (typeof add_to_cart !== 'function') {
@@ -421,6 +429,7 @@ function getProducts(val)
 					let inputId = 'cart-stock-limit' + item.id;
 					// save state
 					localStorage.setItem(inputId + '-value', '');
+					localStorage.setItem(inputId + '-pid', '');
 					localStorage.setItem(inputId, 'visible');
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
@@ -479,7 +488,7 @@ function getProducts(val)
 	}
 }
 
-function check_qty_stock(id, inc, productMeasurement, pid)
+function check_qty_stock(id, inc, productMeasurement, pid, callback)
 {
 	let rw = productMeasurement;
     $('.pid-'+pid).each(function () {
@@ -499,6 +508,7 @@ function check_qty_stock(id, inc, productMeasurement, pid)
 			var result = JSON.parse(response);
 			var stockCount = 0;
 			var pdoduct_type = '';
+			if (callback) callback(); // run increment logic AFTER update
 			
 			if (result.length > 0) {
 				$.each(result, function (i, stock) {
@@ -517,6 +527,7 @@ function check_qty_stock(id, inc, productMeasurement, pid)
 					let inputId = 'cart-stock-limit' + id;
 					// save state
 					localStorage.setItem(inputId + '-value', '');
+					localStorage.setItem(inputId + '-pid', '');
 					localStorage.setItem(inputId, 'visible');
 					
 					if ($('#' + inputId).length === 0) {
@@ -529,12 +540,13 @@ function check_qty_stock(id, inc, productMeasurement, pid)
 					if(pdoduct_type == 'loose') {
 						cart_item_count = '';
 						if(stockCount <= 1) {
-							cart_item_count = pvqty;
+							cart_item_count = parseInt(pvqty);
 						}
 					}
 					console.log('---', pdoduct_type, cart_item_count);
 					$('#' + inputId).val(cart_item_count === 0 ? '' : cart_item_count);
 					localStorage.setItem(inputId + '-value', cart_item_count === 0 ? '' : cart_item_count);
+					localStorage.setItem(inputId + '-pid', pid);
 					
 					//$('#' + inputId).val(stockCount);
 					//localStorage.setItem(inputId + '-value', stockCount);
@@ -566,6 +578,7 @@ function check_qty_stock(id, inc, productMeasurement, pid)
 				$('#product-modal').modal('hide');
 			}
 		}
+		
 	});
 }
 
@@ -656,6 +669,7 @@ function check_product_stock(id,parameter)
 					}
 					$('#' + inputId).val(pvqty === 0 ? '' : pvqty);
 					localStorage.setItem(inputId + '-value', pvqty === 0 ? '' : pvqty);
+					localStorage.setItem(inputId + '-pid', pid);
 					//End Increase and Decrease
 
 				}
@@ -711,6 +725,11 @@ function selectUser(mobile, name, id) {
 }
 function cart_pay()
 {
+	let rw = 0;
+    $('.allpid').each(function () {
+        rw += parseFloat($(this).val()) || 0;
+    });
+	$('#rw').val(rw);
 	//cart-list-form
 	$('#check-stock-div').html('');
 	var items = localStorage.getItem("data", JSON.stringify(basket));
@@ -745,14 +764,14 @@ function cart_pay()
 		success: function(response){
 			var result = JSON.parse(response);
 			
-			var html = '<div class="col-md-6">';
+			var html = '<div class="col-md-12">';
 				//alert(result.length);
 				if (result.length > 0) {
 					$.each(result, function (i, stock) {
 						html += '<div class="row align-items-start border-bottom py-2">';
-							html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
-							html += '<span class="col-md-3 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
-							html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
+							html += '<div class="col-md-6 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</div>';
+							html += '<div class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</div>';
+							html += '<div class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</div>';
 						html += '</div>';
 					});
 					$('#show-products').html(html);
