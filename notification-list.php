@@ -66,6 +66,8 @@
 		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
       
+		<link href="assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
+		
 	<!-- ######### MENU START ############### -->
 		<?PHP include_once("includes/adminMenu.php"); ?>
 	<!-- ######### MENU END ############### -->
@@ -109,8 +111,11 @@
 				
 					<div class="card-body">
 					    <form class="row g-4" action="" method="post">
-							<input type="hidden" name="userId" value="10">
-							<div><button type="submit" value="send_notification" name="btnUser"  class="btn btn-grd btn-grd-success px-2 send_notification">Send notification</button></div>
+							<input type="hidden" name="userId" value="16">
+							<div>
+								<!--<button type="button" class="btn btn-grd btn-grd-success px-2 openNotificationModal">Send notification</button>-->
+								<button type="submit" value="send_notification" name="btnUser" class="btn btn-primary px-2 send_notification" style="float: right;">Send static notification</button>
+							</div>
 						</form>
 						<div class="table-responsive mt-4">
 							<table id="example2" class="table table-striped table-bordered">
@@ -127,6 +132,7 @@
 									<th style="width:100px">Sl. No.</th>
 									<th>Title</th>
 									<th>Description</th>
+									<th>Notification</th>
 									<th>Action</th>
 								  </tr>
 								</thead>
@@ -151,6 +157,7 @@
 									    <td style="width:100px"><?php echo $k+1 ;?></td>
 										<td style=""><?= (mb_strlen($selectValue->title) > 100) ? mb_substr($selectValue->title,0,100).'...' : $selectValue->title; ?></td>
 										<td style=""><?= (mb_strlen($selectValue->message) > 100) ? mb_substr($selectValue->message,0,100).'...' : $selectValue->message; ?></td>
+										<td style=""><button type="button" class="btn btn-grd btn-grd-success px-5 send-notification" data-notification-id="<?php echo $selectValue->id; ?>">Send</button></td>
 										
 										<td>
 											<div class="dropdown">
@@ -180,26 +187,57 @@
     </div>
   </main>
   <!--end main wrapper-->
-  <div class="modal fade" id="barcodeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="modal-title" style="display:inline-block">Product Barcode</h4>
-				<button type="button" class="close" data-dismiss="modal">&times;</button>
-			</div>
-			<div class="modal-body text-center">
-				<svg id="barcode"></svg>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	<div class="modal fade" id="userListModal">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header border-bottom-0 py-2 bg-grd-success">
+					<h5 class="modal-title btn-grd">Payment Mode</h5>
+					<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+						<i class="material-icons-outlined">close</i>
+					</a>
+				</div>
+				<div class="modal-body">
+					<div class="form-body">
+						<div class="row g-3">
+							<div class="col-lg-12 col-md-12 col-sm-12">
+								<div class="card w-100 mb-0 shadow-none">
+								  <div class="card-header border-0 p-3 border-bottom">
+									<div class="position-relative">
+									  <input class="form-control rounded-5 px-5" type="text" id="userSearch" placeholder="Search by name or email">
+									  <span class="material-icons-outlined position-absolute ms-3 translate-middle-y start-0 top-50">search</span>
+									  <span class="material-icons-outlined position-absolute me-3 translate-middle-y end-0 top-50">people</span>
+									</div>
+								  </div>
+								  <div class="card-body p-0">
+									<div class="user-list p-3">
+									  <div class="d-flex flex-column gap-3" id="userListContainer">
+									  
+									  </div>
+									</div>
+								  </div>
+								</div>
+							</div>
+							<div class="col-md-12">
+								<div class="d-md-flex d-grid justify-content-md-between">
+									<!--<button type="button" class="btn btn-outline-danger px-5" data-bs-dismiss="modal">Cancel</button>-->
+									<button type="button" class="btn btn-primary px-5" id="sendAllUsers">Send All</button>
+									<button type="button" class="btn btn-grd btn-grd-success px-5" id="sendSelectedUsers">Send Selected</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
+<script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+<script>
+  new PerfectScrollbar(".user-list")
+</script>
 <script>
 const checkAll = document.getElementById('checkAll');
 
@@ -236,19 +274,136 @@ $(document).ready(function(){
 	});
 	
 	$(document).on('click', '.send_notification', function(){
-		let selectedIds = [];
+		let selectedNotificationIds = [];
 
 		$('.row-checkbox:checked').each(function () {
-			selectedIds.push($(this).val());
+			selectedNotificationIds.push($(this).val());
 		});
 
-		if (selectedIds.length === 0) {
+		if (selectedNotificationIds.length === 0) {
 			//alert('Please select at least one notification');
 			$('.error-notification').show();
 			return;
 		}
-		alert(selectedIds);
 	});
+	$(document).on('click', '.openNotificationModal', function(){
+		let selectedNotificationIds = [];
+
+		$('.row-checkbox:checked').each(function () {
+			selectedNotificationIds.push($(this).val());
+		});
+
+		if (selectedNotificationIds.length === 0) {
+			//alert('Please select at least one notification');
+			$('.error-notification').show();
+			return;
+		}
+		$('#userListModal').modal('show');
+	});
+
+	$(document).on('click', '.send-notification', function () {
+
+		let notificationId = $(this).data('notification-id');
+
+		$.ajax({
+			url: "<?PHP echo SITE_URL; ?>ajax1",
+			type: "POST",
+			data: {
+				action: "sendNotification",
+                type: 'all',
+				notification_ids: [notificationId]
+			},
+			success: function (response) {
+				alert('Notification sent to all users successfully');
+			}
+		});
+	});
+
+	// Load users initially
+    loadUsers('');
+	
+	function loadUsers(search = '') {
+		var datapost = 'action=searchUsersList&search='+search;
+        $.ajax({
+            type: "POST",
+			url: "<?PHP echo SITE_URL; ?>ajax1",
+			data: datapost,
+            success: function(response) {
+                $('#userListContainer').html(response);
+            }
+        });
+    }
+	
+	// Search on typing
+    $('#userSearch').on('keyup', function(){
+        let searchValue = $(this).val();
+        loadUsers(searchValue);
+    });
+	
+	// SEND ALL USERS
+    $('#sendAllUsers').click(function(){
+		let selectedNotificationIds = [];
+		$('.row-checkbox:checked').each(function () {
+			selectedNotificationIds.push($(this).val());
+		});
+		if (selectedNotificationIds.length === 0) {
+			$('.error-notification').show();
+			return;
+		}
+		
+        let searchValue = $('#userSearch').val();
+
+        $.ajax({
+            url: "<?PHP echo SITE_URL; ?>ajax1",
+            type: 'POST',
+            data: {
+                action: 'sendNotification',
+                type: 'all',
+				notification_ids: selectedNotificationIds,
+                search: searchValue
+            },
+            success: function(response){
+                alert('Notification sent to all users');
+                $('#userListModal').modal('hide');
+            }
+        });
+    });
+
+    // SEND SELECTED USERS
+    $('#sendSelectedUsers').click(function(){
+		let selectedNotificationIds = [];
+		$('.row-checkbox:checked').each(function () {
+			selectedNotificationIds.push($(this).val());
+		});
+		if (selectedNotificationIds.length === 0) {
+			$('.error-notification').show();
+			return;
+		}
+		
+        let selectedUsers = [];
+        $('.user-checkbox:checked').each(function(){
+            selectedUsers.push($(this).val());
+        });
+        if(selectedUsers.length === 0){
+            alert('Please select at least one user');
+            return;
+        }
+
+        $.ajax({
+            url: "<?PHP echo SITE_URL; ?>ajax1",
+            type: 'POST',
+            data: {
+                action: 'sendNotification',
+                type: 'selected',
+				notification_ids: selectedNotificationIds,
+                user_ids: selectedUsers
+            },
+            success: function(response){
+                alert('Notification sent to selected users');
+                $('#userListModal').modal('hide');
+            }
+        });
+    });
 });
 
 </script>
