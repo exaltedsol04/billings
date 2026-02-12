@@ -113,7 +113,7 @@
 					    <form class="row g-4" action="" method="post">
 							<input type="hidden" name="userId" value="16">
 							<div>
-								<!--<button type="button" class="btn btn-grd btn-grd-success px-2 openNotificationModal">Send notification</button>-->
+								<button type="button" class="btn btn-grd btn-grd-success px-2 openNotificationModal">Send notification</button>
 								<button type="submit" value="send_notification" name="btnUser" class="btn btn-primary px-2 send_notification" style="float: right;">Send static notification</button>
 							</div>
 						</form>

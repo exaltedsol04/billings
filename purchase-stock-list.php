@@ -161,21 +161,38 @@
 											
 											// debit stock from order item
 											$order_item_stock = 0;
-											$product_variants = $general_cls_call->select_query("id", PRODUCT_VARIANTS, "WHERE product_id =:product_id", array(':product_id'=> $selectValue->product_id,), 2);
+											$product_variants = $general_cls_call->select_query("id, type, stock_unit_id, measurement", PRODUCT_VARIANTS, "WHERE product_id =:product_id", array(':product_id'=> $selectValue->product_id,), 2);
 											
 											foreach($product_variants as $k=>$variants)
 											{
-												$whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status";
-												  $paramsOrdItm = [
+												if($variants->type == 'loose'){
+													$whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status";
+													$paramsOrdItm = [
 														':product_variant_id' => $variants->id,
 														'active_status' => 7
 													];
-												  
-												  $qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
-												 
-												  $qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
-												  
-												  $order_item_stock = $order_item_stock + $qty_used; 
+													$orders = $general_cls_call->select_query("quantity",  ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 2);
+													foreach($orders as $orders_val){
+														$measurement_arr = [
+															'quantity' => $orders_val->quantity * $variants->measurement,
+															'stock_unit_id' => $variants->stock_unit_id,
+														];
+														$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+														$order_item_stock = $order_item_stock + $measurement_units['value']; 
+													}
+												}else{
+													$whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status";
+													  $paramsOrdItm = [
+															':product_variant_id' => $variants->id,
+															'active_status' => 7
+														];
+													  
+													  $qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
+													 
+													  $qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
+													  
+													  $order_item_stock = $order_item_stock + $qty_used; 
+												}
 											}
 											//echo "<pre>";print_r($product_variant_arr);die;
 											

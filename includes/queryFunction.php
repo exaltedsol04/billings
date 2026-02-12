@@ -612,64 +612,82 @@
 			return $timeText;
 		}
 		function countdown_time_diff($from_time, $to_time)
-{
-    $from = new DateTime($from_time);
-    $to   = new DateTime($to_time);
+		{
+			$from = new DateTime($from_time);
+			$to   = new DateTime($to_time);
 
-    if ($to <= $from) {
-        return "Timeout";
-    }
+			if ($to <= $from) {
+				return "Timeout";
+			}
 
-    $diff = $from->diff($to);
+			$diff = $from->diff($to);
 
-    $html = '<div class="time-wrapper">';
+			$html = '<div class="time-wrapper">';
 
-    if ($diff->y > 0) {
-        $html .= '<div class="time-box">
-                    <span class="num">'.$diff->y.'</span>
-                    <span class="label">Years</span>
-                  </div>';
-    }
+			if ($diff->y > 0) {
+				$html .= '<div class="time-box">
+							<span class="num">'.$diff->y.'</span>
+							<span class="label">Years</span>
+						  </div>';
+			}
 
-    if ($diff->m > 0) {
-        $html .= '<div class="time-box">
-                    <span class="num">'.$diff->m.'</span>
-                    <span class="label">Months</span>
-                  </div>';
-    }
+			if ($diff->m > 0) {
+				$html .= '<div class="time-box">
+							<span class="num">'.$diff->m.'</span>
+							<span class="label">Months</span>
+						  </div>';
+			}
 
-    if ($diff->d > 0) {
-        $html .= '<div class="time-box">
-                    <span class="num">'.$diff->d.'</span>
-                    <span class="label">Days</span>
-                  </div>';
-    }
+			if ($diff->d > 0) {
+				$html .= '<div class="time-box">
+							<span class="num">'.$diff->d.'</span>
+							<span class="label">Days</span>
+						  </div>';
+			}
 
-    if ($diff->h > 0) {
-        $html .= '<div class="time-box">
-                    <span class="num">'.$diff->h.'</span>
-                    <span class="label">Hr</span>
-                  </div>';
-    }
+			if ($diff->h > 0) {
+				$html .= '<div class="time-box">
+							<span class="num">'.$diff->h.'</span>
+							<span class="label">Hr</span>
+						  </div>';
+			}
 
-    if ($diff->i > 0) {
-        $html .= '<div class="time-box">
-                    <span class="num">'.$diff->i.'</span>
-                    <span class="label">Min</span>
-                  </div>';
-    }
+			if ($diff->i > 0) {
+				$html .= '<div class="time-box">
+							<span class="num">'.$diff->i.'</span>
+							<span class="label">Min</span>
+						  </div>';
+			}
 
-    if ($diff->s > 0) {
-        $html .= '<div class="time-box">
-                    <span class="num">'.$diff->s.'</span>
-                    <span class="label">Sec</span>
-                  </div>';
-    }
+			if ($diff->s > 0) {
+				$html .= '<div class="time-box">
+							<span class="num">'.$diff->s.'</span>
+							<span class="label">Sec</span>
+						  </div>';
+			}
 
-    $html .= '</div>';
+			$html .= '</div>';
 
-    return $html;
-}
+			return $html;
+		}
+		function convert_measurement($measurement_arr)
+		{
+			$get_data = $this->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$measurement_arr['stock_unit_id']), 1);
+			if($get_data->parent_id == 0){
+				$unit = [
+					'value' => $measurement_arr['quantity'],
+					'unit' => $get_data->name,
+				];
+			}else{
+				$get_parent_unit = $this->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$get_data->parent_id), 1);
+				$unit = [
+					'value' =>  $measurement_arr['quantity'] / $get_data->conversion,
+					'unit' => $get_data->name,
+				];
+			}
+
+			return $unit;
+		}
 
 
 
