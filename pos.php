@@ -103,13 +103,13 @@
 							pr.status,
 							SUM(pr.stock) as total_stock,
 							SUM(pr.loose_stock_quantity) as total_loose_qty,
-							pr.selling_price,
 							u.name as stock_unit_name,
 							pv.measurement,
 							p.name,
 							p.image,
 							p.barcode,
 							pv.type,
+							pv.discounted_price,
 							p.type as product_type
 						";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
@@ -150,7 +150,7 @@
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 					?>
-								<option value="<?PHP echo $arr->pv_product_variant_id.'@@@'.$arr->selling_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.'@@@'.$arr->stock_unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->pv_product_variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.'@@@'.$arr->stock_unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
 					<?PHP
 							}
 						}
@@ -200,11 +200,11 @@
 				<table class="table table-striped table-bordered">
 				  <thead>
 					<tr>
-					  <th>Sl. No.</th>
-					  <th class="text-center" style="width:160px">Qty</th>
-					  <th>Measurement</th>
-					  <th>Type</th>
+					  <th class="text-center">Sl. No.</th>
 					  <th>Product</th>
+					  <th class="text-center">Type</th>
+					  <th class="text-center" style="width:160px">Qty</th>
+					  <th class="text-center">Measurement</th>
 					  <th class="text-center">Price</th>
 					  <th class="text-center">Total Price</th>
 					  <th class="text-center">Remove</th>
@@ -343,7 +343,7 @@ $(document).ready(function(){
 
 			if ($('#' + inputId).length === 0) {
 				$('#qty-total').append(
-					`<input type="text" class="cart-pid-${pid}" id="${inputId}">`
+					`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`
 				);
 			}
 
@@ -394,9 +394,12 @@ function getProducts(val)
 					}
 					let pid = data[0].product_id;
 					let inputId = 'cart-stock-limit' + data[0].id;
+					if(data[0].product_type == 'loose') {
+						inputId = 'cart-stock-limitp' + pid;
+					}
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
@@ -426,14 +429,18 @@ function getProducts(val)
 					$.each(data, function (index, item) {
 					//Start Increase and Decrease
 					let pid = item.product_id;
+					let product_type = item.product_type;
 					let inputId = 'cart-stock-limit' + item.id;
+					if(product_type == 'loose') {
+						inputId = 'cart-stock-limitp' + pid;
+					}
 					// save state
 					localStorage.setItem(inputId + '-value', '');
 					localStorage.setItem(inputId + '-pid', '');
 					localStorage.setItem(inputId, 'visible');
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
@@ -507,51 +514,62 @@ function check_qty_stock(id, inc, productMeasurement, pid, callback)
 		success: function(response){
 			var result = JSON.parse(response);
 			var stockCount = 0;
-			var pdoduct_type = '';
+			var product_type = '';
+			var total_stock = '';
 			if (callback) callback(); // run increment logic AFTER update
 			
 			if (result.length > 0) {
+				
 				$.each(result, function (i, stock) {
 					stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
 					if(stock.product_type == 'loose') {
-						//pdoduct_type = stock.product_type;
+						//product_type = stock.product_type;
 						//stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
 						//stockCount = parseInt(stock.variant_stock);
 					}
-					pdoduct_type = stock.product_type;
+					product_type = stock.product_type;
+					total_stock = stock.total_stock;
 				});
-				console.log(inc, stockCount);
+				//alert(total_stock);
+				//console.log(inc, stockCount);
 				if(inc >= stockCount)
 				{
+					//alert(product_type);
 					//Start Increase and Decrease
 					let inputId = 'cart-stock-limit' + id;
+					if(product_type == 'loose') {
+						inputId = 'cart-stock-limitp' + pid;
+					}
 					// save state
 					localStorage.setItem(inputId + '-value', '');
 					localStorage.setItem(inputId + '-pid', '');
 					localStorage.setItem(inputId, 'visible');
 					
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
 					var cart_item_count = stockCount;
 					
-					if(pdoduct_type == 'loose') {
-						cart_item_count = '';
-						if(stockCount <= 1) {
-							cart_item_count = parseInt(pvqty);
-						}
+					if(product_type == 'loose') {
+						//cart_item_count = '';
+						//if(stockCount <= 1) {
+							cart_item_count = total_stock;
+						//}
 					}
-					console.log('---', pdoduct_type, cart_item_count);
+					//console.log('---', product_type, cart_item_count);
+					
 					$('#' + inputId).val(cart_item_count === 0 ? '' : cart_item_count);
+					
 					localStorage.setItem(inputId + '-value', cart_item_count === 0 ? '' : cart_item_count);
+					
 					localStorage.setItem(inputId + '-pid', pid);
 					
 					//$('#' + inputId).val(stockCount);
 					//localStorage.setItem(inputId + '-value', stockCount);
 					//$('.qty-input' + id).val(cart_item_count);
-					if(pdoduct_type == 'loose' && stockCount == 0) {
+					if(product_type == 'loose' && stockCount == 0) {
 						//localStorage.setItem(inputId + '-value', '');
 					}
 					
@@ -599,7 +617,7 @@ function check_product_stock(id,parameter)
 	//alert(myArray);
 	let productMeasurement = parseFloat(myArray[5]);
 	let pid = parseInt(myArray[8]);
-	//let productType = parseInt(myArray[7]);
+	let product_type = myArray[7];
 	
 	let pvqty = $('#qty_' + id).val();
 	if(typeof pvqty === 'undefined'){
@@ -620,6 +638,7 @@ function check_product_stock(id,parameter)
 		success: function(response){
 			var result = JSON.parse(response);
 			var stockCount = 0;
+			var total_stock = '';
 			if (result.length > 0) {
 				var html = '<div class="col-md-5">';
 				$.each(result, function (i, stock) {
@@ -627,10 +646,11 @@ function check_product_stock(id,parameter)
 					if(stock.product_type == 'loose') {
 						//stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
 						stockCount = parseInt(stock.variant_stock);
+						total_stock = stock.total_stock;
 					}
 					
 					//stockCount = parseInt(stock.variant_stock);
-					console.log(stock.product_type,stockCount, stock.variant_stock, pvqty);
+					//console.log(stock.product_type,stockCount, stock.variant_stock, pvqty);
 					//alert(pvqty);
 					if(stockCount <= 0)
 					{
@@ -661,14 +681,19 @@ function check_product_stock(id,parameter)
 					}
 					//Start Increase and Decrease
 					let inputId = 'cart-stock-limit' + id;
+					var cart_item_count = stockCount;
+					if(product_type == 'loose') {
+						inputId = 'cart-stock-limitp' + pid;
+						cart_item_count = total_stock;
+					}
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
-					$('#' + inputId).val(pvqty === 0 ? '' : pvqty);
-					localStorage.setItem(inputId + '-value', pvqty === 0 ? '' : pvqty);
+					$('#' + inputId).val(cart_item_count === 0 ? '' : cart_item_count);
+					localStorage.setItem(inputId + '-value', cart_item_count === 0 ? '' : cart_item_count);
 					localStorage.setItem(inputId + '-pid', pid);
 					//End Increase and Decrease
 

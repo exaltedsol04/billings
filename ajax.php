@@ -112,273 +112,268 @@
 		
 		case "paynow":
 
-$stockArr = [];
-$barcode  = '';
-$pid      = [];
+			$stockArr = [];
+			$barcode  = '';
+			$pid      = [];
+			$total_stock       = '';
+			$isBulkCheck = !isset($_POST['id']); // bulk = cart validation
 
-$isBulkCheck = !isset($_POST['id']); // bulk = cart validation
-
-if (isset($_POST['id']) && isset($_POST['barcode'])) {
-    $pv_id = $_POST['id'];
-    $barcode = $_POST['barcode'];
-    $rw = (float)($_POST['rw'] ?? 0);
-    $product_variant_id = [0 => $pv_id];
-} else {
-    $product_variant_id = $_POST['product_variant_id'] ?? [];
-    $pid = $_POST['pid'] ?? [];
-}
-
-
-/*
-=====================================================
-STEP 1 → COLLECT VARIANT DATA
-=====================================================
-*/
-$variant_rows = [];
-
-foreach ($product_variant_id as $k => $variant_id)
-{
-    $qty = (float)($_POST['qty'][$k] ?? 1);
-    if ($qty <= 0) continue;
-
-    $variant = $general_cls_call->select_query(
-        "*",
-        PRODUCT_VARIANTS,
-        "WHERE id = :id",
-        [':id' => $variant_id],
-        1
-    );
-
-    if (!$variant) continue;
-
-    $variant_rows[] = [
-        'variant'    => $variant,
-        'product_id' => $variant->product_id,
-        'qty'        => $qty
-    ];
-}
+			if (isset($_POST['id']) && isset($_POST['barcode'])) {
+				$pv_id = $_POST['id'];
+				$barcode = $_POST['barcode'];
+				$rw = (float)($_POST['rw'] ?? 0);
+				$product_variant_id = [0 => $pv_id];
+			} else {
+				$product_variant_id = $_POST['product_variant_id'] ?? [];
+				$pid = $_POST['pid'] ?? [];
+			}
 
 
-/*
-=====================================================
-STEP 2 → TOTAL LOOSE WEIGHT PER PRODUCT (FIXED)
-=====================================================
-*/
-$requested_loose_weight = [];
+			/*
+			=====================================================
+			STEP 1 → COLLECT VARIANT DATA
+			=====================================================
+			*/
+			$variant_rows = [];
 
-/*
------------------------------------------
-PRIORITY 1 → grouped cart weights (pid[])
------------------------------------------
-*/
-if (!empty($pid)) {
-    foreach ($pid as $product_id => $weights) {
-        $requested_loose_weight[$product_id] =
-            array_sum(array_map('floatval', (array)$weights));
-    }
-}
+			foreach ($product_variant_id as $k => $variant_id)
+			{
+				$qty = (float)($_POST['qty'][$k] ?? 1);
+				if ($qty <= 0) continue;
 
-/*
------------------------------------------
-PRIORITY 2 → barcode weight (single scan)
------------------------------------------
-*/
-elseif (!empty($rw)) {
+				$variant = $general_cls_call->select_query(
+					"*",
+					PRODUCT_VARIANTS,
+					"WHERE id = :id",
+					[':id' => $variant_id],
+					1
+				);
 
-    foreach ($variant_rows as $row) {
-        $variant = $row['variant'];
-        if ($variant->type == 'loose') {
-            $requested_loose_weight[$variant->product_id] = (float)$rw;
-        }
-    }
-}
+				if (!$variant) continue;
 
-/*
------------------------------------------
-PRIORITY 3 → calculate from variant qty
------------------------------------------
-*/
-else {
-
-    foreach ($variant_rows as $row) {
-
-        $variant    = $row['variant'];
-        $product_id = $row['product_id'];
-        $qty        = $row['qty'];
-
-        if ($variant->type != 'loose') continue;
-
-        $requested_loose_weight[$product_id] =
-            ($requested_loose_weight[$product_id] ?? 0)
-            + ((float)$variant->measurement * $qty);
-    }
-}
+				$variant_rows[] = [
+					'variant'    => $variant,
+					'product_id' => $variant->product_id,
+					'qty'        => $qty
+				];
+			}
 
 
+			/*
+			=====================================================
+			STEP 2 → TOTAL LOOSE WEIGHT PER PRODUCT (FIXED)
+			=====================================================
+			*/
+			$requested_loose_weight = [];
 
-/*
-=====================================================
-STEP 3 → TOTAL NORMAL QTY PER VARIANT
-=====================================================
-*/
-$requested_normal_qty = [];
+			/*
+			-----------------------------------------
+			PRIORITY 1 → grouped cart weights (pid[])
+			-----------------------------------------
+			*/
+			if (!empty($pid)) {
+				foreach ($pid as $product_id => $weights) {
+					$requested_loose_weight[$product_id] =
+						array_sum(array_map('floatval', (array)$weights));
+				}
+			}
 
-foreach ($variant_rows as $row)
-{
-    $variant = $row['variant'];
-    if ($variant->type == 'loose') continue;
+			/*
+			-----------------------------------------
+			PRIORITY 2 → barcode weight (single scan)
+			-----------------------------------------
+			*/
+			elseif (!empty($rw)) {
 
-    $vid = $variant->id;
-    $requested_normal_qty[$vid] =
-        ($requested_normal_qty[$vid] ?? 0) + $row['qty'];
-}
+				foreach ($variant_rows as $row) {
+					$variant = $row['variant'];
+					if ($variant->type == 'loose') {
+						$requested_loose_weight[$variant->product_id] = (float)$rw;
+					}
+				}
+			}
 
+			/*
+			-----------------------------------------
+			PRIORITY 3 → calculate from variant qty
+			-----------------------------------------
+			*/
+			else {
 
-/*
-=====================================================
-STEP 4 → GET TOTAL LOOSE STOCK FROM DB
-=====================================================
-*/
-$total_loose_stock = [];
+				foreach ($variant_rows as $row) {
 
-foreach ($requested_loose_weight as $product_id => $dummy)
-{
-    $stock = $general_cls_call->select_query_sum(
-        PRODUCT_STOCK_TRANSACTION,
-        "WHERE product_id = :product_id
-         AND status = :status
-         AND seller_id = :seller_id
-         AND stock_type = :stock_type",
-        [
-            'status'     => 1,
-            'product_id' => $product_id,
-            'seller_id'  => $_SESSION['SELLER_ID'],
-            'stock_type' => 1
-        ],
-        'loose_stock_quantity'
-    );
+					$variant    = $row['variant'];
+					$product_id = $row['product_id'];
+					$qty        = $row['qty'];
 
-    $total_loose_stock[$product_id] = (float)($stock->total ?? 0);
-}
+					if ($variant->type != 'loose') continue;
 
-
-/*
-=====================================================
-STEP 5 → VALIDATE EACH VARIANT
-=====================================================
-*/
-foreach ($variant_rows as $row)
-{
-    $variant    = $row['variant'];
-    $product_id = $row['product_id'];
-    $qty        = $row['qty'];
-
-    $remainingStock = 0;
-
-    /*
-    ===============================
-    LOOSE PRODUCT VALIDATION
-    ===============================
-    */
-    if ($variant->type == 'loose')
-    {
-        $variant_size = (float)$variant->measurement;
-        $total_stock  = (float)($total_loose_stock[$product_id] ?? 0);
-        $total_used   = (float)($requested_loose_weight[$product_id] ?? 0);
-
-        // fully used or exceeded
-        if (round($total_used,4) >= round($total_stock,4))
-        {
-            $remainingStock = 0;
-        }
-        else
-        {
-            $current_weight   = $variant_size * $qty;
-            $other_weight     = $total_used - $current_weight;
-            $remaining_weight = max(0, $total_stock - $other_weight);
-
-            $remainingStock =
-                ($variant_size > 0)
-                ? floor($remaining_weight / $variant_size)
-                : 0;
-        }
-    }
-
-    /*
-    ===============================
-    NORMAL PRODUCT VALIDATION
-    ===============================
-    */
-    else
-    {
-        $stock_used = $general_cls_call->select_query_sum(
-            PRODUCT_STOCK_TRANSACTION,
-            "WHERE product_variant_id = :product_variant_id
-             AND product_id = :product_id
-             AND status = :status
-             AND seller_id = :seller_id
-             AND stock_type = :stock_type",
-            [
-                ':product_variant_id'=> $variant->id,
-                'product_id'         => $product_id,
-                'status'             => 1,
-                'seller_id'          => $_SESSION['SELLER_ID'],
-                'stock_type'         => 1
-            ],
-            'stock'
-        );
-
-        $dbStock = (int)($stock_used->total ?? 0);
-        $usedQty = $requested_normal_qty[$variant->id] ?? 0;
-
-        $remainingStock = max(0, $dbStock - $usedQty);
-    }
-
-
-    /*
-    ===============================
-    RESPONSE RULE
-    ===============================
-    */
-
-    // bulk check → return ONLY when stock not available
-    if ($isBulkCheck && $remainingStock > 0) {
-        continue;
-    }
-
-    $product_dtls = $general_cls_call->select_query(
-        "*",
-        PRODUCTS,
-        "WHERE id = :id",
-        [':id'=> $product_id],
-        1
-    );
-
-    $unit_dtls = $general_cls_call->select_query(
-        "*",
-        UNITS,
-        "WHERE id = :id",
-        [':id'=> $variant->stock_unit_id],
-        1
-    );
-
-    $stockArr[] = [
-        "product_name"  => $general_cls_call->cart_product_name($product_dtls->name),
-        "variant_name"  => $variant->measurement.' '.$unit_dtls->name,
-        "variant_stock" => $remainingStock,
-        "product_type"  => $variant->type
-    ];
-}
-
-echo json_encode($stockArr);
-break;
+					$requested_loose_weight[$product_id] =
+						($requested_loose_weight[$product_id] ?? 0)
+						+ ((float)$variant->measurement * $qty);
+				}
+			}
 
 
 
+			/*
+			=====================================================
+			STEP 3 → TOTAL NORMAL QTY PER VARIANT
+			=====================================================
+			*/
+			$requested_normal_qty = [];
+
+			foreach ($variant_rows as $row)
+			{
+				$variant = $row['variant'];
+				if ($variant->type == 'loose') continue;
+
+				$vid = $variant->id;
+				$requested_normal_qty[$vid] =
+					($requested_normal_qty[$vid] ?? 0) + $row['qty'];
+			}
 
 
+			/*
+			=====================================================
+			STEP 4 → GET TOTAL LOOSE STOCK FROM DB
+			=====================================================
+			*/
+			$total_loose_stock = [];
 
-		
+			foreach ($requested_loose_weight as $product_id => $dummy)
+			{
+				$stock = $general_cls_call->select_query_sum(
+					PRODUCT_STOCK_TRANSACTION,
+					"WHERE product_id = :product_id
+					 AND status = :status
+					 AND seller_id = :seller_id
+					 AND stock_type = :stock_type",
+					[
+						'status'     => 1,
+						'product_id' => $product_id,
+						'seller_id'  => $_SESSION['SELLER_ID'],
+						'stock_type' => 1
+					],
+					'loose_stock_quantity'
+				);
+
+				$total_loose_stock[$product_id] = (float)($stock->total ?? 0);
+			}
+
+
+			/*
+			=====================================================
+			STEP 5 → VALIDATE EACH VARIANT
+			=====================================================
+			*/
+			foreach ($variant_rows as $row)
+			{
+				$variant    = $row['variant'];
+				$product_id = $row['product_id'];
+				$qty        = $row['qty'];
+
+				$remainingStock = 0;
+
+				/*
+				===============================
+				LOOSE PRODUCT VALIDATION
+				===============================
+				*/
+				if ($variant->type == 'loose')
+				{
+					$variant_size = (float)$variant->measurement;
+					$total_stock  = (float)($total_loose_stock[$product_id] ?? 0);
+					$total_used   = (float)($requested_loose_weight[$product_id] ?? 0);
+
+					// fully used or exceeded
+					if (round($total_used,4) > round($total_stock,4))
+					{
+						$remainingStock = 0;
+					}
+					else
+					{
+						$current_weight   = $variant_size * $qty;
+						$other_weight     = $total_used - $current_weight;
+						$remaining_weight = max(0, $total_stock - $other_weight);
+
+						$remainingStock =
+							($variant_size > 0)
+							? floor($remaining_weight / $variant_size)
+							: 0;
+					}
+				}
+
+				/*
+				===============================
+				NORMAL PRODUCT VALIDATION
+				===============================
+				*/
+				else
+				{
+					$stock_used = $general_cls_call->select_query_sum(
+						PRODUCT_STOCK_TRANSACTION,
+						"WHERE product_variant_id = :product_variant_id
+						 AND product_id = :product_id
+						 AND status = :status
+						 AND seller_id = :seller_id
+						 AND stock_type = :stock_type",
+						[
+							':product_variant_id'=> $variant->id,
+							'product_id'         => $product_id,
+							'status'             => 1,
+							'seller_id'          => $_SESSION['SELLER_ID'],
+							'stock_type'         => 1
+						],
+						'stock'
+					);
+
+					$dbStock = (int)($stock_used->total ?? 0);
+					$usedQty = $requested_normal_qty[$variant->id] ?? 0;
+
+					$remainingStock = max(0, $dbStock - $usedQty);
+				}
+
+
+				/*
+				===============================
+				RESPONSE RULE
+				===============================
+				*/
+
+				// bulk check → return ONLY when stock not available
+				if ($isBulkCheck && $remainingStock > 0) {
+					continue;
+				}
+
+				$product_dtls = $general_cls_call->select_query(
+					"*",
+					PRODUCTS,
+					"WHERE id = :id",
+					[':id'=> $product_id],
+					1
+				);
+
+				$unit_dtls = $general_cls_call->select_query(
+					"*",
+					UNITS,
+					"WHERE id = :id",
+					[':id'=> $variant->stock_unit_id],
+					1
+				);
+
+				$stockArr[] = [
+					"product_name"  => $general_cls_call->cart_product_name($product_dtls->name),
+					"variant_name"  => $variant->measurement.' '.$unit_dtls->name,
+					"variant_stock" => $remainingStock,
+					"product_type"  => $variant->type,
+					"total_stock"  => $total_stock
+				];
+			}
+
+		echo json_encode($stockArr);
+		break;
+
 		case "paynowsave":
 			 
 			//echo "<pre>";print_r($_POST);die;
@@ -410,15 +405,21 @@ break;
 				
 				$unit_price = $product_variant_dtls->discounted_price;
 				$total_price = $_POST['qty'][$k] * $unit_price;
+				$loose_stock_quantity = 0.00;
+				if($product_variant_dtls->type == 'loose') {
+					$loose_stock_quantity = -($_POST['pid'][$product_id][$k]);
+				}
 				
-				$field = "pos_order_id, product_id, product_variant_id, quantity, unit_price, total_price, created_at, updated_at";
-				$value = ":pos_order_id, :product_id, :product_variant_id, :quantity, :unit_price, :total_price, :created_at, :updated_at";
+				$field = "pos_order_id, product_id, product_variant_id, type, loose_stock_quantity, quantity, unit_price, total_price, created_at, updated_at";
+				$value = ":pos_order_id, :product_id, :product_variant_id, :type, :loose_stock_quantity, :quantity, :unit_price, :total_price, :created_at, :updated_at";
 				
 				
 				$addExecute=array(
 					':pos_order_id'			=> $general_cls_call->specialhtmlremover($last_insert_id),
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
+					':type'					=> $product_variant_dtls->type,
+					':loose_stock_quantity'	=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
 					':quantity'				=> $_POST['qty'][$k],
 					':unit_price'			=> $general_cls_call->specialhtmlremover($unit_price),
 					':total_price'			=> $general_cls_call->specialhtmlremover($total_price),
@@ -439,17 +440,21 @@ break;
 					//echo $val.'-> '.$product_id; die;
 					$unit_price = $product_variant_dtls->discounted_price;
 					$total_price = $_POST['qty'][$k] * $unit_price;
+					$loose_stock_quantity = 0.00;
+					if($product_variant_dtls->type == 'loose') {
+						$loose_stock_quantity = -($_POST['pid'][$product_id][$k]);
+					}
 					
-					$field = "seller_id, product_variant_id, product_id,  stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id, approved_by, approved_date, order_id";
-					$value = ":seller_id, :product_variant_id, :product_id, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
+					$field = "seller_id, product_variant_id, product_id, stock, loose_stock_quantity, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id, approved_by, approved_date, order_id";
+					$value = ":seller_id, :product_variant_id, :product_id, :stock, :loose_stock_quantity, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
 					
 					//parent_id
 					$addExecute=array(
 						':seller_id'			=> $_SESSION['SELLER_ID'],
 						':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
 						':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
-						
 						':stock'				=> -($_POST['qty'][$k]),
+						':loose_stock_quantity'	=> $loose_stock_quantity,
 						':created_date'			=> date("Y-m-d H:i:s"),
 						':status'				=> 1,
 						':selling_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->discounted_price),

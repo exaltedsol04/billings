@@ -96,8 +96,11 @@ let generateCartItems = () => {
 			
         return `<tr id="dataRow${id}">
 					<td class="text-center">${index + 1}
-					<input type="text" class="pid-${pid} allpid" value="${measurement * qty}" id="vid_${id}" name="pid[${pid}][]">
+					<input type="hidden" class="pid-${pid} allpid" value="${measurement * qty}" id="vid_${id}" name="pid[${pid}][]">
 					</td>
+					<td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}
+					<input type="hidden" value="${id}" name="product_variant_id[]"></td>
+					<td class="text-center"><span class="badge bg-grd-primary dash-lable">${ptype}</span></td>
 					<td>
 					<div class="input-group quantity-group">
 						<span class="input-group-btn">
@@ -109,10 +112,7 @@ let generateCartItems = () => {
 						</span>
 					</div>
 				  </td>
-				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${measurement} ${stock_unit_name}</td>
-				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><span class="badge bg-grd-primary dash-lable">${ptype}</span></td>
-				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}</td>
-				  <input type="hidden" value="${id}" name="product_variant_id[]">
+				  <td class="text-center">${measurement} ${stock_unit_name}</td>
 				  <td class="text-center">₹ ${price}</td>						  
 				  <td class="text-center">₹ ${(qty * price).toFixed(2)}</td>
 				  <td class="text-center"><i style="cursor:pointer;" onclick="removeItem(${id})" class="material-icons-outlined text-danger">close</i>
@@ -163,8 +163,11 @@ let increment = (id, msr, ptype, pid) => {
         $("#loader").hide();
         return;
     }
-
+	
     let inputId = 'cart-stock-limit' + id;
+	if (ptype === 'loose') {
+		inputId = 'cart-stock-limitp' + pid;
+	}
 
     check_qty_stock(id, search.qty + 1, msr, pid, function () {
 
@@ -180,9 +183,12 @@ let increment = (id, msr, ptype, pid) => {
 
             let currentWeight = getTotalWeightByPid(pid);
             let nextWeight = currentWeight + Number(msr);
-
-            if (nextWeight > limit) {
-                //$('#dataRow' + id).find('.qty-increment').prop('disabled', true);
+			// ✅ FIX FLOATING PRECISION
+			nextWeight = Number(nextWeight.toFixed(3));
+			limit = Number(limit.toFixed(3));
+            // ❌ block only if truly exceeding
+			if (nextWeight > limit) {
+                $('#dataRow' + id).find('.qty-increment').prop('disabled', true);
                 $("#loader").hide();
                 return;
             }
@@ -242,10 +248,15 @@ let decrement = (id, msr, ptype, pid) => {
     $('#dataRow' + id).find('.qty-increment').prop('disabled', false);
 
     let inputId = 'cart-stock-limit' + id;
+	if (ptype === 'loose') {
+		inputId = 'cart-stock-limitp' + pid;
+	}
+    let pId = 'cart-pid-' + pid;
 
     if (ptype === 'loose') {
 		let totalWeight = getTotalWeightByPid(pid);
-		localStorage.setItem(inputId + '-value', totalWeight);
+		localStorage.setItem(pId + '-value', totalWeight);
+		//console.log('totalWeight', totalWeight);
 	} else {
 		localStorage.setItem(inputId + '-value', '');
 	}

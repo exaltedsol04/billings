@@ -120,6 +120,8 @@ ALTER TABLE `notifications` ADD `status` TINYINT(1) NOT NULL DEFAULT '1' COMMENT
 
 =========== 12-02-2026==========
 ALTER TABLE `2026_admin_stock_purchase_list` ADD `loose_stock_quantity` DOUBLE(10,2) NOT NULL DEFAULT '0.00' AFTER `product_variant_id`; 
+ALTER TABLE `2026_pos_order_items` ADD `loose_stock_quantity` DOUBLE(10,2) NOT NULL DEFAULT '0.00' AFTER `product_variant_id`; 
+ALTER TABLE `2026_pos_order_items` ADD `type` VARCHAR(50) NULL DEFAULT NULL AFTER `product_variant_id`; 
 
 
 
