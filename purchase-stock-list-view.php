@@ -53,7 +53,7 @@
 	
 	if(isset($_GET['pvid']))
 	{
-		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid";
+		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -128,6 +128,7 @@
 										<td></td>
 										<td></td>
 										<td></td>
+										<td></td>
 									</tr>
 								  <tr>
 									<th class="text-center">Sl. No.</th>
@@ -135,6 +136,7 @@
 									<th>Product Name</th>
 									<th class="text-center">Stock</th>
 									<th>Measurement</th>
+									<th>Type</th>
 									<th>Purchase Price</th>
 									<th>Purchase Date</th>
 									<th>Remarks</th>
@@ -171,6 +173,7 @@
 										?>
 										</td>
 										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
+										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $selectValue->type ;?></span></td>
 										<td>₹ <?php echo $selectValue->purchase_price ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td><?php echo !empty($selectValue->remarks) ? $selectValue->remarks : '--';?></td>

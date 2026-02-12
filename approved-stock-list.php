@@ -48,17 +48,19 @@
 										<td><input type="text" class="form-control" id="search-one" placeholder="Search by Product"></td>
 										<td><input type="text" class="form-control" id="search-two" placeholder="Search by Measurement"></td>
 										<td></td>
+										<td></td>
 									</tr>
 								  <tr >
 									<th style="width:100px">Sl. No.</th>
 									<th>Product Name</th>
 									<th class="text-center">Measurement</th>
+									<th class="text-center">Type</th>
 									<th class="text-center">Approved Stock</th>
 								  </tr>
 								</thead>
 								<tbody>
 									<?php
-									$fields = "asp.id, asp.product_id, asp.product_variant_id, asp.status, SUM(asp.stock) as total_stock, asp.created_at, u.name as unit_name, pv.measurement, p.name, p.barcode";
+									$fields = "asp.id, asp.product_id, asp.product_variant_id, asp.status, SUM(asp.stock) as total_stock, asp.created_at, u.name as unit_name, pv.measurement, p.name, p.barcode, pv.type";
 									
 									$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 									INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
@@ -89,6 +91,7 @@
 									    <td class="text-center" style="width:100px"><?php echo $k+1 ;?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
 										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
+										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $selectValue->type ;?></span></td>
 										<td class="text-center"><?php echo $selectValue->total_stock; ?></td>
 									</tr>
 										<?PHP

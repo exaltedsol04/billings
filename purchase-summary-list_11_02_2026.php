@@ -30,11 +30,11 @@
 			];
 		}
 		
-		$fieldsV = "v.id as vendor_id, v.name ,SUM(asp.stock * asp.purchase_price) as total_price";
+		$fieldsV = "v.id as vendor_id, v.name ,SUM(asp.stock * asp.purchase_price) as total_price, asp.product_id";
 
 		$tablesV = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-		$whereV = "WHERE ". $whereDateRange ." GROUP BY asp.vendor_id";
+		$whereV = "WHERE ". $whereDateRange ." GROUP BY asp.product_id";
 
 		$sqlQryVendors = $general_cls_call->select_join_query(
 			$fieldsV,
@@ -107,6 +107,29 @@
 						<?php 
 						foreach($sqlQryVendors as $k => $vendors)
 						{
+							
+							//----get the vendors name------
+											
+							$whereVar = "WHERE product_id =:product_id";
+							$paramsVar = [':product_id'=> $vendors->product_id];
+							$p_variants = $general_cls_call->select_query("distinct(product_variant_id)", ADMIN_STOCK_PURCHASE_LIST, $whereVar, $paramsVar, 2);
+							
+							$vendors_arr = [];
+							
+							foreach($p_variants as $pvi)
+							{
+								$fieldsVend = "distinct(vendor_id) , v.name as vendor_names";
+								$tablesVend = ADMIN_STOCK_PURCHASE_LIST . " asp
+								INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
+								$whereVend = "WHERE asp.product_id=:product_id AND asp.product_variant_id=:product_variant_id";
+								$paramsVend = [
+									':product_id'=>$vendors->product_id,
+									':product_variant_id'=>$pvi->product_variant_id
+								];
+								$sqlVendors = $general_cls_call->select_join_query($fieldsVend, $tablesVend, $whereVend, $paramsVend, 2);
+								$vendors_arr[] = implode(', ', array_column($sqlVendors, 'vendor_names'));
+							}
+							//echo "<pre>";print_r($sqlVendors);die;
 						?>
 							<div class="accordion-item">
 
@@ -119,7 +142,7 @@
 										aria-expanded="<?= $k == 0 ? 'true' : 'false' ?>"
 										aria-controls="collapse<?= $k ?>">
 										<div class="w-100 d-flex justify-content-between align-items-center pe-4">
-											<span><?= $vendors->name ?></span>
+											<span><?= implode(', ', array_unique($vendors_arr)); ?></span>
 											<span class="badge bg-warning fs-6 text-dark">Total purchase amount ₹<?= number_format($vendors->total_price,2) ?></span>
 										</div>
 									</button>
@@ -164,11 +187,11 @@
 													?>
 														<tr>
 															<td><?php echo $general_cls_call->cart_product_name($val->product_name) ?></td>
-															<td class="text-center"><?php echo $val->measurement.' '.$val->unit_name ?></td>
-															<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $val->type ?></span></td>
-															<td class="text-center"><?php echo $val->stock ?></td>
-															<td class="text-center">₹<?php echo $val->purchase_price ?></td>
-															<td class="text-center">₹<?php echo $val->stock*$val->purchase_price ?></td>
+															<td  class="text-center"><?php echo $val->measurement.' '.$val->unit_name ?></td>
+															<td  class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $val->type; ?></span></td>
+															<td  class="text-center"><?php echo $val->stock ?></td>
+															<td  class="text-center">₹<?php echo $val->purchase_price ?></td>
+															<td  class="text-center">₹<?php echo $val->stock*$val->purchase_price ?></td>
 														</tr>
 													<?php 
 													}

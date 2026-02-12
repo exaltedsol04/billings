@@ -116,6 +116,7 @@ ALTER TABLE `2026_packaging_operators_assign` ADD `auto_assign` TINYINT(1) NULL 
 =========== 11-02-2026==========
 
 ALTER TABLE `2026_product_stock_transaction` ADD `loose_stock_quantity` DOUBLE(11,2) NOT NULL DEFAULT '0.00' AFTER `product_id`; 
+ALTER TABLE `notifications` ADD `status` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '1= active; 2= delete' AFTER `date_sent`;
 
 
 

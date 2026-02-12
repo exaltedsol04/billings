@@ -120,6 +120,19 @@
 					</li>
 				</ul>
 				</li>
+			<li <?php if($page=='notification-add.php' || $page=='notification-list.php') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">apps</i>
+				</div>
+				<div class="menu-title">Notification</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'notification-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Add</a>
+				</li>
+				<li><a href="<?php echo SITE_URL.'notification-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a>
+				</li>
+			  </ul>
+			</li>
 			
 			<li>
 				<a href="<?php echo SITE_URL.'logout'; ?>">

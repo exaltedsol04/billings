@@ -249,7 +249,7 @@ function select_product(el)
 			if (result.length > 0) {
 				var html = '<option value="">Select...</option>';
 				$.each(result, function (i, variants) {
-					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname + '</option>';
+					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname + ' (' + variants.ptype + ')</option>';
 				});
 				//$('#product_variant_id').html(html);
 				 row.find('.unit-select').html(html);

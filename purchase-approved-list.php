@@ -75,6 +75,7 @@
 							<td></td>
 							<td><input type="text" class="form-control" id="search-five" placeholder="Search by seller name"></td>
 							<td></td>
+							<td></td>
 						</tr>
                       <tr class="text-center">
 						<th>Sl. No.</th>
@@ -82,6 +83,7 @@
 						<th>Product Name</th>
 						<th>Qty.</th>
 						<th>Measurement</th>
+						<th>Type</th>
 						<th>Requested By</th>
 						<th>Request Date</th>
                       </tr>
@@ -121,6 +123,7 @@
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
 										<td><?PHP echo $arr->pqty ?></td>
 										<td><?PHP echo $arr->measurement. ' '. $unitname; ?></td>
+										<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
 										<td><?PHP echo $arr->username; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
 									</tr>

@@ -155,13 +155,15 @@
 							<td><input type="text" class="form-control" id="search-five" placeholder="Search by seller name"></td>
 							<td></td>
 							<td></td>
+							<td></td>
 						</tr>
-                      <tr>
+                      <tr class="text-center">
 						<th class="text-center">Sl. No.</th>
 						<th>Barcode</th>
 						<th>Product Name</th>
 						<th>Qty.</th>
 						<th>Measurement</th>
+						<th>Type</th>
 						<th>Requested By</th>
 						<th>Request Date</th>
 						<th class="text-center">Action</th>
@@ -203,6 +205,7 @@
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
 										<td><input type="text" value="<?PHP echo $arr->pqty ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9]/g, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
 										<td><?PHP echo $arr->measurement.' '.$unitname; ?></td>
+										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $arr->type ?></span></td>
 										<td><?PHP echo $arr->username; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
 										<td class="text-center">

@@ -9,14 +9,19 @@
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
 	ob_start();
-	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "send_notification")
 	{
-		//echo $vendor_id = $_POST['vendor_id'];die;
-		$whereSrc = "asp.vendor_id=:vendor_id";
-		$paramsSrc = [
-			':vendor_id' => $_POST['vendor_id']
-		];
-		
+		extract($_POST);
+		//echo "<pre>";print_r($_POST);
+		$ch = $fcm->sendUserNotification(
+			$userId,
+			"Title for the notification-30",
+			"Body for the notification",
+			[
+				"screen" => "TEST notification"
+			]
+		);
+		//echo $ch; die;
 	}
 	else{
 		$whereSrc = "1";
@@ -36,7 +41,25 @@
 		
 		$sucMsg = "Status Updated Successfully";
 	}*/
-
+	
+	/*$userId = 10;
+	$fields = 'fcm_token';
+	$tables = USER_TOKENS;
+	$where = "WHERE user_id=:user_id ORDER BY id DESC";
+	$params = [
+		  ':user_id' => 10
+	];*/
+	
+	/*$userId = 10;
+	$ch = $fcm->sendUserNotification(
+		$userId,
+		"Title for the notification",
+		"Body for the notification",
+		[
+			"screen" => "TEST notification"
+		]
+	);
+	echo $ch;die;*/
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
@@ -52,12 +75,16 @@
   <main class="main-wrapper">
     <div class="main-content">
       <!--breadcrumb-->
+	            <div class="alert alert-danger border-0 bg-danger alert-dismissible fade show error-notification" style="display:none">
+					<div class="text-white">Select Al Least One Checkbox</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
 				<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
 					<div class="breadcrumb-title pe-3"><?php echo SITE_TITLE; ?></div>
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Vendor List</a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Notification List</a>
 								</li>
 							</ol>
 						</nav>
@@ -79,8 +106,13 @@
 						}
 					?>
 				<div class="card">
+				
 					<div class="card-body">
-						<div class="table-responsive">
+					    <form class="row g-4" action="" method="post">
+							<input type="hidden" name="userId" value="10">
+							<div><button type="submit" value="send_notification" name="btnUser"  class="btn btn-grd btn-grd-success px-2 send_notification">Send notification</button></div>
+						</form>
+						<div class="table-responsive mt-4">
 							<table id="example2" class="table table-striped table-bordered">
 								<thead>
 									<tr>
@@ -89,16 +121,12 @@
 										<td><input type="text" class="form-control" id="search-two" placeholder="Search by name"></td>
 										<td></td>
 										<td></td>
-										<td></td>
-										<td></td>
 									</tr>
 								  <tr class="text-center">
+									<th  style="white-space: nowrap;">All&nbsp;&nbsp;<input class="form-check-input" type="checkbox" id="checkAll"></th>
 									<th style="width:100px">Sl. No.</th>
-									<th>Name</th>
-									<th>Email</th>
-									<th>Mobile</th>
-									<th>Created Date</th>
-									<th>Status</th>
+									<th>Title</th>
+									<th>Description</th>
 									<th>Action</th>
 								  </tr>
 								</thead>
@@ -109,7 +137,8 @@
 									$paramsVen = [
 										':status'=>2
 									];
-									$sqlQueryVen = $general_cls_call->select_query($fieldsVen, VENDORS, $whereVen, $paramsVen, 2);
+									
+									$sqlQueryVen = $general_cls_call->select_query($fieldsVen, NOTIFICATIONS, $whereVen, $paramsVen, 2);
 									//echo "<pre>";print_r($sqlQueryVen);die;
 									if($sqlQueryVen[0] != '')
 									{
@@ -118,36 +147,11 @@
 											
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
+										<td><input class="form-check-input row-checkbox" type="checkbox" value="<?php echo $selectValue->id;?>" id="packed_status"></td>
 									    <td style="width:100px"><?php echo $k+1 ;?></td>
-										<td style="width:100px"><?PHP echo $selectValue->name; ?></td>
-										<td><?PHP echo $selectValue->email; ?></td>
-										<td><?php echo $selectValue->mobile; ?></td>
+										<td style=""><?= (mb_strlen($selectValue->title) > 100) ? mb_substr($selectValue->title,0,100).'...' : $selectValue->title; ?></td>
+										<td style=""><?= (mb_strlen($selectValue->message) > 100) ? mb_substr($selectValue->message,0,100).'...' : $selectValue->message; ?></td>
 										
-										<td><span class="d-none"><?PHP echo $selectValue->created_at; ?></span><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td>
-										<?php 
-										if($selectValue->status == 1)
-										{
-										?>
-										<div class="ms-auto">
-											<div class="btn-group">
-												<p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Active</p>
-											</div>
-										</div>
-										<?php 
-										}
-										else
-										{
-										?>
-										<div class="ms-auto">
-											<div class="btn-group">
-												<p class="dash-lable mb-0 bg-danger bg-opacity-10 text-danger rounded-2">Inactive</p>
-											</div>
-										</div>
-										<?php 
-										}
-										?>
-										</td>
 										<td>
 											<div class="dropdown">
 												<button class="btn btn-sm btn-filter dropdown-toggle dropdown-toggle-nocaret"
@@ -155,20 +159,8 @@
 												  <i class="bi bi-three-dots"></i>
 												</button>
 												<ul class="dropdown-menu">
-												  <li><a href="<?php echo SITE_URL.'vendor-add'; ?>?vendor_id=<?php echo($selectValue->id);?>" class="dropdown-item" title="Click here to edit">Edit</a></li>
-												  <li><a href="javascript:void(0);" class="dropdown-item" title="Click here to delete"  onclick="deleteData('<?PHP echo VENDORS; ?>', <?PHP echo $selectValue->id; ?>)">Delete</a></li>
-												  <?php 
-												  if($selectValue->status == 1)
-												  {
-												  ?>
-												  <li><a href="javascript:vois(0);" class="dropdown-item" title="Click here to inactive"  onclick="status_change('<?PHP echo VENDORS; ?>', <?PHP echo $selectValue->id; ?>)">Inactive</a></li>
-												  <?php 
-												  }elseif($selectValue->status == 0)
-												  {
-												  ?><li><a href="javascript:void(0);" class="dropdown-item" title="Click here to active" onclick="status_change('<?PHP echo VENDORS; ?>', <?PHP echo $selectValue->id; ?>)">Active</a></li>
-												  <?php 
-												  }
-												  ?>
+												  <li><a href="<?php echo SITE_URL.'notification-add'; ?>?notification_id=<?php echo($selectValue->id);?>" class="dropdown-item" title="Click here to edit">Edit</a></li>
+												  <li><a href="javascript:void(0);" class="dropdown-item" title="Click here to delete"  onclick="deleteData('<?PHP echo NOTIFICATIONS; ?>', <?PHP echo $selectValue->id; ?>)">Delete</a></li>
 												</ul>
 											</div>
 										</td>
@@ -209,13 +201,31 @@
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
+const checkAll = document.getElementById('checkAll');
+
+function getCheckboxes() {
+    return document.querySelectorAll('.row-checkbox');
+}
+checkAll.addEventListener('change', function () {
+    getCheckboxes().forEach(cb => cb.checked = this.checked);
+});
+
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('row-checkbox')) {
+        const checkboxes = getCheckboxes();
+        const allChecked = [...checkboxes].every(cb => cb.checked);
+        checkAll.checked = allChecked;
+    }
+});
+</script>
+<script>
 $(document).ready(function(){
 	if ($.fn.DataTable.isDataTable('#example2')) {
 		$('#example2').DataTable().destroy();
 	}
 	
 	$('#example2').DataTable({
-		order: [[4, 'desc']],
+		order: [[2, 'desc']],
 		columnDefs: [
         {
             targets: 0,        // 1st column
@@ -224,10 +234,22 @@ $(document).ready(function(){
         }
     ] 
 	});
+	
+	$(document).on('click', '.send_notification', function(){
+		let selectedIds = [];
+
+		$('.row-checkbox:checked').each(function () {
+			selectedIds.push($(this).val());
+		});
+
+		if (selectedIds.length === 0) {
+			//alert('Please select at least one notification');
+			$('.error-notification').show();
+			return;
+		}
+		alert(selectedIds);
+	});
 });
-
-
-
 
 </script>
 </body>

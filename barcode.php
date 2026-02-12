@@ -190,7 +190,7 @@
 					//var da = JSON.parse(res);
 					//alert(da.measurement);
 					if(res.measurement && res.unitname){
-						//$('.product').text(res.productname);
+						$('.product').text(res.productname);
 						$('#measurementdata').text(res.measurement + ' ' + res.unitname);
 					} else {
 						$('#measurementdata').text('N/A');
