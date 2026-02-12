@@ -18,12 +18,22 @@
 		{
 			if($_GET['qty'] !='')
 			{
+				$aspl = $general_cls_call->select_query("loose_stock_quantity, stock", ADMIN_STOCK_PURCHASE_LIST, "WHERE id =:id ", array(':id'=> $_GET['id']), 1);
+
+				$loose_stock_quantity = 0.00;
+				if($aspl->loose_stock_quantity != '0.00')
+				{
+					$variant_measurement = floor($aspl->loose_stock_quantity / $aspl->stock);
+					$loose_stock_quantity = $_GET['qty'] * $variant_measurement;
+				}
+				
 				//echo $_GET['qty'];die;
-				$setValues="status=:status, stock=:stock, updated_at=:updated_at";
+				$setValues="status=:status, stock=:stock, loose_stock_quantity=:loose_stock_quantity, updated_at=:updated_at";
 				$whereClause=" WHERE id=:id";
 				$updateExecute=array(
 					':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
 					':stock'=>$general_cls_call->specialhtmlremover($_GET['qty']),
+					':loose_stock_quantity'=>$general_cls_call->specialhtmlremover($loose_stock_quantity),
 					':updated_at'=> date("Y-m-d H:i:s"),
 					':id'=>$_GET['id']
 				);

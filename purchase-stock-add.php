@@ -24,14 +24,26 @@
 				//$product_variant_id = $explode_product[1];
 				
 				$remarks = !empty($remarks) ? $remarks : null;
-				$field = "vendor_id, product_id, product_variant_id, stock, status,  purchase_price, remarks, created_at, updated_at";
-				$value = ":vendor_id, :product_id, :product_variant_id, :stock, :status, :purchase_price, :remarks, :created_at, :updated_at";
+				
+				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_variant_id), 1);
+				
+				$loose_stock_quantity = 0.00;
+				$variant_type = $product_variant_dtls->type;
+				if($variant_type == 'loose')
+				{
+					$variant_measurement = $product_variant_dtls->measurement;
+					$loose_stock_quantity = $stock * $variant_measurement;
+				}
+				
+				$field = "vendor_id, product_id, product_variant_id, loose_stock_quantity, stock, status,  purchase_price, remarks, created_at, updated_at";
+				$value = ":vendor_id, :product_id, :product_variant_id, :loose_stock_quantity, :stock, :status, :purchase_price, :remarks, :created_at, :updated_at";
 					
 					//parent_id
 				$addExecute=array(
 					':vendor_id'			=> $general_cls_call->specialhtmlremover($vendor_id),
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
+					':loose_stock_quantity'	=> $loose_stock_quantity,
 					':stock'				=> $stock,
 					':status'				=> 0,
 					':purchase_price'		=> $general_cls_call->specialhtmlremover($purchase_price),
@@ -207,7 +219,7 @@ function select_product(product)
 	
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
-	var datapost = 'action=getProductVariant&pid='+pid;
+	var datapost = 'action=getMaxProductVariant&pid='+pid;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -217,7 +229,7 @@ function select_product(product)
 			if (result.length > 0) {
 				var html = '<option value="">Select...</option>';
 				$.each(result, function (i, variants) {
-					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname +' ('+ variants.ptype +')</option>';
+					html += '<option value='+ variants.id +'>' + variants.unitname +' ('+ variants.ptype +')</option>';
 				});
 				$('#product_variant_id').html(html);
 			}

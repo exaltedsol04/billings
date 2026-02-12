@@ -161,59 +161,35 @@ foreach ($product_variant_id as $k => $variant_id)
 
 /*
 =====================================================
-STEP 2 → TOTAL LOOSE WEIGHT PER PRODUCT (FIXED)
+STEP 2 → TOTAL LOOSE WEIGHT PER PRODUCT
 =====================================================
 */
 $requested_loose_weight = [];
 
-/*
------------------------------------------
-PRIORITY 1 → grouped cart weights (pid[])
------------------------------------------
-*/
-if (!empty($pid)) {
-    foreach ($pid as $product_id => $weights) {
+foreach ($variant_rows as $row)
+{
+    $variant    = $row['variant'];
+    $product_id = $row['product_id'];
+    $qty        = $row['qty'];
+
+    if ($variant->type != 'loose') continue;
+
+    // cart grouped values (priority)
+    if (!empty($pid[$product_id])) {
         $requested_loose_weight[$product_id] =
-            array_sum(array_map('floatval', (array)$weights));
+            array_sum(array_map('floatval', $pid[$product_id]));
     }
-}
-
-/*
------------------------------------------
-PRIORITY 2 → barcode weight (single scan)
------------------------------------------
-*/
-elseif (!empty($rw)) {
-
-    foreach ($variant_rows as $row) {
-        $variant = $row['variant'];
-        if ($variant->type == 'loose') {
-            $requested_loose_weight[$variant->product_id] = (float)$rw;
-        }
+    // barcode weight
+    elseif (!empty($rw)) {
+        $requested_loose_weight[$product_id] = $rw;
     }
-}
-
-/*
------------------------------------------
-PRIORITY 3 → calculate from variant qty
------------------------------------------
-*/
-else {
-
-    foreach ($variant_rows as $row) {
-
-        $variant    = $row['variant'];
-        $product_id = $row['product_id'];
-        $qty        = $row['qty'];
-
-        if ($variant->type != 'loose') continue;
-
+    // calculate from variants
+    else {
         $requested_loose_weight[$product_id] =
             ($requested_loose_weight[$product_id] ?? 0)
             + ((float)$variant->measurement * $qty);
     }
 }
-
 
 
 /*

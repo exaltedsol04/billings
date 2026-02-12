@@ -1,4 +1,4 @@
-<?PHP  
+<?PHP   
 	/*******Start Auth Section*******/
 	$pageParam = [
 		'dataTables' => false,
@@ -31,18 +31,30 @@
 				if($vendor_id[$index] !='' && $product_id !='' && $product_variant_id[$index] !='' && $purchase_price[$index] !='' && $stock[$index] !='')
 				{	
 					$remarks = !empty($remarks) ? $remarks : null;
-					$field = "vendor_id, product_id, product_variant_id, stock, status,  purchase_price, remarks, created_at, updated_at";
-					$value = ":vendor_id, :product_id, :product_variant_id, :stock, :status, :purchase_price, :remarks, :created_at, :updated_at";
+					
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_variant_id[$index]), 1);
+				
+					$loose_stock_quantity = 0.00;
+					$variant_type = $product_variant_dtls->type;
+					if($variant_type == 'loose')
+					{
+						$variant_measurement = $product_variant_dtls->measurement;
+						$loose_stock_quantity = $stock[$index] * $variant_measurement;
+					}
+				
+					$field = "vendor_id, product_id, product_variant_id, loose_stock_quantity, stock, status,  purchase_price, remarks, created_at, updated_at";
+					$value = ":vendor_id, :product_id, :product_variant_id, :loose_stock_quantity, :stock, :status, :purchase_price, :remarks, :created_at, :updated_at";
 						
 						//parent_id
 					$addExecute=array(
 						':vendor_id'			=> $general_cls_call->specialhtmlremover($vendor_id[$index]),
 						':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 						':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id[$index]),
+						':loose_stock_quantity'	=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
 						':stock'				=> $stock[$index],
 						':status'				=> 0,
 						':purchase_price'		=> $general_cls_call->specialhtmlremover($purchase_price[$index]),
-						':remarks'				=> $remarks[$index],
+						':remarks'				=> $general_cls_call->specialhtmlremover($remarks[$index]),
 						':created_at' 			=> date('Y-m-d H:i:s'),
 						':updated_at'		    => date('Y-m-d H:i:s')
 					);
@@ -114,7 +126,7 @@
 
 								<div class="col-md-3">
 								<label for="input1" class="form-label">Products</label>
-									<select name="product[]" class="form-select"  tabindex="1" onchange="select_product(this)">
+									<select name="product[]" class="form-select select2-dropdown"  tabindex="1" onchange="select_product(this)">
 										<option value="">Select product</option>
 										<?PHP
 										$fields = "*";
@@ -148,7 +160,7 @@
 
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Unit</label>
-									<select name="product_variant_id[]" class="form-select unit-select" tabindex="1" onchange="get_selling_price(this)">
+									<select name="product_variant_id[]" class="form-select select2-dropdown unit-select" tabindex="1" onchange="get_selling_price(this)">
 										<option value="">Select...</option>
 									</select>
 									<span class="text-danger err_unit"></span>
@@ -161,7 +173,7 @@
 								</div>
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Vendors</label>
-									<select name="vendor_id[]" class="form-select" tabindex="1">
+									<select name="vendor_id[]" class="form-select select2-dropdown" tabindex="1">
 										<option value="">Select...</option>
 										<?php 
 											$fields = "*";
@@ -239,7 +251,7 @@ function select_product(el)
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
 	//alert(pid);
-	var datapost = 'action=getProductVariant&pid='+pid;
+	var datapost = 'action=getMaxProductVariant&pid='+pid;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -249,7 +261,7 @@ function select_product(el)
 			if (result.length > 0) {
 				var html = '<option value="">Select...</option>';
 				$.each(result, function (i, variants) {
-					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname + ' (' + variants.ptype + ')</option>';
+					html += '<option value='+ variants.id +'>' + variants.unitname + ' (' + variants.ptype + ')</option>';
 				});
 				//$('#product_variant_id').html(html);
 				 row.find('.unit-select').html(html);
