@@ -12,7 +12,7 @@
 	ob_start();
 
 /*=========== ACCOUNT SETTINGS START ===========*/
-	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	/*if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
 	{	
 		extract($_POST);
 		if($_POST)
@@ -30,8 +30,8 @@
 				':pos_user_id'			=> $_SESSION['SELLER_ID'],
 				':user_id'				=> $general_cls_call->specialhtmlremover($user_hidden_id),
 				':total_amount'			=> $general_cls_call->specialhtmlremover($cart_total_amt),
-				':discount_amount'			=> '0.00',
-				':discount_percentage'		=> '0.00',
+				':discount_amount'		=> '0.00',
+				':discount_percentage'	=> '0.00',
 				':payment_method'		=> $payment_method,
 				':created_at'			=> date("Y-m-d H:i:s"),
 				':updated_at'			=> date("Y-m-d H:i:s")
@@ -48,6 +48,10 @@
 				
 				$unit_price = $product_variant_dtls->discounted_price;
 				$total_price = $qty[$k] * $unit_price;
+				$loose_stock_quantity = 0.00;
+				if($product_variant_dtls->type == 'loose') {
+					$loose_stock_quantity = -($_POST['pid'][$product_id][$k]);
+				}
 				
 				$field = "pos_order_id, product_id, product_variant_id, quantity, unit_price, total_price, created_at, updated_at";
 				$value = ":pos_order_id, :product_id, :product_variant_id, :quantity, :unit_price, :total_price, :created_at, :updated_at";
@@ -68,7 +72,7 @@
 				$sucMsg="Data has been submitted successfully";
 			}
 		}
-	}
+	}*/
 
 	$imagePath = IMG_PATH . 'noImg.jpg';
 
@@ -96,43 +100,64 @@
 					<option value="">Select...</option>
 					<?PHP
 						$fields = "
-							pr.id,
 							pr.product_id,
 							pr.product_variant_id,
-							pv.id as pv_product_variant_id,
-							pr.status,
 							SUM(pr.stock) as total_stock,
 							SUM(pr.loose_stock_quantity) as total_loose_qty,
-							u.name as stock_unit_name,
+							pv.id as variant_id,
 							pv.measurement,
+							pv.type,
+							pv.discounted_price,
+							u.name as stock_unit_name,
 							p.name,
 							p.image,
 							p.barcode,
-							pv.type,
-							pv.discounted_price,
 							p.type as product_type
 						";
+
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
-						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pv.product_id = pr.product_id
-						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+						INNER JOIN " . PRODUCTS . " p 
+							ON p.id = pr.product_id
+						INNER JOIN " . PRODUCT_VARIANTS . " pv 
+							ON pv.product_id = pr.product_id   -- IMPORTANT for loose
+						INNER JOIN " . UNITS . " u 
+							ON u.id = pv.stock_unit_id";
 
 						$where = "
 						WHERE pr.status = :status
 						AND pr.stock_type = :stock_type
 						AND pr.seller_id = :seller_id
-						GROUP BY pv.id
-						HAVING (
-							(p.type = 'loose' AND pv.measurement <= SUM(pr.loose_stock_quantity))
+
+						GROUP BY pr.product_id, pv.id
+
+						HAVING
+						(
+							-- LOOSE → stock must support this variant size
+							(pv.type = 'loose' AND SUM(pr.loose_stock_quantity) >= pv.measurement)
+
 							OR
-							(p.type != 'loose' AND SUM(pr.stock) > 0 AND pv.id = pr.product_variant_id)
-						)";
+
+							-- NORMAL → variant specific stock must exist
+							(pv.type != 'loose'
+							 AND SUM(
+									CASE 
+										WHEN pr.product_variant_id = pv.id THEN pr.stock
+										ELSE 0
+									END
+								 ) > 0
+							)
+						)
+						";
+
 						$params = [
 							':status' => 1,
 							':stock_type' => 1,
 							':seller_id' => $_SESSION['SELLER_ID'],
 						];
+
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+
+
 
 						//echo "<pre>";print_r($sqlQuery);die;
 						if($sqlQuery[0] != '')
@@ -150,7 +175,7 @@
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 					?>
-								<option value="<?PHP echo $arr->pv_product_variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.'@@@'.$arr->stock_unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.'@@@'.$arr->stock_unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
 					<?PHP
 							}
 						}
@@ -343,7 +368,7 @@ $(document).ready(function(){
 
 			if ($('#' + inputId).length === 0) {
 				$('#qty-total').append(
-					`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`
+					`<input type="text" class="cart-pid-${pid}" id="${inputId}">`
 				);
 			}
 
@@ -375,6 +400,7 @@ function getProducts(val)
 				var data = JSON.parse(response);
 				$('#barcode').val('');
 				let totData = data.length;
+				//alert(totData);
 				if(totData == 1)
 				{
 					var parameter =
@@ -394,18 +420,20 @@ function getProducts(val)
 					}
 					let pid = data[0].product_id;
 					let inputId = 'cart-stock-limit' + data[0].id;
+					//var cart_item_count = stockCount;
 					if(data[0].product_type == 'loose') {
 						inputId = 'cart-stock-limitp' + pid;
+						//cart_item_count = total_stock;
 					}
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
-					$('#' + inputId).val(pvqty === 0 ? '' : pvqty);
-					localStorage.setItem(inputId + '-value', pvqty === 0 ? '' : pvqty);
-					localStorage.setItem(inputId + '-pid', pid);
+					//$('#' + inputId).val(pvqty === 0 ? '' : pvqty);
+					//localStorage.setItem(inputId + '-value', pvqty === 0 ? '' : pvqty);
+					//localStorage.setItem(inputId + '-pid', pid);
 					//End Increase and Decrease
 					
 					if (typeof add_to_cart !== 'function') {
@@ -440,7 +468,7 @@ function getProducts(val)
 					localStorage.setItem(inputId, 'visible');
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
@@ -452,7 +480,11 @@ function getProducts(val)
 					item.name + '@@@' +
 					item.image + '@@@' +
 					item.barcode + '@@@' +
-					item.measurement + ' ' + item.stock_unit_id;
+					item.measurement + '@@@' + 
+					item.stock_unit_id + '@@@' +
+					item.product_type + '@@@' +
+					item.product_id;
+					
 					//alert(parameter);
 					var images = item.imagePath;
 					html += '<div class="col">';
@@ -546,17 +578,13 @@ function check_qty_stock(id, inc, productMeasurement, pid, callback)
 					localStorage.setItem(inputId, 'visible');
 					
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
-					var cart_item_count = stockCount;
-					
+					var cart_item_count = stockCount;					
 					if(product_type == 'loose') {
-						//cart_item_count = '';
-						//if(stockCount <= 1) {
-							cart_item_count = total_stock;
-						//}
+						cart_item_count = total_stock;
 					}
 					//console.log('---', product_type, cart_item_count);
 					
@@ -643,6 +671,7 @@ function check_product_stock(id,parameter)
 				var html = '<div class="col-md-5">';
 				$.each(result, function (i, stock) {
 					stockCount = parseInt(stockCount) + parseInt(stock.variant_stock) - parseInt(pvqty);
+					total_stock = stock.total_stock;
 					if(stock.product_type == 'loose') {
 						//stockCount = parseInt(stockCount) + parseInt(stock.variant_stock);
 						stockCount = parseInt(stock.variant_stock);
@@ -681,14 +710,15 @@ function check_product_stock(id,parameter)
 					}
 					//Start Increase and Decrease
 					let inputId = 'cart-stock-limit' + id;
-					var cart_item_count = stockCount;
+					//var cart_item_count = stockCount;
+					var cart_item_count = total_stock;
 					if(product_type == 'loose') {
 						inputId = 'cart-stock-limitp' + pid;
 						cart_item_count = total_stock;
 					}
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}

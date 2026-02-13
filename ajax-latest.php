@@ -1193,34 +1193,6 @@
 					':id' => $stock_transaction_id
 				];
 				$stock_data = $general_cls_call->select_query($field, PRODUCT_STOCK_TRANSACTION, $where, $params, 1);
-				
-				/*
-				// add to admin stock transaction table
-				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_variant_id), 1);				
-				$field = "vendor_id, product_id, product_variant_id, stock,  product_stock_transaction_id, status, created_at, updated_at";
-				$value = ":vendor_id, :product_id, :product_variant_id, :stock,  :product_stock_transaction_id,:status, :created_at, :updated_at";
-				
-				$addExecute=array(
-					':vendor_id'			=> 0,
-					':product_id'			=> $product_id,
-					':product_variant_id'	=> $product_variant_id,
-					':stock'				=> -($stock_data->stock),
-					':product_stock_transaction_id'	=> $stock_data->id,
-					':status'				=> 1,
-					':created_at' 			=> date('Y-m-d h:i:s'),
-					':updated_at'		    => date('Y-m-d H:i:s')
-				);
-				
-				if($product_variant_dtls->type == 'loose')
-				{
-					$field .= ", loose_stock_quantity";
-					$value .= ", :loose_stock_quantity";
-
-					$addExecute[':loose_stock_quantity'] = -($general_cls_call->specialhtmlremover($stock_data->loose_stock_quantity));
-				}
-				$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
-				*/
-				
 				//echo $stock_data->stock;
 				if($accept_status==1)
 				{

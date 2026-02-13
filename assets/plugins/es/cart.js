@@ -115,7 +115,7 @@ let generateCartItems = () => {
 				  <td class="text-center">${measurement} ${stock_unit_name}</td>
 				  <td class="text-center">₹ ${price}</td>						  
 				  <td class="text-center">₹ ${(qty * price).toFixed(2)}</td>
-				  <td class="text-center"><i style="cursor:pointer;" onclick="removeItem(${id})" class="material-icons-outlined text-danger">close</i>
+				  <td class="text-center"><i style="cursor:pointer;" onclick="removeItem(${id}, \'${ptype}\', ${pid})" class="material-icons-outlined text-danger">close</i>
 				  </td>
 				</tr>`;
 					
@@ -256,7 +256,6 @@ let decrement = (id, msr, ptype, pid) => {
     if (ptype === 'loose') {
 		let totalWeight = getTotalWeightByPid(pid);
 		localStorage.setItem(pId + '-value', totalWeight);
-		//console.log('totalWeight', totalWeight);
 	} else {
 		localStorage.setItem(inputId + '-value', '');
 	}
@@ -328,7 +327,7 @@ let update = (id) => {
  * ! using the X [cross] button
  */
 
-let removeItem = (id) => {
+let removeItem = (id, ptype, pid) => {
 	$("#loader").show();
 	let selectedItem = id;
 	basket = basket.filter((x) => x.id !== selectedItem);
@@ -337,6 +336,9 @@ let removeItem = (id) => {
 		generateCartItems();
 	}, 500);
 	let inputId = 'cart-stock-limit' + id;
+	if(ptype == 'loose') {
+		inputId = 'cart-stock-limitp' + pid;
+	}
 	localStorage.setItem(inputId + '-value', '');
 	//localStorage.setItem(inputId + '-pid', '');
 	$('#qty-total').find('#' + inputId).remove();
