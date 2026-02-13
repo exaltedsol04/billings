@@ -37,12 +37,20 @@
 		
 		case "productbarcord":
 			$barcode = $_POST['barcode'];
-			$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode";
-						$tables = PRODUCT_VARIANTS . " pv
-						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id";
-						$where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";
-						$params = [];
-						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+			$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, pv.type, p.name, p.image, p.barcode";
+			$tables = PRODUCT_STOCK_TRANSACTION . " pr
+			INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+			INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			$where = "WHERE pr.stock_type=:stock_type AND pr.status=:status AND pr.seller_id =:seller_id AND p.barcode = :barcode GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+			$params = [
+				':status'	=>	1,
+				':stock_type'	=>	1,
+				':seller_id'	=>	$_SESSION['SELLER_ID'],
+				':barcode'	=>	$barcode
+			];
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+			
 			//echo "<pre>";print_r($sqlQuery);die;
 			$productArr = [];
 
@@ -55,21 +63,30 @@
 				}
 				
 				// get unit 
-				$stock_unit_id = $general_cls_call->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$val->stock_unit_id), 1);
+				//$stock_unit_id = $general_cls_call->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$val->stock_unit_id), 1);
 				
-				$productArr[] = [
-					'id'               => $val->id,
-					'product_id'       => $val->product_id,
-					'type'             => $val->type,
-					'stock'            => $val->stock,
-					'measurement'      => $val->measurement,
-					'discounted_price' => $val->discounted_price,
-					'name'             => $general_cls_call->cart_product_name($val->name),
-					'image'            => $val->image,
-					'barcode'          => $val->barcode,
-					'imagePath'        => $imagePath,
-					'stock_unit_id'          => $stock_unit_id->name,
-				];
+				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val->product_variant_id, 'status'=>1, 'product_id'=> $val->product_id, 'seller_id'=> $_SESSION['SELLER_ID']), 'stock');
+				
+				if($stock_used->total > 0)
+				{
+					$barcode = $val->barcode;
+					$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
+								
+					$productArr[] = [
+						'id'               => $val->product_variant_id,
+						'discounted_price' => $val->selling_price,
+						'name'             => $general_cls_call->cart_product_name($val->name),
+						'imagePath'        => $imagePath,
+						'barcode'          => $barcode,
+						'measurement'      => $val->measurement,
+						'product_id'       => $val->product_id,
+						'stock'            => $val->total_stock,
+						'image'            => $val->image,
+						'stock_unit_id'    => $val->stock_unit_name,
+						'product_type'    	=> $val->type,
+						'product_id'    	=> $val->product_id,
+					];
+				}
 			}
 			//echo "<pre>";print_r($productArr);die;
 			echo json_encode($productArr);
@@ -94,65 +111,312 @@
 		break;
 		
 		case "paynow":
-			//echo "<pre>";print_r($_POST);die;
-			$stockArr =[];
-			foreach($_POST['product_variant_id'] as $k=>$val)
-			{
-				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id", array(':id'=> $val), 1);
-				
-				// check from product_stock_transaction 
-				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status!=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val, 'status'=>2, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
-				//echo $stock_used->price; die;
-				$remainingStock = $stock_used->total;
-				//echo $remainingStock; die;
-				//if($remainingStock <= 0)
-				if($remainingStock < $_POST['qty'][$k])
-				{
-					$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
-					$product_name = $general_cls_call->cart_product_name($product_dtls->name);
-					
-					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
-					$unitname = $unit_dtls->name;
-					
-					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
-					
-					$available_stock = $stock_used->total;
-					/*if($available_stock == 0)
-					{
-						$variant_stock = 'Out of stock';
+
+		$stockArr = [];
+		$barcode  = '';
+		$pid = '';
+		$sum_per_product = [];
+		
+		if (isset($_POST['id']) && isset($_POST['barcode'])) {
+			$pv_id = $_POST['id'];
+			$barcode = $_POST['barcode'];
+			$rw = $_POST['rw'];
+			$product_variant_id = [0 => $pv_id];
+		} else {
+			$product_variant_id = $_POST['product_variant_id'];
+			$pid = $_POST['pid'];
+		
+			/*print_r($pid);die;
+			if($pid){
+				foreach ($pid as $product_id => $values) {
+					echo $values;
+					foreach ($values as $val) {	
+						$sum_per_product[$product_id] += $val;
 					}
-					else{
-						$variant_stock = $available_stock;
-					}*/
-					
-					
-					$stockArr[] = [
-						"product_name" => $product_name,
-						"variant_name" => $p_variant_name,
-						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
-					];
-					
 				}
-				
-			}
+			}*/
+		}
+//die;
+		/*
+		=====================================================
+		STEP 1 → COLLECT ALL REQUESTED DATA FIRST
+		=====================================================
+		*/
+
+		$variant_rows = [];           // store variant info
+		$requested_loose_weight = []; // total weight per product
+		
+
+		foreach ($product_variant_id as $k => $variant_id)
+		{
 			
-			//echo "<pre>";print_r($stockArr);die;
-			echo json_encode($stockArr);
+			$qty = $_POST['qty'][$k] ?? 1;
+			if ($qty <= 0) continue;
+	//echo $variant_id;die;
+			$variant = $general_cls_call->select_query(
+				"*",
+				PRODUCT_VARIANTS,
+				"WHERE id = :id",
+				[':id' => $variant_id],
+				1
+			);
+
+			$product_id = $variant->product_id;
+
+			$variant_rows[] = [
+				'variant'   => $variant,
+				'product_id'=> $product_id,
+				'qty'       => $qty
+			];
+	//print_r($variant);die;
+			// collect total requested loose weight per product
+			if ($variant->type == 'loose')
+			{
+				$weight = (float)$variant->measurement * $qty;
+
+				if (!isset($requested_loose_weight[$product_id])) {
+					$requested_loose_weight[$product_id] = 0;
+				}
+				//$requested_loose_weight[$product_id] += $weight;
+				if($pid){
+					//$requested_loose_weight[$product_id] = $sum_per_product;
+					$requested_loose_weight[$product_id] = array_sum(array_map('floatval', $pid[$product_id]));
+				} else {
+					$requested_loose_weight[$product_id] += $rw;
+				}
+			}
+		}
+//print_r($requested_loose_weight);die;
+
+		/*
+		=====================================================
+		STEP 2 → GET TOTAL LOOSE STOCK PER PRODUCT
+		=====================================================
+		*/
+
+		$total_loose_stock = [];
+
+		foreach ($requested_loose_weight as $product_id => $dummy)
+		{
+			//echo $product_id;die;
+			$stock = $general_cls_call->select_query_sum(
+				PRODUCT_STOCK_TRANSACTION,
+				"WHERE product_id = :product_id
+				 AND status = :status
+				 AND seller_id = :seller_id
+				 AND stock_type = :stock_type",
+				[
+					'status'     => 1,
+					'product_id' => $product_id,
+					'seller_id'  => $_SESSION['SELLER_ID'],
+					'stock_type' => 1
+				],
+				'loose_stock_quantity'
+			);
+
+			$total_loose_stock[$product_id] = (float)($stock->total ?? 0);
+		}
+
+	//print_r($requested_loose_weight);
+		/*
+		=====================================================
+		STEP 3 → VALIDATE EACH VARIANT
+		=====================================================
+		*/
+
+		foreach ($variant_rows as $row)
+		{
+			$variant    = $row['variant'];
+			$product_id = $row['product_id'];
+			$qty        = $row['qty'];
+
+			$remainingStock = 0;
+
+			/*
+			===============================
+			LOOSE PRODUCT VALIDATION
+			===============================
+			*/
+			if ($variant->type == 'loose')
+			{
+				$variant_size = (float)$variant->measurement;
+
+				$total_stock  = $total_loose_stock[$product_id];
+				$total_used   = $requested_loose_weight[$product_id];
+
+				// if total used > stock → block
+				if ($total_used <= $total_stock)
+				{
+					// calculate max qty allowed for THIS variant
+					$other_weight = $total_used - ($variant_size * $qty);
+
+					$remaining_weight = max(0, $total_stock - $other_weight);
+					
+					//$remaining_weight = max(0, $total_stock - $total_used);
+
+					$remainingStock =
+						($variant_size > 0)
+						? floor($remaining_weight / $variant_size)
+						: 0;
+
+					// product name
+					$product_dtls = $general_cls_call->select_query(
+						"*",
+						PRODUCTS,
+						"WHERE id = :id",
+						[':id'=> $product_id],
+						1
+					);
+
+					$product_name =
+						$general_cls_call->cart_product_name($product_dtls->name);
+
+					$unit_dtls = $general_cls_call->select_query(
+						"*",
+						UNITS,
+						"WHERE id = :id",
+						[':id'=> $variant->stock_unit_id],
+						1
+					);
+
+					$p_variant_name =
+						$variant->measurement.' '.$unit_dtls->name;
+
+					$stockArr[] = [
+						"product_name"  => $product_name,
+						"variant_name"  => $p_variant_name,
+						"variant_stock" => $remainingStock,
+						"product_type" => $variant->type,
+					"total_used" => $total_used,
+					"total_stock" => $total_stock,
+					"other_weight" => $other_weight,
+					"remaining_weight" => $remaining_weight,
+					"remainingStock" => $remainingStock,
+					];
+
+					continue;
+				}
+			}
+
+			/*
+			===============================
+			NORMAL PRODUCT VALIDATION
+			===============================
+			*/
+			else
+			{
+				$stock_used = $general_cls_call->select_query_sum(
+					PRODUCT_STOCK_TRANSACTION,
+					"WHERE product_variant_id = :product_variant_id
+					 AND product_id = :product_id
+					 AND status = :status
+					 AND seller_id = :seller_id
+					 AND stock_type = :stock_type",
+					[
+						':product_variant_id'=> $variant->id,
+						'product_id'         => $product_id,
+						'status'             => 1,
+						'seller_id'          => $_SESSION['SELLER_ID'],
+						'stock_type'         => 1
+					],
+					'stock'
+				);
+
+				$remainingStock = (int)($stock_used->total ?? 0);
+
+				if ($qty > $remainingStock)
+				{
+					$product_dtls = $general_cls_call->select_query(
+						"*",
+						PRODUCTS,
+						"WHERE id = :id",
+						[':id'=> $product_id],
+						1
+					);
+
+					$product_name =
+						$general_cls_call->cart_product_name($product_dtls->name);
+
+					$unit_dtls = $general_cls_call->select_query(
+						"*",
+						UNITS,
+						"WHERE id = :id",
+						[':id'=> $variant->stock_unit_id],
+						1
+					);
+
+					$p_variant_name =
+						$variant->measurement.' '.$unit_dtls->name;
+
+					$stockArr[] = [
+						"product_name"  => $product_name,
+						"variant_name"  => $p_variant_name,
+						"variant_stock" => $remainingStock,
+						"product_type" => $variant->type,
+					];
+
+					continue;
+				}
+			}
+
+
+			/*
+			===============================
+			BARCODE CHECK
+			===============================
+			*/
+			if ($barcode == 1)
+			{
+				$product_dtls = $general_cls_call->select_query(
+					"*",
+					PRODUCTS,
+					"WHERE id = :id",
+					[':id'=> $product_id],
+					1
+				);
+
+				$product_name =
+					$general_cls_call->cart_product_name($product_dtls->name);
+
+				$unit_dtls = $general_cls_call->select_query(
+					"*",
+					UNITS,
+					"WHERE id = :id",
+					[':id'=> $variant->stock_unit_id],
+					1
+				);
+
+				$p_variant_name =
+					$variant->measurement.' '.$unit_dtls->name;
+
+				$stockArr[] = [
+					"product_name"  => $product_name,
+					"variant_name"  => $p_variant_name,
+					"variant_stock" => $remainingStock,
+					"product_type" => $variant->type
+				];
+			}
+		}
+		
+		echo json_encode($stockArr);
 		break;
+
+
+
+
 		
 		case "paynowsave":
 			 
 			//echo "<pre>";print_r($_POST);die;
 			$sellers_details = $general_cls_call->select_query("*", SELLERS, "WHERE admin_id=:admin_id", array(':admin_id'=>$_SESSION['USER_ID']), 1);
-			$store_id = $sellers_details->admin_id;
+			//$store_id = $sellers_details->admin_id;
 			
-			$field = "pos_user_id, user_id, store_id, total_amount, discount_amount, discount_percentage, payment_method, created_at, updated_at";
-			$value = ":pos_user_id, :user_id, :store_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :created_at, :updated_at";
+			$field = "pos_user_id, user_id, total_amount, discount_amount, discount_percentage, payment_method, created_at, updated_at";
+			$value = ":pos_user_id, :user_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :created_at, :updated_at";
 			
 			$addExecute=array(
-				':pos_user_id'			=> $_SESSION['USER_ID'],
+				':pos_user_id'			=> $_SESSION['SELLER_ID'],
 				':user_id'				=> $_POST['user_hidden_id'],
-				':store_id'				=> $general_cls_call->specialhtmlremover($store_id),
 				':total_amount'			=> $_POST['cart_total_amt'],
 				':discount_amount'			=> '0.00',
 				':discount_percentage'		=> '0.00',
@@ -202,12 +466,12 @@
 					$unit_price = $product_variant_dtls->discounted_price;
 					$total_price = $_POST['qty'][$k] * $unit_price;
 					
-					$field = "seller_id, product_variant_id, product_id,  stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, approved_by, approved_date, order_id";
-					$value = ":seller_id, :product_variant_id, :product_id, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :approved_by, :approved_date, :order_id";
+					$field = "seller_id, product_variant_id, product_id,  stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id, approved_by, approved_date, order_id";
+					$value = ":seller_id, :product_variant_id, :product_id, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
 					
-					
+					//parent_id
 					$addExecute=array(
-						':seller_id'			=> $_SESSION['USER_ID'],
+						':seller_id'			=> $_SESSION['SELLER_ID'],
 						':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
 						':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 						
@@ -217,9 +481,10 @@
 						':selling_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->discounted_price),
 						':purchase_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->price),
 						':transaction_type'		=> 2,
-						':received_selled_id'	=> null,
-						':approved_by'			=> null,
-						':approved_date'		=> null,
+						':received_selled_id'	=> 0,
+						':parent_id'	=> 0,
+						':approved_by'			=> 0,
+						':approved_date' 		=> '0000-00-00 00:00:00',
 						':order_id'		       => $general_cls_call->specialhtmlremover($last_insert_id),
 					);
 					$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
@@ -238,7 +503,7 @@
 				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id", array(':id'=> $val), 1);
 				
 				// check from product_stock_transaction 
-				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status!=:status AND product_id=:product_id AND seller_id=:seller_id", array(':product_variant_id'=> $val, 'status'=>2, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['USER_ID']), 'stock');
+				$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id AND seller_id=:seller_id AND stock_type=:stock_type", array(':product_variant_id'=> $val, 'status'=>1, 'product_id'=> $product_variant_dtls->product_id, 'seller_id'=> $_SESSION['SELLER_ID'], 'stock_type'=>1), 'stock');
 				//echo $stock_used->price; die;
 				$remainingStock = $stock_used->total;
 				//echo $remainingStock; die;
@@ -297,7 +562,7 @@
 				
 				
 				$addExecute=array(
-					':seller_id'			=> $_SESSION['USER_ID'],
+					':seller_id'			=> $_SESSION['SELLER_ID'],
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					
@@ -309,9 +574,9 @@
 					':transaction_type'		=> 4,
 					':received_selled_id'	=> $_POST['hid_seller_id'],
 					':parent_id'			=> 0,
-					':approved_by'			=> null,
-					':approved_date'		=> null,
-					':order_id'		       => '',
+					':approved_by'			=> 0,
+					':approved_date' 		=> '0000-00-00 00:00:00',
+					':order_id'		       => 0,
 				);
 				
 				$last_insert_id = $general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
@@ -330,9 +595,9 @@
 					':transaction_type'		=> 4,
 					':received_selled_id'	=> 0,
 					':parent_id'			=> $last_insert_id,
-					':approved_by'			=> null,
-					':approved_date'		=> null,
-					':order_id'		       => '',
+					':approved_by'			=> 0,
+					':approved_date' 		=> '0000-00-00 00:00:00',
+					':order_id'		       => 0,
 				);
 				
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
@@ -344,9 +609,14 @@
 		
 		case "productprint":
 				$barcode = $_POST['barcode'];
+				$pvid = $_POST['product_variant_id'];
 				$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode";
-				$tables = PRODUCT_VARIANTS . " pv INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id"; $where = "WHERE p.barcode = '".$barcode."' ORDER BY p.name";
-				$params = [];
+				$tables = PRODUCT_VARIANTS . " pv INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id"; 
+				$where = "WHERE p.barcode=:barcode AND pv.id=:id ORDER BY p.name";
+				$params = [
+					':barcode' => $barcode,
+					':id' => $pvid
+				];
 				$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
 				//echo "<pre>";print_r($sqlQuery);die;
 				
@@ -356,11 +626,755 @@
 				$measurement = $sqlQuery->measurement;
 				$unitname = $stock_unit_data->name;
 				
-				$stockArr[] = [
+				$stockArr = [
 						"measurement" => $measurement,
 						"unitname" => $unitname,
+						"productname" => $general_cls_call->cart_product_name($sqlQuery->name)
 					];
-				echo json_encode($stockArr);exit;
+				echo json_encode($stockArr);
+		break;
+		
+		case "onlineProductStock":
+				//$pv_id = $_POST['pvid'];
+				$pid = $_POST['pid'];
+				$stockArr = [];
+				
+				$fld = "distinct(product_variant_id)";
+				$wh = "WHERE product_id=:product_id AND status=:status AND seller_id =:seller_id AND stock_type=:stock_type GROUP BY product_variant_id HAVING SUM(stock) > 0";
+				$para = [
+					':product_id' => $pid,
+					':stock_type'	=>	1,
+					':seller_id' => $_SESSION['SELLER_ID'],
+					':status' => 1
+				];
+				
+				$product_variant_id = $general_cls_call->select_join_query($fld, PRODUCT_STOCK_TRANSACTION, $wh, $para, 2);
+				
+				//echo "<pre>";print_r($product_variant_id);die;
+				//-------------------------------------------
+				
+				//$product_variant_id = array(0=>$pv_id);
+				foreach($product_variant_id as $k=>$val)
+				{
+					$Where = "WHERE id=:id AND product_id=:product_id";
+					$params = [
+						':id'	=>	$val->product_variant_id,
+						':product_id'	=>	$pid
+					];
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
+					//echo "<pre>";print_r($product_variant_dtls);die;
+					
+					$where = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
+					
+					$params = [
+						':product_variant_id'	=>	$val->product_variant_id,
+						':product_id'	=>	$product_variant_dtls->product_id,
+						':status'	=>	1,
+						':stock_type'	=>	1,
+						':seller_id'	=>	$_SESSION['SELLER_ID']
+					];
+					// check from product_stock_transaction 
+					$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $where, $params, 'stock');
+					
+					// after cart add check stock
+					
+					$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
+					$product_name = $general_cls_call->cart_product_name($product_dtls->name);
+					
+					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
+					$unitname = $unit_dtls->name;
+					
+					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					
+					$available_stock = $stock_used->total;
+					
+					$stockArr[] = [
+						"product_name" => $product_name,
+						"product_variant_id" => $val->product_variant_id,
+						"variant_name" => $p_variant_name .' ('. $product_variant_dtls->type .')',
+						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
+					];
+				}
+				echo json_encode($stockArr);
+		break;
+		case "getProductVariant";
+			 
+			$fields = "pv.id, pv.measurement, u.name as unit_name, pv.type";
+			$tables = PRODUCT_VARIANTS . " pv
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			
+			$where ="WHERE pv.product_id=:product_id";
+			$params = [
+				':product_id' => $_POST['pid']
+			];
+			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
+			$varianrArr = [];
+			if($sqlQuery[0] != '')
+			{
+				foreach($sqlQuery as $arr)
+				{
+					$varianrArr[] = [
+						'id' => $arr->id,
+						'measurement' => $arr->measurement,
+						'unitname' => $arr->unit_name,
+						'ptype' => $arr->type
+					];
+				}
+			}
+			echo json_encode($varianrArr); 
+		break;
+		case "operatorList":			
+			$fields = "po.id, po.name, po.mobile";
+			$tables = PACKAGING_OPERATORS . " po
+			INNER JOIN " . ADMIN_MASTER . " a ON a.id = po.admin_id
+			LEFT JOIN " . PACKAGING_OPERATORS_ASSIGN . " poa ON poa.packaging_operator_id = po.id";
+			$where = "WHERE po.status = :status
+			AND a.created_by = :created_by
+			AND a.role_id = :role_id
+			AND (poa.status IS NULL OR poa.status != :poastatus) GROUP BY po.id";
+			$params = [
+			  ':status'      => 1,
+			  ':role_id'     => 5,
+			  ':poastatus'   => 3,
+			  ':created_by'  => $_SESSION['SELLER_ID']
+			];
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);		
+			
+			if (!empty($sqlQuery)) {
+				$data['status'] = 200;
+				$rec = [];
+				foreach($sqlQuery as $arr)
+				{	
+					$rec[] = [
+						'id' => $arr->id,
+						'name' => $arr->name
+					];
+				}
+				$data['rec'] = $rec;
+			} else {
+				$data['status'] = 400;
+				$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+					<div class="text-white"><strong>Error!</strong> No operator found.</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+			} 	
+			echo json_encode($data);
+			exit;
+		break;
+		
+		case "assign_operator_save":
+			extract($_POST);
+			//echo "<pre>";print_r($_POST);die;
+			$check_exists = $general_cls_call->select_query("id, status", PACKAGING_OPERATORS_ASSIGN, "WHERE order_id =:order_id", array(':order_id'=> $order_id), 1);
+			if(!empty($check_exists)) {
+				$data['status'] = 200;
+				$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+					<div class="text-white"><strong>Error!</strong> Operator already assigned to this order.</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+			} else {
+				
+				$status = $packed_status == 'true' ? 4 : 3;
+				$field = "order_id, packaging_operator_id, assign_by, status, created_at, updated_at";
+				$value = ":order_id, :packaging_operator_id, :assign_by, :status, :created_at, :updated_at";
+				
+				$addExecute=array(
+					':order_id'					=> $order_id,
+					':packaging_operator_id'	=> $packaging_operator_id,
+					':assign_by'				=> $_SESSION['SELLER_ID'],
+					':status'					=> $status,
+					':created_at'				=> date("Y-m-d H:i:s"),
+					':updated_at'				=> date("Y-m-d H:i:s")
+				);
+				
+				$ok = $general_cls_call->insert_query(PACKAGING_OPERATORS_ASSIGN, $field, $value, $addExecute);
+				if($ok) {
+					//insert order statuses
+					$field = "order_id, status, created_by, user_type, created_at";
+					$value = ":order_id, :status, :created_by, :user_type, :created_at";
+					$addExecute=array(
+						':order_id'				=> $order_id,
+						':status'				=> 3,
+						':created_by'			=> $_SESSION['USER_ID'],
+						':user_type'			=> $_SESSION['ROLE_ID'],
+						':created_at'			=> date("Y-m-d H:i:s")
+					);
+					$general_cls_call->insert_query(ORDERS_STATUSES, $field, $value, $addExecute);
+					if($status == 4)
+					{
+						$fieldOs = "order_id, status, created_by, user_type, created_at";
+						$valueOs = ":order_id, :status, :created_by, :user_type, :created_at";
+						$addExecuteOs=array(
+							':order_id'				=> $order_id,
+							':status'				=> 4,
+							':created_by'			=> $_SESSION['USER_ID'],
+							':user_type'			=> $_SESSION['ROLE_ID'],
+							':created_at'			=> date("Y-m-d H:i:s")
+						);
+						$general_cls_call->insert_query(ORDERS_STATUSES, $fieldOs, $valueOs, $addExecuteOs);
+					}
+					//update orders
+					$setValues="active_status=:active_status";
+					$updateExecute=array(
+						':active_status'	=> $status,
+						':order_id'			=> $order_id
+					);
+					$whereClause=" WHERE id = :order_id";
+					$general_cls_call->update_query(ORDERS, $setValues, $whereClause, $updateExecute);
+					//update orders items
+					$setValues="active_status=:active_status";
+					$updateExecute=array(
+						':active_status'	=> $status,
+						':order_id'			=> $order_id
+					);
+					$whereClause=" WHERE order_id = :order_id";
+					$general_cls_call->update_query(ORDERS_ITEMS, $setValues, $whereClause, $updateExecute);
+				
+					$data['status'] = 200;
+					$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+						<div class="text-white"><strong>Success!</strong> Operator assigned successfully.</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>';
+				} else {
+					$data['status'] = 400;
+					$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+						<div class="text-white"><strong>Error!</strong> Something went wrong.</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>';
+				}
+			}
+			echo json_encode($data);
+			exit;
+		break;
+		
+		case "orderStatusList":			
+			$fields = "id, status";
+			$tables = ORDERS_STATUS_LISTS;
+			$where = "WHERE id=:id";
+			$params = [':id'=>4];
+			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);		
+			
+			if (!empty($sqlQuery)) {
+				$data['status'] = 200;
+				$rec = [];
+				foreach($sqlQuery as $arr)
+				{	
+					$rec[] = [
+						'id' => $arr->id,
+						'name' => $arr->status
+					];
+				}
+				$data['rec'] = $rec;
+			} else {
+				$data['status'] = 400;
+				$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+					<div class="text-white"><strong>Error!</strong> No status found.</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+			} 	
+			echo json_encode($data);
+			exit;
+		break;
+		
+		case "order_status_change_save":
+			extract($_POST);
+			
+				//update PACKAGING OPERATORS ASSIGN
+				$setValues="status=:status";
+				$updateExecute=array(
+					':status'		=> $order_status_id,
+					':order_id'		=> $order_id
+				);
+				$whereClause=" WHERE order_id = :order_id";
+				$general_cls_call->update_query(PACKAGING_OPERATORS_ASSIGN, $setValues, $whereClause, $updateExecute);
+				//insert order statuses
+				$field = "order_id, status, created_by, user_type, created_at";
+				$value = ":order_id, :status, :created_by, :user_type, :created_at";
+				$addExecute=array(
+					':order_id'				=> $order_id,
+					':status'				=> $order_status_id,
+					':created_by'			=> $_SESSION['USER_ID'],
+					':user_type'			=> $_SESSION['ROLE_ID'],
+					':created_at'			=> date("Y-m-d H:i:s")
+				);
+				$general_cls_call->insert_query(ORDERS_STATUSES, $field, $value, $addExecute);				
+				//update orders
+				$setValues="active_status=:active_status";
+				$updateExecute=array(
+					':active_status'	=> $order_status_id,
+					':order_id'			=> $order_id
+				);
+				$whereClause=" WHERE id = :order_id";
+				$general_cls_call->update_query(ORDERS, $setValues, $whereClause, $updateExecute);
+				//update orders items
+				$setValues="active_status=:active_status";
+				$updateExecute=array(
+					':active_status'	=> $order_status_id,
+					':order_id'			=> $order_id
+				);
+				$whereClause=" WHERE order_id = :order_id";
+				$general_cls_call->update_query(ORDERS_ITEMS, $setValues, $whereClause, $updateExecute);
+			
+				$data['status'] = 200;
+				$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+					<div class="text-white"><strong>Success!</strong> Order status changed successfully.</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+				
+		
+			echo json_encode($data);
+			
+		break;
+		
+		case "packaging_operator_order_status":
+			extract($_POST);
+			$dataArray = $general_cls_call->callAPI("POST", SITE_URL."api/packaging-operator-orders-save", ['order_id'=>$order_id], $_SESSION['API_TOKEN']);
+			//echo $data['msg'];
+			//echo "<pre>";print_r($dataArray);die;
+			if($dataArray['status'] == 200)
+			{
+				$data['status'] = $dataArray['status'];
+				$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+					<div class="text-white"><strong>Success!</strong> '. $dataArray['msg'].'</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>';
+			}
+			echo json_encode($data);
+			
+		break;
+		case "onlineCheckVariant":
+				$pv_id = $_POST['pvid'];
+				$pid = $_POST['pid'];
+				$stockArr = [];
+				
+				$product_variant_id = array(0=>$pv_id);
+				foreach($product_variant_id as $k=>$val)
+				{
+					$Where = "WHERE id=:id AND product_id=:product_id";
+					$params = [
+						':id'	=>	$val,
+						':product_id'	=>	$pid
+					];
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
+					//echo "<pre>";print_r($product_variant_dtls);die;
+					
+					// available pos stock
+					$wherePos = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
+					
+					$paramsPos = [
+						':product_variant_id'	=>	$val,
+						':product_id'	=>	$product_variant_dtls->product_id,
+						':status'	=>	1,
+						':stock_type'	=>	1,
+						':seller_id'	=>	$_SESSION['SELLER_ID']
+					];
+					// check from product_stock_transaction 
+					$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
+					
+					// available online stock
+					$whereOnline = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
+					
+					$paramsOnline = [
+						':product_variant_id'	=>	$val,
+						':product_id'	=>	$product_variant_dtls->product_id,
+						':status'	=>	1,
+						':stock_type'	=>	2,
+						':seller_id'	=>	$_SESSION['SELLER_ID']
+					];
+					// check from product_stock_transaction 
+					$stock_used_online = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $whereOnline, $paramsOnline, 'stock');
+					
+					$whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status AND seller_id=:seller_id";
+					$paramsOrdItm = [
+						':product_variant_id' => $val,
+						':seller_id' => $_SESSION['SELLER_ID'],
+						'active_status' => 7
+					];
+					$qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
+					 
+					$qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
+					
+					// after cart add check stock
+					
+					$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->product_id), 1);
+					$product_name = $general_cls_call->cart_product_name($product_dtls->name);
+					
+					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
+					$unitname = $unit_dtls->name;
+					
+					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					
+					$available_stock = $stock_used->total;
+					//$available_stock_online = $stock_used_online->total;
+					
+					$stockArr[] = [
+						"product_name" => $product_name,
+						"variant_name" => $p_variant_name,
+						"variant_stock" => $stock_used->total == null ? 0 : $stock_used->total,
+						"variant_stock_online" => $stock_used_online->total == null ? 0 : $stock_used_online->total-$qty_used,
+					];
+				}
+				echo json_encode($stockArr);
+		break;
+		case "purchaseAccept":
+				$accept_status = $_POST['accept_status'];
+				$stock_transaction_id = $_POST['stock_transaction_id'];
+				$qty = $_POST['qty'];
+				$product_id = $_POST['product_id'];
+				$product_variant_id = $_POST['product_variant_id'];
+				//echo $status.' '.$stock_transaction_id;
+				$field = "stock";
+				$where = "WHERE id=:id";
+				$params = [
+					':id' => $stock_transaction_id
+				];
+				$stock_data = $general_cls_call->select_query($field, PRODUCT_STOCK_TRANSACTION, $where, $params, 1);
+				//echo $stock_data->stock;
+				if($accept_status==1)
+				{
+					$setValues="status=:status, seller_accept_status=:seller_accept_status";
+					$updateExecute=array(
+						':status'	=> 1,
+						':seller_accept_status'	=> 1,
+						':id'		=> $stock_transaction_id
+					);
+					$whereClause=" WHERE id = :id";
+					$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+					
+					$data['status'] = 200;
+					$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+						<div class="text-white"><strong>Success!</strong> Stock updated successfully</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>';
+				}
+				elseif($accept_status==2 || $accept_status==4)
+				{
+					if($qty <= $stock_data->stock)
+					{
+						$res['status_name'] = $accept_status==2 ? 'Damage' : 'Short fall';
+						$res['previous_qty'] = $stock_data->stock;
+						$res['updated_qty'] = $qty;
+						$seller_accept_remark = json_encode($res);
+						
+						
+						$setValues="status=:status, stock=:stock, seller_accept_status=:seller_accept_status, seller_accept_remark=:seller_accept_remark";
+						$updateExecute=array(
+							':status'	=> 1,
+							':seller_accept_status'	=> $accept_status,
+							':stock'	=> $qty,
+							':seller_accept_remark'	=> $seller_accept_remark,
+							':id'		=> $stock_transaction_id
+						);
+						$whereClause=" WHERE id=:id";
+						$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+						
+						$data['status'] = 200;
+						$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+						<div class="text-white"><strong>Success!</strong> Stock updated successfully</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>';
+					}
+					else{
+						$data['status'] = 400;
+						$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+							<div class="text-white"><strong>Error!</strong> Input quantity exceed than stock available</div>
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>';
+					}
+				}
+				elseif($accept_status==3)
+				{
+					// check available stock 
+			        $stock_available = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $product_variant_id, 'status'=>1, 'product_id'=> $product_id), 'stock');
+					
+					
+					//if($qty >= $stock_data->stock)
+					//echo $stock_available->total. . $qty; die;
+					if($stock_available->total >= $qty)
+					{
+						$res['status_name'] = 'Exceed';
+						$res['previous_qty'] = $stock_data->stock;
+						$res['updated_qty'] = $qty;
+						$seller_accept_remark = json_encode($res);
+						
+						$setValues="status=:status, stock=:stock, seller_accept_status=:seller_accept_status, seller_accept_remark=:seller_accept_remark";
+						$updateExecute=array(
+							':status'	=> 1,
+							':seller_accept_status'	=> $accept_status,
+							':stock'	=> $qty,
+							':seller_accept_remark'	=> $seller_accept_remark,
+							':id'		=> $stock_transaction_id
+						);
+						$whereClause=" WHERE id=:id";
+						$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+						
+						$data['status'] = 200;
+						$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+						<div class="text-white"><strong>Success!</strong> Stock updated successfully</div>
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>';
+					}
+					else{
+						$data['status'] = 400;
+						$data['msg'] = '<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+							<div class="text-white"><strong>Error!</strong> Input quantity less than stock available</div>
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>';
+					}
+				}
+				
+			echo json_encode($data);
+		break;
+		
+		case "getVendorSellingPrice":
+			 $product_variant_id = $_POST['val'];
+			 $where = "WHERE id =:id";
+			 $params = [':id'=> $product_variant_id];
+			 $prices = $general_cls_call->select_query("discounted_price", PRODUCT_VARIANTS, $where, $params, 1);
+			 $data['status'] = 200;
+			 $data['discount_price'] = $prices->discounted_price;
+			 echo json_encode($data);
+			 
+		break;
+		case "updatedelete":
+			$setValues="status=:status";
+			$updateExecute=array(
+				':status'	=> 2,
+				':id'	    => $_POST['id']
+			);
+			$whereClause=" WHERE id = :id";
+			$update = $general_cls_call->update_query($_POST['table'], $setValues, $whereClause, $updateExecute);
+			if($update)
+			{
+				echo 'l';
+			}
+		break;
+		
+		case "updatestatus":
+		
+			$statusData = $general_cls_call->select_query("status", $_POST['table'], "WHERE id=:id", array(':id'=>$_POST['id']), 1);
+			
+			$status = $statusData->status == 1 ? 0 : 1;
+		
+			$setValues="status=:status";
+			$updateExecute=array(
+				':status'	=> $status,
+				':id'	    => $_POST['id']
+			);
+			$whereClause=" WHERE id = :id";
+			$update = $general_cls_call->update_query($_POST['table'], $setValues, $whereClause, $updateExecute);
+			if($update)
+			{
+				echo 'l';
+			}
+		break;
+		case "auto_assign_operator":
+			
+			//$where = "WHERE oi.active_status=:active_status 
+			$where = "WHERE o.active_status=:active_status 
+				  AND oi.seller_id=:seller_id
+				  GROUP BY oi.order_id
+				  ORDER BY 
+					  CASE 
+						  WHEN o.order_type = 'slot' THEN o.from_time
+						  ELSE o.created_at
+					  END ASC";
+			$params = [
+				':seller_id'=> $_SESSION['SELLER_ID'],
+				':active_status'=> 2
+			];
+			
+			
+			$fields = "o.id";
+
+			$tables = ORDERS . " o
+			INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id";
+			
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+			
+			$order_ids = [];
+			if(!empty($sqlQuery[0]))
+			{
+				foreach($sqlQuery as $k=>$arr)
+				{
+					$order_id = $arr->id;
+					$check_exists = $general_cls_call->select_query("id, status", PACKAGING_OPERATORS_ASSIGN, "WHERE order_id =:order_id", array(':order_id'=> $order_id), 1);
+					if(empty($check_exists))
+					{
+						//echo $order_id = $arr->id;die;
+						$fields = "po.id, po.name, po.mobile";
+
+						$tables = PACKAGING_OPERATORS . " po
+						INNER JOIN " . ADMIN_MASTER . " a ON a.id = po.admin_id
+						LEFT JOIN " . PACKAGING_OPERATORS_ASSIGN . " poa 
+							ON poa.packaging_operator_id = po.id";
+
+						$where = "WHERE po.status = :status
+						AND a.created_by = :created_by
+						AND a.role_id = :role_id
+						AND (poa.status IS NULL OR poa.status != :poastatus)
+						ORDER BY 
+						CASE 
+							WHEN po.id > (
+								SELECT IFNULL(poa2.packaging_operator_id, 0)
+								FROM " . PACKAGING_OPERATORS_ASSIGN . " poa2
+								WHERE poa2.status != :poastatus
+								ORDER BY poa2.id DESC
+								LIMIT 1
+							) THEN 0
+							ELSE 1
+						END,
+						po.id ASC
+						LIMIT 1";
+
+						$params = [
+							':status'     => 1,
+							':role_id'    => 5,
+							':poastatus'  => 3,
+							':created_by' => $_SESSION['SELLER_ID']
+						];
+
+						$poQuery = $general_cls_call->select_join_query($fields,$tables,$where,$params,1);
+						$packaging_operator_id = '';
+						//echo "<pre>";print_r($poQuery);die;
+						$packaging_operator_id = !empty($poQuery->id) ? $poQuery->id : '';
+						
+						if($packaging_operator_id !='')
+						{
+							$field = "order_id, packaging_operator_id, assign_by, status, auto_assign, created_at, updated_at";
+							$value = ":order_id, :packaging_operator_id, :assign_by, :status, :auto_assign, :created_at, :updated_at";
+							
+							$addExecute=array(
+								':order_id'					=> $order_id,
+								':packaging_operator_id'	=> $packaging_operator_id,
+								':assign_by'				=> $_SESSION['SELLER_ID'],
+								':status'					=> 3,
+								':auto_assign'				=> 1,
+								':created_at'				=> date("Y-m-d H:i:s"),
+								':updated_at'				=> date("Y-m-d H:i:s")
+							);
+							
+							$ok = $general_cls_call->insert_query(PACKAGING_OPERATORS_ASSIGN, $field, $value, $addExecute);
+							
+							
+							$fields = "order_id, status, created_by, user_type, created_at";
+							$values = ":order_id, :status, :created_by, :user_type, :created_at";
+							$addExecutes=array(
+								':order_id'				=> $order_id,
+								':status'				=> 3,
+								':created_by'			=> $_SESSION['USER_ID'],
+								':user_type'			=> $_SESSION['ROLE_ID'],
+								':created_at'			=> date("Y-m-d H:i:s")
+							);
+							$general_cls_call->insert_query(ORDERS_STATUSES, $fields, $values, $addExecutes);
+							//update orders
+							$setValues="active_status=:active_status";
+							$updateExecute=array(
+								':active_status'	=> 3,
+								':order_id'			=> $order_id
+							);
+							$whereClause=" WHERE id = :order_id";
+							$general_cls_call->update_query(ORDERS, $setValues, $whereClause, $updateExecute);
+							//update orders items
+							$setValues="active_status=:active_status";
+							$updateExecute=array(
+								':active_status'	=> 3,
+								':order_id'			=> $order_id
+							);
+							$whereClause=" WHERE order_id = :order_id";
+							$general_cls_call->update_query(ORDERS_ITEMS, $setValues, $whereClause, $updateExecute);
+							
+							$order_ids[] = $order_id;
+						}
+					}
+				}
+			}
+			echo json_encode($order_ids);
+		break;
+		
+		case "getDeductProductVariant";
+			 
+			$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode, pv.id as pvid, pv.type";
+			$tables = PRODUCT_STOCK_TRANSACTION . " pr
+			INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+			INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			$where = "WHERE pr.product_id=:product_id AND  pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+			$params = [
+				':status'			=> 1,
+				':seller_id'		=> $_SESSION['SELLER_ID'],
+				':product_id'		=> $_POST['pid']
+			];
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+			$varianrArr = [];
+			if($sqlQuery[0] != '')
+			{
+				foreach($sqlQuery as $arr)
+				{
+					$wherePos = "WHERE product_id=:product_id AND product_variant_id=:product_variant_id AND  stock_type=:stock_type AND seller_id=:seller_id AND status=:status";
+							 
+					$paramsPos = [
+						':product_id' => $arr->product_id,
+						':product_variant_id' => $arr->pvid,
+						':stock_type' => 1,
+						':seller_id' => $_SESSION['SELLER_ID'],
+						':status' => 1
+					];
+					$pos_stock = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
+					
+					if($pos_stock->total != 0)
+					{
+						$varianrArr[] = [
+							'id' => $arr->product_variant_id,
+							'measurement' => $arr->measurement,
+							'unitname' => $arr->stock_unit_name,
+							'ptype' => $arr->type
+						];
+					}
+				}
+			}
+			echo json_encode($varianrArr); 
+		break;
+		
+		case "getDeductProductVariantQry";
+			 
+			$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode, pv.id as pvid";
+			$tables = PRODUCT_STOCK_TRANSACTION . " pr
+			INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+			INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			$where = "WHERE pr.product_variant_id=:product_variant_id AND  pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+			$params = [
+				':status'			=> 1,
+				':seller_id'		=> $_SESSION['SELLER_ID'],
+				':product_variant_id'	=> $_POST['pvid']
+			];
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
+			$varianrArr = [];
+			//if($sqlQuery[0] != '')
+			//{
+				//foreach($sqlQuery as $arr)
+				//{
+					$wherePos = "WHERE product_id=:product_id AND product_variant_id=:product_variant_id AND  stock_type=:stock_type AND seller_id=:seller_id AND status=:status";
+							 
+					$paramsPos = [
+						':product_id' => $sqlQuery->product_id,
+						':product_variant_id' => $sqlQuery->pvid,
+						':stock_type' => 1,
+						':seller_id' => $_SESSION['SELLER_ID'],
+						':status' => 1
+					];
+					$pos_stock = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
+					
+					if($pos_stock->total != 0)
+					{
+						$varianrArr[] = [
+							'stock' => $pos_stock->total
+						];
+					}
+				//}
+			//}
+			echo json_encode($varianrArr); 
 		break;
     }
 ?>
