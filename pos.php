@@ -368,7 +368,7 @@ $(document).ready(function(){
 
 			if ($('#' + inputId).length === 0) {
 				$('#qty-total').append(
-					`<input type="text" class="cart-pid-${pid}" id="${inputId}">`
+					`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`
 				);
 			}
 
@@ -427,7 +427,7 @@ function getProducts(val)
 					}
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
@@ -468,7 +468,7 @@ function getProducts(val)
 					localStorage.setItem(inputId, 'visible');
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
@@ -578,7 +578,7 @@ function check_qty_stock(id, inc, productMeasurement, pid, callback)
 					localStorage.setItem(inputId, 'visible');
 					
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
@@ -718,7 +718,7 @@ function check_product_stock(id,parameter)
 					}
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="cart-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="cart-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
