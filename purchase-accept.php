@@ -191,8 +191,8 @@
 				</div>
 				
 				<div class="col-md-12 qty-div"  style="display:none">
-				  <label for="operator_id" class="form-label">Quantity</label>
-				  <input type="text" class="form-control" id="qty"  placeholder="Quantity"  oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+				  <label for="operator_id" class="form-label">Correct Quantity</label>
+				  <input type="text" class="form-control" id="qty"  placeholder="Correct Quantity"  oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 				  <div id="error_qty"></div>
 				</div>
 				<input type="hidden" id="product_stock_transaction_id">

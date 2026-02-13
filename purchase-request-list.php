@@ -17,7 +17,48 @@
 			$product_stk_dtls = $general_cls_call->select_query("*", PRODUCT_STOCK_TRANSACTION, "WHERE id =:id ", array(':id'=> $_GET['id']), 1);
 			
 			// check available stock 
-			$stock_available = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $product_stk_dtls->product_variant_id, 'status'=>1, 'product_id'=> $product_stk_dtls->product_id), 'stock');
+			$fields = "
+				SUM(
+					CASE 
+						WHEN pv.type = 'loose' THEN asp.loose_stock_quantity
+						WHEN pv.type = 'packet' THEN asp.stock
+						ELSE 0
+					END
+				) AS total_stock
+			";
+
+			$table = ADMIN_STOCK_PURCHASE_LIST . " asp
+			INNER JOIN product_variants pv 
+				ON pv.id = asp.product_variant_id";
+
+			$where = "
+			WHERE asp.status = ?
+			AND asp.product_id = ?
+			AND pv.deleted_at IS NULL
+			AND (
+					pv.type = 'loose'
+				 OR (pv.type = 'packet' AND asp.product_variant_id = ?)
+			)
+			";
+
+			$params = [
+				1,
+				$product_stk_dtls->product_id,
+				$product_stk_dtls->product_variant_id
+			];
+
+			$result = $general_cls_call->select_query(
+				$fields,
+				$table,
+				$where,
+				$params,
+				1
+			);
+
+			$stock_available = $result->total_stock ?? 0;
+			
+			
+			/*$stock_available = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $product_stk_dtls->product_variant_id, 'status'=>1, 'product_id'=> $product_stk_dtls->product_id), 'stock');*/
 			
 			
 			$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date";
@@ -30,9 +71,34 @@
 			);
 				
 			if($_GET['mode'] == '1')
-			{				
-				if($stock_available->total >= $_GET['qty'])
+			{;
+				// echo '<pre>'; print_r($stock_available);die;
+				if($stock_available >= $_GET['qty'])
 				{
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
+					$loose_stock_quantity = $product_stk_dtls->loose_stock_quantity;
+					if($product_variant_dtls->type == 'loose')
+					{
+						$measurement_arr = [
+							'quantity' => $_GET['qty'] * $product_variant_dtls->measurement,
+							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
+						];
+						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+						
+						$loose_stock_quantity = $measurement_units['value'];
+						
+						$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date, loose_stock_quantity=:loose_stock_quantity, stock=:stock";
+						$whereClause=" WHERE id=:id";
+						$updateExecute=array(
+							':approved_by'=>$_SESSION['USER_ID'],
+							':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
+							':approved_date'=> date("Y-m-d H:i:s"),
+							':loose_stock_quantity'=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
+							':stock'=> $_GET['qty'],
+							':id'=>$_GET['id']
+						);
+					}
+					
 					$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
 					
 					
@@ -51,6 +117,16 @@
 						':created_at' 			=> date('Y-m-d h:i:s'),
 						':updated_at'		    => date('Y-m-d H:i:s')
 					);
+					
+					// Add loose field properly
+					if ($product_variant_dtls->type == 'loose') {
+
+						$field .= ", loose_stock_quantity";
+						$value .= ", :loose_stock_quantity";
+
+						$addExecute[':loose_stock_quantity'] = -($general_cls_call->specialhtmlremover($loose_stock_quantity));
+					}
+					
 					$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
 					
 					if($updateRec)
@@ -63,9 +139,40 @@
 				}
 			}
 			
-			if($_GET['mode'] == '2' || $_GET['mode'] == '3')
+			if($_GET['mode'] == '2')
 			{
 				$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+			}
+			if($_GET['mode'] == '3')
+			{
+				if($stock_available >= $_GET['qty'])
+				{
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
+					$loose_stock_quantity = $product_stk_dtls->loose_stock_quantity;
+					if($product_variant_dtls->type == 'loose')
+					{
+						$measurement_arr = [
+							'quantity' => $_GET['qty'] * $product_variant_dtls->measurement,
+							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
+						];
+						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+						
+						$loose_stock_quantity = $measurement_units['value'];
+						
+						$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date, loose_stock_quantity=:loose_stock_quantity, stock=:stock";
+						$whereClause=" WHERE id=:id";
+						$updateExecute=array(
+							':approved_by'=>$_SESSION['USER_ID'],
+							':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
+							':approved_date'=> date("Y-m-d H:i:s"),
+							':loose_stock_quantity'=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
+							':stock'=> $_GET['qty'],
+							':id'=>$_GET['id']
+						);
+					}
+					
+					$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
+				}
 			}
 			
 			if(empty($_GET['qty']))
@@ -218,7 +325,7 @@
 													  data-bs-toggle="dropdown"> <span class="visually-hidden">Toggle Dropdown</span>
 													</button>
 													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
-															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1&qty=<?php echo $arr->pqty ?>" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-success text-bold">Instant Approve</span></a>
+															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-success text-bold">Instant Approve</span></a>
 															
 															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=3&qty=<?php echo $arr->pqty ?>" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-info text-bold">Approve</span></a>
 															
