@@ -21,7 +21,9 @@
 				$explode_product = explode("@@@", $product);
 				
 				$product_id = $explode_product[0];
-				//$product_variant_id = $explode_product[1];
+				$product_variant_id = $product_variant_id;
+				
+				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id AND product_id=:product_id", array(':id'=> $product_variant_id, ':product_id'=>$product_id), 1);
 				
 				$remarks = !empty($remarks) ? $remarks : null;
 				$field = "seller_id, product_id, product_variant_id, stock, status,  reason,  processing_user_id, remarks, created_date, transaction_type";
@@ -40,6 +42,12 @@
 					':remarks'				=> $remarks,
 					':created_date' 			=> date('Y-m-d H:i:s')
 				);
+				if($product_variant_dtls->type == 'loose'){
+					$field .= ", loose_stock_quantity";
+					$value .= ", :loose_stock_quantity";
+
+					$addExecute[':loose_stock_quantity'] = -($product_variant_dtls->measurement * $stock);
+				}
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 				$sucMsg = "Stock Ddeducted Successfully";
 			/*}
@@ -112,7 +120,7 @@
 										INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 										INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 										INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-										$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id AND pr.stock_type=:stock_type GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
+										$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id AND pr.stock_type=:stock_type GROUP BY pr.product_id HAVING SUM(pr.stock) > 0";
 										$params = [
 											':status' => 1,
 											':stock_type' => 1,

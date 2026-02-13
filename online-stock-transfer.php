@@ -57,6 +57,12 @@
 					':approved_date' 		=> '0000-00-00 00:00:00',
 					':order_id'		       => 0,
 				);
+				if($product_variant_dtls->type == 'loose'){
+					$field .= ", loose_stock_quantity";
+					$value .= ", :loose_stock_quantity";
+
+					$addExecute[':loose_stock_quantity'] = $product_variant_dtls->measurement * $stock;
+				}
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 				
 				
@@ -78,6 +84,9 @@
 					':approved_date' 		=> '0000-00-00 00:00:00',
 					':order_id'		       => 0,
 				);
+				if($product_variant_dtls->type == 'loose'){
+					$addExecute[':loose_stock_quantity'] = -($product_variant_dtls->measurement * $stock);
+				}
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 				
 				//------- add stock to product variant table-----
