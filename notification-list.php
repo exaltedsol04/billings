@@ -306,7 +306,7 @@ $(document).ready(function(){
 		let notificationId = $(this).data('notification-id');
 
 		$.ajax({
-			url: "<?PHP echo SITE_URL; ?>ajax1",
+			url: "<?PHP echo SITE_URL; ?>ajax",
 			type: "POST",
 			data: {
 				action: "sendNotification",
@@ -326,7 +326,7 @@ $(document).ready(function(){
 		var datapost = 'action=searchUsersList&search='+search;
         $.ajax({
             type: "POST",
-			url: "<?PHP echo SITE_URL; ?>ajax1",
+			url: "<?PHP echo SITE_URL; ?>ajax",
 			data: datapost,
             success: function(response) {
                 $('#userListContainer').html(response);
@@ -354,7 +354,7 @@ $(document).ready(function(){
         let searchValue = $('#userSearch').val();
 
         $.ajax({
-            url: "<?PHP echo SITE_URL; ?>ajax1",
+            url: "<?PHP echo SITE_URL; ?>ajax",
             type: 'POST',
             data: {
                 action: 'sendNotification',
@@ -390,7 +390,7 @@ $(document).ready(function(){
         }
 
         $.ajax({
-            url: "<?PHP echo SITE_URL; ?>ajax1",
+            url: "<?PHP echo SITE_URL; ?>ajax",
             type: 'POST',
             data: {
                 action: 'sendNotification',
