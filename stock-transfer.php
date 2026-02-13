@@ -234,7 +234,7 @@ $(document).ready(function(){
 
 			if ($('#' + inputId).length === 0) {
 				$('#qty-total').append(
-					`<input type="text" class="transfer-pid-${pid}" id="${inputId}">`
+					`<input type="hidden" class="transfer-pid-${pid}" id="${inputId}">`
 				);
 			}
 
@@ -291,7 +291,7 @@ function check_qty_stock(id, inc, productMeasurement, pid, callback)
 					localStorage.setItem(inputId, 'visible');
 					
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="transfer-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="transfer-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
@@ -397,12 +397,12 @@ function check_product_stock(id,parameter)
 				{
 					//$('#dataRow' + id).find('.qty-increment').prop('disabled', false);
 					if (typeof add_to_cart !== 'function') {
-						$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/cart.js")
+						$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/stock-transfer.js")
 							.done(function () {
 								add_to_cart(parameter);
 							})
 							.fail(function () {
-								alert('Failed to load cart.js');
+								alert('Failed to load stock-transfer.js');
 							});
 
 					} else {
@@ -418,7 +418,7 @@ function check_product_stock(id,parameter)
 					}
 					// ensure it exists
 					if ($('#' + inputId).length === 0) {
-					  $('#qty-total').append(`<input type="text" class="transfer-pid-${pid}" id="${inputId}">`);
+					  $('#qty-total').append(`<input type="hidden" class="transfer-pid-${pid}" id="${inputId}">`);
 					} else {
 					  $('#' + inputId).show();
 					}
