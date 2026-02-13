@@ -459,7 +459,7 @@
 				$total_price = $_POST['qty'][$k] * $unit_price;
 				$loose_stock_quantity = 0.00;
 				if($product_variant_dtls->type == 'loose') {
-					$loose_stock_quantity = -($_POST['pid'][$product_id][$k]);
+					$loose_stock_quantity = -($_POST['pid'][$product_id][$val]);
 				}
 				
 				$field = "pos_order_id, product_id, product_variant_id, type, loose_stock_quantity, quantity, unit_price, total_price, created_at, updated_at";
@@ -494,7 +494,7 @@
 					$total_price = $_POST['qty'][$k] * $unit_price;
 					$loose_stock_quantity = 0.00;
 					if($product_variant_dtls->type == 'loose') {
-						$loose_stock_quantity = -($_POST['pid'][$product_id][$k]);
+						$loose_stock_quantity = -($_POST['pid'][$product_id][$val]);
 					}
 					
 					$field = "seller_id, product_variant_id, product_id, stock, loose_stock_quantity, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id, approved_by, approved_date, order_id";
@@ -691,7 +691,7 @@
 				$total_price = $_POST['qty'][$k] * $unit_price;
 				$loose_stock_quantity = 0.00;
 				if($product_variant_dtls->type == 'loose') {
-					$loose_stock_quantity = -($_POST['pid'][$product_id][$k]);
+					$loose_stock_quantity = -($_POST['pid'][$product_id][$val]);
 				}
 				
 				$field = "seller_id, product_variant_id, product_id, loose_stock_quantity, stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id";
