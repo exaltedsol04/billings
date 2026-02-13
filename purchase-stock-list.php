@@ -108,6 +108,7 @@
 									<th>Credit Stock</th>
 									<th>Debit Stock</th>
 									<th>Available Stock</th>
+									<th>Unit</th>
 									<th>Pending Status</th>
 									<!--<th>Measurement</th>-->
 									<th>Action</th>
@@ -193,11 +194,22 @@
 													  
 													  $order_item_stock = $order_item_stock + $qty_used; 
 												}
+												
+												$whereDebit = "WHERE product_id=:product_id AND product_variant_id =:product_variant_id AND product_stock_transaction_id!=:product_stock_transaction_id";
+											
+												$paramsDebit = [
+													':product_id'=> $selectValue->product_id,
+													':product_variant_id'=> $variants->id,
+													':product_stock_transaction_id'=>0
+												];
+												$stock_debit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereDebit, $paramsDebit, 'stock');
 											}
 											//echo "<pre>";print_r($product_variant_arr);die;
 											
 											
-											$admin_stock_debit = abs($stock_debit) + $order_item_stock;
+											
+											
+											$admin_stock_debit = abs($stock_debit->total) + $order_item_stock;
 											// pending stock
 											$whereStatus = "WHERE product_id=:product_id AND product_stock_transaction_id =:product_stock_transaction_id AND status=:status";
 											
@@ -229,14 +241,26 @@
 												$sqlVendors = $general_cls_call->select_join_query($fieldsVend, $tablesVend, $whereVend, $paramsVend, 2);
 												$vendors_arr[] = implode(', ', array_column($sqlVendors, 'vendor_names'));
 											}
+											
+											//--- get the unit-----
+										$fieldsUnit = "pv.id as product_variant_id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
+										$tablesUnit = PRODUCT_VARIANTS . " pv
+										INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id
+										INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+										$whereUnit = "WHERE pv.product_id=:product_id";
+										$paramsUnit = [
+											':product_id' => $selectValue->product_id
+										];
+										$sqlUnit = $general_cls_call->select_join_query($fieldsUnit, $tablesUnit, $whereUnit, $paramsUnit, 1);
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
-									    <td style="width:100px"><?php echo $k+1 ;?></td>
+									    <td style="width:100px"><?php echo $i ;?></td>
 										<td><?PHP echo implode(', ', $vendors_arr); ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
 										<td><?php echo $stock_credit->total; ?></td>
 										<td><?php echo $admin_stock_debit; ?></td>
 										<td><?PHP echo $stock_credit->total-$admin_stock_debit; ?></td>
+										<td><span class="badge bg-grd-primary dash-lable"><?php echo $sqlUnit->unit_name ;?></span></td>
 										<td><?php echo $pending_stock; ?></td>
 										<!--<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>-->
 										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
@@ -247,17 +271,10 @@
 												$i++;
 											}
 										}
-										else
-										{
+										
 									?>
-									  <tr>
-										<td colspan="9">
-										 No record found.
-										</td>
-									  </tr>
-						<?PHP
-							}	
-						?>
+									  
+						
 								</tbody>
 							</table>
 						</div>
@@ -294,7 +311,7 @@ $(document).ready(function(){
 	}
 	
 	$('#example2').DataTable({
-		order: [[7, 'desc']],
+		order: [[8, 'desc']],
 		columnDefs: [
         {
             targets: 0,        // 1st column
