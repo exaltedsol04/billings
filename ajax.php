@@ -1123,17 +1123,27 @@
 					//echo "<pre>";print_r($product_variant_dtls);die;
 					
 					// available pos stock
-					$wherePos = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
+					$wherePos = "WHERE product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
 					
+					if($product_variant_dtls->type != 'loose'){
+						$wherePos .= " AND product_variant_id=:product_variant_id";
+
+						$paramsPos[':product_variant_id'] = $val;
+					}
 					$paramsPos = [
-						':product_variant_id'	=>	$val,
+						// ':product_variant_id'	=>	$val,
 						':product_id'	=>	$product_variant_dtls->product_id,
 						':status'	=>	1,
 						':stock_type'	=>	1,
 						':seller_id'	=>	$_SESSION['SELLER_ID']
 					];
 					// check from product_stock_transaction 
-					$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
+					if($product_variant_dtls->type != 'loose'){
+						$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
+					}else{
+						$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'loose_stock_quantity');
+					}
+					
 					
 					// available online stock
 					$whereOnline = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";

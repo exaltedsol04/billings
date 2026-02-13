@@ -157,7 +157,7 @@
 									    <td style="width:100px"><?php echo $k+1 ;?></td>
 										<td style=""><?= (mb_strlen($selectValue->title) > 100) ? mb_substr($selectValue->title,0,100).'...' : $selectValue->title; ?></td>
 										<td style=""><?= (mb_strlen($selectValue->message) > 100) ? mb_substr($selectValue->message,0,100).'...' : $selectValue->message; ?></td>
-										<td style=""><button type="button" class="btn btn-grd btn-grd-success px-5 send-notification" data-notification-id="<?php echo $selectValue->id; ?>">Send</button></td>
+										<!--<td style=""><button type="button" class="btn btn-grd btn-grd-success px-5 send-notification" data-notification-id="<?php echo $selectValue->id; ?>">Send</button></td>-->
 										
 										<td>
 											<div class="dropdown">

@@ -245,7 +245,7 @@ function product_stock_show(product)
 	$('#hid_product_id').val(pid);
 	//let pvid = parseInt(myArray[6]);
 	//var datapost = 'action=onlineProductStock&pvid=' + pvid + '&pid=' + pid;
-	var datapost = 'action=onlineProductStock&pid=' + pid;
+	/*var datapost = 'action=onlineProductStock&pid=' + pid;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -263,6 +263,22 @@ function product_stock_show(product)
 			else{
 				var htmlsel = '<option value="">Select...</option>';
 				$('#product_variant_id').html(htmlsel);
+			}
+		}
+	});*/
+	var datapost = 'action=getMaxProductVariant&pid='+pid;
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: datapost,
+		success: function(response){
+			var result = JSON.parse(response);
+			if (result.length > 0) {
+				var html = '<option value="">Select...</option>';
+				$.each(result, function (i, variants) {
+					html += '<option value='+ variants.id +'>' + variants.unitname +' ('+ variants.ptype +')</option>';
+				});
+				$('#product_variant_id').html(html);
 			}
 		}
 	});
