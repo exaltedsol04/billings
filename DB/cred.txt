@@ -16,6 +16,10 @@ https://retail.ecoleaf.store/cpanel
 UserName: ecoleafs
 PassWord: kLw0NOwA!OvH
 
+Domain: pos.trumilan.com/cpanel
+UserName: postrumilan
+PassWord: mjQjLJx-hiai.xoC
+
 ----------------------------------------------------------
 Worksnaps
 user - exaltedsol06

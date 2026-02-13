@@ -132,7 +132,7 @@
 									<th style="width:100px">Sl. No.</th>
 									<th>Title</th>
 									<th>Description</th>
-									<th>Notification</th>
+									<!--<th>Notification</th>-->
 									<th>Action</th>
 								  </tr>
 								</thead>
