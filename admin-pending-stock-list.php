@@ -20,11 +20,11 @@
 			{
 				$aspl = $general_cls_call->select_query("loose_stock_quantity, stock", ADMIN_STOCK_PURCHASE_LIST, "WHERE id =:id ", array(':id'=> $_GET['id']), 1);
 
+				$stock = $_GET['qty'];
 				$loose_stock_quantity = 0.00;
-				if($aspl->loose_stock_quantity != '0.00')
-				{
-					$variant_measurement = floor($aspl->loose_stock_quantity / $aspl->stock);
-					$loose_stock_quantity = $_GET['qty'] * $variant_measurement;
+				if($aspl->loose_stock_quantity != '0.00') {
+					$stock = 0;
+					$loose_stock_quantity = $_GET['qty'];
 				}
 				
 				//echo $_GET['qty'];die;
@@ -32,7 +32,7 @@
 				$whereClause=" WHERE id=:id";
 				$updateExecute=array(
 					':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
-					':stock'=>$general_cls_call->specialhtmlremover($_GET['qty']),
+					':stock'=>$general_cls_call->specialhtmlremover($stock),
 					':loose_stock_quantity'=>$general_cls_call->specialhtmlremover($loose_stock_quantity),
 					':updated_at'=> date("Y-m-d H:i:s"),
 					':id'=>$_GET['id']
@@ -63,7 +63,7 @@
 	
 	//if(isset($_GET['pvid']))
 	//{
-		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
+		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.loose_stock_quantity, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -157,39 +157,39 @@
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
-										foreach($sqlQuery as $k=>$selectValue)
+										foreach($sqlQuery as $k=>$arr)
 										{
-											$barcode = $selectValue->barcode;
+											$barcode = $arr->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
-									  <tr id="dataRow<?php echo($selectValue->id);?>">
+									  <tr id="dataRow<?php echo($arr->id);?>">
 										<td class="text-center"><?PHP echo $k+1; ?></td>
-										<td><?PHP echo $selectValue->vendor; ?></td>
-										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
-										<td class="text-center"><input type="text" value="<?PHP echo $selectValue->stock ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9]/g, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
-										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $selectValue->type ;?></span></td>
-										<td>₹ <?php echo $selectValue->purchase_price ?></td>
-										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td><?php echo !empty($selectValue->remarks) ? $selectValue->remarks : '--';?></td>
+										<td><?PHP echo $arr->vendor; ?></td>
+										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
+										<td class="text-center"><input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
+										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $arr->unit_name : $arr->measurement.' '.$arr->unit_name; ?></td>
+										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ;?></span></td>
+										<td>₹ <?php echo $arr->purchase_price ?></td>
+										<td><?PHP echo $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A'); ?></td>
+										<td><?php echo !empty($arr->remarks) ? $arr->remarks : '--';?></td>
 										<td class="text-center">
 											<div class="ms-auto">
 												  <div class="btn-group">
 												  <?php 
-													if($selectValue->status == 0 || $selectValue->status == 2)
+													if($arr->status == 0 || $arr->status == 2)
 													{
 													?>
-													<button type="button" class="btn btn-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?>">
-													<?PHP echo $selectValue->status==1 ? 'Approved' : ($selectValue->status==2 ? 'Rejected' : 'Pending'); ?>
+													<button type="button" class="btn btn-<?PHP echo $arr->status==1 ? 'success' : ($arr->status==2 ? 'danger' : 'warning'); ?>">
+													<?PHP echo $arr->status==1 ? 'Approved' : ($arr->status==2 ? 'Rejected' : 'Pending'); ?>
 													</button>
-													<button type="button" class="btn btn-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?> split-bg-<?PHP echo $selectValue->status==1 ? 'success' : ($selectValue->status==2 ? 'danger' : 'warning'); ?> dropdown-toggle dropdown-toggle-split"
+													<button type="button" class="btn btn-<?PHP echo $arr->status==1 ? 'success' : ($arr->status==2 ? 'danger' : 'warning'); ?> split-bg-<?PHP echo $arr->status==1 ? 'success' : ($arr->status==2 ? 'danger' : 'warning'); ?> dropdown-toggle dropdown-toggle-split"
 													  data-bs-toggle="dropdown"> <span class="visually-hidden">Toggle Dropdown</span>
 													</button>
 													
 													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
-															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=1&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to inward" data-bs-toggle="tooltip"><span class="text-success text-bold">Inward</span></a>
+															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1&pvid=<?php echo $arr->pvid ?>" title = "Click here to inward" data-bs-toggle="tooltip"><span class="text-success text-bold">Inward</span></a>
 															
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($selectValue->id);?>&mode=2&pvid=<?php echo $selectValue->pvid ?>" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
+															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=2&pvid=<?php echo $arr->pvid ?>" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
 													</div>
 													<?php 
 													}

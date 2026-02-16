@@ -166,7 +166,7 @@
 
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Stock Quantity</label>
-									<input type="text" class="form-control" name="stock[]" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+									<input type="text" class="form-control" name="stock[]" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
 									<span class="text-danger err_stock"></span>
 								</div>
 
