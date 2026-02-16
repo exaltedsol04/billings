@@ -207,7 +207,7 @@
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Stock Quantity</label>
-								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="<?php echo isset($_POST['stock']) ? $_POST['stock'] : '' ?>">
+								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" value="<?php echo isset($_POST['stock']) ? $_POST['stock'] : '' ?>">
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<input type="hidden" id="stock_limit" name="stock_limit" value="<?php echo isset($_POST['stock_limit']) ? $_POST['stock_limit'] : '' ?>">

@@ -1187,27 +1187,94 @@
 					
 					
 					// available online stock
-					$whereOnline = "WHERE product_variant_id=:product_variant_id AND product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
-					
+					// decide which column to sum
+					$column = ($product_variant_dtls->type === 'loose')
+						? 'loose_stock_quantity'
+						: 'stock';
+
+
+					$whereOnline = "
+					WHERE product_variant_id = :product_variant_id
+					AND product_id = :product_id
+					AND status = :status
+					AND stock_type = :stock_type
+					AND seller_id = :seller_id
+					";
+
 					$paramsOnline = [
-						':product_variant_id'	=>	$val,
-						':product_id'	=>	$product_variant_dtls->product_id,
-						':status'	=>	1,
-						':stock_type'	=>	2,
-						':seller_id'	=>	$_SESSION['SELLER_ID']
+						':product_variant_id' => $val,
+						':product_id'         => $product_variant_dtls->product_id,
+						':status'             => 1,
+						':stock_type'         => 2,
+						':seller_id'          => $_SESSION['SELLER_ID']
 					];
-					// check from product_stock_transaction 
-					$stock_used_online = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $whereOnline, $paramsOnline, 'stock');
+
+					// sum correct column
+					$stock_used_online = $general_cls_call->select_query_sum(
+						PRODUCT_STOCK_TRANSACTION,
+						$whereOnline,
+						$paramsOnline,
+						$column
+					);
+
 					
-					$whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status AND seller_id=:seller_id";
+					$fields = "
+						SUM(
+							CASE 
+								WHEN pv.type = 'loose' THEN
+									oi.quantity * pv.measurement / 
+									COALESCE(child_u.conversion, 1)
+								ELSE
+									oi.quantity
+							END
+						) AS total_used
+						";
+
+						$tables = ORDERS_ITEMS . " oi
+						INNER JOIN " . PRODUCT_VARIANTS . " pv
+							ON pv.id = oi.product_variant_id
+
+						INNER JOIN " . UNITS . " child_u
+							ON child_u.id = pv.stock_unit_id
+
+						LEFT JOIN " . UNITS . " parent_u
+							ON parent_u.id = child_u.parent_id
+						";
+
+						$where = "
+						WHERE oi.seller_id = :seller_id
+						AND oi.active_status != :active_status
+						AND (
+								(pv.type = 'loose' AND pv.product_id = :product_id)
+							 OR (pv.type != 'loose' AND oi.product_variant_id = :product_variant_id)
+						)
+						";
+
+						$params = [
+							':seller_id'          => $_SESSION['SELLER_ID'],
+							':active_status'      => 7,
+							':product_variant_id' => $val,
+							':product_id'         => $product_variant_dtls->product_id
+						];
+
+						$qty_used = $general_cls_call->select_join_query(
+							$fields,
+							$tables,
+							$where,
+							$params,
+							1
+						);
+
+					
+					/*$whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status AND seller_id=:seller_id";
 					$paramsOrdItm = [
 						':product_variant_id' => $val,
 						':seller_id' => $_SESSION['SELLER_ID'],
 						'active_status' => 7
 					];
-					$qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
+					$qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');*/
 					 
-					$qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
+					//$qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
 					
 					// after cart add check stock
 					
@@ -1217,7 +1284,8 @@
 					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
 					$unitname = $unit_dtls->name;
 					
-					$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					//$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					$p_variant_name = $unitname;
 					
 					$available_stock = $stock_used->total;
 					//$available_stock_online = $stock_used_online->total;
@@ -1276,7 +1344,15 @@
 				
 				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_variant_id), 1);	
 				
-				$request_stock_quantity = $qty;
+				$stock = $qty;
+				$loose_stock_quantity = 0.00;
+				if($product_variant_dtls->type == 'loose'){
+					$stock = 0;
+					$loose_stock_quantity = $qty;
+				}			
+				$check_requested_stock = $qty;
+				
+				/*$request_stock_quantity = $qty;
 				$loose_stock_quantity = '0.00';
 				if($product_variant_dtls->type == 'loose')
 				{
@@ -1287,7 +1363,7 @@
 					$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
 					$request_stock_quantity = $measurement_units['value'];
 					$loose_stock_quantity = $measurement_units['value'];
-				}	
+				}	*/
 				
 				//echo $stock_data->stock;
 				if($accept_status==1)
@@ -1319,29 +1395,30 @@
 				}
 				elseif($accept_status==2 || $accept_status==3 || $accept_status==4)
 				{
-					if($stock_available >= $request_stock_quantity)
+					if ((float)$stock_available >= (float)$check_requested_stock)
 					{
 						$res['status_name'] = $accept_status==2 ? 'Damage' : ($accept_status==3 ? 'Exceed' : 'Short fall');
 						$res['previous_qty'] = $product_variant_dtls->type == 'loose' ? $stock_data->loose_stock_quantity : $stock_data->stock;
-						$res['updated_qty'] = $product_variant_dtls->type == 'loose' ? $loose_stock_quantity : $request_stock_quantity;
+						$res['updated_qty'] = $product_variant_dtls->type == 'loose' ? $loose_stock_quantity : $stock;
 						$seller_accept_remark = json_encode($res);
 						
 						
-						$setValues="status=:status, stock=:stock, seller_accept_status=:seller_accept_status, seller_accept_remark=:seller_accept_remark";
+						$setValues="status=:status, stock=:stock, loose_stock_quantity=:loose_stock_quantity, seller_accept_status=:seller_accept_status, seller_accept_remark=:seller_accept_remark";
 						$updateExecute=array(
 							':status'	=> 1,
 							':seller_accept_status'	=> $accept_status,
-							':stock'	=> $qty,
-							':loose_stock_quantity'	=> $loose_stock_quantity,							
+							':stock'	=> $stock,
+							':loose_stock_quantity'	=> $loose_stock_quantity,
 							':seller_accept_remark'	=> $seller_accept_remark,
 							':id'		=> $stock_transaction_id
 						);	
 						$whereClause=" WHERE id=:id";
 						$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
 						
-						$setValues="seller_accept_status=:seller_accept_status";
+						$setValues="seller_accept_status=:seller_accept_status, stock=:stock, loose_stock_quantity=:loose_stock_quantity";
 						$updateExecute=array(
 							':seller_accept_status'				=> $accept_status,
+							':stock'							=> $stock,
 							':loose_stock_quantity'				=> $loose_stock_quantity,
 							':product_stock_transaction_id'		=> $stock_transaction_id
 						);

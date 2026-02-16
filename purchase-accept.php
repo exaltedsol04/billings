@@ -101,7 +101,7 @@
                     </thead>
                     <tbody>
 					<?php 
-						$fields = "pr.id, pr.product_id, pr.status, pr.stock as pqty, pv.stock_unit_id, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, pv.id as product_variant_id";
+						$fields = "pr.id, pr.product_id, pr.status, pr.loose_stock_quantity, pr.stock as pqty, pv.stock_unit_id, pv.type, pv.stock, pv.measurement, p.name, p.image, p.barcode, pv.id as product_variant_id";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id";
@@ -134,13 +134,23 @@
 								}*/
 								
 								$unitdata = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+								$unitname = $unitdata->name;
+								if($arr->type == 'loose')
+								{
+									$measurement_arr = [
+										'quantity' => 1 * $arr->measurement,
+										'stock_unit_id' => $arr->stock_unit_id,
+									];
+									$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+									$unitname = $measurement_units['unit'];
+								}
 					?>
                       <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $key+1; ?></td>
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td><?PHP echo $arr->pqty ?></td>
-						<td><?PHP echo $arr->measurement . ' ' .$unitdata->name; ?></td>
+						<td><?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->pqty; ?></td>
+						<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 						<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ?></span></td>
 						<td>
 						<a href="javascript:void(0);" onclick="accept_purchase(<?php echo $arr->id ;?>, <?php echo $arr->product_id ;?>, <?php echo $arr->product_variant_id ;?>)">
@@ -192,7 +202,7 @@
 				
 				<div class="col-md-12 qty-div"  style="display:none">
 				  <label for="operator_id" class="form-label">Correct Quantity</label>
-				  <input type="text" class="form-control" id="qty"  placeholder="Correct Quantity"  oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+				  <input type="text" class="form-control" id="qty"  placeholder="Correct Quantity"  oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
 				  <div id="error_qty"></div>
 				</div>
 				<input type="hidden" id="product_stock_transaction_id">
