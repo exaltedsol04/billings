@@ -58,30 +58,31 @@
 				$request_stock_quantity = $measurement_units['value'];
 				$loose_stock_quantity = $measurement_units['value'];
 			}	*/
-			$request_stock_quantity = $_GET['qty'];
+			$stock = $_GET['qty'];
 			$loose_stock_quantity = 0.00;
-			if($product_variant_dtls->type == 'loose')
-				$request_stock_quantity = 0;
+			if($product_variant_dtls->type == 'loose'){
+				$stock = 0;
 				$loose_stock_quantity = $_GET['qty'];
 			}			
-			$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date";
+			$check_requested_stock = $_GET['qty'];
+			/*$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date";
 			$whereClause=" WHERE id=:id";
 			$updateExecute=array(
 				':approved_by'=>$_SESSION['USER_ID'],
 				':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
 				':approved_date'=> date("Y-m-d H:i:s"),
 				':id'=>$_GET['id']
-			);
+			);*/
 			
 				
 			if($_GET['mode'] == '1' || $_GET['mode'] == '3')
 			{;
-				// echo '<pre>'; print_r($stock_available);die;
-				//echo $_GET['qty']; die;
-				if($stock_available >= $request_stock_quantity)
+				 
+				if ((float)$stock_available >= (float)$check_requested_stock)
 				{
-					if($product_variant_dtls->type == 'loose')
-					{
+					//echo (float)$stock_available.' --- '.(float)$check_requested_stock;die;
+					//if($product_variant_dtls->type == 'loose')
+					//{
 						$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date, loose_stock_quantity=:loose_stock_quantity, stock=:stock";
 						$whereClause=" WHERE id=:id";
 						$updateExecute=array(
@@ -89,10 +90,10 @@
 							':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
 							':approved_date'=> date("Y-m-d H:i:s"),
 							':loose_stock_quantity'=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
-							':stock'=> $request_stock_quantity,
+							':stock'=> $stock,
 							':id'=>$_GET['id']
 						);
-					}
+					//}
 					
 					$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
 					
@@ -102,14 +103,15 @@
 					}		
 					
 					// add to admin stock transaction table 					
-					$field = "vendor_id, product_id, product_variant_id, stock,  product_stock_transaction_id, seller_accept_status, status, created_at, updated_at";
-					$value = ":vendor_id, :product_id, :product_variant_id, :stock,  :product_stock_transaction_id, :seller_accept_status, :status, :created_at, :updated_at";
+					$field = "vendor_id, product_id, product_variant_id, stock, loose_stock_quantity,  product_stock_transaction_id, seller_accept_status, status, created_at, updated_at";
+					$value = ":vendor_id, :product_id, :product_variant_id, :stock, :loose_stock_quantity, :product_stock_transaction_id, :seller_accept_status, :status, :created_at, :updated_at";
 					
 					$addExecute=array(
 						':vendor_id'			=> 0,
 						':product_id'			=> $product_stk_dtls->product_id,
 						':product_variant_id'	=> $product_stk_dtls->product_variant_id,
-						':stock'				=> -($request_stock_quantity),
+						':stock'				=> -($stock),
+						':loose_stock_quantity'	=> -($loose_stock_quantity),
 						':product_stock_transaction_id'	=> $_GET['id'],
 						':seller_accept_status'	=> $seller_accept_status,
 						':status'				=> 1,
@@ -117,15 +119,7 @@
 						':updated_at'		    => date('Y-m-d H:i:s')
 					);
 					
-					// Add loose field properly
-					if ($product_variant_dtls->type == 'loose') {
-
-						$field .= ", loose_stock_quantity";
-						$value .= ", :loose_stock_quantity";
-
-						$addExecute[':loose_stock_quantity'] = -($general_cls_call->specialhtmlremover($loose_stock_quantity));
-					}
-					
+					// Add loose field properly					
 					$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
 					
 					if($updateRec)
@@ -296,7 +290,7 @@
 													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
 															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-success text-bold">Instant Approve</span></a>
 															
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=3&qty=<?php echo $arr->pqty ?>" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-info text-bold">Approve</span></a>
+															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=3&qty=<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->pqty; ?>" title = "Click here to approve" data-bs-toggle="tooltip"><span class="text-info text-bold">Approve</span></a>
 															
 															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=2" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
 													</div>
