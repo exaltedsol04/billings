@@ -111,7 +111,7 @@
 				<select name="product" id="product" onchange=add_to_cart(this) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
-						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
+						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id, p.name, p.image, p.barcode, u.name as unit_name";
 						$tables = PRODUCT_VARIANTS . " pv
 						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id
 						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
@@ -122,6 +122,14 @@
 						{
 							foreach($sqlQuery as $arr)
 							{	
+								$measurement_arr = [
+									'quantity' => 1 * $arr->measurement,
+									'stock_unit_id' => $arr->stock_unit_id,
+								];
+								$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+								$measurement = $measurement_units['value'];
+								$unit_name = $measurement_units['unit'];
+								
 								/*$imagePath = MAIN_SERVER_PATH . $arr->image;
 								if (!empty($arr->image) && file_exists($imagePath)) {
 									$imagePath = MAIN_SERVER_PATH . $arr->image;
@@ -132,7 +140,7 @@
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->unit_name.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$measurement.' '.$unit_name.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
 					<?PHP
 							}
 						}
