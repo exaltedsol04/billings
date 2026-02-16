@@ -96,7 +96,7 @@
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>">
-										<td class="text-center"><?PHP echo $k+1; ?></td>
+										<td class="text-center"><?PHP echo $i; ?></td>
 										<td class="text-center"><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td class="text-center">₹ <?php echo $selectValue->tot_price ?></td>
 										<td class="text-center">
@@ -152,7 +152,7 @@ $(document).ready(function(){
 	}
 	
 	$('#example2').DataTable({
-		order: [[2, 'desc']],
+		//order: [[2, 'desc']],
 		columnDefs: [
         {
             targets: 0,        // 1st column
