@@ -99,7 +99,7 @@
 				<select name="product" id="product" onchange=check_product_stock_onchange(this.value) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
-						$fields = "
+						/*$fields = "
 							pr.product_id,
 							pr.product_variant_id,
 							SUM(pr.stock) as total_stock,
@@ -108,6 +108,7 @@
 							pv.measurement,
 							pv.type,
 							pv.discounted_price,
+							pv.stock_unit_id,
 							u.name as stock_unit_name,
 							p.name,
 							p.image,
@@ -147,7 +148,84 @@
 								 ) > 0
 							)
 						)
+						";*/
+						$fields = "
+							pr.product_id,
+							pr.product_variant_id,
+
+							SUM(pr.stock) as total_stock,
+							SUM(pr.loose_stock_quantity) as total_loose_qty,
+
+							pv.id as variant_id,
+							pv.measurement,
+							pv.type,
+							pv.discounted_price,
+							pv.stock_unit_id,
+
+							u.name as stock_unit_name,
+							u.parent_id,
+							u.conversion,
+
+							p.name,
+							p.image,
+							p.barcode,
+							p.type as product_type
 						";
+
+						$tables = PRODUCT_STOCK_TRANSACTION . " pr
+
+						INNER JOIN " . PRODUCTS . " p 
+							ON p.id = pr.product_id
+
+						INNER JOIN " . PRODUCT_VARIANTS . " pv 
+							ON pv.product_id = pr.product_id
+
+						INNER JOIN " . UNITS . " u 
+							ON u.id = pv.stock_unit_id
+						";
+
+						$where = "
+						WHERE pr.status = :status
+						AND pr.stock_type = :stock_type
+						AND pr.seller_id = :seller_id
+
+						GROUP BY pr.product_id, pv.id
+
+						HAVING
+						(
+							/* ===============================
+							   LOOSE PRODUCT CHECK
+							   =============================== */
+							(
+								pv.type = 'loose'
+								AND
+								SUM(pr.loose_stock_quantity) >=
+								(
+									CASE
+										WHEN u.parent_id != 0 AND u.conversion > 0
+											THEN pv.measurement / u.conversion
+										ELSE pv.measurement
+									END
+								)
+							)
+
+							OR
+
+							/* ===============================
+							   NORMAL PRODUCT CHECK
+							   =============================== */
+							(
+								pv.type != 'loose'
+								AND SUM(
+									CASE 
+										WHEN pr.product_variant_id = pv.id THEN pr.stock
+										ELSE 0
+									END
+								) > 0
+							)
+						)
+						";
+
 
 						$params = [
 							':status' => 1,
@@ -164,6 +242,14 @@
 						{
 							foreach($sqlQuery as $arr)
 							{	
+								$measurement_arr = [
+									'quantity' => 1 * $arr->measurement,
+									'stock_unit_id' => $arr->stock_unit_id,
+								];
+								$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+								$measurement = $measurement_units['value'];
+								$unit_name = $measurement_units['unit'];
+								
 								$imagePath = MAIN_SERVER_PATH . $arr->image;
 								if (!empty($arr->image) && file_exists($imagePath)) {
 									$imagePath = MAIN_SERVER_PATH . $arr->image;
@@ -175,7 +261,7 @@
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 					?>
-								<option value="<?PHP echo $arr->variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.'@@@'.$arr->stock_unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$measurement.'@@@'.$unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
 					<?PHP
 							}
 						}

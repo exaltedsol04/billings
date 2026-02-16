@@ -96,7 +96,7 @@ let generateCartItems = () => {
 			
         return `<tr id="dataRow${id}">
 					<td class="text-center">${index + 1}
-					<input type="hidden" class="pid-${pid} allpid" value="${measurement * qty}" id="vid_${id}" name="pid[${pid}][${id}]">
+					<input type="text" class="pid-${pid} allpid" value="${measurement * qty}" id="vid_${id}" name="pid[${pid}][${id}]">
 					</td>
 					<td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${name}
 					<input type="hidden" value="${id}" name="product_variant_id[]"></td>
