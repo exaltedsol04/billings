@@ -156,7 +156,7 @@
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Stock Quantity</label>
-								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity">
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<div class="col-md-6">
@@ -247,7 +247,18 @@ function select_product(product)
 					html += '<option value='+ variants.id +'>' + variants.unitname +' ('+ variants.ptype +')</option>';
 					if(variants.ptype == 'loose')
 					{
-						//$('#stock').attr();
+						$('#stock').off('input').on('input', function(){
+							this.value = this.value
+								.replace(/[^0-9.]/g, '')   // allow dot
+								.replace(/(\..*)\./g, '$1'); // allow only one dot
+						});
+					}
+					else{
+						$('#stock').off('input').on('input', function(){
+							this.value = this.value
+								.replace(/[^0-9]/g, '')   // allow dot
+								.replace(/(\..*)\./g, '$1'); // allow only one dot
+						});
 					}
 				});
 				$('#product_variant_id').html(html);

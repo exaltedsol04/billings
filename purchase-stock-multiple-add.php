@@ -166,7 +166,7 @@
 
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Stock Quantity</label>
-									<input type="text" class="form-control" name="stock[]" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+									<input type="text" class="form-control stock-input" name="stock[]" id="stock" placeholder="Stock quantity">
 									<span class="text-danger err_stock"></span>
 								</div>
 
@@ -259,6 +259,8 @@ function select_product(el)
 	
 	let row = $(el).closest('.item-row'); // current row
 	let product = $(el).val();
+	let stockInput = row.find('.stock-input');
+	stockInput.val('');
 	
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
@@ -274,9 +276,27 @@ function select_product(el)
 				var html = '<option value="">Select...</option>';
 				$.each(result, function (i, variants) {
 					html += '<option value='+ variants.id +'>' + variants.unitname + ' (' + variants.ptype + ')</option>';
+					
+					if(variants.ptype == 'loose')
+					{
+						alert(variants.ptype);
+						stockInput.off('input').on('input', function () {
+							this.value = this.value
+								.replace(/[^0-9.]/g, '')   // allow dot
+								.replace(/(\..*)\./g, '$1'); // only one dot
+						});
+					}
+					else{
+						stockInput.off('input').on('input', function(){
+							this.value = this.value
+								.replace(/[^0-9]/g, '')   // allow dot
+								.replace(/(\..*)\./g, '$1'); // allow only one dot
+						});
+					}
+					
 				});
 				//$('#product_variant_id').html(html);
-				 row.find('.unit-select').html(html);
+				row.find('.unit-select').html(html);
 			}
 		}
 	});
