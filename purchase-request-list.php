@@ -41,27 +41,13 @@
 			)
 			";
 
-			$params = [
-				1,
-				$product_stk_dtls->product_id,
-				$product_stk_dtls->product_variant_id
-			];
-
-			$result = $general_cls_call->select_query(
-				$fields,
-				$table,
-				$where,
-				$params,
-				1
-			);
-
+			$params = [1, $product_stk_dtls->product_id, $product_stk_dtls->product_variant_id];
+			$result = $general_cls_call->select_query($fields, $table, $where, $params, 1);
 			$stock_available = $result->total_stock ?? 0;
-			
-			
-			/*$stock_available = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $product_stk_dtls->product_variant_id, 'status'=>1, 'product_id'=> $product_stk_dtls->product_id), 'stock');*/
 			
 			$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
 			$request_stock_quantity = $_GET['qty'];
+			$loose_stock_quantity = '0.00';
 			if($product_variant_dtls->type == 'loose')
 			{
 				$measurement_arr = [
@@ -82,24 +68,14 @@
 			);
 			
 				
-			if($_GET['mode'] == '1')
+			if($_GET['mode'] == '1' || $_GET['mode'] == '3')
 			{;
 				// echo '<pre>'; print_r($stock_available);die;
 				//echo $_GET['qty']; die;
 				if($stock_available >= $request_stock_quantity)
 				{
-					//$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
-					//$loose_stock_quantity = $product_stk_dtls->loose_stock_quantity;
 					if($product_variant_dtls->type == 'loose')
 					{
-						/*$measurement_arr = [
-							'quantity' => $_GET['qty'] * $product_variant_dtls->measurement,
-							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
-						];
-						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);*/
-						
-						
-						
 						$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date, loose_stock_quantity=:loose_stock_quantity, stock=:stock";
 						$whereClause=" WHERE id=:id";
 						$updateExecute=array(
@@ -114,11 +90,14 @@
 					
 					$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
 					
+					$seller_accept_status = 0;
+					if($_GET['mode'] == '3') {
+						$seller_accept_status = 5;
+					}		
 					
-					// add to admin stock transaction table 
-					
-					$field = "vendor_id, product_id, product_variant_id, stock,  product_stock_transaction_id, status, created_at, updated_at";
-					$value = ":vendor_id, :product_id, :product_variant_id, :stock,  :product_stock_transaction_id,:status, :created_at, :updated_at";
+					// add to admin stock transaction table 					
+					$field = "vendor_id, product_id, product_variant_id, stock,  product_stock_transaction_id, seller_accept_status, status, created_at, updated_at";
+					$value = ":vendor_id, :product_id, :product_variant_id, :stock,  :product_stock_transaction_id, :seller_accept_status, :status, :created_at, :updated_at";
 					
 					$addExecute=array(
 						':vendor_id'			=> 0,
@@ -126,6 +105,7 @@
 						':product_variant_id'	=> $product_stk_dtls->product_variant_id,
 						':stock'				=> -($_GET['qty']),
 						':product_stock_transaction_id'	=> $_GET['id'],
+						':seller_accept_status'	=> $seller_accept_status,
 						':status'				=> 1,
 						':created_at' 			=> date('Y-m-d h:i:s'),
 						':updated_at'		    => date('Y-m-d H:i:s')
@@ -155,37 +135,6 @@
 			if($_GET['mode'] == '2')
 			{
 				$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
-			}
-			if($_GET['mode'] == '3')
-			{
-				if($stock_available >= $request_stock_quantity)
-				{
-					//$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
-					//$loose_stock_quantity = $product_stk_dtls->loose_stock_quantity;
-					if($product_variant_dtls->type == 'loose')
-					{
-						/*$measurement_arr = [
-							'quantity' => $_GET['qty'] * $product_variant_dtls->measurement,
-							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
-						];
-						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
-						
-						$loose_stock_quantity = $measurement_units['value'];*/
-						
-						$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date, loose_stock_quantity=:loose_stock_quantity, stock=:stock";
-						$whereClause=" WHERE id=:id";
-						$updateExecute=array(
-							':approved_by'=>$_SESSION['USER_ID'],
-							':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
-							':approved_date'=> date("Y-m-d H:i:s"),
-							':loose_stock_quantity'=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
-							':stock'=> $_GET['qty'],
-							':id'=>$_GET['id']
-						);
-					}
-					
-					$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
-				}
 			}
 			
 			if(empty($_GET['qty']))

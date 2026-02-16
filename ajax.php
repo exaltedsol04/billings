@@ -1237,13 +1237,57 @@
 				$qty = $_POST['qty'];
 				$product_id = $_POST['product_id'];
 				$product_variant_id = $_POST['product_variant_id'];
-				//echo $status.' '.$stock_transaction_id;
+				//echo $status.' '.$stock_transaction_id;		
+				// check available stock 
+				$fields = "
+					SUM(
+						CASE 
+							WHEN pv.type = 'loose' THEN asp.loose_stock_quantity
+							WHEN pv.type != 'loose' THEN asp.stock
+							ELSE 0
+						END
+					) AS total_stock
+				";
+
+				$table = ADMIN_STOCK_PURCHASE_LIST . " asp
+				INNER JOIN product_variants pv 
+					ON pv.id = asp.product_variant_id";
+
+				$where = "
+				WHERE asp.status = ?
+				AND asp.product_id = ?
+				AND pv.deleted_at IS NULL
+				AND (
+						pv.type = 'loose'
+					 OR (pv.type != 'loose' AND asp.product_variant_id = ?)
+				)
+				";
+
+				$params = [1, $product_id, $product_variant_id];
+				$result = $general_cls_call->select_query($fields, $table, $where, $params, 1);
+				$stock_available = $result->total_stock ?? 0;
+			
 				$field = "id, stock, loose_stock_quantity";
 				$where = "WHERE id=:id";
 				$params = [
 					':id' => $stock_transaction_id
 				];
 				$stock_data = $general_cls_call->select_query($field, PRODUCT_STOCK_TRANSACTION, $where, $params, 1);
+				
+				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_variant_id), 1);	
+				
+				$request_stock_quantity = $qty;
+				$loose_stock_quantity = '0.00';
+				if($product_variant_dtls->type == 'loose')
+				{
+					$measurement_arr = [
+						'quantity' => $qty * $product_variant_dtls->measurement,
+						'stock_unit_id' => $product_variant_dtls->stock_unit_id,
+					];
+					$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+					$request_stock_quantity = $measurement_units['value'];
+					$loose_stock_quantity = $measurement_units['value'];
+				}	
 				
 				//echo $stock_data->stock;
 				if($accept_status==1)
@@ -1258,8 +1302,8 @@
 					$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
 					
 					// add to admin stock transaction table
-					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_variant_id), 1);				
-					$field = "vendor_id, product_id, product_variant_id, stock,  product_stock_transaction_id, status, created_at, updated_at";
+								
+					/*$field = "vendor_id, product_id, product_variant_id, stock,  product_stock_transaction_id, status, created_at, updated_at";
 					$value = ":vendor_id, :product_id, :product_variant_id, :stock,  :product_stock_transaction_id,:status, :created_at, :updated_at";
 					
 					$addExecute=array(
@@ -1280,7 +1324,15 @@
 
 						$addExecute[':loose_stock_quantity'] = -($general_cls_call->specialhtmlremover($stock_data->loose_stock_quantity));
 					}
-					$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
+					$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);*/
+					
+					$setValues="seller_accept_status=:seller_accept_status";
+					$updateExecute=array(
+						':seller_accept_status'		=> $accept_status,
+						':product_stock_transaction_id'		=> $stock_transaction_id
+					);
+					$whereClause=" WHERE product_stock_transaction_id = :product_stock_transaction_id";
+					$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
 					
 					$data['status'] = 200;
 					$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
@@ -1290,11 +1342,11 @@
 				}
 				elseif($accept_status==2 || $accept_status==4)
 				{
-					if($qty <= $stock_data->stock)
+					if($stock_available >= $request_stock_quantity)
 					{
 						$res['status_name'] = $accept_status==2 ? 'Damage' : 'Short fall';
-						$res['previous_qty'] = $stock_data->stock;
-						$res['updated_qty'] = $qty;
+						$res['previous_qty'] = $product_variant_dtls->type == 'loose' ? $stock_data->loose_stock_quantity : $stock_data->stock;
+						$res['updated_qty'] = $product_variant_dtls->type == 'loose' ? $loose_stock_quantity : $request_stock_quantity;
 						$seller_accept_remark = json_encode($res);
 						
 						
@@ -1303,30 +1355,15 @@
 							':status'	=> 1,
 							':seller_accept_status'	=> $accept_status,
 							':stock'	=> $qty,
+							':loose_stock_quantity'	=> $loose_stock_quantity,							
 							':seller_accept_remark'	=> $seller_accept_remark,
 							':id'		=> $stock_transaction_id
-						);
-						
-						$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_variant_id), 1);	
-						$loose_stock_quantity = $stock_data->loose_stock_quantity;
-						if($product_variant_dtls->type == 'loose')
-						{
-							$measurement_arr = [
-								'quantity' => $qty * $product_variant_dtls->measurement,
-								'stock_unit_id' => $product_variant_dtls->stock_unit_id,
-							];
-							$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
-						
-							$loose_stock_quantity = $measurement_units['value'];
-							
-							$setValues .= ", loose_stock_quantity=:loose_stock_quantity";
-							$updateExecute[':loose_stock_quantity'] = $general_cls_call->specialhtmlremover($loose_stock_quantity);
-						}
+						);	
 						$whereClause=" WHERE id=:id";
 						$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
 						
 						// add to admin stock transaction table
-						$field = "vendor_id, product_id, product_variant_id, stock,  product_stock_transaction_id, status, created_at, updated_at";
+						/*$field = "vendor_id, product_id, product_variant_id, stock,  product_stock_transaction_id, status, created_at, updated_at";
 						$value = ":vendor_id, :product_id, :product_variant_id, :stock,  :product_stock_transaction_id,:status, :created_at, :updated_at";
 						
 						$addExecute=array(
@@ -1347,7 +1384,16 @@
 
 							$addExecute[':loose_stock_quantity'] = -($general_cls_call->specialhtmlremover($loose_stock_quantity));
 						}
-						$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
+						$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);*/
+						
+						$setValues="seller_accept_status=:seller_accept_status";
+						$updateExecute=array(
+							':seller_accept_status'				=> $accept_status,
+							':loose_stock_quantity'				=> $loose_stock_quantity,
+							':product_stock_transaction_id'		=> $stock_transaction_id
+						);
+						$whereClause=" WHERE product_stock_transaction_id = :product_stock_transaction_id";
+						$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
 						
 						$data['status'] = 200;
 						$data['msg'] = '<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
@@ -1385,8 +1431,7 @@
 							':stock'	=> $qty,
 							':seller_accept_remark'	=> $seller_accept_remark,
 							':id'		=> $stock_transaction_id
-						);
-						$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_variant_id), 1);		
+						);		
 						$loose_stock_quantity = $stock_data->loose_stock_quantity;				
 						if($product_variant_dtls->type == 'loose')
 						{

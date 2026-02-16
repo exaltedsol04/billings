@@ -123,6 +123,9 @@ ALTER TABLE `2026_admin_stock_purchase_list` ADD `loose_stock_quantity` DOUBLE(1
 ALTER TABLE `2026_pos_order_items` ADD `loose_stock_quantity` DOUBLE(10,2) NOT NULL DEFAULT '0.00' AFTER `product_variant_id`; 
 ALTER TABLE `2026_pos_order_items` ADD `type` VARCHAR(50) NULL DEFAULT NULL AFTER `product_variant_id`; 
 
+=========== 16-02-2026==========
+ALTER TABLE `2026_admin_stock_purchase_list` ADD `seller_accept_status` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '0=Admin instant approve, 1=all right, 2=damage, 3=short fault, 4=exceed, 5= Admin approve' AFTER `product_stock_transaction_id`; 
+
 
 
 

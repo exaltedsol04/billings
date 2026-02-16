@@ -178,7 +178,7 @@
 								<td class="text-center">₹<?PHP echo $final_total; ?></td>
 								<td class="text-center"><?PHP echo '<span class="badge bg-grd-success dash-lable">'.$general_cls_call->time_ago($arr->created_at).'</span>'. '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>'; ?></td>
 								<td class="text-center">--</td>
-								<td class="<?php echo $arr->order_type == 'instant' ? 'text-success' : '' ; ?> text-center"><?PHP echo $arr->order_type; ?></td>
+								<td class="<?php echo $arr->order_type == 'instant' ? 'text-success' : '' ; ?> text-center"><?PHP echo $arr->order_type; ?><?php echo $arr->order_type == 'slot' ? '<div style="font-size:10px; border-top:1px solid #5b6166;">'. date("g:i A", strtotime($arr->from_time)) . ' to '.date("g:i A", strtotime($arr->to_time)).'</div>' : ''; ?></td>
 								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $to_be_delivered; ?></span></td>
 								<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>
 								
