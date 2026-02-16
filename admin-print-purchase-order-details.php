@@ -4,7 +4,7 @@ include_once 'init.php';
 
 if(isset($_GET['group_id']))
 {
-	$fields = "asp.id, asp.group_id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
+	$fields = "asp.id, asp.group_id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type, v.email as vendor_email, v.mobile as vendor_mobile, v.city as vendor_city, v.pincode as vendor_pincode, v.address as vendor_address";
 	$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 	INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 	INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -17,6 +17,9 @@ if(isset($_GET['group_id']))
 	];
 	$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 	//echo "<pre>";print_r($sqlQuery);die;
+	
+	/// ADMIN DETAILS
+	$admin_details = $general_cls_call->select_query("username, email", ADMIN_MASTER, "WHERE role_id=:role_id", array(':role_id'=>$_SESSION['ROLE_ID']), 1);
 }	
 ?>
 <!DOCTYPE html>
@@ -118,8 +121,75 @@ if(isset($_GET['group_id']))
     <div class="center small" style="margin-top:10px;">
         <strong><?php echo SITE_TITLE; ?></strong>
 	</div>
-    <div style="margin-top:10px;margin-bottom:10px;">Invoice date: <?PHP echo $general_cls_call->change_date_format($sqlQuery[0]->created_at, 'j M Y g:i A'); ?>
-    </div>
+	
+	<div style="margin-top:15px;margin-bottom:10px;"><p style="font-size:20px;"> PURCHASE ORDER [PO]</p>
+		 <table width="100%" style="border-collapse:collapse;">
+        <tr>
+            
+            <!-- FROM -->
+            <td width="33%" valign="top">
+                <small><b>From</b></small>
+                <address style="margin-top:5px;">
+                    <strong>
+                        Hello, <?php echo $_SESSION['ROLE_ID']==1 ? $_SESSION['USERNAME'] : 'Seller'; ?><br>
+                    </strong>
+					Email: <?php echo $admin_details->email; ?>
+                </address>
+            </td>
+
+            <!-- TO -->
+            <td width="33%" valign="top">
+                <?php if(!empty($sqlQuery[0]->vendor)) { ?>
+                    <small><b>To</b></small>
+                    <address style="margin-top:5px;">
+                        <strong><?php echo $sqlQuery[0]->vendor; ?></strong><br>
+
+                        <?php if(!empty($sqlQuery[0]->vendor_email)) { ?>
+                            Email: <?php echo $sqlQuery[0]->vendor_email ?><br>
+                        <?php } ?>
+
+                        <?php if(!empty($sqlQuery[0]->vendor_mobile)) { ?>
+                            Mobile: <?php echo $sqlQuery[0]->vendor_mobile ?><br>
+                        <?php } ?>
+
+                        <?php if(!empty($sqlQuery[0]->vendor_city)) { ?>
+                            City: <?php echo $sqlQuery[0]->vendor_city; ?><br>
+                        <?php } ?>
+
+                        <?php if(!empty($sqlQuery[0]->vendor_pincode)) { ?>
+                            Pincode: <?php echo $sqlQuery[0]->vendor_pincode; ?><br>
+                        <?php } ?>
+
+                        <?php if(!empty($sqlQuery[0]->vendor_address)) { ?>
+                            Address: <?php echo $sqlQuery[0]->vendor_address; ?>
+                        <?php } ?>
+                    </address>
+                <?php } ?>
+            </td>
+
+            <!-- DATE -->
+            <td width="33%" valign="top" align="right">
+                <small><b>Date</b></small>
+                <div style="margin-top:5px;">
+                    <b>
+                        <?php echo $general_cls_call->change_date_format(
+                            $sqlQuery[0]->created_at,
+                            'j M Y g:i A'
+                        ); ?>
+                    </b>
+                </div>
+            </td>
+
+        </tr>
+    </table>
+			
+	</div>
+	
+	
+	  
+	
+    <!--<div style="margin-top:10px;margin-bottom:10px;">Invoice date: <?PHP echo $general_cls_call->change_date_format($sqlQuery[0]->created_at, 'j M Y g:i A'); ?>
+    </div>-->
 
     <!--<div class="center bold">BILL OF SUPPLY</div>
     <div class="center small">********** Original for Recipient **********</div>
@@ -134,6 +204,8 @@ if(isset($_GET['group_id']))
         Store: <?php echo $seller->store_name; ?> &nbsp;&nbsp; Cashier: <?php echo $seller->name; ?><br>
         POS No: R106
     </div>-->
+	
+		
 
     <div class="divider"></div>
 

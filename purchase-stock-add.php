@@ -156,7 +156,7 @@
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Stock Quantity</label>
-								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<div class="col-md-6">
@@ -168,7 +168,7 @@
 
 							<div class="col-md-6 purchase-div"  style="display:none">
 								<label for="input5" class="form-label">Purchase price</label>
-								<input type="text" class="form-control" id="purchase_price" name="purchase_price" placeholder="Purchase price" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+								<input type="text" class="form-control" id="purchase_price" name="purchase_price" placeholder="Purchase price" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<div class="col-md-6 selling-div"  style="display:none">
@@ -245,6 +245,10 @@ function select_product(product)
 				var html = '<option value="">Select...</option>';
 				$.each(result, function (i, variants) {
 					html += '<option value='+ variants.id +'>' + variants.unitname +' ('+ variants.ptype +')</option>';
+					if(variants.ptype == 'loose')
+					{
+						//$('#stock').attr();
+					}
 				});
 				$('#product_variant_id').html(html);
 			}
