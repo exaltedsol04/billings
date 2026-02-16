@@ -16,6 +16,12 @@
 		if($product != '' && $stock !='' && $purchase_price !='' && $vendor_id !='')
 		{
 			//echo "<pre>";print_r($_POST);die;
+			$fields = "max(group_id) as grp_id";
+			$where = 'WHERE 1';
+			$params = [];
+			$group_data_id = $general_cls_call->select_query($fields, ADMIN_STOCK_PURCHASE_LIST, $where, $params, 1);
+			$group_id = $group_data_id->grp_id + 1;
+			
 			if($_POST['selling_price'] > $_POST['purchase_price'])
 			{
 				$explode_product = explode("@@@", $product);
@@ -35,8 +41,8 @@
 					$loose_stock_quantity = $stock * $variant_measurement;
 				}
 				
-				$field = "vendor_id, product_id, product_variant_id, loose_stock_quantity, stock, status,  purchase_price, remarks, created_at, updated_at";
-				$value = ":vendor_id, :product_id, :product_variant_id, :loose_stock_quantity, :stock, :status, :purchase_price, :remarks, :created_at, :updated_at";
+				$field = "vendor_id, product_id, product_variant_id, loose_stock_quantity, stock, status,  group_id, purchase_price, remarks, created_at, updated_at";
+				$value = ":vendor_id, :product_id, :product_variant_id, :loose_stock_quantity, :stock, :status, :group_id, :purchase_price, :remarks, :created_at, :updated_at";
 					
 					//parent_id
 				$addExecute=array(
@@ -46,12 +52,21 @@
 					':loose_stock_quantity'	=> $loose_stock_quantity,
 					':stock'				=> $stock,
 					':status'				=> 0,
+					':group_id'				=> $group_id,
 					':purchase_price'		=> $general_cls_call->specialhtmlremover($purchase_price),
 					':remarks'				=> $remarks,
 					':created_at' 			=> date('Y-m-d H:i:s'),
 					':updated_at'		    => date('Y-m-d H:i:s')
 				);
 				$general_cls_call->insert_query(ADMIN_STOCK_PURCHASE_LIST, $field, $value, $addExecute);
+				$sucMsg = "Stock Inserted Successfully";
+				//header('location:admin-print-purchase-order-details.php');
+				$id = $group_id;
+				$location  = SITE_URL.'admin-print-purchase-order-details?group_id=' .$id;
+				//header('location:' . $location);
+				
+				echo "<script>window.open('$location', '_blank');</script>";
+				
 				$sucMsg = "Stock Inserted Successfully";
 			}
 			else{
