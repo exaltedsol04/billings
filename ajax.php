@@ -862,7 +862,7 @@
 		break;
 		case "getMaxProductVariant";
 			 
-			$fields = "pv.id, pv.measurement, u.name as unit_name, pv.type";
+			/*$fields = "pv.id, pv.measurement, u.name as unit_name, pv.type";
 			$tables = PRODUCT_VARIANTS . " pv
 			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
 			
@@ -871,7 +871,48 @@
 				':product_id' => $_POST['pid'],
 				':parent_id' => 0
 			];
+			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);*/
+			$fields = "
+				pv.id, pv.measurement, pv.type,
+
+				CASE 
+					WHEN pv.type = 'loose'
+						THEN COALESCE(parent_u.id, u.id)
+					ELSE u.id
+				END AS unit_id,
+
+				CASE 
+					WHEN pv.type = 'loose'
+						THEN COALESCE(parent_u.name, u.name)
+					ELSE u.name
+				END AS unit_name
+			";
+
+			$tables = PRODUCT_VARIANTS . " pv
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
+			LEFT JOIN " . UNITS . " parent_u ON parent_u.id = u.parent_id";
+
+			$where = "
+			WHERE pv.product_id = :product_id
+			GROUP BY 
+				pv.type,
+				CASE 
+					WHEN pv.type = 'loose'
+						THEN COALESCE(parent_u.id, u.id)
+					ELSE u.id
+				END
+			";
+
+			$params = [
+				':product_id' => $_POST['pid']
+			];
+
 			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
+
+
+
+
+
 			$varianrArr = [];
 			if($sqlQuery[0] != '')
 			{
