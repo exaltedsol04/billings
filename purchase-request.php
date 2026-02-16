@@ -138,7 +138,7 @@
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->stock_unit_id.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->unit_name.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
 					<?PHP
 							}
 						}

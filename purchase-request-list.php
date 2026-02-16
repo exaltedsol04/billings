@@ -21,7 +21,7 @@
 				SUM(
 					CASE 
 						WHEN pv.type = 'loose' THEN asp.loose_stock_quantity
-						WHEN pv.type = 'packet' THEN asp.stock
+						WHEN pv.type != 'loose' THEN asp.stock
 						ELSE 0
 					END
 				) AS total_stock
@@ -37,7 +37,7 @@
 			AND pv.deleted_at IS NULL
 			AND (
 					pv.type = 'loose'
-				 OR (pv.type = 'packet' AND asp.product_variant_id = ?)
+				 OR (pv.type != 'loose' AND asp.product_variant_id = ?)
 			)
 			";
 
@@ -60,7 +60,18 @@
 			
 			/*$stock_available = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, "WHERE product_variant_id =:product_variant_id AND status=:status AND product_id=:product_id", array(':product_variant_id'=> $product_stk_dtls->product_variant_id, 'status'=>1, 'product_id'=> $product_stk_dtls->product_id), 'stock');*/
 			
-			
+			$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
+			$request_stock_quantity = $_GET['qty'];
+			if($product_variant_dtls->type == 'loose')
+			{
+				$measurement_arr = [
+					'quantity' => $_GET['qty'] * $product_variant_dtls->measurement,
+					'stock_unit_id' => $product_variant_dtls->stock_unit_id,
+				];
+				$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+				$request_stock_quantity = $measurement_units['value'];
+				$loose_stock_quantity = $measurement_units['value'];
+			}		
 			$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date";
 			$whereClause=" WHERE id=:id";
 			$updateExecute=array(
@@ -69,23 +80,25 @@
 				':approved_date'=> date("Y-m-d H:i:s"),
 				':id'=>$_GET['id']
 			);
+			
 				
 			if($_GET['mode'] == '1')
 			{;
 				// echo '<pre>'; print_r($stock_available);die;
-				if($stock_available >= $_GET['qty'])
+				//echo $_GET['qty']; die;
+				if($stock_available >= $request_stock_quantity)
 				{
-					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
-					$loose_stock_quantity = $product_stk_dtls->loose_stock_quantity;
+					//$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
+					//$loose_stock_quantity = $product_stk_dtls->loose_stock_quantity;
 					if($product_variant_dtls->type == 'loose')
 					{
-						$measurement_arr = [
+						/*$measurement_arr = [
 							'quantity' => $_GET['qty'] * $product_variant_dtls->measurement,
 							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
 						];
-						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);*/
 						
-						$loose_stock_quantity = $measurement_units['value'];
+						
 						
 						$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date, loose_stock_quantity=:loose_stock_quantity, stock=:stock";
 						$whereClause=" WHERE id=:id";
@@ -145,19 +158,19 @@
 			}
 			if($_GET['mode'] == '3')
 			{
-				if($stock_available >= $_GET['qty'])
+				if($stock_available >= $request_stock_quantity)
 				{
-					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
-					$loose_stock_quantity = $product_stk_dtls->loose_stock_quantity;
+					//$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
+					//$loose_stock_quantity = $product_stk_dtls->loose_stock_quantity;
 					if($product_variant_dtls->type == 'loose')
 					{
-						$measurement_arr = [
+						/*$measurement_arr = [
 							'quantity' => $_GET['qty'] * $product_variant_dtls->measurement,
 							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
 						];
 						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
 						
-						$loose_stock_quantity = $measurement_units['value'];
+						$loose_stock_quantity = $measurement_units['value'];*/
 						
 						$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date, loose_stock_quantity=:loose_stock_quantity, stock=:stock";
 						$whereClause=" WHERE id=:id";
