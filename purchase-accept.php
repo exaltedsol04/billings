@@ -153,7 +153,7 @@
 						<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 						<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ?></span></td>
 						<td>
-						<a href="javascript:void(0);" onclick="accept_purchase(<?php echo $arr->id ;?>, <?php echo $arr->product_id ;?>, <?php echo $arr->product_variant_id ;?>)">
+						<a href="javascript:void(0);" onclick="accept_purchase('<?php echo $arr->id ;?>', '<?php echo $arr->product_id ;?>', '<?php echo $arr->product_variant_id ;?>', '<?php echo $arr->type; ?>')">
 						<button type="button" class="btn btn-success raised d-flex gap-2" title = "Accept" data-bs-toggle="tooltip"><i class="lni lni-checkmark-circle fs-5"></i>Accept</button></a></td>
                       </tr>
 						<?PHP
@@ -202,7 +202,7 @@
 				
 				<div class="col-md-12 qty-div"  style="display:none">
 				  <label for="operator_id" class="form-label">Correct Quantity</label>
-				  <input type="text" class="form-control" id="qty"  placeholder="Correct Quantity"  oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+				  <input type="text" class="form-control accept-qty" id="qty"  placeholder="Correct Quantity"  oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
 				  <div id="error_qty"></div>
 				</div>
 				<input type="hidden" id="product_stock_transaction_id">
@@ -211,6 +211,7 @@
 					<input type="hidden" id="order_id" name="order_id">
 					<input type="hidden" id="hid_product_id" name="hid_product_id">
 					<input type="hidden" id="hid_product_variant_id" name="hid_product_variant_id">
+					<input type="hidden" id="hid_product_type" name="hid_product_type">
 					
 					<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
 					<button type="button" id="acceptSave" class="btn btn-grd btn-grd-success px-4">Save</button>
@@ -310,7 +311,7 @@ $(document).on('click', '#acceptSave', function(){
 		}
 	});
 })
-function accept_purchase(id,pid,pvid)
+function accept_purchase(id,pid,pvid,typ)
 {
 	//alert(id);alert(pid);alert(pvid);
 	$('#msgText').html('');
@@ -321,6 +322,8 @@ function accept_purchase(id,pid,pvid)
 	$('#product_stock_transaction_id').val(id);
 	$('#hid_product_id').val(pid);
 	$('#hid_product_variant_id').val(pvid);
+	$('#hid_product_type').val(typ);
+	
 	$('#acceptModal').modal('show');
 }
 function select_status(val)
@@ -329,6 +332,22 @@ function select_status(val)
 	{
 		$('.qty-div').show();
 		$('#error_qty').html('');
+		let type = $('#hid_product_type').val();
+		if(type=='loose')
+		{
+			$('.accept-qty').off('input').on('input', function(){
+							this.value = this.value
+								.replace(/[^0-9.]/g, '')   // allow dot
+								.replace(/(\..*)\./g, '$1'); // allow only one dot
+						});
+		}
+		else{
+			$('.accept-qty').off('input').on('input', function(){
+							this.value = this.value
+								.replace(/[^0-9]/g, '')   // allow dot
+								.replace(/(\..*)\./g, '$1'); // allow only one dot
+						});
+		}
 	}
 	else{
 		$('.qty-div').hide();
