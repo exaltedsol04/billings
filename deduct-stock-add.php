@@ -115,7 +115,7 @@
 									<select name="product" id="product" class="form-select select2-dropdown" tabindex="1" onchange="select_product(this.value)" required>
 									<option value="">Select...</option>
 									<?PHP
-										$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, p.name, p.image, p.barcode";
+										/*$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, p.name, p.image, p.barcode";
 										$tables = PRODUCT_STOCK_TRANSACTION . " pr
 										INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 										INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
@@ -126,6 +126,92 @@
 											':stock_type' => 1,
 											':seller_id' => $_SESSION['SELLER_ID'],
 										];
+										$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);*/
+										
+										$fields = "
+											pr.product_id,
+											pr.product_variant_id,
+
+											SUM(pr.stock) as total_stock,
+											SUM(pr.loose_stock_quantity) as total_loose_qty,
+
+											pv.id as variant_id,
+											pv.measurement,
+											pv.type,
+											pv.discounted_price,
+											pv.stock_unit_id,
+
+											u.name as stock_unit_name,
+											u.parent_id,
+											u.conversion,
+
+											p.name,
+											p.image,
+											p.barcode,
+											p.type as product_type
+										";
+
+										$tables = PRODUCT_STOCK_TRANSACTION . " pr
+
+										INNER JOIN " . PRODUCTS . " p 
+											ON p.id = pr.product_id
+
+										INNER JOIN " . PRODUCT_VARIANTS . " pv 
+											ON pv.product_id = pr.product_id
+
+										INNER JOIN " . UNITS . " u 
+											ON u.id = pv.stock_unit_id
+										";
+
+										$where = "
+										WHERE pr.status = :status
+										AND pr.stock_type = :stock_type
+										AND pr.seller_id = :seller_id
+
+										GROUP BY pr.product_id, pv.id
+
+										HAVING
+										(
+											/* ===============================
+											   LOOSE PRODUCT CHECK
+											   =============================== */
+											(
+												pv.type = 'loose'
+												AND
+												SUM(pr.loose_stock_quantity) >=
+												(
+													CASE
+														WHEN u.parent_id != 0 AND u.conversion > 0
+															THEN pv.measurement / u.conversion
+														ELSE pv.measurement
+													END
+												)
+											)
+
+											OR
+
+											/* ===============================
+											   NORMAL PRODUCT CHECK
+											   =============================== */
+											(
+												pv.type != 'loose'
+												AND SUM(
+													CASE 
+														WHEN pr.product_variant_id = pv.id THEN pr.stock
+														ELSE 0
+													END
+												) > 0
+											)
+										)
+										";
+
+
+										$params = [
+											':status' => 1,
+											':stock_type' => 1,
+											':seller_id' => $_SESSION['SELLER_ID'],
+										];
+
 										$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 										//echo "<pre>"; print_r($sqlQuery);die;
 										
