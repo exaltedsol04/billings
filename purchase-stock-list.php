@@ -251,7 +251,13 @@
 										$paramsUnit = [
 											':product_id' => $selectValue->product_id
 										];
+										
 										$sqlUnit = $general_cls_call->select_join_query($fieldsUnit, $tablesUnit, $whereUnit, $paramsUnit, 1);
+										$type_unit = $sqlUnit->type;
+										if($sqlUnit->type == 'loose')
+										{
+											$type_unit = $sqlUnit->type.'-'.$sqlUnit->unit_name;
+										}
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
 									    <td style="width:100px"><?php echo $i ;?></td>
@@ -260,7 +266,7 @@
 										<td><?php echo $stock_credit->total; ?></td>
 										<td><?php echo $admin_stock_debit; ?></td>
 										<td><?PHP echo $stock_credit->total-$admin_stock_debit; ?></td>
-										<td><span class="badge bg-grd-primary dash-lable"><?php echo $sqlUnit->unit_name ;?></span></td>
+										<td><span class="badge bg-grd-primary dash-lable"><?php echo $type_unit ;?></span></td>
 										<td><?php echo $pending_stock; ?></td>
 										<!--<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>-->
 										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
