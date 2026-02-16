@@ -21,6 +21,12 @@
 			//echo "<pre>";print_r($_POST);die;
 			$countProduct = count($product);
 			//echo $countProduct;die;
+			$fields = "max(group_id) as grp_id";
+			$where = 'WHERE 1';
+			$params = [];
+			$group_data_id = $general_cls_call->select_query($fields, ADMIN_STOCK_PURCHASE_LIST, $where, $params, 1);
+			$group_id = $group_data_id->grp_id + 1;
+			
 			for($index = 0; $index < $countProduct; $index++)
 			{
 				$explode_product = explode("@@@", $product[$index]);
@@ -42,8 +48,8 @@
 						$loose_stock_quantity = $stock[$index] * $variant_measurement;
 					}
 				
-					$field = "vendor_id, product_id, product_variant_id, loose_stock_quantity, stock, status,  purchase_price, remarks, created_at, updated_at";
-					$value = ":vendor_id, :product_id, :product_variant_id, :loose_stock_quantity, :stock, :status, :purchase_price, :remarks, :created_at, :updated_at";
+					$field = "vendor_id, product_id, product_variant_id, loose_stock_quantity, stock, status, group_id, purchase_price, remarks, created_at, updated_at";
+					$value = ":vendor_id, :product_id, :product_variant_id, :loose_stock_quantity, :stock, :status, :group_id, :purchase_price, :remarks, :created_at, :updated_at";
 						
 						//parent_id
 					$addExecute=array(
@@ -53,6 +59,7 @@
 						':loose_stock_quantity'	=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
 						':stock'				=> $stock[$index],
 						':status'				=> 0,
+						':group_id'				=> $group_id,
 						':purchase_price'		=> $general_cls_call->specialhtmlremover($purchase_price[$index]),
 						':remarks'				=> $general_cls_call->specialhtmlremover($remarks[$index]),
 						':created_at' 			=> date('Y-m-d H:i:s'),
@@ -64,6 +71,11 @@
 			}
 			
 			$sucMsg = "Stock Inserted Successfully";
+			
+			$id = $group_id;
+			$location  = SITE_URL.'admin-print-purchase-order-details?group_id=' .$id;
+			//header('location:' . $location);
+			echo "<script>window.open('$location', '_blank');</script>";
 		//}
 		//else{
 			//$erMsg = "Please Fill All Fields";
