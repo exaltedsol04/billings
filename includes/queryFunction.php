@@ -682,7 +682,7 @@
 				$get_parent_unit = $this->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$get_data->parent_id), 1);
 				$unit = [
 					'value' =>  $measurement_arr['quantity'] / $get_data->conversion,
-					'unit' => $get_data->name,
+					'unit' => $get_parent_unit->name,
 				];
 			}
 
