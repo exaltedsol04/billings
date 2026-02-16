@@ -23,7 +23,7 @@ if(isset($_GET['group_id']))
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Stock</title>
+<title></title>
 
 <style>
     body {
