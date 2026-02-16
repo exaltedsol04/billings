@@ -74,8 +74,8 @@
 								<thead>
 									<tr class="text-center">
 										<td></td>
-										<td><input type="text" class="form-control" id="search-one" placeholder="Search by Vendor"></td>
-										<td><input type="text" class="form-control" id="search-two" placeholder="Search by name"></td>
+										<td></td>
+										<td></td>
 										<td></td>
 									</tr>
 								  <tr>
