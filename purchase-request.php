@@ -31,7 +31,12 @@
 				if($variant_type == 'loose')
 				{
 					$variant_measurement = $product_variant_dtls->measurement;
-					$loose_stock_quantity = $_POST['qty'][$k] * $variant_measurement;
+					$measurement_arr = [
+						'quantity' => $_POST['qty'][$k] * $variant_measurement,
+						'stock_unit_id' => $product_variant_dtls->stock_unit_id,
+					];
+					$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+					$loose_stock_quantity = $measurement_units['value'];
 				}
 				
 				
@@ -122,14 +127,7 @@
 						{
 							foreach($sqlQuery as $arr)
 							{	
-								$measurement_arr = [
-									'quantity' => 1 * $arr->measurement,
-									'stock_unit_id' => $arr->stock_unit_id,
-								];
-								$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
-								$measurement = $measurement_units['value'];
-								$unit_name = $measurement_units['unit'];
-								
+							
 								/*$imagePath = MAIN_SERVER_PATH . $arr->image;
 								if (!empty($arr->image) && file_exists($imagePath)) {
 									$imagePath = MAIN_SERVER_PATH . $arr->image;
@@ -140,7 +138,7 @@
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
 					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$measurement.' '.$unit_name.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->stock_unit_id.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
 					<?PHP
 							}
 						}
