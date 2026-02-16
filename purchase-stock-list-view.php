@@ -171,12 +171,12 @@
 										if($arr->status == 0)
 										{
 										?>
-										<input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"><small class="text-danger qty-error" style="display:none;"></small>
+										<input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(<?php echo $arr->type == 'loose' ? '/[^0-9.]/g' : '/[^0-9]/g'; ?>, '')"><small class="text-danger qty-error" style="display:none;"></small>
 										<?php 
 										}
 										else{
 										?>
-										<?PHP echo $arr->stock ?>
+										<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock ?>
 										<?php 
 										}
 										?>

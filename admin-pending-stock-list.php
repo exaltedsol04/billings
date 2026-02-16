@@ -166,7 +166,7 @@
 										<td class="text-center"><?PHP echo $k+1; ?></td>
 										<td><?PHP echo $arr->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
-										<td class="text-center"><input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
+										<td class="text-center"><input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(<?php echo $arr->type == 'loose' ? '/[^0-9.]/g' : '/[^0-9]/g'; ?>, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
 										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $arr->unit_name : $arr->measurement.' '.$arr->unit_name; ?></td>
 										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ;?></span></td>
 										<td>₹ <?php echo $arr->purchase_price ?></td>

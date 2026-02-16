@@ -60,7 +60,23 @@
 								</thead>
 								<tbody>
 									<?php
-									$fields = "asp.id, asp.product_id, asp.product_variant_id, asp.status, SUM(asp.stock) as total_stock, asp.created_at, u.name as unit_name, pv.measurement, p.name, p.barcode, pv.type";
+									$fields = "asp.id,
+									asp.product_id,
+									asp.product_variant_id,
+									asp.status,
+									SUM(
+										CASE 
+											WHEN pv.type = 'loose' 
+												THEN asp.loose_stock_quantity
+											ELSE asp.stock
+										END
+									) as total_stock,
+									asp.created_at,
+									u.name as unit_name,
+									pv.measurement,
+									p.name,
+									p.barcode,
+									pv.type";
 									
 									$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 									INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
@@ -72,7 +88,7 @@
 										':status' => 1
 									];
 									
-									$where = "WHERE ". $whereSrc ." GROUP BY asp.product_variant_id HAVING SUM(asp.stock) > 0 ORDER BY asp.created_at DESC";
+									$where = "WHERE ". $whereSrc ." GROUP BY asp.product_variant_id HAVING total_stock > 0 ORDER BY asp.created_at DESC";
 									
 									
 									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $paramsSrc, 2);

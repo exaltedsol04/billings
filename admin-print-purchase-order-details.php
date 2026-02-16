@@ -4,7 +4,7 @@ include_once 'init.php';
 
 if(isset($_GET['group_id']))
 {
-	$fields = "asp.id, asp.group_id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type, v.email as vendor_email, v.mobile as vendor_mobile, v.city as vendor_city, v.pincode as vendor_pincode, v.address as vendor_address";
+	$fields = "asp.id, asp.group_id, asp.loose_stock_quantity, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type, v.email as vendor_email, v.mobile as vendor_mobile, v.city as vendor_city, v.pincode as vendor_pincode, v.address as vendor_address";
 	$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 	INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 	INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -245,14 +245,14 @@ if(isset($_GET['group_id']))
 				
 				<!--<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>-->
 				<td class="text-center">
-				<?PHP echo $selectValue->stock ?>
+				<?PHP echo $selectValue->type== 'loose'  ? $selectValue->loose_stock_quantity : $selectValue->stock ?>
 				</td>
 				<td>₹ <?php echo $selectValue->purchase_price ?></td>
-				<td>₹ <?php echo $selectValue->stock*$selectValue->purchase_price ?></td>
+				<td>₹ <?php echo $selectValue->type== 'loose'  ? $selectValue->loose_stock_quantity*$selectValue->purchase_price : $selectValue->stock*$selectValue->purchase_price; ?></td>
             </tr>
             <?php 
 				$sl++;
-				  $total_amt = $total_amt+ $selectValue->stock*$selectValue->purchase_price;
+				  $total_amt = $selectValue->type== 'loose'  ? $total_amt+ $selectValue->loose_stock_quantity*$selectValue->purchase_price : $total_amt+ $selectValue->stock*$selectValue->purchase_price;
 				}
 			}
 			?>
