@@ -12,7 +12,7 @@
 	/*=========== STATUS CHANGE START ================*/
 		if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '2' || $_GET['mode'] == '3'))
 		{
-			//echo $_GET['id'].' '.$_GET['mode'].' '.$_GET['qty'];die;
+			//echo $_GET['id'].' -- '.$_GET['mode'].' -- '.$_GET['qty'];die;
 			// get product and product variant_ab
 			$product_stk_dtls = $general_cls_call->select_query("*", PRODUCT_STOCK_TRANSACTION, "WHERE id =:id ", array(':id'=> $_GET['id']), 1);
 			
@@ -46,7 +46,7 @@
 			$stock_available = $result->total_stock ?? 0;
 			
 			$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
-			$request_stock_quantity = $_GET['qty'];
+			/*$request_stock_quantity = $_GET['qty'];
 			$loose_stock_quantity = '0.00';
 			if($product_variant_dtls->type == 'loose')
 			{
@@ -57,7 +57,13 @@
 				$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
 				$request_stock_quantity = $measurement_units['value'];
 				$loose_stock_quantity = $measurement_units['value'];
-			}		
+			}	*/
+			$request_stock_quantity = $_GET['qty'];
+			$loose_stock_quantity = 0.00;
+			if($product_variant_dtls->type == 'loose')
+				$request_stock_quantity = 0;
+				$loose_stock_quantity = $_GET['qty'];
+			}			
 			$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date";
 			$whereClause=" WHERE id=:id";
 			$updateExecute=array(
@@ -83,7 +89,7 @@
 							':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
 							':approved_date'=> date("Y-m-d H:i:s"),
 							':loose_stock_quantity'=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
-							':stock'=> $_GET['qty'],
+							':stock'=> $request_stock_quantity,
 							':id'=>$_GET['id']
 						);
 					}
@@ -103,7 +109,7 @@
 						':vendor_id'			=> 0,
 						':product_id'			=> $product_stk_dtls->product_id,
 						':product_variant_id'	=> $product_stk_dtls->product_variant_id,
-						':stock'				=> -($_GET['qty']),
+						':stock'				=> -($request_stock_quantity),
 						':product_stock_transaction_id'	=> $_GET['id'],
 						':seller_accept_status'	=> $seller_accept_status,
 						':status'				=> 1,
@@ -240,7 +246,7 @@
 								</thead>
 								<tbody>
 									<?php 
-						$fields = "pr.id, pr.product_id, pr.status, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, pv.stock_unit_id, p.name, p.image, p.barcode, a.username";
+						$fields = "pr.id, pr.product_id, pr.status, pr.loose_stock_quantity, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, pv.stock_unit_id, p.name, p.image, p.barcode, a.username";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
@@ -256,24 +262,25 @@
 						{
 							$i = 1;
 							foreach($sqlQuery as $key=>$arr)
-							{	
-								/*$imagePath = MAIN_SERVER_PATH . $arr->image;
-								if (!empty($arr->image) && file_exists($imagePath)) {
-									$imagePath = MAIN_SERVER_PATH . $arr->image;
-								} else {
-									$imagePath = IMG_PATH . 'noImg.jpg';
-								}*/
-								
+							{									
 								$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
 								$unitname = $unit_dtls->name;
+								if($arr->type == 'loose')
+								{
+									$measurement_arr = [
+										'quantity' => 1 * $arr->measurement,
+										'stock_unit_id' => $arr->stock_unit_id,
+									];
+									$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+									$unitname = $measurement_units['unit'];
+								}
 					?>
 									  <tr id="dataRow<?php echo($arr->id);?>">
-										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
 										<td><?PHP echo $key+1; ?></td>
 										<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
-										<td><input type="text" value="<?PHP echo $arr->pqty ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9]/g, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
-										<td><?PHP echo $arr->measurement.' '.$unitname; ?></td>
+										<td><input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->pqty; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
+										<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $arr->type ?></span></td>
 										<td><?PHP echo $arr->username; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
