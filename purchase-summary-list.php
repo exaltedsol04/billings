@@ -157,6 +157,7 @@
 															<th style="width:10px">Quantity</th>
 															<th style="width:20px">Purchase price</th>
 															<th style="width:40px">Total price</th>
+															<th style="width:40px">Purchase date</th>
 														</tr>
 													</thead>
 													<tbody>
@@ -198,6 +199,7 @@
 															<td class="text-center"><?PHP echo $stock; ?></td>
 															<td class="text-center">₹<?php echo $val->purchase_price ?></td>
 															<td class="text-center">₹<?php echo $stock * $val->purchase_price ?></td>
+															<td><?PHP echo $general_cls_call->change_date_format($val->created_at, 'j M Y g:i A'); ?></td>
 														</tr>
 													<?php 
 													}

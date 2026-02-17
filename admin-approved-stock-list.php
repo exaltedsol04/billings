@@ -53,7 +53,7 @@
 	
 	//if(isset($_GET['pvid']))
 	//{
-		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, asp.loose_stock_quantity, u.name as unit_name, pv.measurement, pv.stock_unit_id, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
+		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, asp.loose_stock_quantity, u.name as unit_name, pv.measurement, pv.stock_unit_id, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type, asp.po_status";
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -140,6 +140,7 @@
 									<th>Purchase Price</th>
 									<th>Purchase Date</th>
 									<th>Remarks</th>
+									<th>PO Status</th>
 									<th class="text-center">Action</th>
 								  </tr>
 								</thead>
@@ -165,7 +166,7 @@
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
 									  <tr id="dataRow<?php echo($arr->id);?>">
-										<td class="text-center"><?PHP echo $k+1; ?></td>
+										<td class="text-center"></td>
 										<td><?PHP echo $arr->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
 										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock ?></td>
@@ -174,6 +175,7 @@
 										<td>₹ <?php echo $arr->purchase_price ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A'); ?></td>
 										<td><?php echo !empty($arr->remarks) ? $arr->remarks : '--';?></td>
+										<td><span class="badge <?php echo $arr->po_status == 1 ? 'bg-grd-info' : ($arr->po_status == 2 ? 'bg-grd-warning' :($arr->po_status == 3 ? 'bg-grd-success' : 'bg-grd-danger') ) ?>"><?php echo $arr->po_status == 1 ? 'Sent' : ($arr->po_status == 2 ? 'View' : ($arr->po_status == 3 ? 'Approved' : 'Rejected')) ?></span></td>
 										<td class="text-center">
 											<div class="ms-auto">
 												<div class="btn-group">
