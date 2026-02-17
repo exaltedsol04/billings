@@ -191,7 +191,7 @@ let increment = (id, msr, ptype, pid) => {
 			limit = Number(limit.toFixed(3));
             // ❌ block only if truly exceeding
 			if (nextWeight > limit) {
-                //$('#dataRow' + id).find('.qty-increment').prop('disabled', true);
+                $('#dataRow' + id).find('.qty-increment').prop('disabled', true);
                 $("#loader").hide();
                 return;
             }
@@ -205,7 +205,7 @@ let increment = (id, msr, ptype, pid) => {
         if (ptype !== 'loose' && limit !== null) {
 
             if (search.qty >= limit) {
-                //$('#dataRow' + id).find('.qty-increment').prop('disabled', true);
+                $('#dataRow' + id).find('.qty-increment').prop('disabled', true);
                 $("#loader").hide();
                 return;
             }
@@ -248,7 +248,7 @@ let decrement = (id, msr, ptype, pid) => {
 
     search.qty -= 1;
 
-   //$('#dataRow' + id).find('.qty-increment').prop('disabled', false);
+    $('#dataRow' + id).find('.qty-increment').prop('disabled', false);
 
     let inputId = 'cart-stock-limit' + id;
 	if (ptype === 'loose') {
