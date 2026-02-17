@@ -63,7 +63,7 @@
 	
 	//if(isset($_GET['pvid']))
 	//{
-		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.loose_stock_quantity, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
+		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.loose_stock_quantity, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.stock_unit_id, pv.id as pvid, pv.type";
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -159,6 +159,18 @@
 										$i = 1;
 										foreach($sqlQuery as $k=>$arr)
 										{
+											$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+											$unitname = $unit_dtls->name;
+											if($arr->type == 'loose')
+											{
+												$measurement_arr = [
+													'quantity' => 1 * $arr->measurement,
+													'stock_unit_id' => $arr->stock_unit_id,
+												];
+												$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+												$unitname = $measurement_units['unit'];
+											}
+								
 											$barcode = $arr->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
@@ -167,7 +179,7 @@
 										<td><?PHP echo $arr->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
 										<td class="text-center"><input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(<?php echo $arr->type == 'loose' ? '/[^0-9.]/g' : '/[^0-9]/g'; ?>, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
-										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $arr->unit_name : $arr->measurement.' '.$arr->unit_name; ?></td>
+										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ;?></span></td>
 										<td>₹ <?php echo $arr->purchase_price ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A'); ?></td>

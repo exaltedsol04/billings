@@ -131,20 +131,20 @@
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
-										foreach($sqlQuery as $k=>$selectValue)
+										foreach($sqlQuery as $k=>$arr)
 										{
 											$product_variant_arr = [];
 											$placeholders = [];
 											$paramsOrdItm = [];
 											
-											$barcode = $selectValue->barcode;
+											$barcode = $arr->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 											
 											// credit stock 
 											$whereCredit = "WHERE product_id= :product_id AND  product_stock_transaction_id= :product_stock_transaction_id AND status=:status";
 											
 											$paramsCredit = [
-												':product_id' => $selectValue->product_id,
+												':product_id' => $arr->product_id,
 												':product_stock_transaction_id' => 0,
 												':status' => 1
 											];
@@ -154,7 +154,7 @@
 											$whereDebit = "WHERE product_id=:product_id AND product_stock_transaction_id!=:product_stock_transaction_id AND status=:status";
 											
 											$paramsDebit = [
-												':product_id'=> $selectValue->product_id,
+												':product_id'=> $arr->product_id,
 												':product_stock_transaction_id'=>0,
 												':status'=>1
 											];
@@ -162,7 +162,7 @@
 											
 											// debit stock from order item
 											$order_item_stock = 0;
-											$product_variants = $general_cls_call->select_query("id, type, stock_unit_id, measurement", PRODUCT_VARIANTS, "WHERE product_id =:product_id", array(':product_id'=> $selectValue->product_id,), 2);
+											$product_variants = $general_cls_call->select_query("id, type, stock_unit_id, measurement", PRODUCT_VARIANTS, "WHERE product_id =:product_id", array(':product_id'=> $arr->product_id,), 2);
 											
 											foreach($product_variants as $k=>$variants)
 											{
@@ -198,7 +198,7 @@
 												$whereDebit = "WHERE product_id=:product_id AND product_variant_id =:product_variant_id AND product_stock_transaction_id!=:product_stock_transaction_id";
 											
 												$paramsDebit = [
-													':product_id'=> $selectValue->product_id,
+													':product_id'=> $arr->product_id,
 													':product_variant_id'=> $variants->id,
 													':product_stock_transaction_id'=>0
 												];
@@ -214,7 +214,7 @@
 											$whereStatus = "WHERE product_id=:product_id AND product_stock_transaction_id =:product_stock_transaction_id AND status=:status";
 											
 											$paramsStatus = [
-												':product_id'=> $selectValue->product_id,
+												':product_id'=> $arr->product_id,
 												':product_stock_transaction_id'=>0,
 												':status'=>0
 											];
@@ -223,7 +223,7 @@
 											//----get the vendors name------
 											
 											$whereVar = "WHERE product_id =:product_id";
-											$paramsVar = [':product_id'=> $selectValue->product_id];
+											$paramsVar = [':product_id'=> $arr->product_id];
 											$p_variants = $general_cls_call->select_query("distinct(product_variant_id)", ADMIN_STOCK_PURCHASE_LIST, $whereVar, $paramsVar, 2);
 											
 											$vendors_arr = [];
@@ -235,7 +235,7 @@
 												INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
 												$whereVend = "WHERE asp.product_id=:product_id AND asp.product_variant_id=:product_variant_id";
 												$paramsVend = [
-													':product_id'=>$selectValue->product_id,
+													':product_id'=>$arr->product_id,
 													':product_variant_id'=>$pvi->product_variant_id
 												];
 												$sqlVendors = $general_cls_call->select_join_query($fieldsVend, $tablesVend, $whereVend, $paramsVend, 2);
@@ -243,33 +243,47 @@
 											}
 											
 											//--- get the unit-----
-										$fieldsUnit = "pv.id as product_variant_id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
+										$fieldsUnit = "pv.id as product_variant_id, pv.product_id, pv.type, pv.stock_unit_id, pv.stock, pv.measurement, pv.discounted_price, p.name, p.image, p.barcode, u.name as unit_name";
 										$tablesUnit = PRODUCT_VARIANTS . " pv
 										INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id
 										INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
 										$whereUnit = "WHERE pv.product_id=:product_id";
 										$paramsUnit = [
-											':product_id' => $selectValue->product_id
+											':product_id' => $arr->product_id
 										];
 										
 										$sqlUnit = $general_cls_call->select_join_query($fieldsUnit, $tablesUnit, $whereUnit, $paramsUnit, 1);
-										$type_unit = $sqlUnit->type;
+										/*$type_unit = $sqlUnit->type;
 										if($sqlUnit->type == 'loose')
 										{
 											$type_unit = $sqlUnit->type.'-'.$sqlUnit->unit_name;
+										}*/
+										
+										$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $sqlUnit->stock_unit_id), 1);
+										$unitname = $unit_dtls->name;
+										$type_unit = $sqlUnit->type;
+										if($sqlUnit->type == 'loose')
+										{
+											$measurement_arr = [
+												'quantity' => 1 * $arr->measurement,
+												'stock_unit_id' => $sqlUnit->stock_unit_id,
+											];
+											$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+											$unitname = $measurement_units['unit'];
+											$type_unit = $sqlUnit->type.'-'.$unitname;
 										}
 									?>
-									  <tr id="dataRow<?php echo($selectValue->id);?>" class="text-center">
+									  <tr id="dataRow<?php echo($arr->id);?>" class="text-center">
 									    <td style="width:100px"><?php echo $i ;?></td>
 										<td><?PHP echo implode(', ', $vendors_arr); ?></td>
-										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
+										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
 										<td><?php echo $stock_credit->total; ?></td>
 										<td><?php echo $admin_stock_debit; ?></td>
 										<td><?PHP echo $stock_credit->total-$admin_stock_debit; ?></td>
 										<td><span class="badge bg-grd-primary dash-lable"><?php echo $type_unit ;?></span></td>
 										<td><?php echo $pending_stock; ?></td>
-										<!--<td><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>-->
-										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($selectValue->product_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
+										<!--<td><?PHP echo $arr->measurement.'  '.$arr->unit_name; ?></td>-->
+										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($arr->product_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
 											<span class="material-icons-outlined fs-5">visibility</span>
 										</div></a></td>
 									</tr>
