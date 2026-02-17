@@ -133,16 +133,7 @@
 												$i++;
 											}
 										}
-										else
-										{
 									?>
-									  <tr>
-										<td colspan="6" class="text-center">No record found.
-										</td>
-									  </tr>
-						<?PHP
-							}	
-						?>
 								</tbody>
 							</table>
 						</div>
