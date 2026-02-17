@@ -34,7 +34,7 @@
 				$product_id = $explode_product[0];
 				//$product_variant_id = $explode_product[1];
 				
-				if($product_id !='' && $product_variant_id[$index] !='' && $purchase_price[$index] !='' && $stock[$index] !='')
+				if($vendor_id[$index] !='' && $product_id !='' && $product_variant_id[$index] !='' && $purchase_price[$index] !='' && $stock[$index] !='')
 				{	
 					$remarks = !empty($remarks) ? $remarks : null;
 					
@@ -53,7 +53,7 @@
 						
 						//parent_id
 					$addExecute=array(
-						':vendor_id'			=> $general_cls_call->specialhtmlremover($vendor_id),
+						':vendor_id'			=> $general_cls_call->specialhtmlremover($vendor_id[$index]),
 						':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 						':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id[$index]),
 						':loose_stock_quantity'	=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
@@ -133,33 +133,10 @@
 						
 					<form class="row g-4" action="" method="post" id="save_stock">
 						<div id="rows-wrapper">
-							<div class="row">
-								<div class="col-md-4">
-									<label for="input5" class="form-label">Vendors</label>
-									<select name="vendor_id" id="vendor_id" class="form-select select2-dropdown" tabindex="1">
-										<option value="">Select...</option>
-										<?php 
-											$fields = "*";
-											$where = "WHERE 1";
-											$params = [];
-											$sqlQuery = $general_cls_call->select_query($fields, VENDORS, $where, $params, 2);
-											if($sqlQuery[0] != '')
-											{
-												foreach($sqlQuery as $arr)
-												{
-										?>
-												<option value="<?php echo $arr->id ?>" <?php echo ($_POST['vendor_id'] == $arr->id) ? 'selected' : '' ?>><?php echo $arr->name ?></option>
-										<?php 
-												}
-											}
-										?>
-									</select>
-									<span class="text-danger err_vendor"></span>
-								</div>
-							</div>
+							
 							<div class="row item-row mb-2 mt-2">
 
-								<div class="col-md-5">
+								<div class="col-md-3">
 								<label for="input1" class="form-label">Products</label>
 									<select name="product[]" class="form-select select2-dropdown"  tabindex="1" onchange="select_product(this)">
 										<option value="">Select product</option>
@@ -206,7 +183,28 @@
 									<input type="hidden" class="hid_purchase_price">
 									<span id="selling_price_div" class="w-100 selling_price_div error_purchase text-danger"></span>
 								</div>
-								
+								<div class="col-md-2">
+									<label for="input5" class="form-label">Vendors</label>
+									<select name="vendor_id[]" class="form-select select2-dropdown" tabindex="1">
+										<option value="">Select...</option>
+										<?php 
+											$fields = "*";
+											$where = "WHERE 1";
+											$params = [];
+											$sqlQuery = $general_cls_call->select_query($fields, VENDORS, $where, $params, 2);
+											if($sqlQuery[0] != '')
+											{
+												foreach($sqlQuery as $arr)
+												{
+										?>
+												<option value="<?php echo $arr->id ?>" <?php echo ($_POST['vendor_id'] == $arr->id) ? 'selected' : '' ?>><?php echo $arr->name ?></option>
+										<?php 
+												}
+											}
+										?>
+									</select>
+									<span class="text-danger err_vendor"></span>
+								</div>
 								<div class="col-md-11">
 									<label for="input5" class="form-label">Remarks</label>
 									<input type="text" name="remarks[]" id="remarks" class="form-control">
@@ -281,7 +279,7 @@ function select_product(el)
 					
 					if(variants.ptype == 'loose')
 					{
-						//alert(variants.ptype);
+						alert(variants.ptype);
 						stockInput.off('input').on('input', function () {
 							this.value = this.value
 								.replace(/[^0-9.]/g, '')   // allow dot
@@ -423,24 +421,13 @@ $(document).on('click', '.save-purchase-stock', function (e) {
 	e.preventDefault();
 	let isValid = true;
     let firstError = null;
-	let vendor_id =  $('#vendor_id').val();
-	if(vendor_id == '')
-	{
-		$('html, body').animate({
-             scrollTop: $('#vendor_id').offset().top - 100
-        }, 400);
-
-        $('#vendor_id').focus();
-		$('.err_vendor').html('<span>Select vendor</span>');
-		return false;
-	}
 
     $('.item-row').each(function () {
 
         let row = $(this);
 		row.find('.selling_price_div').html('');
         // fields to validate inside this row 
-        let inputs = row.find('select[name="product[]"], input[name="stock[]"], select[name="product_variant_id[]"], input[name="purchase_price[]"]');
+        let inputs = row.find('select[name="product[]"], input[name="stock[]"], select[name="product_variant_id[]"], input[name="purchase_price[]"], select[name="vendor_id[]"]');
 
        inputs.each(function () {
 
