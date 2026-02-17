@@ -90,7 +90,7 @@
 								</thead>
 								<tbody>
 									<?php 
-						$fields = "pr.id, pr.product_id, pr.status, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, pv.stock_unit_id, p.name, p.image, p.barcode, a.username";
+						$fields = "pr.id, pr.product_id, pr.status, pr.loose_stock_quantity, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, pv.stock_unit_id, p.name, p.image, p.barcode, a.username";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
@@ -107,22 +107,24 @@
 							$i = 1;
 							foreach($sqlQuery as $key=>$arr)
 							{	
-								/*$imagePath = MAIN_SERVER_PATH . $arr->image;
-								if (!empty($arr->image) && file_exists($imagePath)) {
-									$imagePath = MAIN_SERVER_PATH . $arr->image;
-								} else {
-									$imagePath = IMG_PATH . 'noImg.jpg';
-								}*/
 								$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
 								$unitname = $unit_dtls->name;
+								if($arr->type == 'loose')
+								{
+									$measurement_arr = [
+										'quantity' => 1 * $arr->measurement,
+										'stock_unit_id' => $arr->stock_unit_id,
+									];
+									$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+									$unitname = $measurement_units['unit'];
+								}
 					?>
 									  <tr id="dataARow<?php echo($arr->id);?>"  class="text-center">
-										<!--<td><img src="<?PHP echo $imagePath; ?>" height="50"></td>-->
 										<td><?PHP echo $key+1; ?></td>
 										<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
-										<td><?PHP echo $arr->pqty ?></td>
-										<td><?PHP echo $arr->measurement. ' '. $unitname; ?></td>
+										<td><?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->pqty; ?></td>
+										<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 										<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
 										<td><?PHP echo $arr->username; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
@@ -131,16 +133,7 @@
 												$i++;
 											}
 										}
-										else
-										{
 									?>
-									  <tr>
-										<td colspan="6" class="text-center">No record found.
-										</td>
-									  </tr>
-						<?PHP
-							}	
-						?>
 								</tbody>
 							</table>
 						</div>
