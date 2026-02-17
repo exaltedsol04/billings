@@ -952,11 +952,11 @@ function pay_now()
 			var result = JSON.parse(response);
 			//alert(result.length);
 			if (result.length > 0) {
-				var html = '<div class="col-md-6">';
+				var html = '<div class="col-md-12">';
 				$.each(result, function (i, stock) {
 					html += '<div class="row align-items-start border-bottom py-2">';
-						html += '<span class="col-md-5 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
-						html += '<span class="col-md-3 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
+						html += '<span class="col-md-6 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
+						html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
 						html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
 					html += '</div>';
 				});

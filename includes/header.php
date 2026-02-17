@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-bs-theme="<?php echo $_SESSION['ROLE_ID']==1 ? 'light' : ($_SESSION['ROLE_ID']==5 ? 'blue-theme' : 'semi-dark'); ?>">
+<html lang="en" data-bs-theme="<?php echo $_SESSION['ROLE_ID']==1 ? 'light' : ($_SESSION['ROLE_ID']==5 ? 'blue-theme' : ($_SESSION['ROLE_ID']==3 ? 'semi-dark' : 'dark')); ?>">
 
 <head>
   <meta charset="utf-8">
