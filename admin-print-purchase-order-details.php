@@ -213,7 +213,7 @@ if(isset($_GET['group_id']))
         <thead>
             <tr>
                 <th class="text-center">Sl. No.</th>
-				<th>Vendor</th>
+				<!--<th>Vendor</th>-->
 				<th>Product Name</th>
 				
 				<th>Measurement</th>
@@ -237,7 +237,7 @@ if(isset($_GET['group_id']))
 			?>
             <tr>
                 <td class="text-center"><?PHP echo $k+1; ?></td>
-				<td><?PHP echo $selectValue->vendor; ?></td>
+				<!--<td><?PHP echo $selectValue->vendor; ?></td>-->
 				<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
 				
 				<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
