@@ -14,8 +14,8 @@
       <div class="sidebar-nav">
           <!--navigation-->
           <ul class="metismenu" id="sidenav">
-            <li <?php if($page=='dashboard.php') { echo ('class="mm-active"');} ?>>
-              <a href="<?php echo SITE_URL.'dashboard'; ?>">
+            <li <?php if($page=='vendor-dashboard.php') { echo ('class="mm-active"');} ?>>
+              <a href="<?php echo SITE_URL.'vendor-dashboard'; ?>">
                 <div class="parent-icon"><i class="material-icons-outlined">home</i>
                 </div>
                 <div class="menu-title">Dashboard</div>
