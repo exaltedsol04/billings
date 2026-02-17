@@ -128,6 +128,9 @@ ALTER TABLE `2026_admin_stock_purchase_list` ADD `group_id` INT(11) NULL DEFAULT
 
 ALTER TABLE `2026_admin_stock_purchase_list` ADD `seller_accept_status` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '0=Admin instant approve, 1=all right, 2=damage, 3=short fault, 4=exceed, 5= Admin approve' AFTER `product_stock_transaction_id`; 
 
+================ 17-02-2026====================
+ALTER TABLE `2026_vendors` ADD `admin_id` INT(10) NOT NULL AFTER `id`;
+
 
 
 

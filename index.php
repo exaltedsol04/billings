@@ -48,6 +48,13 @@
 					$dashboard = 'dashboard';
 				}
 				
+				if($_SESSION['ROLE_ID'] == 6) {
+					
+					$vendor = $general_cls_call->select_query("id", VENDORS, "WHERE admin_id=:admin_id", array(':admin_id'=>$user->id), 1);
+					$_SESSION['VENDOR_ID'] = $vendor->id;
+					$dashboard = 'vendor-dashboard';
+				}
+				
 				$_SESSION['USERNAME'] = $user->username;
 				if($_REQUEST['rem'] == "ON")
 				{
