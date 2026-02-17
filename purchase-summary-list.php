@@ -30,10 +30,23 @@
 			];
 		}
 		
-		$fieldsV = "v.id as vendor_id, v.name ,SUM(asp.stock * asp.purchase_price) as total_price";
+		$fieldsV = "
+			v.id as vendor_id,
+			v.name,
+
+			SUM(
+				CASE
+					WHEN pv.type = 'loose'
+						THEN asp.loose_stock_quantity * asp.purchase_price
+					ELSE
+						asp.stock * asp.purchase_price
+				END
+			) as total_price
+		";
 
 		$tablesV = ADMIN_STOCK_PURCHASE_LIST . " asp
-		INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
+		INNER JOIN " . VENDORS . " v ON v.id = asp.vendor_id
+		INNER JOIN " . PRODUCT_VARIANTS . " pv ON pv.id = asp.product_variant_id";
 		$whereV = "WHERE ". $whereDateRange ." GROUP BY asp.vendor_id";
 
 		$sqlQryVendors = $general_cls_call->select_join_query(
@@ -137,8 +150,8 @@
 													<thead>
 														<tr class="text-center">
 															<th style="width:180px">Product name</th>
-															<th style="width:20px">Measurement</th>
 															<th style="width:20px">Type</th>
+															<th style="width:20px">Measurement</th>
 															<th style="width:10px">Quantity</th>
 															<th style="width:20px">Purchase price</th>
 															<th style="width:40px">Total price</th>
@@ -147,7 +160,7 @@
 													<tbody>
 													<?php 
 													
-													$fields = "asp.*, p.name as product_name, p.barcode, u.name as unit_name, pv.measurement, pv.discounted_price, pv.type";
+													$fields = "asp.*, p.name as product_name, p.barcode, u.name as unit_name, pv.measurement, pv.stock_unit_id, pv.discounted_price, pv.type";
 													$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 													INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 													INNER JOIN " . PRODUCT_VARIANTS . " pv ON pv.id = asp.product_variant_id
@@ -161,14 +174,27 @@
 													//echo "<pre>";print_r($sqlDetails);
 													foreach($sqlDetails as $val)
 													{
+														$stock = $val->stock;
+														$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $val->stock_unit_id), 1);
+														$unitname = $unit_dtls->name;
+														if($val->type == 'loose')
+														{
+															$measurement_arr = [
+																'quantity' => 1 * $val->measurement,
+																'stock_unit_id' => $val->stock_unit_id,
+															];
+															$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+															$unitname = $measurement_units['unit'];
+															$stock = $val->loose_stock_quantity;
+														}
 													?>
 														<tr>
 															<td><?php echo $general_cls_call->cart_product_name($val->product_name) ?></td>
-															<td class="text-center"><?php echo $val->measurement.' '.$val->unit_name ?></td>
 															<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $val->type ?></span></td>
-															<td class="text-center"><?php echo $val->stock ?></td>
+															<td class="text-center"><?PHP echo $val->type == 'loose' ? $unitname : $val->measurement.' '.$unitname; ?></td>
+															<td class="text-center"><?PHP echo $stock; ?></td>
 															<td class="text-center">₹<?php echo $val->purchase_price ?></td>
-															<td class="text-center">₹<?php echo $val->stock*$val->purchase_price ?></td>
+															<td class="text-center">₹<?php echo $stock * $val->purchase_price ?></td>
 														</tr>
 													<?php 
 													}

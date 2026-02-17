@@ -53,9 +53,9 @@
 								  <tr >
 									<th style="width:100px">Sl. No.</th>
 									<th>Product Name</th>
+									<th class="text-center">Approved Stock</th>
 									<th class="text-center">Measurement</th>
 									<th class="text-center">Type</th>
-									<th class="text-center">Approved Stock</th>
 								  </tr>
 								</thead>
 								<tbody>
@@ -74,6 +74,7 @@
 									asp.created_at,
 									u.name as unit_name,
 									pv.measurement,
+									pv.stock_unit_id,
 									p.name,
 									p.barcode,
 									pv.type";
@@ -96,19 +97,31 @@
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
-										foreach($sqlQuery as $k=>$selectValue)
+										foreach($sqlQuery as $k=>$arr)
 										{
-											$barcode = $selectValue->barcode;
+											$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+											$unitname = $unit_dtls->name;
+											if($arr->type == 'loose')
+											{
+												$measurement_arr = [
+													'quantity' => 1 * $arr->measurement,
+													'stock_unit_id' => $arr->stock_unit_id,
+												];
+												$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+												$unitname = $measurement_units['unit'];
+											}
+											
+											$barcode = $arr->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 											
 											
 									?>
-									  <tr id="dataRow<?php echo($selectValue->id);?>">
+									  <tr id="dataRow<?php echo($arr->id);?>">
 									    <td class="text-center" style="width:100px"><?php echo $k+1 ;?></td>
-										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
-										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $selectValue->type ;?></span></td>
-										<td class="text-center"><?php echo $selectValue->total_stock; ?></td>
+										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
+										<td class="text-center"><?php echo $arr->total_stock; ?></td>
+										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
+										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ;?></span></td>
 									</tr>
 										<?PHP
 												$i++;

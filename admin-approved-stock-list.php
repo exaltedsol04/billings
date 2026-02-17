@@ -53,7 +53,7 @@
 	
 	//if(isset($_GET['pvid']))
 	//{
-		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, asp.loose_stock_quantity, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
+		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, asp.loose_stock_quantity, u.name as unit_name, pv.measurement, pv.stock_unit_id, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -148,21 +148,32 @@
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
-										foreach($sqlQuery as $k=>$selectValue)
+										foreach($sqlQuery as $k=>$arr)
 										{
-											$barcode = $selectValue->barcode;
+											$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+											$unitname = $unit_dtls->name;
+											if($arr->type == 'loose')
+											{
+												$measurement_arr = [
+													'quantity' => 1 * $arr->measurement,
+													'stock_unit_id' => $arr->stock_unit_id,
+												];
+												$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+												$unitname = $measurement_units['unit'];
+											}
+											$barcode = $arr->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
-									  <tr id="dataRow<?php echo($selectValue->id);?>">
+									  <tr id="dataRow<?php echo($arr->id);?>">
 										<td class="text-center"><?PHP echo $k+1; ?></td>
-										<td><?PHP echo $selectValue->vendor; ?></td>
-										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
-										<td class="text-center"><?PHP echo $selectValue->type == 'loose' ? $selectValue->loose_stock_quantity : $selectValue->stock ?></td>
-										<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $selectValue->type ;?></span></td>
-										<td>₹ <?php echo $selectValue->purchase_price ?></td>
-										<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td><?php echo !empty($selectValue->remarks) ? $selectValue->remarks : '--';?></td>
+										<td><?PHP echo $arr->vendor; ?></td>
+										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
+										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock ?></td>
+										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
+										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ;?></span></td>
+										<td>₹ <?php echo $arr->purchase_price ?></td>
+										<td><?PHP echo $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A'); ?></td>
+										<td><?php echo !empty($arr->remarks) ? $arr->remarks : '--';?></td>
 										<td class="text-center">
 											<div class="ms-auto">
 												<div class="btn-group">

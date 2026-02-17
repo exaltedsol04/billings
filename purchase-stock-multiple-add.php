@@ -44,8 +44,15 @@
 					$variant_type = $product_variant_dtls->type;
 					if($variant_type == 'loose')
 					{
-						$variant_measurement = $product_variant_dtls->measurement;
-						$loose_stock_quantity = $stock[$index] * $variant_measurement;
+						$measurement_arr = [
+							'quantity' => $stock[$index] * $product_variant_dtls->measurement,
+							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
+						];
+						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+						$loose_stock_quantity = $measurement_units['value'];
+					
+						//$variant_measurement = $product_variant_dtls->measurement;
+						//$loose_stock_quantity = $stock[$index] * $variant_measurement;
 					}
 				
 					$field = "vendor_id, product_id, product_variant_id, loose_stock_quantity, stock, status, group_id, purchase_price, remarks, created_at, updated_at";
@@ -134,7 +141,7 @@
 					<form class="row g-4" action="" method="post" id="save_stock">
 						<div id="rows-wrapper">
 							<div class="row">
-								<div class="col-md-4">
+								<div class="col-md-12">
 									<label for="input5" class="form-label">Vendors</label>
 									<select name="vendor_id" id="vendor_id" class="form-select select2-dropdown" tabindex="1">
 										<option value="">Select...</option>
@@ -157,11 +164,12 @@
 									<span class="text-danger err_vendor"></span>
 								</div>
 							</div>
+							<hr>
 							<div class="row item-row mb-2 mt-2">
 
-								<div class="col-md-5">
+								<div class="col-md-3">
 								<label for="input1" class="form-label">Products</label>
-									<select name="product[]" class="form-select select2-dropdown"  tabindex="1" onchange="select_product(this)">
+									<select name="product[]" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="select_product(this)">
 										<option value="">Select product</option>
 										<?PHP
 										$fields = "*";
@@ -189,45 +197,45 @@
 
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Stock Quantity</label>
-									<input type="text" class="form-control stock-input" name="stock[]" id="stock" placeholder="Stock quantity">
+									<input type="text" class="form-control form-control-sm stock-input" name="stock[]" id="stock" placeholder="Stock quantity">
 									<span class="text-danger err_stock"></span>
 								</div>
 
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Unit</label>
-									<select name="product_variant_id[]" class="form-select select2-dropdown unit-select" tabindex="1" onchange="get_selling_price(this)">
+									<select name="product_variant_id[]" class="form-select form-select-sm select2-dropdown unit-select" tabindex="1" onchange="get_selling_price(this)">
 										<option value="">Select...</option>
 									</select>
 									<span class="text-danger err_unit"></span>
 								</div>
-								<div class="col-md-3 purchase-div">
+								<div class="col-md-2 purchase-div">
 									<label for="input5" class="form-label">Purchase price</label>
-									<input type="text" class="form-control purchase_price" id="purchase_price" name="purchase_price[]" placeholder="Purchase price">
+									<input type="text" class="form-control form-control-sm purchase_price" id="purchase_price" name="purchase_price[]" placeholder="Purchase price">
 									<input type="hidden" class="hid_purchase_price">
 									<span id="selling_price_div" class="w-100 selling_price_div error_purchase text-danger"></span>
 								</div>
 								
-								<div class="col-md-11">
+								<div class="col-md-2">
 									<label for="input5" class="form-label">Remarks</label>
-									<input type="text" name="remarks[]" id="remarks" class="form-control">
+									<input type="text" name="remarks[]" id="remarks" class="form-control form-control-sm">
 									<span class="text-danger" id="err_stock"></span>
 								</div>
 
-								<div class="col-md-1">
-									<button type="button" class="btn btn-danger removeRow mt-4">X</button>
+								<div class="col-md-1 text-right">
+									<button type="button" class="btn btn-sm btn-danger removeRow mt-4">X</button>
 								</div>
 
 							</div>
 
 						</div>
-
+						<hr>
+						<div class="row mb-0 mt-0">
 						<div class="col-md-12">
-								<div class="d-md-flex d-grid justify-content-md-between">
-									<button type="button" id="addMore" class="btn btn-primary mt-2">
-							+ Add More
-						</button>
-						<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 save-purchase-stock">Purchase Stock</button>
+							<div class="d-md-flex d-grid justify-content-md-between">
+								<button type="button" id="addMore" class="btn btn-primary">+ Add More</button>
+								<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success save-purchase-stock">Purchase Stock</button>
 							</div>
+						</div>
 						</div>
 						
 					</form>
@@ -512,6 +520,7 @@ function initSelect2(rows) {
     rows.find('select:not(.normal)').each(function () {
         $(this).select2({
             width: '100%',
+			theme: 'bootstrap-5',
             minimumResultsForSearch: 0,
             dropdownParent: $(this).closest('.item-row') // ⭐ KEY FIX
         });
