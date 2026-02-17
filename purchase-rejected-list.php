@@ -90,11 +90,11 @@
 								</thead>
 								<tbody>
 									<?php 
-						$fields = "pr.id, pr.product_id, pr.status, pr.loose_stock_quantity, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, pv.stock_unit_id, p.name, p.image, p.barcode, a.username";
+						$fields = "pr.id, pr.product_id, pr.status, pr.loose_stock_quantity, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, pv.stock_unit_id, p.name, p.image, p.barcode, s.store_name";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.seller_id";
+						INNER JOIN " . SELLERS . " s ON s.id = pr.seller_id";
 						$where = "WHERE pr.status = :status AND pr.transaction_type = :transaction_type ORDER BY pr.created_date DESC";
 						$params = [
 							':status' => 2,
@@ -126,7 +126,7 @@
 										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->pqty; ?></td>
 										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
-										<td><?PHP echo $arr->username; ?></td>
+										<td><?PHP echo $arr->store_name; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
 									  </tr>
 										<?PHP

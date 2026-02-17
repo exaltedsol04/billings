@@ -141,24 +141,99 @@
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 											
 											// credit stock 
-											$whereCredit = "WHERE product_id= :product_id AND  product_stock_transaction_id= :product_stock_transaction_id AND status=:status";
-											
+											$fieldsCredit = "
+											SUM(
+												CASE 
+													WHEN pv.type = 'loose'
+														THEN asp.loose_stock_quantity
+													ELSE asp.stock
+												END
+											) AS total_stock
+											";
+
+											$tablesCredit = ADMIN_STOCK_PURCHASE_LIST . " asp
+											INNER JOIN " . PRODUCT_VARIANTS . " pv 
+												ON pv.id = asp.product_variant_id
+											";
+
+											$whereCredit = "
+											WHERE asp.status = :status
+											AND asp.product_stock_transaction_id = :product_stock_transaction_id
+
+											AND (
+													/* LOOSE → check by product_id */
+													(pv.type = 'loose' AND asp.product_id = :product_id)
+
+													OR
+
+													/* NON LOOSE → check by variant_id */
+													(pv.type != 'loose' AND asp.product_variant_id = :product_variant_id)
+												)
+											";
+
 											$paramsCredit = [
 												':product_id' => $arr->product_id,
+												':product_variant_id' => $arr->product_variant_id, // required for non-loose
 												':product_stock_transaction_id' => 0,
 												':status' => 1
 											];
-											$stock_credit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereCredit, $paramsCredit, 'stock');
+
+											$stock_credit = $general_cls_call->select_join_query(
+												$fieldsCredit,
+												$tablesCredit,
+												$whereCredit,
+												$paramsCredit,
+												1
+											);
+
+
 											
 											// dedit debit admin_stock_transaction 
-											$whereDebit = "WHERE product_id=:product_id AND product_stock_transaction_id!=:product_stock_transaction_id AND status=:status";
-											
+											$fieldsDebit = "
+											SUM(
+												CASE 
+													WHEN pv.type = 'loose'
+														THEN asp.loose_stock_quantity
+													ELSE asp.stock
+												END
+											) AS total_stock
+											";
+
+											$tablesDebit = ADMIN_STOCK_PURCHASE_LIST . " asp
+											INNER JOIN " . PRODUCT_VARIANTS . " pv 
+												ON pv.id = asp.product_variant_id
+											";
+
+											$whereDebit = "
+											WHERE asp.status = :status
+											AND asp.product_stock_transaction_id != :product_stock_transaction_id
+
+											AND (
+													/* LOOSE → check by product_id */
+													(pv.type = 'loose' AND asp.product_id = :product_id)
+
+													OR
+
+													/* NON LOOSE → check by variant_id */
+													(pv.type != 'loose' AND asp.product_variant_id = :product_variant_id)
+												)
+											";
+
 											$paramsDebit = [
-												':product_id'=> $arr->product_id,
-												':product_stock_transaction_id'=>0,
-												':status'=>1
+												':product_id' => $arr->product_id,
+												':product_variant_id' => $arr->product_variant_id, // required for non-loose
+												':product_stock_transaction_id' => 0,
+												':status' => 1
 											];
-											$admin_stock_debit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereDebit, $paramsDebit, 'stock');
+
+											$admin_stock_debit = $general_cls_call->select_join_query(
+												$fieldsDebit,
+												$tablesDebit,
+												$whereDebit,
+												$paramsDebit,
+												1
+											);
+
 											
 											// debit stock from order item
 											$order_item_stock = 0;
@@ -195,21 +270,21 @@
 													  $order_item_stock = $order_item_stock + $qty_used; 
 												}
 												
-												$whereDebit = "WHERE product_id=:product_id AND product_variant_id =:product_variant_id AND product_stock_transaction_id!=:product_stock_transaction_id";
+												/*$whereDebit = "WHERE product_id=:product_id AND product_variant_id =:product_variant_id AND product_stock_transaction_id!=:product_stock_transaction_id";
 											
 												$paramsDebit = [
 													':product_id'=> $arr->product_id,
 													':product_variant_id'=> $variants->id,
 													':product_stock_transaction_id'=>0
 												];
-												$stock_debit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereDebit, $paramsDebit, 'stock');
+												$stock_debit = $general_cls_call->select_query_sum( ADMIN_STOCK_PURCHASE_LIST, $whereDebit, $paramsDebit, 'stock');*/
 											}
 											//echo "<pre>";print_r($product_variant_arr);die;
 											
 											
 											
 											
-											$admin_stock_debit = abs($stock_debit->total) + $order_item_stock;
+											$admin_stock_debit = abs($admin_stock_debit->total_stock) + $order_item_stock;
 											// pending stock
 											$whereStatus = "WHERE product_id=:product_id AND product_stock_transaction_id =:product_stock_transaction_id AND status=:status";
 											
@@ -277,9 +352,9 @@
 									    <td style="width:100px"><?php echo $i ;?></td>
 										<td><?PHP echo implode(', ', $vendors_arr); ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
-										<td><?php echo $stock_credit->total; ?></td>
+										<td><?php echo $stock_credit->total_stock; ?></td>
 										<td><?php echo $admin_stock_debit; ?></td>
-										<td><?PHP echo $stock_credit->total-$admin_stock_debit; ?></td>
+										<td><?PHP echo ($stock_credit->total_stock - $admin_stock_debit); ?></td>
 										<td><span class="badge bg-grd-primary dash-lable"><?php echo $type_unit ;?></span></td>
 										<td><?php echo $pending_stock; ?></td>
 										<!--<td><?PHP echo $arr->measurement.'  '.$arr->unit_name; ?></td>-->

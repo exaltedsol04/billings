@@ -1162,27 +1162,7 @@ error_reporting(0);
 					];
 					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
 					//echo "<pre>";print_r($product_variant_dtls);die;
-					
-					// available pos stock
-					/*$wherePos = "WHERE product_id=:product_id AND status=:status AND stock_type=:stock_type AND seller_id=:seller_id";
-					
-					if($product_variant_dtls->type != 'loose'){
-						$wherePos .= " AND product_variant_id=:product_variant_id";
 
-						$paramsPos[':product_variant_id'] = $val;
-					}
-					$paramsPos = [
-						':product_id'	=>	$product_variant_dtls->product_id,
-						':status'	=>	1,
-						':stock_type'	=>	1,
-						':seller_id'	=>	$_SESSION['SELLER_ID']
-					];
-					// check from product_stock_transaction 
-					if($product_variant_dtls->type != 'loose'){
-						$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');
-					}else{
-						$stock_used = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'loose_stock_quantity');
-					}*/
 					$fields = "
 						SUM(
 							CASE 
@@ -1328,6 +1308,15 @@ error_reporting(0);
 					
 					//$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
 					$p_variant_name = $unitname;
+					if($product_variant_dtls->type == 'loose')
+					{
+						$measurement_arr = [
+							'quantity' => 1 * $product_variant_dtls->measurement,
+							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
+						];
+						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+						$p_variant_name = $measurement_units['unit'];
+					}
 					
 					//$available_stock = $stock_used->total;
 					//$available_stock_online = $stock_used_online->total;
@@ -1879,8 +1868,8 @@ error_reporting(0);
 					foreach ($notifications as $notification) {
 						$fcm->sendUserNotification(
 							$user->id,
-							$notification->title,
-							$notification->message,
+							$general_cls_call->clean_notification_text($notification->title),
+							$general_cls_call->clean_notification_text($notification->message),
 							[
 								"screen" => "TEST notification"
 							]
@@ -1899,8 +1888,8 @@ error_reporting(0);
 					foreach ($notifications as $notification) {
 						$fcm->sendUserNotification(
 							$id,
-							$notification->title,
-							$notification->message,
+							$general_cls_call->clean_notification_text($notification->title),
+							$general_cls_call->clean_notification_text($notification->message),
 							[
 								"screen" => "TEST notification"
 							]
