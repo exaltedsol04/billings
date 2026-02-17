@@ -88,8 +88,14 @@ let generateStockItems = () => {
         let { id, item, qty, price, measurement, stock_unit_name, name, pimage, ptype, pid } = x;
 		$('#loader').hide();
 		$('#removeCart').show();
+		var tprice = (qty * price).toFixed(2);
+		var hidMsr = measurement * qty;
+		if(ptype == 'loose') {
+			tprice = (qty * price).toFixed(2);
+			hidMsr = (measurement * qty).toFixed(2);
+		}
         return `<tr>
-				 <td class="text-center">${index + 1}<input type="hidden" class="pid-${pid} allpid" value="${measurement * qty}" id="vid_${id}" name="pid[${pid}][${id}]"></td>				  
+				 <td class="text-center">${index + 1}<input type="hidden" class="pid-${pid} allpid" value="${hidMsr}" id="vid_${id}" name="pid[${pid}][${id}]"></td>				  
 				  <td style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
 				  ${name}
 				  <input type="hidden" value="${id}" name="product_variant_id[]">
@@ -107,9 +113,9 @@ let generateStockItems = () => {
 						</span>
 					</div>
 				  </td>
-					<td class="text-center">${measurement}</td>
+					<td class="text-center">${measurement} ${stock_unit_name}</td>
 				  <td class="text-center">₹ ${price}</td>	
-				  <td class="text-center">₹ ${(qty * price).toFixed(2)}</td>
+				  <td class="text-center">₹ ${tprice}</td>
 				  <td class="text-center">
 					<i style="cursor:pointer;" onclick="removeItem(${id}, \'${ptype}\', ${pid})" class="material-icons-outlined text-danger">close</i>
 				  </td>
@@ -425,9 +431,13 @@ let TotalAmount = () => {
 	 
     let amount = stockBasket
       .map((x) => {
-        let { id, qty, price } = x;
+        let { id, qty, measurement, ptype, price } = x;
         //let filterData = shopItemsData.find((x) => x.id === id);
-        return price * qty;
+		var tprice = price * qty;
+		if(ptype == 'loose') {
+			tprice = price * qty;
+		}
+        return tprice;
       })
       .reduce((x, y) => x + y, 0);
 

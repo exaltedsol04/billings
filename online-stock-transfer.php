@@ -40,7 +40,7 @@
 
 				$loose_stock_quantity = '0.00';
 				if($product_variant_dtls->type == 'loose'){
-					$loose_stock_quantity = $product_variant_dtls->measurement * $stock;
+					$loose_stock_quantity = $stock;
 					$stock = 0;
 				}	
 				//parent_id
@@ -90,7 +90,11 @@
 				$product_variant_stock_exists = $product_variant_dtls->stock;
 				$product_variant_stock = $product_variant_stock_exists + $stock;
 				if($product_variant_dtls->type == 'loose'){
-					$product_variant_stock = $product_variant_stock + $loose_stock_quantity;
+					$get_data = $general_cls_call->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$product_variant_dtls->stock_unit_id), 1);
+					if($get_data->parent_id != 0){
+						$loose_stock_quantity = ($loose_stock_quantity * $get_data->conversion) / $product_variant_dtls->measurement;
+					}
+					$product_variant_stock = $product_variant_stock_exists + $loose_stock_quantity;
 				}
 				$setValuesPv = "stock=:stock, status=:status";
 				$updateExecutePv=array(
@@ -312,8 +316,12 @@ function unit_measurement(pvid)
 				$.each(result, function (i, stock) {
 					//alert(stock.product_variant_id);
 					var unitname = stock.measurement+ ' ' +stock.variant_name;
+					var variant_stock = stock.variant_stock;
+					var variant_stock_online = stock.variant_stock_online;
 					if(stock.product_type == 'loose') {
 						unitname = stock.variant_name;
+						variant_stock = stock.variant_stock.toFixed(2);
+						variant_stock_online = stock.variant_stock_online.toFixed(2);
 					}
 					html += '<div class="row align-items-start border-bottom py-2">';
 						html += '<span class="col-md-10 fw-bold text-break text-nowrap" style="color:#A300A3">Product name: ' +stock.product_name + '</span>';
@@ -321,11 +329,11 @@ function unit_measurement(pvid)
 					html += '</div>';
 					html += '<div class="row align-items-start border-bottom py-2">';
 						html += '<span class="col-md-10 fw-bold text-nowrap" style="color:#A300A3">POS stock</span>';
-						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + stock.variant_stock + '</span>';
+						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + variant_stock + '</span>';
 					html += '</div>';
 					html += '<div class="row align-items-start border-bottom py-2">';
 						html += '<span class="col-md-10 fw-bold text-nowrap" style="color:#A300A3">Online stock</span>';
-						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + stock.variant_stock_online + '</span>';
+						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + variant_stock_online + '</span>';
 					html += '</div>';
 					$('#stock_limit').val(stock.variant_stock);
 				});

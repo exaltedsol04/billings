@@ -350,9 +350,11 @@ error_reporting(0);
 							? floor($remaining_weight / $variant_size)
 							: 0;
 						$checkStock = $remainingStock;
+						
 					}
+					
+//echo $current_weight.'--'.$other_weight.'--'.$remaining_weight.'--'.$remainingStock;die;
 				}
-
 				/*
 				===============================
 				NORMAL PRODUCT VALIDATION
@@ -555,11 +557,21 @@ error_reporting(0);
 				if($variant->type == 'loose')
 				{
 					$pid = $variant->product_id;
-					$weight = $variant->measurement * $qty;
+					
+					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $variant->stock_unit_id), 1);
+					$unitname = $unit_dtls->name;
+					$measurement_arr = [
+						'quantity' => 1 * $variant->measurement * $qty,
+						'stock_unit_id' => $variant->stock_unit_id,
+					];
+					$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+					$weight = $measurement_units['value'];
+					$unitname = $measurement_units['unit'];
 
 					if(!isset($looseRequested[$pid])) {
 						$looseRequested[$pid] = 0;
 					}
+					//echo $weight;die;
 
 					$looseRequested[$pid] += $weight;
 					$looseVariants[$pid] = $variant; // store any one variant for display
@@ -666,7 +678,7 @@ error_reporting(0);
 					$stockArr[] = [
 						"product_name"  => $general_cls_call->cart_product_name($product->name),
 						"variant_name"  => "Loose",
-						"variant_stock" => $totalLooseStock.' '.$unit->name
+						"variant_stock" => $totalLooseStock.' '.$unitname
 					];
 				}
 			}
@@ -1150,6 +1162,7 @@ error_reporting(0);
 				$stockArr = [];
 				
 				$product_variant_id = array(0=>$pv_id);
+				$availableStock = 0;
 				foreach($product_variant_id as $k=>$val)
 				{
 					$Where = "WHERE id=:id AND product_id=:product_id";
@@ -1196,12 +1209,12 @@ error_reporting(0);
 							':seller_id'          => $_SESSION['SELLER_ID']
 						];
 					$stock_used = $general_cls_call->select_query($fields, $tables, $where, $params, 1);
-					$availableStock = (float)($stock_used->total_stock ?? 0);
+					$availableStock = $stock_used->total_stock;
 
 
 
 					
-					//echo "<pre>";print_r($availableStock);die;
+					//echo "<pre>";print_r($stock_used);die;
 					
 					// available online stock
 					// decide which column to sum
@@ -1318,6 +1331,7 @@ error_reporting(0);
 					//$available_stock = $stock_used->total;
 					//$available_stock_online = $stock_used_online->total;
 					
+					
 					$stockArr[] = [
 						"product_name" => $product_name,
 						"product_type" => $product_variant_dtls->type,
@@ -1327,6 +1341,7 @@ error_reporting(0);
 						"variant_stock_online" => $stock_used_online->total == null ? 0 : $stock_used_online->total - $qty_used->total_used,
 					];
 				}
+				//echo '<pre>'; print_r($stockArr); die;
 				echo json_encode($stockArr);
 		break;
 		case "purchaseAccept":
@@ -1783,7 +1798,8 @@ error_reporting(0);
 			if($pos_stock->total_stock != 0)
 			{
 				$varianrArr[] = [
-					'stock' => $pos_stock->total_stock
+					'stock' => $pos_stock->total_stock,
+					'type' => $pos_stock->type
 				];
 			}
 

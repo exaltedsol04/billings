@@ -242,14 +242,17 @@
 						{
 							foreach($sqlQuery as $arr)
 							{	
-								$measurement_arr = [
-									'quantity' => 1 * $arr->measurement,
-									'stock_unit_id' => $arr->stock_unit_id,
-								];
-								$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
-								$measurement = $measurement_units['value'];
-								$unit_name = $measurement_units['unit'];
-								
+								$measurement = $arr->measurement;
+								$unit_name = $arr->stock_unit_name;
+								if($arr->type == 'loose') {
+									$measurement_arr = [
+										'quantity' => 1 * $arr->measurement,
+										'stock_unit_id' => $arr->stock_unit_id,
+									];
+									$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+									$measurement = $measurement_units['value'];
+									$unit_name = $measurement_units['unit'];
+								}
 								$imagePath = MAIN_SERVER_PATH . $arr->image;
 								if (!empty($arr->image) && file_exists($imagePath)) {
 									$imagePath = MAIN_SERVER_PATH . $arr->image;
@@ -687,10 +690,10 @@ function check_qty_stock(id, inc, productMeasurement, pid, callback)
 						//localStorage.setItem(inputId + '-value', '');
 					}
 					
-					
+					if((stockCount == 0 && product_type == 'loose') || product_type != 'loose') {
 					//End Increase and Decrease
-					let msgStock = '<div style="text-align:center;">Available  stock is ' + stockCount + '</div>';
-					//let msgStock = '<div style="text-align:center;">Out of stock</div>';
+					//let msgStock = '<div style="text-align:center;">Available  stock is ' + stockCount + '</div>';
+					let msgStock = '<div style="text-align:center;">No more available stock.</div>';
 						Lobibox.notify('default', {
 							pauseDelayOnHover: true,
 							continueDelayOnInactiveTab: false,
@@ -698,6 +701,7 @@ function check_qty_stock(id, inc, productMeasurement, pid, callback)
 							size: 'mini',
 							msg: msgStock
 						});
+					}
 				}
 			} else {					
 				Lobibox.notify('default', {

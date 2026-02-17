@@ -32,8 +32,8 @@
 				}
 				
 				$remarks = !empty($remarks) ? $remarks : null;
-				$field = "seller_id, product_id, product_variant_id, stock, status,  reason,  processing_user_id, remarks, created_date, transaction_type";
-				$value = ":seller_id, :product_id, :product_variant_id, :stock, :status, :reason, :processing_user_id, :remarks, :created_date, :transaction_type";
+				$field = "seller_id, product_id, product_variant_id, loose_stock_quantity, stock, status,  reason,  processing_user_id, remarks, created_date, transaction_type";
+				$value = ":seller_id, :product_id, :product_variant_id, :loose_stock_quantity, :stock, :status, :reason, :processing_user_id, :remarks, :created_date, :transaction_type";
 					
 					//parent_id
 				$addExecute=array(
@@ -116,20 +116,7 @@
 								<label for="input1" class="form-label">Products</label>
 									<select name="product" id="product" class="form-select select2-dropdown" tabindex="1" onchange="select_product(this.value)" required>
 									<option value="">Select...</option>
-									<?PHP
-										/*$fields = "pr.id, pr.product_id, pr.product_variant_id, pr.status, SUM(pr.stock) as total_stock, pr.selling_price, u.name as stock_unit_name, pv.measurement, p.name, p.image, p.barcode";
-										$tables = PRODUCT_STOCK_TRANSACTION . " pr
-										INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
-										INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-										INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-										$where = "WHERE pr.status=:status AND pr.seller_id =:seller_id AND pr.stock_type=:stock_type GROUP BY pr.product_id HAVING SUM(pr.stock) > 0";
-										$params = [
-											':status' => 1,
-											':stock_type' => 1,
-											':seller_id' => $_SESSION['SELLER_ID'],
-										];
-										$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);*/
-										
+									<?PHP										
 										$fields = "
 											pr.product_id,
 											MIN(pr.product_variant_id) as product_variant_id,
@@ -313,7 +300,7 @@ $(document).on('input', '.deduct-qty', function () {
     let num = parseFloat(value);
 
     // max check
-    if (value > max) {
+    if (parseFloat(value) > parseFloat(max)) {
 		$('.deduct-qty').val(max);
 		$('#err_stock').html('<div class="text-danger">Stock not exceed: ' + max + '</div>');
     }
@@ -385,8 +372,12 @@ function get_qry(val)
 		success: function(response){
 			//var result = JSON.parse(response);
 			//alert(response[0].stock);
-			$('.deduct-qty').val(response[0].stock);
-			$('#hid_deduct_qty').val(response[0].stock);
+			var variant_stock = response[0].stock;
+			if(response[0].type == 'loose') {
+				variant_stock = response[0].stock.toFixed(2);
+			}
+			$('.deduct-qty').val(variant_stock);
+			$('#hid_deduct_qty').val(variant_stock);
 			
 		}
 	});

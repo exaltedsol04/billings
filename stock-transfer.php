@@ -49,54 +49,73 @@
 					<option value="">Select...</option>
 					<?PHP
 						$fields = "
-							pr.product_id,
-							pr.product_variant_id,
-							SUM(pr.stock) as total_stock,
-							SUM(pr.loose_stock_quantity) as total_loose_qty,
-							pv.id as variant_id,
-							pv.measurement,
-							pv.type,
-							pv.discounted_price,
-							u.name as stock_unit_name,
-							p.name,
-							p.image,
-							p.barcode,
-							p.type as product_type
-						";
+						pr.product_id,
+						MIN(pr.product_variant_id) as product_variant_id,
 
-						$tables = PRODUCT_STOCK_TRANSACTION . " pr
-						INNER JOIN " . PRODUCTS . " p 
-							ON p.id = pr.product_id
-						INNER JOIN " . PRODUCT_VARIANTS . " pv 
-							ON pv.product_id = pr.product_id   -- IMPORTANT for loose
-						INNER JOIN " . UNITS . " u 
-							ON u.id = pv.stock_unit_id";
+						SUM(pr.stock) as total_stock,
+						SUM(pr.loose_stock_quantity) as total_loose_qty,
 
-						$where = "
-						WHERE pr.status = :status
-						AND pr.stock_type = :stock_type
-						AND pr.seller_id = :seller_id
+						MIN(pv.id) as variant_id,
+						MAX(pv.measurement) as measurement,
+						MAX(pv.type) as type,
+						MAX(pv.discounted_price) as discounted_price,
+						MAX(pv.stock_unit_id) as stock_unit_id,
 
-						GROUP BY pr.product_id, pv.id
+						MAX(u.name) as stock_unit_name,
+						MAX(u.parent_id) as parent_id,
+						MAX(u.conversion) as conversion,
 
-						HAVING
+						MAX(p.name) as name,
+						MAX(p.image) as image,
+						MAX(p.barcode) as barcode,
+						MAX(p.type) as product_type
+					";
+
+					$tables = PRODUCT_STOCK_TRANSACTION . " pr
+					INNER JOIN " . PRODUCTS . " p 
+						ON p.id = pr.product_id
+					INNER JOIN " . PRODUCT_VARIANTS . " pv 
+						ON pv.product_id = pr.product_id
+					INNER JOIN " . UNITS . " u 
+						ON u.id = pv.stock_unit_id
+					";
+
+					$where = "
+					WHERE pr.status = :status
+					AND pr.stock_type = :stock_type
+					AND pr.seller_id = :seller_id
+
+					GROUP BY 
+						CASE 
+							WHEN pv.type = 'loose' THEN pr.product_id
+							ELSE pv.id
+						END
+
+					HAVING
+					(
 						(
-							-- LOOSE → stock must support this variant size
-							(pv.type = 'loose' AND SUM(pr.loose_stock_quantity) >= pv.measurement)
-
-							OR
-
-							-- NORMAL → variant specific stock must exist
-							(pv.type != 'loose'
-							 AND SUM(
-									CASE 
-										WHEN pr.product_variant_id = pv.id THEN pr.stock
-										ELSE 0
-									END
-								 ) > 0
+							MAX(pv.type) = 'loose'
+							AND SUM(pr.loose_stock_quantity) >=
+							(
+								CASE
+									WHEN MAX(u.parent_id) != 0 AND MAX(u.conversion) > 0
+										THEN MAX(pv.measurement) / MAX(u.conversion)
+									ELSE MAX(pv.measurement)
+								END
 							)
 						)
-						";
+						OR
+						(
+							MAX(pv.type) != 'loose'
+							AND SUM(
+								CASE 
+									WHEN pr.product_variant_id = pv.id THEN pr.stock
+									ELSE 0
+								END
+							) > 0
+						)
+					)
+					";
 
 						$params = [
 							':status' => 1,
@@ -109,10 +128,21 @@
 						{
 							foreach($sqlQuery as $arr)
 							{	
+								$measurement = $arr->measurement;
+								$unit_name = $arr->stock_unit_name;
+								if($arr->type == 'loose') {
+									$measurement_arr = [
+										'quantity' => 1 * $arr->measurement,
+										'stock_unit_id' => $arr->stock_unit_id,
+									];
+									$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
+									$measurement = $measurement_units['value'];
+									$unit_name = $measurement_units['unit'];
+								}
 							    $barcode = $arr->barcode;
 								$barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 					?>
-								<option value="<?PHP echo $arr->variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$arr->measurement.'@@@'.$arr->stock_unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$measurement.'@@@'.$unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
 					<?PHP
 							}
 						}
@@ -307,7 +337,9 @@ function check_qty_stock(id, inc, productMeasurement, pid, callback)
 					localStorage.setItem(inputId + '-pid', pid);
 
 					//End Increase and Decrease
-					let msgStock = '<div style="text-align:center;">Available  stock is ' + stockCount + '</div>';
+					if((stockCount == 0 && product_type == 'loose') || product_type != 'loose') {
+						//let msgStock = '<div style="text-align:center;">Available stock is ' + stockCount + '</div>';
+						let msgStock = '<div style="text-align:center;">No more available stock.</div>';
 						Lobibox.notify('default', {
 							pauseDelayOnHover: true,
 							continueDelayOnInactiveTab: false,
@@ -315,6 +347,7 @@ function check_qty_stock(id, inc, productMeasurement, pid, callback)
 							size: 'mini',
 							msg: msgStock
 						});
+					}
 				}
 			} else {					
 				Lobibox.notify('default', {
@@ -485,7 +518,7 @@ function submit_request()
 						html += '<div class="row align-items-start border-bottom py-2">';
 							html += '<span class="col-md-6 fw-bold text-break text-nowrap" style="color:#A300A3">' +stock.product_name + '</span>';
 							html += '<span class="col-md-2 text-nowrap" style="color:#A300A3">' + stock.variant_name + '</span>';
-							html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Available stock ' + stock.variant_stock + '</span>';
+							html += '<span class="col-md-4 text-danger fw-bold text-end text-nowrap">Avail. stock ' + stock.variant_stock + '</span>';
 						html += '</div>';
 					});
 					//$('#show-payment-div').hide();
