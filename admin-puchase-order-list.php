@@ -152,7 +152,7 @@ $(document).ready(function(){
 	}
 	
 	$('#example2').DataTable({
-		//order: [[2, 'desc']],
+		order: [[1, 'desc']],
 		columnDefs: [
         {
             targets: 0,        // 1st column
