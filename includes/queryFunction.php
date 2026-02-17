@@ -688,7 +688,24 @@
 
 			return $unit;
 		}
+		function clean_notification_text($text)
+		{
+			if (!$text) {
+				return '';
+			}
 
+			// Convert <br> to new line
+			$text = preg_replace('/<br\s*\/?>/i', "\n", $text);
+
+			// Remove all remaining HTML tags
+			$text = strip_tags($text);
+
+			// Decode HTML entities (&amp; → &, etc.)
+			$text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+			// Trim extra spaces
+			return trim($text);
+		}
 
 
 	}

@@ -1868,8 +1868,8 @@ error_reporting(0);
 					foreach ($notifications as $notification) {
 						$fcm->sendUserNotification(
 							$user->id,
-							$notification->title,
-							$notification->message,
+							$general_cls_call->clean_notification_text($notification->title),
+							$general_cls_call->clean_notification_text($notification->message),
 							[
 								"screen" => "TEST notification"
 							]
@@ -1888,8 +1888,8 @@ error_reporting(0);
 					foreach ($notifications as $notification) {
 						$fcm->sendUserNotification(
 							$id,
-							$notification->title,
-							$notification->message,
+							$general_cls_call->clean_notification_text($notification->title),
+							$general_cls_call->clean_notification_text($notification->message),
 							[
 								"screen" => "TEST notification"
 							]
