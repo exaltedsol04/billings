@@ -130,35 +130,32 @@
 										
 										$fields = "
 											pr.product_id,
-											pr.product_variant_id,
+											MIN(pr.product_variant_id) as product_variant_id,
 
 											SUM(pr.stock) as total_stock,
 											SUM(pr.loose_stock_quantity) as total_loose_qty,
 
-											pv.id as variant_id,
-											pv.measurement,
-											pv.type,
-											pv.discounted_price,
-											pv.stock_unit_id,
+											MIN(pv.id) as variant_id,
+											MAX(pv.measurement) as measurement,
+											MAX(pv.type) as type,
+											MAX(pv.discounted_price) as discounted_price,
+											MAX(pv.stock_unit_id) as stock_unit_id,
 
-											u.name as stock_unit_name,
-											u.parent_id,
-											u.conversion,
+											MAX(u.name) as stock_unit_name,
+											MAX(u.parent_id) as parent_id,
+											MAX(u.conversion) as conversion,
 
-											p.name,
-											p.image,
-											p.barcode,
-											p.type as product_type
+											MAX(p.name) as name,
+											MAX(p.image) as image,
+											MAX(p.barcode) as barcode,
+											MAX(p.type) as product_type
 										";
 
 										$tables = PRODUCT_STOCK_TRANSACTION . " pr
-
 										INNER JOIN " . PRODUCTS . " p 
 											ON p.id = pr.product_id
-
 										INNER JOIN " . PRODUCT_VARIANTS . " pv 
 											ON pv.product_id = pr.product_id
-
 										INNER JOIN " . UNITS . " u 
 											ON u.id = pv.stock_unit_id
 										";
@@ -168,33 +165,28 @@
 										AND pr.stock_type = :stock_type
 										AND pr.seller_id = :seller_id
 
-										GROUP BY pr.product_id, pv.id
+										GROUP BY 
+											CASE 
+												WHEN pv.type = 'loose' THEN pr.product_id
+												ELSE pv.id
+											END
 
 										HAVING
 										(
-											/* ===============================
-											   LOOSE PRODUCT CHECK
-											   =============================== */
 											(
-												pv.type = 'loose'
-												AND
-												SUM(pr.loose_stock_quantity) >=
+												MAX(pv.type) = 'loose'
+												AND SUM(pr.loose_stock_quantity) >=
 												(
 													CASE
-														WHEN u.parent_id != 0 AND u.conversion > 0
-															THEN pv.measurement / u.conversion
-														ELSE pv.measurement
+														WHEN MAX(u.parent_id) != 0 AND MAX(u.conversion) > 0
+															THEN MAX(pv.measurement) / MAX(u.conversion)
+														ELSE MAX(pv.measurement)
 													END
 												)
 											)
-
 											OR
-
-											/* ===============================
-											   NORMAL PRODUCT CHECK
-											   =============================== */
 											(
-												pv.type != 'loose'
+												MAX(pv.type) != 'loose'
 												AND SUM(
 													CASE 
 														WHEN pr.product_variant_id = pv.id THEN pr.stock
@@ -205,7 +197,6 @@
 										)
 										";
 
-
 										$params = [
 											':status' => 1,
 											':stock_type' => 1,
@@ -213,6 +204,9 @@
 										];
 
 										$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+
+
+
 										//echo "<pre>"; print_r($sqlQuery);die;
 										
 										if($sqlQuery[0] != '')
@@ -239,7 +233,7 @@
 
 							<div class="col-md-3">
 								<label for="input5" class="form-label">Deduct Quantity</label>
-								<input type="text" class="form-control deduct-qty" name="stock" id="stock" placeholder="Deduct quantity" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+								<input type="text" class="form-control deduct-qty" name="stock" id="stock" placeholder="Deduct quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" required>
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<input type="hidden" id="hid_deduct_qty">
@@ -338,7 +332,8 @@ function select_product(product)
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
 	//alert(pid);
-	var datapost = 'action=getDeductProductVariant&pid='+pid;
+	//var datapost = 'action=getDeductProductVariant&pid='+pid;
+	var datapost = 'action=getMaxProductVariant&pid='+pid;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",

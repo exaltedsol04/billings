@@ -46,41 +46,152 @@
                     </thead>
                     <tbody>
 					<?php 
-						$fields = "pr.id, pr.product_id, pr.status, SUM(pr.stock) as total_stock, u.name as stock_unit_name, pv.measurement, p.name, p.barcode ,pv.id as product_variant_id, pv.type";
-						$tables = PRODUCT_STOCK_TRANSACTION . " pr
-						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
-						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-						$where = "WHERE pr.stock_type=:stock_type AND pr.status=:status AND pr.seller_id =:seller_id GROUP BY pr.product_variant_id HAVING SUM(pr.stock) > 0";
-						$params = [
-							':stock_type' 		=> 2,
-							':status'			=> 1,
-							':seller_id'		=> $_SESSION['SELLER_ID']
-						];
-						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+						$fields = "
+							p.id AS product_id,
+							p.name,
+							p.barcode,
+
+							pv.id AS product_variant_id,
+							pv.measurement,
+							pv.type,
+							u.name AS stock_unit_name,
+
+							/* TOTAL STOCK */
+							CASE
+								WHEN pv.type = 'loose' THEN COALESCE(ps.total_loose_stock,0)
+								ELSE COALESCE(ps.total_variant_stock,0)
+							END AS total_stock,
+
+							/* USED STOCK */
+							CASE
+								WHEN pv.type = 'loose' THEN COALESCE(ou.used_loose_qty,0)
+								ELSE COALESCE(ou.used_variant_qty,0)
+							END AS used_stock,
+
+							/* AVAILABLE */
+							(
+								CASE
+									WHEN pv.type = 'loose' THEN COALESCE(ps.total_loose_stock,0)
+									ELSE COALESCE(ps.total_variant_stock,0)
+								END
+								-
+								CASE
+									WHEN pv.type = 'loose' THEN COALESCE(ou.used_loose_qty,0)
+									ELSE COALESCE(ou.used_variant_qty,0)
+								END
+							) AS available_stock
+						";
+
+
+
+						$tables = PRODUCTS . " p
+
+						INNER JOIN " . PRODUCT_VARIANTS . " pv
+							ON pv.product_id = p.id
+
+						INNER JOIN " . UNITS . " u
+							ON u.id = pv.stock_unit_id
+
+
+
+						/* =========================
+						   STOCK TOTAL
+						   ========================= */
+						LEFT JOIN (
+							SELECT
+								product_id,
+								product_variant_id,
+								SUM(stock) AS total_variant_stock,
+								SUM(loose_stock_quantity) AS total_loose_stock
+							FROM " . PRODUCT_STOCK_TRANSACTION . "
+							WHERE status = 1
+							AND stock_type = 2
+							AND seller_id = " . $_SESSION['SELLER_ID'] . "
+							GROUP BY product_id, product_variant_id
+						) ps ON (
+							(pv.type = 'loose' AND ps.product_id = p.id)
+							OR
+							(pv.type != 'loose' AND ps.product_variant_id = pv.id)
+						)
+
+
+
+						/* =========================
+						   ORDER USED STOCK
+						   ========================= */
+						LEFT JOIN (
+							SELECT
+								pv2.product_id,
+								oi.product_variant_id,
+
+								/* LOOSE USED */
+								SUM(
+									CASE
+										WHEN pv2.type = 'loose'
+										THEN (oi.quantity * pv2.measurement) / child_u.conversion
+										ELSE 0
+									END
+								) AS used_loose_qty,
+
+								/* NORMAL USED */
+								SUM(
+									CASE
+										WHEN pv2.type != 'loose'
+										THEN oi.quantity
+										ELSE 0
+									END
+								) AS used_variant_qty
+
+							FROM " . ORDERS_ITEMS . " oi
+
+							INNER JOIN " . PRODUCT_VARIANTS . " pv2
+								ON pv2.id = oi.product_variant_id
+
+							INNER JOIN " . UNITS . " child_u
+								ON child_u.id = pv2.stock_unit_id
+
+							WHERE oi.active_status != 7
+							AND oi.seller_id = " . $_SESSION['SELLER_ID'] . "
+
+							GROUP BY pv2.product_id, oi.product_variant_id
+						) ou ON (
+							(pv.type = 'loose' AND ou.product_id = p.id)
+							OR
+							(pv.type != 'loose' AND ou.product_variant_id = pv.id)
+						)
+						";
+						$where = "
+						WHERE p.deleted_at IS NULL
+						AND (
+								pv.type != 'loose'
+							 OR (pv.type = 'loose' AND u.parent_id = 0)
+						)
+						GROUP BY pv.id
+						HAVING available_stock > 0
+						";
+
+						$params = [];
+
+						$sqlQuery = $general_cls_call->select_join_query(
+							$fields,
+							$tables,
+							$where,
+							$params,
+							2
+						);
 						//echo "<pre>";print_r($sqlQuery);die;
 						if($sqlQuery[0] != '')
 						{
 							$i = 1;
 							foreach($sqlQuery as $k=>$arr)
 							{	
-							  $whereOrdItm = "WHERE product_variant_id=:product_variant_id AND active_status!=:active_status AND seller_id=:seller_id";
-							  $paramsOrdItm = [
-									':product_variant_id' => $arr->product_variant_id,
-									':seller_id' => $_SESSION['SELLER_ID'],
-									'active_status' => 7
-								];
-							  
-							  $qty_used = $general_cls_call->select_query_sum( ORDERS_ITEMS, $whereOrdItm, $paramsOrdItm, 'quantity');
-							 
-							  $qty_used = !empty($qty_used->total) ? $qty_used->total : 0;
 					?>
                      <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $k+1 ?></td>
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td><?PHP echo $arr->total_stock - $qty_used ?></td>
-						<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
+						<td><?PHP echo $arr->available_stock; //$arr->total_stock - $qty_used ?></td>
+						<td><?PHP echo $arr->type == 'loose' ? $arr->stock_unit_name : $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
 						<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
 					</tr>
 						<?PHP

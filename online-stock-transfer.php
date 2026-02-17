@@ -35,16 +35,21 @@
 				$selling_price = $product_variant_dtls->discounted_price;
 				$purchase_price = $product_variant_dtls->price;
 				
-				$field = "seller_id, product_variant_id, product_id, stock, stock_type, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id, approved_by, approved_date, order_id";
-				$value = ":seller_id, :product_variant_id, :product_id, :stock, :stock_type, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
-					
-					//parent_id
+				$field = "seller_id, product_variant_id, product_id, stock, loose_stock_quantity, stock_type, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id, approved_by, approved_date, order_id";
+				$value = ":seller_id, :product_variant_id, :product_id, :stock, :loose_stock_quantity, :stock_type, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
+
+				$loose_stock_quantity = '0.00';
+				if($product_variant_dtls->type == 'loose'){
+					$loose_stock_quantity = $product_variant_dtls->measurement * $stock;
+					$stock = 0;
+				}	
+				//parent_id
 				$addExecute=array(
 					':seller_id'			=> $_SESSION['SELLER_ID'],
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
-					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
-					
+					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),					
 					':stock'				=> $stock,
+					':loose_stock_quantity'	=> $loose_stock_quantity,
 					':stock_type'			=> 2,
 					':created_date'			=> date("Y-m-d H:i:s"),
 					':status'				=> 1,
@@ -57,14 +62,8 @@
 					':approved_date' 		=> '0000-00-00 00:00:00',
 					':order_id'		       => 0,
 				);
-				if($product_variant_dtls->type == 'loose'){
-					$field .= ", loose_stock_quantity";
-					$value .= ", :loose_stock_quantity";
-
-					$addExecute[':loose_stock_quantity'] = $product_variant_dtls->measurement * $stock;
-				}
-				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 				
+				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 				
 				$addExecute=array(
 					':seller_id'			=> $_SESSION['SELLER_ID'],
@@ -72,6 +71,7 @@
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					
 					':stock'				=> -($stock),
+					':loose_stock_quantity'	=> -($loose_stock_quantity),
 					':stock_type'			=> 1,
 					':created_date'			=> date("Y-m-d H:i:s"),
 					':status'				=> 1,
@@ -84,22 +84,25 @@
 					':approved_date' 		=> '0000-00-00 00:00:00',
 					':order_id'		       => 0,
 				);
-				if($product_variant_dtls->type == 'loose'){
-					$addExecute[':loose_stock_quantity'] = -($product_variant_dtls->measurement * $stock);
-				}
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 				
 				//------- add stock to product variant table-----
-				$product_variant_stock = $product_variant_dtls->stock;
+				$product_variant_stock_exists = $product_variant_dtls->stock;
+				$product_variant_stock = $product_variant_stock_exists + $stock;
+				if($product_variant_dtls->type == 'loose'){
+					$product_variant_stock = $product_variant_stock + $loose_stock_quantity;
+				}
 				$setValuesPv = "stock=:stock, status=:status";
 				$updateExecutePv=array(
-					':stock' => $product_variant_stock + $stock,
+					':stock' => $product_variant_stock,
 					':status' => 1,
 					':product_id'	=> $product_id,
 					':id'	=> $product_variant_id
 				);
+				//echo '<pre>'; print_r($updateExecutePv);die;
 				$whereClausePv=" WHERE  product_id=:product_id AND id=:id";
 				$general_cls_call->update_query(PRODUCT_VARIANTS, $setValuesPv, $whereClausePv, $updateExecutePv);
+				
 				
 				$setValuesPr = "status=:status";
 				$updateExecutePr=array(
@@ -308,9 +311,13 @@ function unit_measurement(pvid)
 				var html = '<div class="col-md-5">';
 				$.each(result, function (i, stock) {
 					//alert(stock.product_variant_id);
+					var unitname = stock.measurement+ ' ' +stock.variant_name;
+					if(stock.product_type == 'loose') {
+						unitname = stock.variant_name;
+					}
 					html += '<div class="row align-items-start border-bottom py-2">';
 						html += '<span class="col-md-10 fw-bold text-break text-nowrap" style="color:#A300A3">Product name: ' +stock.product_name + '</span>';
-						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + stock.variant_name + '</span>';
+						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + unitname + '</span>';
 					html += '</div>';
 					html += '<div class="row align-items-start border-bottom py-2">';
 						html += '<span class="col-md-10 fw-bold text-nowrap" style="color:#A300A3">POS stock</span>';
