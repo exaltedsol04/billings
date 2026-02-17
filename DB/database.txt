@@ -130,6 +130,7 @@ ALTER TABLE `2026_admin_stock_purchase_list` ADD `seller_accept_status` TINYINT(
 
 ================ 17-02-2026====================
 ALTER TABLE `2026_vendors` ADD `admin_id` INT(10) NOT NULL AFTER `id`;
+ALTER TABLE `2026_admin_stock_purchase_list` ADD `po_status` INT(11) NOT NULL DEFAULT '1' COMMENT '1=po sent,2=po view,3=po approves,4=po reject' AFTER `status`;
 
 
 
