@@ -4,7 +4,7 @@ include_once 'init.php';
 
 if(isset($_GET['group_id']))
 {
-	$fields = "asp.id, asp.group_id, asp.loose_stock_quantity, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type, v.email as vendor_email, v.mobile as vendor_mobile, v.city as vendor_city, v.pincode as vendor_pincode, v.address as vendor_address";
+	$fields = "asp.id, asp.group_id, asp.loose_stock_quantity, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.stock_unit_id, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type, v.email as vendor_email, v.mobile as vendor_mobile, v.city as vendor_city, v.pincode as vendor_pincode, v.address as vendor_address";
 	$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 	INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 	INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -111,7 +111,7 @@ if(isset($_GET['group_id']))
 
 </style>
 </head>
-<!---->
+<!----> 
 <body onload="window.print();">
 
 <div class="receipt">
@@ -182,45 +182,18 @@ if(isset($_GET['group_id']))
 
         </tr>
     </table>
-			
 	</div>
-	
-	
-	  
-	
-    <!--<div style="margin-top:10px;margin-bottom:10px;">Invoice date: <?PHP echo $general_cls_call->change_date_format($sqlQuery[0]->created_at, 'j M Y g:i A'); ?>
-    </div>-->
-
-    <!--<div class="center bold">BILL OF SUPPLY</div>
-    <div class="center small">********** Original for Recipient **********</div>
-
-    <div class="divider"></div>-->
-
-    <!--<div class="small">
-        Place of Supply & State Code: 27 MH<br>
-        Customer: <?php echo $customer->name.' (M. '.$customer->mobile.')'; ?><br>
-        Date: <?php echo date('d/m/Y H:i');?><br>
-        Bill No: #<?php echo $order_id; ?><br>
-        Store: <?php echo $seller->store_name; ?> &nbsp;&nbsp; Cashier: <?php echo $seller->name; ?><br>
-        POS No: R106
-    </div>-->
-	
-		
-
     <div class="divider"></div>
 
     <table>
         <thead>
             <tr>
-                <th class="text-center">Sl. No.</th>
-				<!--<th>Vendor</th>-->
-				<th>Product Name</th>
-				
-				<th>Measurement</th>
+                <th class="center">Sl. No.</th>
+				<th>Product Name</th>				
 				<th>Type</th>
-				<th class="text-center">Quantity</th>
+				<th>Measurement</th>
+				<th>Quantity</th>
 				<th>Purchase Price</th>
-				<!--<th>Purchase Date</th>-->
 				<th>Total price</th>
             </tr>
         </thead>
@@ -231,28 +204,33 @@ if(isset($_GET['group_id']))
 				$total_amt = 0;
 				if($sqlQuery[0] != '')
 				{
-					foreach($sqlQuery as $k=>$selectValue)
+					foreach($sqlQuery as $k=>$arr)
 					{
+						$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+						$unitname = $unit_dtls->name;
+						if($arr->type == 'loose')
+						{
+							$measurement_arr = [
+								'quantity' => 1 * $arr->measurement,
+								'stock_unit_id' => $arr->stock_unit_id,
+							];
+							$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+							$unitname = $measurement_units['unit'];
+						}
 						
 			?>
             <tr>
-                <td class="text-center"><?PHP echo $k+1; ?></td>
-				<!--<td><?PHP echo $selectValue->vendor; ?></td>-->
-				<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($selectValue->name); ?></td>
-				
-				<td class="text-center"><?PHP echo $selectValue->measurement.'  '.$selectValue->unit_name; ?></td>
-				<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $selectValue->type ;?></span></td>
-				
-				<!--<td><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>-->
-				<td class="text-center">
-				<?PHP echo $selectValue->type== 'loose'  ? $selectValue->loose_stock_quantity : $selectValue->stock ?>
-				</td>
-				<td>₹ <?php echo $selectValue->purchase_price ?></td>
-				<td>₹ <?php echo $selectValue->type== 'loose'  ? $selectValue->loose_stock_quantity*$selectValue->purchase_price : $selectValue->stock*$selectValue->purchase_price; ?></td>
+                <td class="center"><?PHP echo $k+1; ?></td>
+				<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
+				<td><?PHP echo $arr->type ;?></td>				
+				<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
+				<td><?PHP echo $arr->type== 'loose'  ? $arr->loose_stock_quantity : $arr->stock ?></td>
+				<td>₹ <?php echo $arr->purchase_price ?></td>
+				<td>₹ <?php echo $arr->type== 'loose'  ? $arr->loose_stock_quantity*$arr->purchase_price : $arr->stock*$arr->purchase_price; ?></td>
             </tr>
             <?php 
 				$sl++;
-				  $total_amt = $selectValue->type== 'loose'  ? $total_amt+ $selectValue->loose_stock_quantity*$selectValue->purchase_price : $total_amt+ $selectValue->stock*$selectValue->purchase_price;
+				  $total_amt = $arr->type== 'loose'  ? $total_amt+ $arr->loose_stock_quantity*$arr->purchase_price : $total_amt+ $arr->stock*$arr->purchase_price;
 				}
 			}
 			?>
@@ -260,7 +238,7 @@ if(isset($_GET['group_id']))
 
 		<tfoot class="bfoot">
 			<tr class="bold">
-            <td class="right" colspan="7">Total Amount: </td>
+            <td class="right" colspan="6">Total Amount: </td>
 			<td>₹ <?= $total_amt  ?></td>
 			</tr>
 		</tfoot>

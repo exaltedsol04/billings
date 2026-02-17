@@ -165,7 +165,7 @@
 								</div>
 							</div>
 							<hr>
-							<div class="row item-row mb-2 mt-2">
+							<div class="row item-row mt-2">
 
 								<div class="col-md-3">
 								<label for="input1" class="form-label">Products</label>

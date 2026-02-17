@@ -134,6 +134,14 @@
 			
 			if($_GET['mode'] == '2')
 			{
+				$setValues="status=:status, approved_by=:approved_by, approved_date=:approved_date";
+				$whereClause=" WHERE id=:id";
+				$updateExecute=array(
+					':approved_by'=>$_SESSION['USER_ID'],
+					':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
+					':approved_date'=> date("Y-m-d H:i:s"),
+					':id'=>$_GET['id']
+				);
 				$updateRec=$general_cls_call->update_query(PRODUCT_STOCK_TRANSACTION, $setValues, $whereClause, $updateExecute);
 			}
 			
@@ -240,11 +248,11 @@
 								</thead>
 								<tbody>
 									<?php 
-						$fields = "pr.id, pr.product_id, pr.status, pr.loose_stock_quantity, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, pv.stock_unit_id, p.name, p.image, p.barcode, a.username";
+						$fields = "pr.id, pr.product_id, pr.status, pr.loose_stock_quantity, pr.stock as pqty, pr.created_date, pv.type, pv.stock, pv.measurement, pv.stock_unit_id, p.name, p.image, p.barcode, s.store_name";
 						$tables = PRODUCT_STOCK_TRANSACTION . " pr
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-						INNER JOIN " . ADMIN_MASTER . " a ON a.id = pr.seller_id";
+						INNER JOIN " . SELLERS . " s ON s.id = pr.seller_id";
 						$where = "WHERE pr.status = :status AND pr.transaction_type = :transaction_type ORDER BY pr.created_date DESC";
 						$params = [
 							':status' => 0,
@@ -276,7 +284,7 @@
 										<td><input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->pqty; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(<?php echo $arr->type == 'loose' ? '/[^0-9.]/g' : '/[^0-9]/g'; ?>, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
 										<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $arr->type ?></span></td>
-										<td><?PHP echo $arr->username; ?></td>
+										<td><?PHP echo $arr->store_name; ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A'); ?></td>
 										<td class="text-center">
 											<div class="ms-auto">
