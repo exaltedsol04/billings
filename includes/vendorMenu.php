@@ -22,7 +22,7 @@
               </a>
             </li>
 			
-			<li <?php if($page=='vendor-pending-stock-list.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='vendor-pending-stock-list.php' || $page=='vendor-approved-stock-list.php' || $page=='vendor-rejected-stock-list') { echo ('class="mm-active"');} ?>>
 				  <a href="javascript:;" class="has-arrow">
 					<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
 					</div>
@@ -30,7 +30,8 @@
 				  </a>
 				  <ul>
 					<li><a href="<?php echo SITE_URL.'vendor-pending-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Pending stock</a></li>
-					
+					<li><a href="<?php echo SITE_URL.'vendor-approved-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved stock</a></li>
+					<li><a href="<?php echo SITE_URL.'vendor-rejected-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Rejected stock</a></li>
 				  </ul>
 				</li>
 			<li>

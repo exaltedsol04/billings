@@ -9,61 +9,24 @@
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
 	ob_start();
-	//echo $_SESSION['USER_ID'];die;
 	
-	if(isset($_GET['mode']) && ($_GET['mode'] == '3' || $_GET['mode'] == '4'))
-	{	
-		if($_GET['mode'] == 3)
-		{
-			if($_GET['qty'] !='')
-			{
-				//echo $_GET['qty'];die;
-				$setValues="po_status=:po_status";
-				$whereClause=" WHERE id=:id";
-				$updateExecute=array(
-					':po_status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
-					':id'=>$_GET['id']
-				);
-				$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
-			}
-		}
-		
-		if($_GET['mode'] == 4)
-		{
-			$setValues="po_status=:po_status";
-			$whereClause=" WHERE id=:id";
-			$updateExecute=array(
-				':po_status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
-				':id'=>$_GET['id']
-			);
-			$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
-		}
-		//header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php')."?m=1");
-		if($updateRec)
-		{
-			$sucMsg="Status updated successfully";
-		}
-		
-		header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php'));
-	}
 	
-	//if(isset($_GET['pvid']))
-	//{
+	
 		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.loose_stock_quantity, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.stock_unit_id, pv.id as pvid, pv.type, asp.po_status";
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 		LEFT JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-		$where = "WHERE asp.status=:status AND asp.vendor_id=:vendor_id";
+		$where = "WHERE asp.po_status=:po_status AND asp.vendor_id=:vendor_id";
 		$params = [
-				':status'=>0,
+				':po_status'=>3,
 				':vendor_id'=>$_SESSION['VENDOR_ID']
 			];
 		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 				
 		//echo "<pre>";print_r($sqlQuery);die;
-	//}
+	
 
 	ob_end_flush();
 ?>
@@ -91,7 +54,7 @@
 					<div class="ps-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb mb-0 p-0">
-								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Pending Stock</a>
+								<li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i> Approved Stock</a>
 								</li>
 							</ol>
 						</nav>
@@ -160,8 +123,6 @@
 								
 											$barcode = $arr->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
-									if($arr->po_status == 2)
-									{
 									?>
 									  <tr id="dataRow<?php echo($arr->id);?>">
 										<td class="text-center"><?PHP echo $k+1; ?></td>
@@ -177,43 +138,17 @@
 										<td><?php echo !empty($arr->remarks) ? $arr->remarks : '--';?></td>
 										<td class="text-center">
 											<div class="ms-auto">
-												  <div class="btn-group">
-												  <?php 
-													if($arr->status == 0 || $arr->status == 2)
-													{
-														
-													?>
-													<button type="button" class="btn btn-<?PHP echo $arr->status==1 ? 'success' : ($arr->status==2 ? 'danger' : 'warning'); ?>">
-													<?PHP echo $arr->status==1 ? 'Approved' : ($arr->status==2 ? 'Rejected' : 'Pending'); ?>
-													</button>
-													<button type="button" class="btn btn-<?PHP echo $arr->status==1 ? 'success' : ($arr->status==2 ? 'danger' : 'warning'); ?> split-bg-<?PHP echo $arr->status==1 ? 'success' : ($arr->status==2 ? 'danger' : 'warning'); ?> dropdown-toggle dropdown-toggle-split"
-													  data-bs-toggle="dropdown"> <span class="visually-hidden">Toggle Dropdown</span>
-													</button>
-													
-													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
-															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=3" title = "Click here to inward" data-bs-toggle="tooltip"><span class="text-success text-bold">Approved</span></a>
-															
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=4" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
-													</div>
-													<?php 
-														
-													}
-													else{
-													?>
-													 <p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Completed</p>
-													<?php 
-													}
-													?>
+												<div class="btn-group">
+													<p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">Approved</p>
 												</div>
 											</div>
 										</td>
 										
 									  </tr>
 										<?PHP
-											}
 												$i++;
+											}
 										}
-									}
 									?>
 								</tbody>
 							</table>
