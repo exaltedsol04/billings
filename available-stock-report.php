@@ -226,8 +226,8 @@
 						<td><?PHP echo $k+1 ?></td>
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td><?PHP echo $arr->pos_stock; ?></td>
-						<td><?PHP echo $arr->available_stock; ?></td>
+						<td><?PHP echo round($arr->pos_stock, 2); ?></td>
+						<td><?PHP echo round($arr->available_stock, 2); ?></td>
 						<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 						<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
 					</tr>
