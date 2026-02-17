@@ -11,43 +11,29 @@
 	ob_start();
 	//echo $_SESSION['USER_ID'];die;
 	
-	if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '2'))
+	if(isset($_GET['mode']) && ($_GET['mode'] == '3' || $_GET['mode'] == '4'))
 	{	
-//echo $_GET['id'].' '.$_GET['mode'].' '.$_GET['qty'];die;
-		if($_GET['mode'] == 1)
+		if($_GET['mode'] == 3)
 		{
 			if($_GET['qty'] !='')
 			{
-				$aspl = $general_cls_call->select_query("loose_stock_quantity, stock", ADMIN_STOCK_PURCHASE_LIST, "WHERE id =:id ", array(':id'=> $_GET['id']), 1);
-
-				$stock = $_GET['qty'];
-				$loose_stock_quantity = 0.00;
-				if($aspl->loose_stock_quantity != '0.00') {
-					$stock = 0;
-					$loose_stock_quantity = $_GET['qty'];
-				}
-				
 				//echo $_GET['qty'];die;
-				$setValues="status=:status, stock=:stock, loose_stock_quantity=:loose_stock_quantity, updated_at=:updated_at";
+				$setValues="po_status=:po_status";
 				$whereClause=" WHERE id=:id";
 				$updateExecute=array(
-					':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
-					':stock'=>$general_cls_call->specialhtmlremover($stock),
-					':loose_stock_quantity'=>$general_cls_call->specialhtmlremover($loose_stock_quantity),
-					':updated_at'=> date("Y-m-d H:i:s"),
+					':po_status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
 					':id'=>$_GET['id']
 				);
 				$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
 			}
 		}
 		
-		if($_GET['mode'] == 2)
+		if($_GET['mode'] == 4)
 		{
-			$setValues="status=:status, updated_at=:updated_at";
+			$setValues="po_status=:po_status";
 			$whereClause=" WHERE id=:id";
 			$updateExecute=array(
-				':status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
-				':updated_at'=> date("Y-m-d H:i:s"),
+				':po_status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
 				':id'=>$_GET['id']
 			);
 			$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
@@ -58,12 +44,12 @@
 			$sucMsg="Status updated successfully";
 		}
 		
-		header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php').'?pvid='. $_GET['pvid']);
+		//header("location:".SITE_URL.basename($_SERVER['PHP_SELF'], '.php').'?pvid='. $_GET['pvid']);
 	}
 	
 	//if(isset($_GET['pvid']))
 	//{
-		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.loose_stock_quantity, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
+		$fields = "asp.id, asp.product_id, asp.remarks, asp.status, asp.loose_stock_quantity, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.stock_unit_id, pv.id as pvid, pv.type";
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -160,6 +146,18 @@
 										$i = 1;
 										foreach($sqlQuery as $k=>$arr)
 										{
+											$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+											$unitname = $unit_dtls->name;
+											if($arr->type == 'loose')
+											{
+												$measurement_arr = [
+													'quantity' => 1 * $arr->measurement,
+													'stock_unit_id' => $arr->stock_unit_id,
+												];
+												$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+												$unitname = $measurement_units['unit'];
+											}
+								
 											$barcode = $arr->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
@@ -167,8 +165,10 @@
 										<td class="text-center"><?PHP echo $k+1; ?></td>
 										<td><?PHP echo $arr->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
-										<td class="text-center"><input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(<?php echo $arr->type == 'loose' ? '/[^0-9.]/g' : '/[^0-9]/g'; ?>, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
-										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $arr->unit_name : $arr->measurement.' '.$arr->unit_name; ?></td>
+										<td class="text-center">
+										<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>
+										</td>
+										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ;?></span></td>
 										<td>₹ <?php echo $arr->purchase_price ?></td>
 										<td><?PHP echo $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A'); ?></td>
@@ -188,9 +188,9 @@
 													</button>
 													
 													<div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end"> 
-															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=1&pvid=<?php echo $arr->pvid ?>" title = "Click here to inward" data-bs-toggle="tooltip"><span class="text-success text-bold">Inward</span></a>
+															<a class="dropdown-item approveBtn" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=3" title = "Click here to inward" data-bs-toggle="tooltip"><span class="text-success text-bold">Approved</span></a>
 															
-															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=2&pvid=<?php echo $arr->pvid ?>" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
+															<a class="dropdown-item" href = "<?PHP echo SITE_URL.basename($_SERVER['PHP_SELF'], '.php'); ?>?id=<?php echo($arr->id);?>&mode=4" title = "Click here to reject" data-bs-toggle="tooltip"><span class="text-danger text-bold">Reject</span></a>
 													</div>
 													<?php 
 													}

@@ -1911,5 +1911,26 @@ error_reporting(0);
 				echo "success";
 			}
 		break;
+		
+		case "updateVendorPoStatus":
+		
+			$fieldsVen = "po_status";
+			$tablesVen = ADMIN_STOCK_PURCHASE_LIST;
+			$whereVen = "WHERE vendor_id=:vendor_id";
+			$paramsVen = [':vendor_id'=>$_SESSION['VENDOR_ID']];
+			$sqlQueryVen = $general_cls_call->select_query($fieldsVen, $tablesVen, $whereVen, $paramsVen, 1);
+			
+			if($sqlQueryVen->po_status == 1)
+			{
+				$setValues="po_status=:po_status";
+				$whereClause=" WHERE vendor_id=:vendor_id AND status=:status";
+				$updateExecute=array(
+					':po_status'=>2,
+					':status'=>0,
+					':vendor_id'=>$_SESSION['VENDOR_ID']
+				);
+				$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
+			}
+		break;
     }
 ?>

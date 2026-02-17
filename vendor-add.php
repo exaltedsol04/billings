@@ -77,6 +77,27 @@
 			$unique_mobile = $general_cls_call->select_query_count(VENDORS, $whereMobile, $paramsMobile);
 			if($unique_mobile == 0)
 			{
+				$fieldsVen = "admin_id";
+				$tablesVen = VENDORS;
+				$whereVen = "WHERE id=:id";
+				$paramsVen = [':id'=>$vendor_id];
+				$sqlQueryVen = $general_cls_call->select_query($fieldsVen, $tablesVen, $whereVen, $paramsVen, 1);
+				
+				// update admin table 
+				$setValuesAdmin="username=:username, email=:email,password=:password,updated_at=:updated_at";
+				
+				$newHashPassword = password_hash(stripslashes(trim($password)), PASSWORD_BCRYPT);
+				$updateExecuteAdmin=array(
+					':username'		=> $general_cls_call->specialhtmlremover($name),
+					':email'		=> $general_cls_call->specialhtmlremover($mobile),
+					':password'		=> $general_cls_call->specialhtmlremover($newHashPassword),
+					':updated_at'	=> date('Y-m-d H:i:s'),
+					':id'		=> $sqlQueryVen->admin_id
+				);
+				$whereClauseAdmin=" WHERE id = :id";
+				$general_cls_call->update_query(ADMIN_MASTER, $setValuesAdmin, $whereClauseAdmin, $updateExecuteAdmin);
+				
+				// update vendor table 
 				$setValues=" name=:name, email=:email, mobile=:mobile, city=:city, pincode=:pincode, address=:address, product_ids=:product_ids, updated_at=:updated_at";
 				$updateExecute=array(
 					':name'		=> $general_cls_call->specialhtmlremover($name),
