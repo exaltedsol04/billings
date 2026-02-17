@@ -18,12 +18,19 @@
 	
 	$whereAppr = "WHERE vendor_id=:vendor_id AND po_status=:po_status";		
 	$paramsAppr = [
+		':po_status'=> 3,
+		':vendor_id'=> $_SESSION['VENDOR_ID']
+	];
+	
+	$approved_stock = $general_cls_call->select_query_count(ADMIN_STOCK_PURCHASE_LIST, $whereAppr, $paramsAppr);
+	
+	$wherePen = "WHERE vendor_id=:vendor_id AND po_status=:po_status";		
+	$paramsPen = [
 		':po_status'=> 2,
 		':vendor_id'=> $_SESSION['VENDOR_ID']
 	];
 	
-	$pending_stock = $general_cls_call->select_query_count(ADMIN_STOCK_PURCHASE_LIST, $whereAppr, $paramsAppr);
-	
+	$pending_stock = $general_cls_call->select_query_count(ADMIN_STOCK_PURCHASE_LIST, $wherePen, $paramsPen);
 	ob_end_flush();
 ?>
 
@@ -74,7 +81,7 @@
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo"><?= $pending_stock->total ? $pending_stock->total : 0; ?></h3>
+                    <h3 class="mb-0 text-indigo"><?= $pending_stock ? $pending_stock : 0; ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'vendor-pending-stock-list'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>
@@ -93,7 +100,7 @@
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo"><?php echo $user_purchase_stock ? $user_purchase_stock : 0; ?></h3>
+                    <h3 class="mb-0 text-indigo"><?php echo $approved_stock ? $approved_stock : 0; ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'vendor-approved-stock-list'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>
