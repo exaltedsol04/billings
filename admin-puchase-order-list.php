@@ -96,7 +96,7 @@
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
 									  <tr id="dataRow<?php echo($selectValue->id);?>">
-										<td class="text-center"><?PHP echo $i; ?></td>
+										<td class="text-center"></td>
 										<td class="text-center"><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
 										<td class="text-center">₹ <?php echo $selectValue->tot_price ?></td>
 										<td class="text-center">
@@ -151,7 +151,7 @@ $(document).ready(function(){
 		$('#example2').DataTable().destroy();
 	}
 	
-	$('#example2').DataTable({
+	/*$('#example2').DataTable({
 		order: [[1, 'desc']],
 		columnDefs: [
         {
@@ -160,7 +160,25 @@ $(document).ready(function(){
             orderSequence: ['asc', 'desc'] // manual toggle only
         }
     ] 
+	});*/
+	
+	var table = $('#example2').DataTable({
+		order: [[1, 'desc']],
+		columnDefs: [
+			{
+				targets: 0,
+				orderable: false
+			}
+		]
 	});
+	
+	table.on('order.dt search.dt', function () {
+    table.column(0, { search:'applied', order:'applied' }).nodes()
+			.each(function (cell, i) {
+				cell.innerHTML = i + 1;
+			});
+	}).draw();
+	
 });
 
 function print_page(id)
