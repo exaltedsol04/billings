@@ -15,8 +15,9 @@
 		{
 			$fromDate = $_POST['fromDate'];
 			$toDate = $_POST['toDate'];
-			$whereDateRange = "asp.product_stock_transaction_id=:product_stock_transaction_id AND asp.created_at >= :fromDate AND asp.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+			$whereDateRange = "asp.status=:status AND asp.product_stock_transaction_id=:product_stock_transaction_id AND asp.created_at >= :fromDate AND asp.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
 			$paramsV = [
+				':status'=> 1, 
 				':product_stock_transaction_id' => 0,
 				':fromDate' => $_POST['fromDate'],
 				':toDate'   => $_POST['toDate']
@@ -24,8 +25,9 @@
 		}
 		else
 		{
-			$whereDateRange = "asp.product_stock_transaction_id = :product_stock_transaction_id";
+			$whereDateRange = "asp.status=:status AND asp.product_stock_transaction_id = :product_stock_transaction_id";
 			$paramsV = [
+				':status'=> 1, 
 				':product_stock_transaction_id' => 0
 			];
 		}
@@ -165,8 +167,9 @@
 													INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 													INNER JOIN " . PRODUCT_VARIANTS . " pv ON pv.id = asp.product_variant_id
 													INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
-													$where = "WHERE asp.vendor_id=:vendor_id AND asp.product_stock_transaction_id=:product_stock_transaction_id";
+													$where = "WHERE asp.status=:status AND asp.vendor_id=:vendor_id AND asp.product_stock_transaction_id=:product_stock_transaction_id";
 													$params = [
+														':status'=> 1, 
 														':vendor_id'=> $vendors->vendor_id, 
 														':product_stock_transaction_id'=>0
 													];

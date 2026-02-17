@@ -24,6 +24,12 @@
 				$product_variant_id = $product_variant_id;
 				
 				$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id AND product_id=:product_id", array(':id'=> $product_variant_id, ':product_id'=>$product_id), 1);
+				$loose_stock_quantity = '0.00';
+				if($product_variant_dtls->type == 'loose'){
+					
+					$loose_stock_quantity = $stock;
+					$stock = 0;
+				}
 				
 				$remarks = !empty($remarks) ? $remarks : null;
 				$field = "seller_id, product_id, product_variant_id, stock, status,  reason,  processing_user_id, remarks, created_date, transaction_type";
@@ -35,6 +41,7 @@
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
 					':stock'				=> -($stock),
+					':loose_stock_quantity'	=> -($loose_stock_quantity),
 					':status'				=> 1,
 					':transaction_type'		=> 6,
 					':reason'		=> $general_cls_call->specialhtmlremover($reason),
@@ -42,12 +49,7 @@
 					':remarks'				=> $remarks,
 					':created_date' 			=> date('Y-m-d H:i:s')
 				);
-				if($product_variant_dtls->type == 'loose'){
-					$field .= ", loose_stock_quantity";
-					$value .= ", :loose_stock_quantity";
-
-					$addExecute[':loose_stock_quantity'] = -($product_variant_dtls->measurement * $stock);
-				}
+				
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 				$sucMsg = "Stock Ddeducted Successfully";
 			/*}
@@ -343,7 +345,11 @@ function select_product(product)
 			if (result.length > 0) {
 				var html = '<option value="">Select...</option>';
 				$.each(result, function (i, variants) {
-					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname + '  (' + variants.ptype +' )</option>';
+					var unit = variants.measurement + ' ' + variants.unitname + '  (' + variants.ptype +')';
+					if(variants.type == 'loose') {
+						var unit = variants.unitname + '  (' + variants.ptype +')';
+					}
+					html += '<option value='+ variants.id +'>' + unit +'</option>';
 					
 					if(variants.ptype == 'loose')
 					{

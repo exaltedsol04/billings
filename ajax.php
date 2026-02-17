@@ -909,10 +909,6 @@ error_reporting(0);
 
 			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
 
-
-
-
-
 			$varianrArr = [];
 			if($sqlQuery[0] != '')
 			{
@@ -921,6 +917,7 @@ error_reporting(0);
 					$varianrArr[] = [
 						'id' => $arr->id,
 						'measurement' => $arr->measurement,
+						'type' => $arr->type,
 						'unitname' => $arr->unit_name,
 						'ptype' => $arr->type
 					];
@@ -1714,11 +1711,9 @@ error_reporting(0);
 			$pos_stock = $general_cls_call->select_query_sum( PRODUCT_STOCK_TRANSACTION, $wherePos, $paramsPos, 'stock');*/
 			
 			$fields = "id, product_id";
-			$tables = PRODUCT_STOCK_TRANSACTION;
-			$where = "WHERE product_variant_id=:product_variant_id AND  status=:status AND seller_id =:seller_id";
+			$tables = PRODUCT_VARIANTS;
+			$where = "WHERE id=:product_variant_id";
 			$params = [
-				':status'			=> 1,
-				':seller_id'		=> $_SESSION['SELLER_ID'],
 				':product_variant_id'	=> $_POST['pvid']
 			];
 			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);

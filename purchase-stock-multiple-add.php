@@ -53,6 +53,10 @@
 					
 						//$variant_measurement = $product_variant_dtls->measurement;
 						//$loose_stock_quantity = $stock[$index] * $variant_measurement;
+						
+						
+						$loose_stock_quantity = $stock[$index];
+						$stock[$index] = 0;
 					}
 				
 					$field = "vendor_id, product_id, product_variant_id, loose_stock_quantity, stock, status, group_id, purchase_price, remarks, created_at, updated_at";
