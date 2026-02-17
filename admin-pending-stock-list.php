@@ -175,7 +175,7 @@
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
 									  <tr id="dataRow<?php echo($arr->id);?>">
-										<td class="text-center"><?PHP echo $k+1; ?></td>
+										<td class="text-center"></td>
 										<td><?PHP echo $arr->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
 										<td class="text-center"><input type="text" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(<?php echo $arr->type == 'loose' ? '/[^0-9.]/g' : '/[^0-9]/g'; ?>, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
@@ -257,7 +257,7 @@ $(document).ready(function(){
 		$('#example2').DataTable().destroy();
 	}
 	
-	$('#example2').DataTable({
+	/*$('#example2').DataTable({
 		order: [[6, 'desc']],
 		columnDefs: [
         {
@@ -266,7 +266,24 @@ $(document).ready(function(){
             orderSequence: ['asc', 'desc'] // manual toggle only
         }
     ] 
+	});*/
+	
+	var table = $('#example2').DataTable({
+		order: [[7, 'desc']],
+		columnDefs: [
+			{
+				targets: 0,
+				orderable: false
+			}
+		]
 	});
+	
+	table.on('order.dt search.dt', function () {
+    table.column(0, { search:'applied', order:'applied' }).nodes()
+			.each(function (cell, i) {
+				cell.innerHTML = i + 1;
+			});
+	}).draw();
 });
 $(document).on('click', '.approveBtn', function(e){
     e.preventDefault();
