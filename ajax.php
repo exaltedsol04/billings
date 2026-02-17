@@ -1735,64 +1735,64 @@ error_reporting(0);
 			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
 			
 			$fields = "
-    pr.id,
-    pr.product_id,
-    pr.product_variant_id,
-    pr.status,
+			pr.id,
+			pr.product_id,
+			pr.product_variant_id,
+			pr.status,
 
-    SUM(
-        CASE 
-            WHEN pv.type = 'loose' THEN pr.loose_stock_quantity
-            ELSE pr.stock
-        END
-    ) as total_stock,
+			SUM(
+				CASE 
+					WHEN pv.type = 'loose' THEN pr.loose_stock_quantity
+					ELSE pr.stock
+				END
+			) as total_stock,
 
-    u.name as stock_unit_name,
-    pv.measurement,
-    pv.type,
-    p.name,
-    p.barcode,
-    pv.id as pvid
-";
+			u.name as stock_unit_name,
+			pv.measurement,
+			pv.type,
+			p.name,
+			p.barcode,
+			pv.id as pvid
+		";
 
-$tables = PRODUCT_STOCK_TRANSACTION . " pr
-INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
-INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
-INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+		$tables = PRODUCT_STOCK_TRANSACTION . " pr
+		INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
+		INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
+		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
 
-$where = "
-WHERE pr.status = :status
-AND pr.stock_type = :stock_type
-AND pr.seller_id = :seller_id
-AND (
-        (pv.type = 'loose' AND pr.product_id = :product_id)
-        OR
-        (pv.type != 'loose' AND pr.product_variant_id = :product_variant_id)
-    )
+		$where = "
+		WHERE pr.status = :status
+		AND pr.stock_type = :stock_type
+		AND pr.seller_id = :seller_id
+		AND (
+				(pv.type = 'loose' AND pr.product_id = :product_id)
+				OR
+				(pv.type != 'loose' AND pr.product_variant_id = :product_variant_id)
+			)
 
-GROUP BY 
-    CASE 
-        WHEN pv.type = 'loose' THEN pr.product_id
-        ELSE pr.product_variant_id
-    END
+		GROUP BY 
+			CASE 
+				WHEN pv.type = 'loose' THEN pr.product_id
+				ELSE pr.product_variant_id
+			END
 
-HAVING SUM(
-    CASE 
-        WHEN pv.type = 'loose' THEN pr.loose_stock_quantity
-        ELSE pr.stock
-    END
-) > 0
-";
+		HAVING SUM(
+			CASE 
+				WHEN pv.type = 'loose' THEN pr.loose_stock_quantity
+				ELSE pr.stock
+			END
+		) > 0
+		";
 
-$params = [
-    ':status' => 1,
-    ':stock_type' => 1,
-    ':seller_id' => $_SESSION['SELLER_ID'],
-    ':product_id' => $sqlQuery->product_id,        // required for loose
-    ':product_variant_id' => $_POST['pvid']       // required for non-loose
-];
+		$params = [
+			':status' => 1,
+			':stock_type' => 1,
+			':seller_id' => $_SESSION['SELLER_ID'],
+			':product_id' => $sqlQuery->product_id,        // required for loose
+			':product_variant_id' => $_POST['pvid']       // required for non-loose
+		];
 
-$pos_stock = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
+		$pos_stock = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
 
 
 			

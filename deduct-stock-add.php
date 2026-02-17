@@ -233,7 +233,7 @@
 
 							<div class="col-md-3">
 								<label for="input5" class="form-label">Deduct Quantity</label>
-								<input type="text" class="form-control deduct-qty" name="stock" id="stock" placeholder="Deduct quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" required>
+								<input type="text" class="form-control deduct-qty" name="stock" id="stock" placeholder="Deduct quantity" required>
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<input type="hidden" id="hid_deduct_qty">
@@ -300,13 +300,13 @@ $(document).on('input', '.deduct-qty', function () {
     let value = this.value;
     
     // allow only numbers + decimal
-    value = value.replace(/[^0-9]/g, '');
+    //value = value.replace(/[^0-9]/g, '');
 
     // prevent multiple decimals
-    value = value.replace(/(\..*?)\..*/g, '$1');
+    //value = value.replace(/(\..*?)\..*/g, '$1');
 
     // limit 2 digits after decimal
-    
+    //alert(max);
 
     let num = parseFloat(value);
 
@@ -344,8 +344,25 @@ function select_product(product)
 				var html = '<option value="">Select...</option>';
 				$.each(result, function (i, variants) {
 					html += '<option value='+ variants.id +'>' + variants.measurement + ' ' + variants.unitname + '  (' + variants.ptype +' )</option>';
+					
+					if(variants.ptype == 'loose')
+					{
+						$('.deduct-qty').off('input').on('input', function(){
+								this.value = this.value
+									.replace(/[^0-9.]/g, '')   // allow dot
+									.replace(/(\..*)\./g, '$1'); // allow only one dot
+							});
+					}
+					else{
+						$('.deduct-qty').off('input').on('input', function(){
+								this.value = this.value
+									.replace(/[^0-9]/g, '')   // allow dot
+									.replace(/(\..*)\./g, '$1'); // allow only one dot
+							});
+					}
 				});
 				$('#product_variant_id').html(html);
+				
 			}
 		}
 	});
