@@ -509,7 +509,9 @@ $(document).ready(function(){
 
 	});
 
-
+	$('#supplier_id').on('input', function () {
+		this.value = this.value.replace(/[^0-9]/g, '');
+	});
 
 	//End Increase and Decrease
 });
@@ -881,6 +883,8 @@ function check_product_stock(id,parameter)
 }
 function user_details(val)
 {
+	//this.value = this.value.replace(/[^0-9]/g, '');
+	//alert(val);
 	$('#err_user').html('');
 	var datapost = 'action=userdetails&phone='+val;
 	$.ajax({
