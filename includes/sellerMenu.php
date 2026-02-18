@@ -91,7 +91,7 @@
 			</li>
 			
 			
-			<li <?php if($page=='packaging-operator-add.php' || $page=='packaging-operator-list.php' || $page=='packaging-operator-assign.php' || $page=='online-order-packaging-operator-assign.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='packaging-operator-add.php' || $page=='packaging-operator-list.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">inventory_2</i>
 				</div>
@@ -103,7 +103,7 @@
 			  </ul>
 			</li>
 
-			<li <?php if($page=='online-assigned-orders.php' || $page=='online-order-assign.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='online-assigned-orders.php' || $page=='packaging-operator-assign.php' || $page=='online-order-assign.php' ||  $page=='online-order-packaging-operator-assign.php') { echo ('class="mm-active"');} ?>>
 				  <a href="javascript:;" class="has-arrow">
 					<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
 					</div>

@@ -160,7 +160,7 @@
 										];*/
 									}
 									
-									$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.created_at, o.active_status, o.payment_method, o.total, SUM(oi.sub_total) AS orders_items_sub_total, u.name AS customer_name, osl.status AS orders_status_list_status, os.created_at AS orders_statuses_created_at";
+									$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.created_at, o.active_status, o.payment_method, o.total, SUM(oi.sub_total) AS orders_items_sub_total, u.name AS customer_name, osl.status AS orders_status_list_status, os.created_at AS orders_statuses_created_at, o.address_id";
 
 									$tables = ORDERS . " o
 									INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
@@ -211,7 +211,8 @@
 										?>
 										  <tr id="dataRow<?php echo($arr->id);?>">
 											<td><?PHP echo $arr->id; ?></td>
-											<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>
+											<!--<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>-->
+											<td><?PHP echo $general_cls_call->customer_order_address(array('address_id'=>$arr->address_id)); ?></td>
 											<!--<td class="text-center">₹<?PHP echo $final_total; ?></td>-->
 											<td class="text-center">₹<?PHP echo  ($arr->payment_method == 'waller') ? $arr->total : $arr->final_total; ?></td>
 											<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>'; ?></td>

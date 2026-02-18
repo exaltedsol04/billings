@@ -135,7 +135,7 @@
 								  ".$whereDateRange." AND poa.status=:status";
 							
 							
-							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.payment_method, o.total, o.active_status, o.delivery_boy_id, po.name AS packaging_operator_name, osl.status AS orders_status_list_status, u.name AS customer_name";
+							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, o.payment_method, o.total, o.active_status, o.delivery_boy_id, po.name AS packaging_operator_name, osl.status AS orders_status_list_status, u.name AS customer_name, o.address_id";
 
 							$tables = PACKAGING_OPERATORS_ASSIGN . " poa
 							INNER JOIN " . ORDERS . " o ON o.id = poa.order_id
@@ -190,7 +190,8 @@
 							?>
 							  <tr id="dataRow<?php echo($arr->id);?>">
 								<td><?PHP echo $arr->id; ?></td>
-								<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>
+								<!--<td><?PHP echo !empty($arr->customer_name) ? $arr->customer_name : 'N/A'; ?></td>-->
+								<td><?PHP echo $general_cls_call->customer_order_address(array('address_id'=>$arr->address_id)); ?></td>
 								
 								<!--<td class="text-center">₹<?PHP echo $final_total; ?></td>-->
 								<td class="text-center">₹<?PHP echo  ($arr->payment_method == 'waller') ? $arr->total : $arr->final_total; ?></td>

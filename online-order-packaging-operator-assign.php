@@ -28,7 +28,7 @@
 			];
 		}
 		
-		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, o.total, o.delivery_charge, o.payment_method, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status";
+		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, o.total, o.delivery_charge, o.payment_method, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status, o.address_id";
 		$tables = ORDERS . " o
 		INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
 		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id
@@ -255,7 +255,9 @@
             </div>
 			</div>
          </div><!--end row-->
-
+		 <?php  
+		  $user_addr_data = $general_cls_call->select_query("name, pincode, area, city,mobile", USER_ADDRESS, "WHERE id=:id", array(':id'=>$orderData->address_id), 1);
+		 ?>
 
          <h5 class="fw-bold mb-4">Billing Details</h5>
          <div class="card">
@@ -268,7 +270,7 @@
                     </div>
                     <div class="detail-info">
                        <p class="fw-bold mb-1">Customer Name</p>
-                       <a href="javascript:;" class="mb-0"><?php echo $orderData->customer_name ? $orderData->customer_name : 'NA'; ?></a>
+                       <a href="javascript:;" class="mb-0"><?php echo $user_addr_data->name ? $user_addr_data->name : 'NA'; ?></a>
                     </div>
                  </div>
                 </div>
@@ -276,11 +278,11 @@
                 <div class="col">
                   <div class="d-flex align-items-start gap-3 border p-3 rounded">
                     <div class="detail-icon fs-5">
-                      <i class="bi bi-envelope-fill"></i>
+                      <i class="bi bi-telephone-fill"></i>
                     </div>
                     <div class="detail-info">
-                      <h6 class="fw-bold mb-1">Email</h6>
-                      <a href="javascript:;" class="mb-0"><?php echo $orderData->customer_email ? $orderData->customer_email : 'NA'; ?></a>
+                      <h6 class="fw-bold mb-1">Phone</h6>
+                      <a href="javascript:;" class="mb-0"><?php echo $user_addr_data->mobile ? $user_addr_data->mobile : 'NA'; ?></a>
                     </div>
                   </div>
                 </div>
