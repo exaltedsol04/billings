@@ -1932,5 +1932,24 @@ error_reporting(0);
 				$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
 			}
 		break;
+		case "savePosUser":
+			$user = $_POST['pos_user'];
+			$mobile = $_POST['pos_mobile'];
+			//echo $pos_user.' '.$pos_mobile;
+			$field = "name, mobile, status, created_at, updated_at";
+			$value = ":name, :mobile, :status, :created_at, :updated_at";
+			
+			$addExecute=array(
+				':name'			        =>  $user,
+				':mobile'				=> $mobile,
+				':status'				=> 1,
+				':created_at'			=> date("Y-m-d H:i:s"),
+				':updated_at'			=> date("Y-m-d H:i:s")
+			);
+			
+			$last_insert_id = $general_cls_call->insert_query(USERS, $field, $value, $addExecute);
+			$data['user_id'] = $last_insert_id;
+			echo json_encode($data); 	
+		break;
     }
 ?>
