@@ -1951,5 +1951,40 @@ error_reporting(0);
 			$data['user_id'] = $last_insert_id;
 			echo json_encode($data); 	
 		break;
+		
+		case "getRequestSellingPrice":
+			 $product_variant_id = $_POST['val'];
+			 /*$where = "WHERE id =:id";
+			 $params = [':id'=> $product_variant_id];
+			 $prices = $general_cls_call->select_query("discounted_price", PRODUCT_VARIANTS, $where, $params, 1);
+			 $data['status'] = 200;
+			 $data['discount_price'] = $prices->discounted_price;
+			 echo json_encode($data);*/
+			 
+			 $fields = "pv.*, u.name as unit_name, u.parent_id, u.conversion";
+			$tables = PRODUCT_VARIANTS . " pv
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			$where = "WHERE pv.id=:id";
+			$params = [
+				':id'=> $product_variant_id
+			];
+			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
+			
+			//echo "<pre>";print_r($sqlQuery);die;
+			$data['status'] = 200;
+			if($sqlQuery->parent_id !=0)
+			{
+				$conversion = $sqlQuery->conversion;
+				$multiply_by = $conversion/$sqlQuery->measurement;
+				$data['discount_price'] = $sqlQuery->discounted_price * $multiply_by;
+				$data['price'] = $sqlQuery->price * $multiply_by;
+			}
+			else{
+				$data['discount_price'] = $sqlQuery->discounted_price;
+				$data['price'] = $sqlQuery->price;
+			}
+			echo json_encode($data);
+			 
+		break;
     }
 ?>

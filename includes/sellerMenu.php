@@ -39,7 +39,7 @@
 					<div class="menu-title">POS Sell</div>
 				</a>
 			</li>
-			<li <?php if($page=='purchase-request.php' || $page=='purchase-report' || $page=='approved-purchase-report') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='purchase-request.php' || $page=='purchase-request-multiple.php' || $page=='purchase-report' || $page=='approved-purchase-report') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">inventory_2</i>
 				</div>
@@ -47,6 +47,7 @@
 			  </a>
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'purchase-request'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Request</a></li>
+				<li><a href="<?php echo SITE_URL.'purchase-request-multiple'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Request Multiple</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-accept'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Inward</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Report</a></li>
 				<li><a href="<?php echo SITE_URL.'approved-purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Purchase</a></li>
