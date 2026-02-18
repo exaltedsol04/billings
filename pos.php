@@ -272,7 +272,7 @@
 				</select>
 			</div>
 			<div class="col-md-3">
-				<input type="text" class="form-control" id="supplier_id" name="supplier_id" placeholder="Mobile No" oninput="user_details(this.value)" autocomplete="off">
+				<input type="text" class="form-control" id="supplier_id" name="supplier_id" placeholder="Mobile No" oninput="user_details(this.value)" autocomplete="off" maxlength="10">
 				<div id="user_suggestions" class="list-group 1position-absolute 1w-100" style="z-index:1000;"></div>
 				<span class="text-danger" id="err_supplier_id"></span>
 			</div>
@@ -414,6 +414,48 @@
                     </div>
                   </div>
                 </div>
+				
+		<!---User modal--->
+		<div class="modal fade" id="user-modal">
+		  <div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+			  <div class="modal-header border-bottom-0 py-2 bg-grd-success">
+				<h5 class="modal-title btn-grd">User</h5>
+				<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+				  <i class="material-icons-outlined">close</i>
+				</a>
+			  </div>
+			  <div class="modal-body">
+				<div class="form-body">
+					<div class="row g-3">
+					<div class="col-lg-12 col-md-12 col-sm-12">
+							<div class="card-body">
+							    
+								<span id="pos_user_success_msg" class="text-success" style="font-size:16px"></span>
+								<div class="mb-3 text-center mt-2">
+									<input type="text" class="form-control" name="pos_user" id="pos_user" placeholder="User name">
+									<span class="text-danger text-start" id="err_user"></span>
+								</div>
+								</span>
+
+							</div>
+					</div>
+					<input type="hidden" id="pos_mobile" name="pos_mobile">
+					<div class="col-md-12">
+					<div class="d-md-flex d-grid justify-content-md-between">
+						<button type="button" class="btn btn-outline-danger px-5" data-bs-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-grd btn-grd-success px-5" onclick="save_users()">save</button>
+					 </div>
+				  </div>
+				  </div>
+				</div>
+			</div>
+			
+			  
+			</div>
+		  </div>
+		</div>
+		
 			
 </main>
 
@@ -467,7 +509,9 @@ $(document).ready(function(){
 
 	});
 
-
+	$('#supplier_id').on('input', function () {
+		this.value = this.value.replace(/[^0-9]/g, '');
+	});
 
 	//End Increase and Decrease
 });
@@ -839,6 +883,8 @@ function check_product_stock(id,parameter)
 }
 function user_details(val)
 {
+	//alert(val);
+	$('#err_user').html('');
 	var datapost = 'action=userdetails&phone='+val;
 	$.ajax({
 		type: "POST",
@@ -857,7 +903,49 @@ function user_details(val)
 			} else {
 				$('#user_hidden_id').val('');
 				$('#user_suggestions').hide();
+				if(val.length==10)
+				{
+					$('#err_supplier_id').text('');
+					$('#pos_user').val('');
+					$('#user-modal').modal('show');
+					$('#pos_mobile').val(val);
+				}
+				else{
+					$('#user-modal').modal('hide');
+				}
 			}
+		}
+	});
+}
+function save_users()
+{
+	$('#err_user').html('');
+	let pos_user = $('#pos_user').val();
+	let pos_mobile  = $('#pos_mobile').val();
+
+	if(pos_user == '')
+	{
+		$('#err_user').html('<div>Enter user name</div>');
+		return false;
+	}
+	
+	
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: {action: 'savePosUser', pos_user:pos_user, pos_mobile:pos_mobile},
+		dataType: "json",
+		success: function(res){
+			//alert(res.user_id);
+			$('#user_hidden_id').val(res.user_id);
+			$('#err_supplier_id').text('');
+			$('#pos_user_success_msg')
+				.text('User created successfully')
+				.fadeIn()
+				.delay(2000)
+				.fadeOut(function () {
+					$('#user-modal').modal('hide');
+			});
 		}
 	});
 }
