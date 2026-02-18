@@ -10,11 +10,13 @@ $amount = $_POST['amount'];
 
 /*$stmt = $pdo->prepare("SELECT amount FROM orders WHERE razorpay_order_id=?");
 $stmt->execute([$razorpay_order_id]);
-$order = $stmt->fetch();
+$order = $stmt->fetch();*/
 
-if (!$order) {
+$order = $general_cls_call->select_query("*", ORDERS, "WHERE id=:id", array(':id'=>$order_id), 1);
+
+if (empty($order)) {
     exit(json_encode(['error' => 'Order not found']));
-}*/
+}
 
 $response = razorpayRequest('POST', '/v1/payment_links', [
     "amount" => $amount * 100,
