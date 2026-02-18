@@ -26,4 +26,5 @@
 	define("USER_TOKENS",  TABLE_PREFIX."user_tokens");
 	define("SETTINGS",  TABLE_PREFIX."settings");
 	define("NOTIFICATIONS",  TABLE_PREFIX."notifications");
+	define("USER_ADDRESS",  TABLE_PREFIX."user_addresses");
 ?>

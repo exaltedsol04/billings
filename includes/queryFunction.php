@@ -706,6 +706,36 @@
 			// Trim extra spaces
 			return trim($text);
 		}
+		function customer_order_address($data)
+		{
+			//print_r($data);die;
+			$user_addr_data = $this->select_query("name, pincode, area, city", USER_ADDRESS, "WHERE id=:id", array(':id'=>$data['address_id']), 1);
+			
+			//$area = '';
+			//$pincode = '';
+			//$city = '';
+			$addressParts = [];
+
+			if (!empty($user_addr_data->area)) {
+				$addressParts[] = $user_addr_data->area;
+			}
+
+			if (!empty($user_addr_data->pincode)) {
+				$addressParts[] = $user_addr_data->pincode;
+			}
+
+			if (!empty($user_addr_data->city)) {
+				$addressParts[] = $user_addr_data->city;
+			}
+
+			$address = implode(', ', $addressParts);
+			
+			$html = $user_addr_data->name.'<div style="font-size:10px; border-top:1px solid #5b6166;">'. $address .'</div>';
+			
+			//print_r($user_addr_data);die;
+			//echo $data['address_id'];
+			return $html;
+		}
 
 
 	}

@@ -8,11 +8,22 @@ $order_id = $_POST['order_id'];
 $amount = $_POST['amount'];
 $currency = $_POST['currency'];
 
-/*$stmt = $pdo->prepare("SELECT * FROM orders WHERE id=?");
-$stmt->execute([$order_id]);
-$order = $stmt->fetch();
+//----check order exists-----------
 
-if (!$order || $order['payment_status'] === 'paid') {
+$whereOrder = "WHERE id=:id";		
+$paramsOrder = [
+	':id'=> $order_id
+];
+
+$order_exists = $general_cls_call->select_query_count(ADMIN_STOCK_PURCHASE_LIST, $whereOrder, $paramsOrder);
+if($order_exists == 0)
+{
+	exit(json_encode(['error' => 'Invalid order']));
+}
+//-------------------------------
+
+
+/*if (!$order || $order['payment_status'] === 'paid') {
     exit(json_encode(['error' => 'Invalid order']));
 }*/
 
