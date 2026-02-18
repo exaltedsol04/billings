@@ -883,7 +883,6 @@ function check_product_stock(id,parameter)
 }
 function user_details(val)
 {
-	//this.value = this.value.replace(/[^0-9]/g, '');
 	//alert(val);
 	$('#err_user').html('');
 	var datapost = 'action=userdetails&phone='+val;
@@ -910,6 +909,9 @@ function user_details(val)
 					$('#pos_user').val('');
 					$('#user-modal').modal('show');
 					$('#pos_mobile').val(val);
+				}
+				else{
+					$('#user-modal').modal('hide');
 				}
 			}
 		}
