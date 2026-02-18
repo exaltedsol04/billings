@@ -902,6 +902,8 @@ function user_details(val)
 				$('#user_suggestions').hide();
 				if(val.length==10)
 				{
+					$('#err_supplier_id').text('');
+					$('#pos_user').val('');
 					$('#user-modal').modal('show');
 					$('#pos_mobile').val(val);
 				}
@@ -930,6 +932,7 @@ function save_users()
 		success: function(res){
 			//alert(res.user_id);
 			$('#user_hidden_id').val(res.user_id);
+			$('#err_supplier_id').text('');
 			$('#pos_user_success_msg')
 				.text('User created successfully')
 				.fadeIn()
