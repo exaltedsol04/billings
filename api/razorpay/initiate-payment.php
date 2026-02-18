@@ -6,8 +6,6 @@ include_once '../../includes/razorpay.php';
 //include_once('../../includes/config.php');
 
 $order_id = $_POST['order_id'];
-$amount = $_POST['amount'];
-$currency = $_POST['currency'];
 
 //----get order details-----------
 $order = $general_cls_call->select_query("*", ORDERS, "WHERE id=:id", array(':id'=>$order_id), 1);

@@ -44,12 +44,12 @@
 					$variant_type = $product_variant_dtls->type;
 					if($variant_type == 'loose')
 					{
-						$measurement_arr = [
+						/*$measurement_arr = [
 							'quantity' => $stock[$index] * $product_variant_dtls->measurement,
 							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
 						];
 						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);
-						$loose_stock_quantity = $measurement_units['value'];
+						$loose_stock_quantity = $measurement_units['value'];*/
 					
 						//$variant_measurement = $product_variant_dtls->measurement;
 						//$loose_stock_quantity = $stock[$index] * $variant_measurement;
