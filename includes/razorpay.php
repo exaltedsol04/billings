@@ -22,6 +22,9 @@ function razorpayRequest($method, $endpoint, $data = [])
 function verifySignature()
 {
     $payload = file_get_contents('php://input');
+
+    file_put_contents('webhook_log.txt', $payload.PHP_EOL, FILE_APPEND);
+
     $sig = $_SERVER['HTTP_X_RAZORPAY_SIGNATURE'] ?? '';
     $expected = hash_hmac('sha256', $payload, RAZORPAY_WEBHOOK_SECRET);
 
@@ -29,5 +32,7 @@ function verifySignature()
         http_response_code(401);
         exit('Invalid signature');
     }
+
     return json_decode($payload, true);
 }
+

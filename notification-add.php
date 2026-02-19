@@ -66,7 +66,7 @@
 			);
 			$whereClause=" WHERE id = :id";
 			$general_cls_call->update_query(NOTIFICATIONS, $setValues, $whereClause, $updateExecute);
-			$sucMsg = "Vendor Updated Successfully";
+			$sucMsg = "NotificatioN Updated Successfully";
 		}
 			
 		
@@ -148,11 +148,19 @@
 							<div class="col-md-6">
 								<label class="form-label">Image</label>
 								<input class="form-control" type="file" name="image" accept="image/x-png,image/gif,image/jpeg"  onchange="readImage(this);">
-								<?PHP if($sqlQueryVen->image!='') { ?>
+								<?PHP if($sqlQueryVen->image!='') {
+										$photo_path = 'images/notification/'.$sqlQueryVen->image;
+											if(file_exists($photo_path)){
+									?>
 									<img id="prevImage" class="mt-2" src="<?PHP echo 'images/notification/'.$sqlQueryVen->image; ?>" style="height:150px;width:150px;" />
+								<?PHP 
+											}
+								?>
 									<input type="hidden" name="txtHidden" value="<?PHP echo $sqlQueryVen->image; ?>">
-								<?PHP }else{ ?>
-								<img id="prevImage" class="mt-2" src="#" style="height:150px;width:150px;">
+								<?PHP
+									}else{
+								?>
+								<img id="prevImage" class="mt-2" src="<?PHP echo 'assets/images/noImg.jpg'; ?>" style="height:150px;width:150px;">
 								<?PHP } ?>
 							</div>
 							<input type="hidden" value="<?php echo $_GET['notification_id'] ?>" name="notification_id">
