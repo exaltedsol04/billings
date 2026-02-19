@@ -1,6 +1,6 @@
 <?php
 ini_set('display_errors', 1);
-error_reporting(E_ALL);
+error_reporting(0);
 include_once '../../init.php';
 include_once '../../includes/razorpay.php';
 
@@ -22,7 +22,7 @@ else{
 
 $response = razorpayRequest('POST', '/v1/payment_links', [
     "amount" => $amount * 100,
-    "currency" => $razopayCurrency,  //from config
+    "currency" => RAZORPAY_CURRENCY,  //from config
     "accept_partial" => false,
     "description" => "Payment for Order ".$order_id,
     "reference_id" => 'ORDER_'.$order_id.'_' . uniqid(),
