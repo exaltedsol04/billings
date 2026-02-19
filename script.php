@@ -1,6 +1,29 @@
 <?PHP
 	include_once 'init.php';
 	
+	
+	$payload = '{
+  "event": "payment.captured",
+  "payload": {
+    "payment": {
+      "entity": {
+        "id": "pay_test123",
+        "amount": 100,
+        "notes": {
+          "order_id": "1"
+        }
+      }
+    }
+  }
+}
+';
+
+$secret = 'Eco123leaf';
+
+echo hash_hmac('sha256', $payload, $secret);die;
+
+
+
 	//update ADMIN_STOCK_PURCHASE_LIST
 	$fields = "st.id, st.product_variant_id, st.stock, pv.type, pv.stock_unit_id, pv.measurement";
 	$tables = ADMIN_STOCK_PURCHASE_LIST . " st
