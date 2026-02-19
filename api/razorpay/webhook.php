@@ -31,7 +31,7 @@ function markOrderPaid($razorpay_order_id, $payment_id)
 
 	$updateExecute = array(
 		':cod_payment_status' => 'UPI Paid',
-		':id' => $order_id
+		':id' => $razorpay_order_id
 	);
 
 	$whereClause = " WHERE id = :id";
@@ -61,7 +61,7 @@ function markOrderRefunded($razorpay_payment_id, $refund_id)
 
 	$updateExecute = array(
 		':cod_payment_status' => 'refunded',
-		':id' => $order_id
+		':id' => $razorpay_payment_id
 	);
 
 	$whereClause = " WHERE id = :id";
