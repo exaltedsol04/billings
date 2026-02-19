@@ -6,7 +6,7 @@ $data = verifySignature();
 $event = $data['event'] ?? '';
 
 if ($event === 'payment.captured') {
-	global $general_cls_call;
+	//global $general_cls_call;
     $p = $data['payload']['payment']['entity'];
     //markOrderPaid($p['order_id'], $p['id']);
 	
@@ -29,7 +29,7 @@ if ($event === 'payment.captured') {
 }
 
 if ($event === 'refund.processed') {
-	global $general_cls_call;
+	//global $general_cls_call;
     $r = $data['payload']['refund']['entity'];
     //markOrderRefunded($r['payment_id'], $r['id']);
 	

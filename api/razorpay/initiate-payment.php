@@ -33,7 +33,7 @@ $response = razorpayRequest('POST', '/v1/orders', [
 
 if(!empty($response['id']))
 {
-	global $general_cls_call;
+	//global $general_cls_call;
 	$setValues = "cod_payment_status = :cod_payment_status";
 
 	$updateExecute = array(
