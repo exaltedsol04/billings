@@ -286,8 +286,7 @@ function select_product(el)
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
 	let vid = parseInt(myArray[2]);
-	let ptype = parseInt(myArray[3]);
-	//alert(pid);
+	let ptype = myArray[3];
 	//data: {action:'getRequestSellingPrice', val:val},
 	//var datapost = 'action=getMaxProductVariant&pid='+pid+'&vid='+vid;
 	var datapost = 'action=getRequestSellingPrice&val='+vid;
