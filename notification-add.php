@@ -152,7 +152,7 @@
 									<img id="prevImage" class="mt-2" src="<?PHP echo 'images/notification/'.$sqlQueryVen->image; ?>" style="height:150px;width:150px;" />
 									<input type="hidden" name="txtHidden" value="<?PHP echo $sqlQueryVen->image; ?>">
 								<?PHP }else{ ?>
-								<img id="prevImage" class="mt-2" src="#" style="height:150px;width:150px;">
+								<img id="prevImage" class="mt-2" src="<?PHP echo 'assets/images/noImg.jpg'; ?>" style="height:150px;width:150px;">
 								<?PHP } ?>
 							</div>
 							<input type="hidden" value="<?php echo $_GET['notification_id'] ?>" name="notification_id">
