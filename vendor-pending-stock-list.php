@@ -17,11 +17,22 @@
 		{
 			if($_GET['qty'] !='')
 			{
+				$aspl = $general_cls_call->select_query("loose_stock_quantity, stock", ADMIN_STOCK_PURCHASE_LIST, "WHERE id =:id ", array(':id'=> $_GET['id']), 1);
+
+				$loose_stock_quantity = 0.00;
+				if($aspl->loose_stock_quantity != '0.00')
+				{
+					$loose_stock_quantity = $_GET['qty'];
+				}
+				
 				//echo $_GET['qty'];die;
-				$setValues="po_status=:po_status";
+				$setValues="po_status=:po_status, stock=:stock, loose_stock_quantity=:loose_stock_quantity, updated_at=:updated_at";
 				$whereClause=" WHERE id=:id";
 				$updateExecute=array(
 					':po_status'=>$general_cls_call->specialhtmlremover($_GET['mode']),
+					':stock'=>$general_cls_call->specialhtmlremover($_GET['qty']),
+					':loose_stock_quantity'=>$general_cls_call->specialhtmlremover($loose_stock_quantity),
+					':updated_at'=> date("Y-m-d H:i:s"),
 					':id'=>$_GET['id']
 				);
 				$updateRec=$general_cls_call->update_query(ADMIN_STOCK_PURCHASE_LIST, $setValues, $whereClause, $updateExecute);
@@ -130,7 +141,7 @@
 									<th class="text-center">Sl. No.</th>
 									<th>Vendor</th>
 									<th>Product Name</th>
-									<th class="text-center">Stock</th>
+									<th class="text-center" style="width:10px;">Stock</th>
 									<th>Measurement</th>
 									<th>Type</th>
 									<th>Purchase Price</th>
@@ -167,8 +178,20 @@
 										<td class="text-center"><?PHP echo $k+1; ?></td>
 										<td><?PHP echo $arr->vendor; ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
-										<td class="text-center">
+										<td class="text-center" style="width:10px;">
+										<?php 
+										if($arr->status == 0)
+										{
+										?>
+										<input type="text" name="stock" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>" oninput="this.value = this.value.replace(<?php echo $arr->type == 'loose' ? '/[^0-9.]/g' : '/[^0-9]/g'; ?>, '')" class="form-control form-control-sm qty"><small class="text-danger qty-error" style="display:none;"></small>
+										<?php 
+										}
+										else{
+										?>
 										<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock; ?>
+										<?php 
+										}
+										?>
 										</td>
 										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ;?></span></td>
@@ -282,6 +305,7 @@ $(document).on('click', '.approveBtn', function(e){
 	let row = $(this).closest('tr');
 	let errorBox = row.find('.qty-error');
 	errorBox.hide().text('');
+	//alert(qty);
 	if(qty == '' || qty == 0)
 	{
 		errorBox.text('Stock is required').show();
