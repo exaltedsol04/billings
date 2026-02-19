@@ -29,6 +29,7 @@ let add_to_cart = (product) => {
 	let stock_unit_name = myArray[6];
 	let productType = myArray[7];
 	let productId = myArray[8];
+	let rawmeasurement = myArray[9];
 	let qty = 1;
 	let search = stockBasket.find((x) => x.id === selectedItem);
 	
@@ -45,6 +46,7 @@ let add_to_cart = (product) => {
 		qty: parseInt(qty),
 		ptype: productType,
 		pid: productId,
+		rawmeasurement: rawmeasurement,
 		item: 1
     });
   } else {
@@ -85,7 +87,7 @@ let generateStockItems = () => {
   if (stockBasket.length !== 0) {
     return (StockCart.innerHTML = stockBasket
       .map((x, index) => {
-        let { id, item, qty, price, measurement, stock_unit_name, name, pimage, ptype, pid } = x;
+        let { id, item, qty, price, measurement, stock_unit_name, name, pimage, ptype, pid, rawmeasurement} = x;
 		$('#loader').hide();
 		$('#removeCart').show();
 		var tprice = (qty * price).toFixed(2);
@@ -113,7 +115,7 @@ let generateStockItems = () => {
 						</span>
 					</div>
 				  </td>
-					<td class="text-center">${measurement} ${stock_unit_name}</td>
+					<td class="text-center">${rawmeasurement}</td>
 				  <td class="text-center">₹ ${price}</td>	
 				  <td class="text-center">₹ ${tprice}</td>
 				  <td class="text-center">

@@ -142,7 +142,7 @@
 							    $barcode = $arr->barcode;
 								$barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 					?>
-								<option value="<?PHP echo $arr->variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$measurement.'@@@'.$unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$measurement.'@@@'.$unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id.'@@@'.$arr->measurement.' '.$arr->stock_unit_name; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
 					<?PHP
 							}
 						}

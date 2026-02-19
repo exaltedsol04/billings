@@ -216,8 +216,8 @@
 								</div>-->
 								
 								<div class="col-md-2 purchase-div">
-									<label for="input5" class="form-label">Purchase price</label>
-									<input type="text" class="form-control form-control-sm purchase_price" id="purchase_price" name="purchase_price[]" placeholder="Purchase price" readonly>
+									<label for="input5" class="form-label">Purchase price (₹)</label>
+									<input type="text" style="border:0" class="form-control form-control-sm purchase_price" name="purchase_price[]" placeholder="0.00" readonly>
 									<input type="hidden" class="hid_purchase_price">
 									<input type="hidden" class="hid_price" name="hid_price[]">
 									<input type="hidden" class="product_variant_id" name="product_variant_id[]">
@@ -225,8 +225,8 @@
 								</div>
 								
 								<div class="col-md-2">
-									<label for="input5" class="form-label">Total price</label>
-									<input type="text" name="total_price[]" id="total_price" class="form-control form-control-sm total_price" readonly>
+									<label for="input5" class="form-label">Total price (₹)</label>
+									<input type="text" style="border:0" name="total_price[]" placeholder="0.00" class="form-control form-control-sm total_price" readonly>
 									<span class="text-danger" id="err_stock"></span>
 								</div>
 
@@ -286,8 +286,7 @@ function select_product(el)
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
 	let vid = parseInt(myArray[2]);
-	let ptype = parseInt(myArray[3]);
-	//alert(pid);
+	let ptype = myArray[3];
 	//data: {action:'getRequestSellingPrice', val:val},
 	//var datapost = 'action=getMaxProductVariant&pid='+pid+'&vid='+vid;
 	var datapost = 'action=getRequestSellingPrice&val='+vid;
@@ -386,7 +385,7 @@ $(document).on('input', '.stock-input', function () {
     let max = parseFloat(row.find('.hid_purchase_price').val()) || 0;
 	let value = this.value;
 	let tot_price = this.value*max;
-	tot_price = tot_price.toFixed(2)
+	tot_price = '₹ ' + tot_price.toFixed(2)
 	row.find('.total_price').val(tot_price);
 });
 

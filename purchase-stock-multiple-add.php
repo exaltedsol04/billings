@@ -71,7 +71,7 @@
 						':stock'				=> $stock[$index],
 						':status'				=> 0,
 						':group_id'				=> $group_id,
-						':purchase_price'		=> $general_cls_call->specialhtmlremover($purchase_price[$index]),
+						':purchase_price'		=> $purchase_price[$index],
 						':remarks'				=> $general_cls_call->specialhtmlremover($remarks[$index]),
 						':created_at' 			=> date('Y-m-d H:i:s'),
 						':updated_at'		    => date('Y-m-d H:i:s')
@@ -171,26 +171,79 @@
 							<hr>
 							<div class="row item-row mt-2">
 
-								<div class="col-md-3">
+								<div class="col-md-5">
 								<label for="input1" class="form-label">Products</label>
 									<select name="product[]" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="select_product(this)">
 										<option value="">Select product</option>
 										<?PHP
-										$fields = "*";
-										$tables = PRODUCTS;
-										$where = "WHERE 1 ORDER BY name";
+										$fields = "
+											pv.id,
+											pv.product_id,
+											pv.type,
+											pv.stock,
+											pv.measurement,
+											pv.discounted_price,
+											pv.stock_unit_id,
+											p.name,
+											p.image,
+											p.barcode,
+											u.name as unit_name
+										";
+
+										$tables = PRODUCT_VARIANTS . " pv
+										INNER JOIN " . PRODUCTS . " p 
+											ON p.id = pv.product_id
+										INNER JOIN " . UNITS . " u 
+											ON u.id = pv.stock_unit_id
+
+										/* pick only ONE loose variant per product */
+										LEFT JOIN (
+											SELECT product_id, MIN(id) AS keep_variant_id
+											FROM " . PRODUCT_VARIANTS . "
+											WHERE type = 'loose'
+											GROUP BY product_id
+										) loose_pick 
+											ON loose_pick.keep_variant_id = pv.id
+										";
+
+										$where = "
+										WHERE
+										(
+												pv.type != 'loose'
+											 OR loose_pick.keep_variant_id IS NOT NULL
+										)
+										ORDER BY p.name
+										";
+
 										$params = [];
-										$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
+
+										$sqlQuery = $general_cls_call->select_join_query(
+											$fields,
+											$tables,
+											$where,
+											$params,
+											2
+										);
 										//echo "<pre>"; print_r($sqlQuery);die;
 										if($sqlQuery[0] != '')
 										{
 											foreach($sqlQuery as $arr)
 											{	
-												$barcode = $arr->barcode;
-												
+												$barcode = $arr->barcode;					
 												$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
+												$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+												$unitname = $unit_dtls->name;
+												if($arr->type == 'loose')
+												{
+													$measurement_arr = [
+														'quantity' => 1 * $arr->measurement,
+														'stock_unit_id' => $arr->stock_unit_id,
+													];
+													$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+													$unitname = $measurement_units['unit'];
+												}
 									?>
-												<option value="<?PHP echo $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name); ?>" <?php echo ($_POST['product'] == $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name)) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name); ?></option>
+												<option value="<?PHP echo $arr->product_id.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->id.'@@@'.$arr->type; ?>" <?php echo ($_POST['product'] == $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name)) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name); ?> (<?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?> - <?php echo $arr->type; ?>)</option>
 									<?PHP
 											}
 										}
@@ -205,16 +258,16 @@
 									<span class="text-danger err_stock"></span>
 								</div>
 
-								<div class="col-md-2">
+								<!--<div class="col-md-2">
 									<label for="input5" class="form-label">Unit</label>
 									<select name="product_variant_id[]" class="form-select form-select-sm select2-dropdown unit-select" tabindex="1" onchange="get_selling_price(this)">
 										<option value="">Select...</option>
 									</select>
 									<span class="text-danger err_unit"></span>
-								</div>
+								</div>-->
 								<div class="col-md-2 purchase-div">
-									<label for="input5" class="form-label">Purchase price</label>
-									<input type="text" class="form-control form-control-sm purchase_price" id="purchase_price" name="purchase_price[]" placeholder="Purchase price">
+									<label for="input5" class="form-label">Purchase price (₹)</label>
+									<input type="text" class="form-control form-control-sm purchase_price" name="purchase_price[]" placeholder="0.00">
 									<input type="hidden" class="hid_purchase_price">
 									<span id="selling_price_div" class="w-100 selling_price_div error_purchase text-danger"></span>
 								</div>
@@ -224,7 +277,7 @@
 									<input type="text" name="remarks[]" id="remarks" class="form-control form-control-sm">
 									<span class="text-danger" id="err_stock"></span>
 								</div>
-
+								<input type="hidden" class="product_variant_id" name="product_variant_id[]">
 								<div class="col-md-1 text-right">
 									<button type="button" class="btn btn-sm btn-danger removeRow mt-4">X</button>
 								</div>
@@ -278,13 +331,45 @@ function select_product(el)
 	
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
+	let vid = parseInt(myArray[2]);
+	let ptype = myArray[3];
 	//alert(pid);
-	var datapost = 'action=getMaxProductVariant&pid='+pid;
+	//var datapost = 'action=getMaxProductVariant&pid='+pid;
+	var datapost = 'action=getRequestSellingPrice&val='+vid;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
 		data: datapost,
+		dataType: "json",
 		success: function(response){
+			if(ptype == 'loose')
+			{
+				//alert(variants.ptype);
+				stockInput.off('input').on('input', function () {
+					this.value = this.value
+						.replace(/[^0-9.]/g, '')   // allow dot
+						.replace(/(\..*)\./g, '$1'); // only one dot
+				});
+			}
+			else{
+				stockInput.off('input').on('input', function(){
+					this.value = this.value
+						.replace(/[^0-9]/g, '')   // allow dot
+						.replace(/(\..*)\./g, '$1'); // allow only one dot
+				});
+			}
+		
+			$('#selling_price').val(response.discount_price);
+			$('.purchase-div').show();
+			$('.selling-div').show();
+			var html = '<div class="text-left;"><span class="fw-bold" style="color:#A300A3; font-size:20px;">Selling price:</span><span style="color:#A300A3; font-size:20px;"> ₹ ' + response.discount_price + '</span></div>';
+			 
+			 row.find('.product_variant_id').val(vid);
+			 row.find('.purchase_price').val(response.discount_price);
+			 row.find('.hid_purchase_price').val(response.discount_price);
+			 row.find('.hid_price').val(response.price);
+		}
+		/*success: function(response){
 			var result = JSON.parse(response);
 			if (result.length > 0) {
 				var html = '<option value="">Select...</option>';
@@ -309,10 +394,9 @@ function select_product(el)
 					}
 					
 				});
-				//$('#product_variant_id').html(html);
 				row.find('.unit-select').html(html);
 			}
-		}
+		}*/
 	});
 }
 function get_selling_price(el)
