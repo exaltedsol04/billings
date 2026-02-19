@@ -123,7 +123,13 @@
 									INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 									LEFT JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-									$where = "WHERE ". $whereSrc ." GROUP BY asp.product_id  ORDER BY asp.created_at DESC";
+									$where = "WHERE ". $whereSrc ." GROUP BY 
+									CASE 
+										WHEN pv.type = 'loose' 
+											THEN asp.product_id
+										ELSE asp.product_variant_id
+									END
+									ORDER BY asp.created_at DESC";
 									
 									
 									$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $paramsSrc, 2);

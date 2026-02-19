@@ -160,7 +160,7 @@
 			";
 
 			$params = [
-				':seller_id'=> 1
+				':seller_id'=> $_GET['sid']
 			];
 
 			$sqlQueryP = $general_cls_call->select_join_query(
@@ -189,7 +189,13 @@
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 		LEFT JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-		$where = "WHERE 1 GROUP BY asp.product_id  ORDER BY asp.created_at DESC";
+		$where = "WHERE 1 GROUP BY
+		CASE 
+			WHEN pv.type = 'loose' 
+				THEN asp.product_id
+			ELSE asp.product_variant_id
+		END
+		ORDER BY asp.created_at DESC";
 		
 		
 		$sqlQueryP = $general_cls_call->select_join_query($fields, $tables, $where, $paramsSrc, 2);
@@ -419,10 +425,10 @@
 													}
 												
 												
-													$admin_stock_debit = abs($admin_stock_debit->total_stock) + $order_item_stock;
+													$admin_stock_debit = $admin_stock_debit->total_stock + $order_item_stock;
 												}
 												
-												$available_stock = abs($stock_credit->total_stock - $admin_stock_debit);
+												$available_stock = $stock_credit->total_stock - $admin_stock_debit;
 											}
 											else if(isset($_GET['sid'])  && $_GET['sid'] != 'admin')
 											{
