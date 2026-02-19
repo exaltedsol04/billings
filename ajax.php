@@ -1988,9 +1988,7 @@ error_reporting(0);
 		break;
 		case "getProductVariantOnlineTransfer";
 			
-			
-			
-			$fields = "
+			/*$fields = "
 				pv.id, pv.measurement, pv.type,
 
 				CASE 
@@ -2040,7 +2038,7 @@ error_reporting(0);
 						'ptype' => $arr->type
 					];
 				}
-			}
+			}*/
 			
 			
 			
