@@ -34,10 +34,11 @@ $response = razorpayRequest('POST', '/v1/orders', [
 if(!empty($response['id']))
 {
 	//global $general_cls_call;
-	$setValues = "cod_payment_status = :cod_payment_status";
+	$setValues = "cod_payment_status = :cod_payment_status, razorpay_transaction_id = :razorpay_transaction_id";
 
 	$updateExecute = array(
 		':cod_payment_status' => 'initiated',
+		':razorpay_transaction_id' => $response['id'],		
 		':id' => $order_id
 	);
 
@@ -49,8 +50,28 @@ if(!empty($response['id']))
 		$whereClause,
 		$updateExecute
 	);
+	
+	$referenceId = $order_id . '_' . time(); // must be unique
+
+	$qr = razorpayRequest('POST', '/v1/payment_links', [
+		'amount' => $amount * 100,
+		'currency' => 'INR',
+		'reference_id' => $referenceId,
+		'description' => 'Order #' . $order_id,
+		'notify' => ['sms' => false, 'email' => false],
+		'reminder_enable' => false,
+		'notes' => [
+			'order_id' => $order_id,
+			'razorpay_order_id' => $response['id']
+		]
+	]);
+
 }
 
+$short_url = $qr['short_url'];
+
+echo '<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='.urlencode($short_url).'">';
+
 //echo json_encode(['razorpay_order_id' => $response['id']]);
-echo json_encode($response);
+//echo json_encode($response);
 
