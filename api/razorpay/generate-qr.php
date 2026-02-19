@@ -6,7 +6,7 @@ include_once '../../includes/razorpay.php';
 
 $order_id = $_POST['order_id'];
 
-$order = $general_cls_call->select_query("cod_payment_status, payment_method, total, final_total", ORDERS, "WHERE id=:id", array(':id'=>$order_id), 1);
+$order = $general_cls_call->select_query("cod_payment_status, payment_method, total, final_total", ORDERS_TESTS, "WHERE id=:id", array(':id'=>$order_id), 1);
 
 if (empty($order)) {
     exit(json_encode(['error' => 'Order not found']));

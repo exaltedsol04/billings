@@ -27,4 +27,5 @@
 	define("SETTINGS",  TABLE_PREFIX."settings");
 	define("NOTIFICATIONS",  TABLE_PREFIX."notifications");
 	define("USER_ADDRESS",  TABLE_PREFIX."user_addresses");
+	define("ORDERS_TESTS",  TABLE_PREFIX."orders_test");
 ?>

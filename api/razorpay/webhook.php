@@ -20,7 +20,7 @@ if ($event === 'payment.captured') {
 	$whereClause = " WHERE id = :id";
 
 	$general_cls_call->update_query(
-		ORDERS,
+		ORDERS_TESTS,
 		$setValues,
 		$whereClause,
 		$updateExecute
@@ -43,7 +43,7 @@ if ($event === 'refund.processed') {
 	$whereClause = " WHERE id = :id";
 
 	$general_cls_call->update_query(
-		ORDERS,
+		ORDERS_TESTS,
 		$setValues,
 		$whereClause,
 		$updateExecute
