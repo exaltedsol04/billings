@@ -216,8 +216,8 @@
 								</div>-->
 								
 								<div class="col-md-2 purchase-div">
-									<label for="input5" class="form-label">Purchase price</label>
-									<input type="text" style="border:0" class="form-control form-control-sm purchase_price" name="purchase_price[]" placeholder="₹ 0.00" readonly>
+									<label for="input5" class="form-label">Purchase price (₹)</label>
+									<input type="text" style="border:0" class="form-control form-control-sm purchase_price" name="purchase_price[]" placeholder="0.00" readonly>
 									<input type="hidden" class="hid_purchase_price">
 									<input type="hidden" class="hid_price" name="hid_price[]">
 									<input type="hidden" class="product_variant_id" name="product_variant_id[]">
@@ -225,8 +225,8 @@
 								</div>
 								
 								<div class="col-md-2">
-									<label for="input5" class="form-label">Total price</label>
-									<input type="text" style="border:0" name="total_price[]" placeholder="₹ 0.00" class="form-control form-control-sm total_price" readonly>
+									<label for="input5" class="form-label">Total price (₹)</label>
+									<input type="text" style="border:0" name="total_price[]" placeholder="0.00" class="form-control form-control-sm total_price" readonly>
 									<span class="text-danger" id="err_stock"></span>
 								</div>
 
@@ -319,7 +319,7 @@ function select_product(el)
 			var html = '<div class="text-left;"><span class="fw-bold" style="color:#A300A3; font-size:20px;">Selling price:</span><span style="color:#A300A3; font-size:20px;"> ₹ ' + response.discount_price + '</span></div>';
 			 
 			 row.find('.product_variant_id').val(vid);
-			 row.find('.purchase_price').val('₹ ' + response.discount_price);
+			 row.find('.purchase_price').val(response.discount_price);
 			 row.find('.hid_purchase_price').val(response.discount_price);
 			 row.find('.hid_price').val(response.price);
 		}
@@ -371,7 +371,7 @@ function get_selling_price(el)
 			$('.selling-div').show();
 			var html = '<div class="text-left;"><span class="fw-bold" style="color:#A300A3; font-size:20px;">Selling price:</span><span style="color:#A300A3; font-size:20px;"> ₹ ' + response.discount_price + '</span></div>';
 			 
-			 row.find('.purchase_price').val('₹ ' + response.discount_price);
+			 row.find('.purchase_price').val(response.discount_price);
 			 row.find('.hid_purchase_price').val(response.discount_price);
 			 row.find('.hid_price').val(response.price);
 		}

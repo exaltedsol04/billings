@@ -33,6 +33,7 @@ function add_to_cart(product) {
 	let stock_unit_name = myArray[6];
 	let productType = myArray[7];
 	let productId = myArray[8];
+	let rawmeasurement = myArray[9];
 	let qty = 1;
 	let search = basket.find((x) => x.id === selectedItem);
 
@@ -47,6 +48,7 @@ function add_to_cart(product) {
       qty: parseInt(qty),
 	  ptype: productType,
 	  pid: productId,
+	  rawmeasurement: rawmeasurement,
 	  item: 1
     });
   } else {
@@ -86,7 +88,7 @@ let generateCartItems = () => {
   if (basket.length !== 0) {
     return (ShoppingCart.innerHTML = basket
       .map((x, index) => {
-        let { id, item, qty, price, measurement, stock_unit_name, name, pimage, ptype, pid} = x;
+        let { id, item, qty, price, measurement, stock_unit_name, name, pimage, ptype, pid, rawmeasurement} = x;
 		$('#loader').hide();
 		let progress = 0;
 		$('#removeCart').show();
@@ -115,7 +117,7 @@ let generateCartItems = () => {
 						</span>
 					</div>
 				  </td>
-				  <td class="text-center">${measurement} ${stock_unit_name}</td>
+				  <td class="text-center">${rawmeasurement}</td>
 				  <td class="text-center">₹ ${price}</td>						  
 				  <td class="text-center">₹ ${tprice}</td>
 				  <td class="text-center"><i style="cursor:pointer;" onclick="removeItem(${id}, \'${ptype}\', ${pid})" class="material-icons-outlined text-danger">close</i>
