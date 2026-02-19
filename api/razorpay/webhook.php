@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '../../init.php';
-require_once __DIR__ . '/../../includes/razorpay.php';
+include_once '../../init.php';
+include_once '../../includes/razorpay.php';
 
 $data = verifySignature();
 $event = $data['event'] ?? '';
@@ -15,28 +15,63 @@ if ($event === 'refund.processed') {
     markOrderRefunded($r['payment_id'], $r['id']);
 }
 
-/*function markOrderPaid($razorpay_order_id, $payment_id)
+function markOrderPaid($razorpay_order_id, $payment_id)
 {
-    global $pdo;
-    $stmt = $pdo->prepare(
+    global $general_cls_call;
+    /*$stmt = $pdo->prepare(
         "UPDATE orders
          SET payment_status='paid',
              razorpay_payment_id=?
          WHERE razorpay_order_id=?"
     );
-    $stmt->execute([$payment_id, $razorpay_order_id]);
+    $stmt->execute([$payment_id, $razorpay_order_id]);*/
+	
+	
+	$setValues = "cod_payment_status = :cod_payment_status";
+
+	$updateExecute = array(
+		':cod_payment_status' => 'UPI Paid',
+		':id' => $order_id
+	);
+
+	$whereClause = " WHERE id = :id";
+
+	$general_cls_call->update_query(
+		ORDERS,
+		$setValues,
+		$whereClause,
+		$updateExecute
+	);
+	
 }
 
 function markOrderRefunded($razorpay_payment_id, $refund_id)
 {
-    global $pdo;
-    $stmt = $pdo->prepare(
+    global $general_cls_call;
+     /*$stmt = $pdo->prepare(
         "UPDATE orders
          SET payment_status='refunded',
              razorpay_refund_id=?
          WHERE razorpay_payment_id=?"
     );
-    $stmt->execute([$refund_id, $razorpay_payment_id]);
-}*/
+    $stmt->execute([$refund_id, $razorpay_payment_id]);*/
+	
+	
+	$setValues = "cod_payment_status = :cod_payment_status";
+
+	$updateExecute = array(
+		':cod_payment_status' => 'refunded',
+		':id' => $order_id
+	);
+
+	$whereClause = " WHERE id = :id";
+
+	$general_cls_call->update_query(
+		ORDERS,
+		$setValues,
+		$whereClause,
+		$updateExecute
+	);
+}
 
 http_response_code(200);

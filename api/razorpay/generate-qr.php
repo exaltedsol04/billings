@@ -5,22 +5,24 @@ include_once '../../init.php';
 include_once '../../includes/razorpay.php';
 
 $order_id = $_POST['order_id'];
-$amount = $_POST['amount'];
 
-
-/*$stmt = $pdo->prepare("SELECT amount FROM orders WHERE razorpay_order_id=?");
-$stmt->execute([$razorpay_order_id]);
-$order = $stmt->fetch();*/
-
-$order = $general_cls_call->select_query("*", ORDERS, "WHERE id=:id", array(':id'=>$order_id), 1);
+$order = $general_cls_call->select_query("cod_payment_status, payment_method, total, final_total", ORDERS, "WHERE id=:id", array(':id'=>$order_id), 1);
 
 if (empty($order)) {
     exit(json_encode(['error' => 'Order not found']));
 }
 
+if($order->payment_method = 'wallet')
+{
+	$amount = $order->total;
+}
+else{
+	$amount = $order->final_total;
+}
+
 $response = razorpayRequest('POST', '/v1/payment_links', [
     "amount" => $amount * 100,
-    "currency" => "INR",
+    "currency" => $razopayCurrency,  //from config
     "accept_partial" => false,
     "description" => "Payment for Order ".$order_id,
     "reference_id" => 'ORDER_'.$order_id.'_' . uniqid(),

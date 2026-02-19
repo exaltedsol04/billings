@@ -5,7 +5,7 @@
 	//RAZORPAY CREDENTIAL
 	define('RAZORPAY_KEY_ID', 'rzp_live_S4ZlQI0kKeRgzo');
 	define('RAZORPAY_KEY_SECRET', 'Sui3jI6YzsAweOuLXHtfZF6m');
-	define('RAZORPAY_WEBHOOK_SECRET', 'your_webhook_secret');
+	define('RAZORPAY_WEBHOOK_SECRET', 'Eco123leaf');
 	
 	/* used in online-packaging-operator-orders*/
 	$operator_array[] = [
@@ -28,5 +28,7 @@
 		'2'=> 'Damage',
 		'3'=> 'Wrong entry'
 	];
+	
+	$razopayCurrency = 'INR';
  
 ?>
