@@ -1851,7 +1851,7 @@ error_reporting(0);
 			}
 			// 1. Fetch notifications
 			$placeholders = implode(',', array_fill(0, count($notificationIds), '?'));
-			$fields = "id, title, message";
+			$fields = "id, title, message, image";
 			$where  = "WHERE id IN ($placeholders) AND status != ?";
 			$params = $notificationIds;
 			$params[] = 2; 
@@ -1881,6 +1881,7 @@ error_reporting(0);
 							$user->id,
 							$general_cls_call->clean_notification_text($notification->title),
 							$general_cls_call->clean_notification_text($notification->message),
+							DOMAIN_NAME.'images/notification/'.$notification->image,
 							[
 								"screen" => "TEST notification"
 							]
@@ -1901,6 +1902,7 @@ error_reporting(0);
 							$id,
 							$general_cls_call->clean_notification_text($notification->title),
 							$general_cls_call->clean_notification_text($notification->message),
+							DOMAIN_NAME.'images/notification/'.$notification->image,
 							[
 								"screen" => "TEST notification"
 							]

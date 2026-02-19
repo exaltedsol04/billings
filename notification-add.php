@@ -17,13 +17,21 @@
 		
 		if(empty($notification_id) && $notification_id == '')
 		{
+			if($_FILES['image']['tmp_name']!='') {
+				// $rand = substr(number_format(time() * rand(),0,'',''),0,6);
+				$file_name=$_FILES['image']['name'];
+				$explode = explode(".",$file_name);
+				$filename=time().".".strtolower($explode[count($explode)-1]);			
+				$general_cls_call->uploadImage($_FILES["image"], 'images/notification/', $filename);
+			}
 			
-			$field = "title, message";
-			$value = ":title, :message";
+			$field = "title, message, image";
+			$value = ":title, :message, :image";
 					
 			$addExecute=array(
 				':title'	=> $general_cls_call->specialhtmlremover($title),
-				':message'	=> $general_cls_call->specialhtmlremover($message)
+				':message'	=> $general_cls_call->specialhtmlremover($message),
+				':image'	=> $general_cls_call->specialhtmlremover($filename)
 			);
 		
 			$general_cls_call->insert_query(NOTIFICATIONS, $field, $value, $addExecute);
@@ -33,10 +41,27 @@
 		}
 		else
 		{
-			$setValues=" title=:title, message=:message";
+			$whereft = "WHERE id=".$_GET['notification_id'];
+			$ft = $general_cls_call->select_query("*", NOTIFICATIONS, $whereft, array(), 1);
+			if($_FILES['image']['tmp_name']!='') {
+				if($ft->image!='') {	
+					$unlink_photo_path1 = 'images/notification/'.$ft->image;	
+					if(file_exists($unlink_photo_path1)){ unlink($unlink_photo_path1); }
+				}
+				// $rand = substr(number_format(time() * rand(),0,'',''),0,6);
+				$file_name=$_FILES['image']['name'];
+				$explode = explode(".",$file_name);
+				$filename=time().".".strtolower($explode[count($explode)-1]);
+				$general_cls_call->uploadImage($_FILES["image"], 'images/notification/', $filename);
+			} else {
+				$filename = $txtHidden;
+			}
+			
+			$setValues=" title=:title, message=:message, image=:image";
 			$updateExecute=array(
 				':title'		=> $general_cls_call->specialhtmlremover($title),
 				':message'	=> $general_cls_call->specialhtmlremover($message),
+				':image'	=> $general_cls_call->specialhtmlremover($filename),
 				':id'	    => $notification_id
 			);
 			$whereClause=" WHERE id = :id";
@@ -109,7 +134,7 @@
 					<?PHP
 						}
 					?>
-						<form class="row g-4" action="" method="post">
+						<form class="row g-4" action="" method="post" enctype="multipart/form-data">
 							
 							<div class="col-md-8">
 								<label for="input5" class="form-label">Title</label>
@@ -119,6 +144,16 @@
 								<label for="input5" class="form-label">Description</label>
 								 <textarea class="form-control" id="description" name="message"><?php echo $sqlQueryVen->message; ?></textarea>
 								 <span id="error_notification"></span>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">Image</label>
+								<input class="form-control" type="file" name="image" accept="image/x-png,image/gif,image/jpeg"  onchange="readImage(this);">
+								<?PHP if($sqlQueryVen->image!='') { ?>
+									<img id="prevImage" class="mt-2" src="<?PHP echo 'images/notification/'.$sqlQueryVen->image; ?>" style="height:150px;width:150px;" />
+									<input type="hidden" name="txtHidden" value="<?PHP echo $sqlQueryVen->image; ?>">
+								<?PHP }else{ ?>
+								<img id="prevImage" class="mt-2" src="<?PHP echo 'assets/images/noImg.jpg'; ?>" style="height:150px;width:150px;">
+								<?PHP } ?>
 							</div>
 							<input type="hidden" value="<?php echo $_GET['notification_id'] ?>" name="notification_id">
 							<div class="col-md-12">
@@ -160,5 +195,18 @@ document.querySelector('form').addEventListener('submit', function(e) {
        $('#error_notification').html('<span class="text-danger">Enter the description</span>');
     }
 });
+</script>
+<script>
+function readImage(input) {
+	if (input.files && input.files[0]) {
+		var reader = new FileReader();
+
+		reader.onload = function (e) {
+			$('#prevImage').attr('src', e.target.result).width(150).height(150);
+		};
+
+		reader.readAsDataURL(input.files[0]);
+	}
+}
 </script>
 

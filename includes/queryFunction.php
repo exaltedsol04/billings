@@ -731,7 +731,24 @@
 	
 			return $html;
 		}
-
+		
+		public function uploadImage($file, $dir, $imgName)
+		{
+			$img_fileName = str_replace(' ','_',$file['name']);
+			$fileData  = pathinfo(basename($img_fileName));
+			$ext = $fileData['extension'];
+			//$ext = explode('.', $img_fileName);
+			//Thumbnail file name File
+			$image_filePath=str_replace(' ','_',$file['tmp_name']);
+			
+			$extension = strtolower($ext);
+							
+			//Check the file format before upload
+			if(in_array($extension , array('jpg','jpeg', 'gif', 'png', 'bmp')))
+			{
+				move_uploaded_file($image_filePath,$dir.$imgName);	
+			}
+		}
 
 	}
 ?>
