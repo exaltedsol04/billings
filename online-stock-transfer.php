@@ -180,7 +180,7 @@
 						}
 					?>
 						<form class="row g-4" action="" method="post">
-							<div class="col-md-12">
+							<!--<div class="col-md-12">
 								<label for="input1" class="form-label">Products</label>
 								<select name="product" id="product" onchange=product_stock_show(this.value) class="form-select select2-dropdown" tabindex="1">
 								<option value="">Select...</option>
@@ -205,20 +205,103 @@
 										}
 									?>
 							</select>
-							</div>
-							<div class="col-md-6">
-								<label for="input5" class="form-label">Unit</label>
-								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1" onchange="unit_measurement(this.value)">
-									<option value="">Select...</option>
+							</div>-->
+							
+							<div class="col-md-12">
+								<label for="input1" class="form-label">Products</label>
+								<select name="product[]" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="product_stock_show(this.value)">
+									<option value="">Select product</option>
+									<?PHP
+									$fields = "
+										pv.id,
+										pv.product_id,
+										pv.type,
+										pv.stock,
+										pv.measurement,
+										pv.discounted_price,
+										pv.stock_unit_id,
+										p.name,
+										p.image,
+										p.barcode,
+										u.name as unit_name
+									";
+
+									$tables = PRODUCT_VARIANTS . " pv
+									INNER JOIN " . PRODUCTS . " p 
+										ON p.id = pv.product_id
+									INNER JOIN " . UNITS . " u 
+										ON u.id = pv.stock_unit_id
+
+									/* pick only ONE loose variant per product */
+									LEFT JOIN (
+										SELECT product_id, MIN(id) AS keep_variant_id
+										FROM " . PRODUCT_VARIANTS . "
+										WHERE type = 'loose'
+										GROUP BY product_id
+									) loose_pick 
+										ON loose_pick.keep_variant_id = pv.id
+									";
+
+									$where = "
+									WHERE
+									(
+											pv.type != 'loose'
+										 OR loose_pick.keep_variant_id IS NOT NULL
+									)
+									ORDER BY p.name
+									";
+
+									$params = [];
+
+									$sqlQuery = $general_cls_call->select_join_query(
+										$fields,
+										$tables,
+										$where,
+										$params,
+										2
+									);
+										//echo "<pre>"; print_r($sqlQuery);die;
+										if($sqlQuery[0] != '')
+										{
+											foreach($sqlQuery as $arr)
+											{	
+												$barcode = $arr->barcode;
+												$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
+												$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+												$unitname = $unit_dtls->name;
+												if($arr->type == 'loose')
+												{
+													$measurement_arr = [
+														'quantity' => 1 * $arr->measurement,
+														'stock_unit_id' => $arr->stock_unit_id,
+													];
+													$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+													$unitname = $measurement_units['unit'];
+												}
+									?>
+												<option value="<?PHP echo $arr->product_id.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->id.'@@@'.$arr->type; ?>" <?php echo ($_POST['product'] == $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name)) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name); ?> (<?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?> - <?php echo $arr->type; ?>)</option>
+									<?PHP
+											}
+										}
+									?>
 								</select>
 							</div>
+							
 							<div class="col-md-6">
-								<label for="input5" class="form-label">Stock Quantity</label>
+								<label for="input5" class="form-label">Unit</label>
+								<!--<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1" onchange="unit_measurement(this.value)">
+									<option value="">Select...</option>
+								</select>-->
+								<span id="all_unit_name" class="text-danger d-block mt-2"></span>
+							</div>
+							<div class="col-md-6">
+								<label for="input5" class="form-label">Stock Quantity<span class="text-danger" id="show_unit_type"></span></label>
 								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" value="<?php echo isset($_POST['stock']) ? $_POST['stock'] : '' ?>">
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<input type="hidden" id="stock_limit" name="stock_limit" value="<?php echo isset($_POST['stock_limit']) ? $_POST['stock_limit'] : '' ?>">
 							<input type="hidden" id="hid_product_id">
+							<input type="hidden" id="hid_variant_id">
 							<span id="stock-check-div"></span>
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">
@@ -258,7 +341,12 @@ function product_stock_show(product)
 	$('#check-stock-pay-div').html('');
 	const myArray = product.split("@@@");
 	let pid = parseInt(myArray[0]);
+	let pvid = parseInt(myArray[2]);
+	let ptype = myArray[3];
+	//alert(ptype);
+	//alert(pid);alert(pvid);
 	$('#hid_product_id').val(pid);
+	$('#hid_variant_id').val(pvid);
 	//let pvid = parseInt(myArray[6]);
 	//var datapost = 'action=onlineProductStock&pvid=' + pvid + '&pid=' + pid;
 	/*var datapost = 'action=onlineProductStock&pid=' + pid;
@@ -283,7 +371,7 @@ function product_stock_show(product)
 		}
 	});*/
 	//var datapost = 'action=getMaxProductVariant&pid='+pid;
-	var datapost = 'action=getProductVariantOnlineTransfer&pid='+pid;
+	var datapost = 'action=getProductVariantOnlineTransfer&pid='+pid+'&pvid=' + pvid + '&ptype='+ ptype;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -291,12 +379,36 @@ function product_stock_show(product)
 		success: function(response){
 			var result = JSON.parse(response);
 			if (result.length > 0) {
-				var html = '<option value="">Select...</option>';
+				/*var html = '<option value="">Select...</option>';
 				$.each(result, function (i, variants) {
 					html += '<option value='+ variants.id +'>' + variants.unitname +' ('+ variants.ptype +')</option>';
+					
 				});
-				$('#product_variant_id').html(html);
+				$('#product_variant_id').html(html);*/
+				let totrec = result.length;
+				var html = 'Available product in ';
+				var comma = ',';
+				$.each(result, function (i, variants) {
+					
+					if(totrec == 1 + parseInt(i))
+					{
+						comma = '';
+					}
+					
+					if(i == 0)
+					{
+						let stock_type = ' [' + variants.unitname + '-' + ptype + ']';
+						$('#show_unit_type').html(stock_type);
+					}
+					
+					html += '<span class="me-1">['+ variants.unitname + comma + ']</span>';
+				});
+				$('#all_unit_name').html(html);
+				
+				
 			}
+			
+			unit_measurement(pvid)
 		}
 	});
 }
