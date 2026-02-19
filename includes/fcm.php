@@ -71,6 +71,7 @@ class FCM
 		$userId,
 		string $title,
 		string $body,
+		string $image = '',
 		array $data = []
 	) {
 		$user = $this->general->select_query("fcm_token", USER_TOKENS, "WHERE user_id=:user_id ORDER BY id DESC", array(':user_id'=>$userId), 1);
@@ -92,7 +93,7 @@ class FCM
 				"notification" => [
 					"title" => $title,
 					"body" => $body,
-					// "image" => 'https://retail.ecoleaf.store/assets/images/logo-icon.png'
+					"image" => $image ?? null
 				],
 				"data" => array_merge(
 					[
