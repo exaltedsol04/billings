@@ -1986,5 +1986,75 @@ error_reporting(0);
 			echo json_encode($data);
 			 
 		break;
+		case "getProductVariantOnlineTransfer";
+			$fields = "
+				pv.id, pv.measurement, pv.type,
+
+				CASE 
+					WHEN pv.type = 'loose'
+						THEN COALESCE(parent_u.id, u.id)
+					ELSE u.id
+				END AS unit_id,
+
+				CASE 
+					WHEN pv.type = 'loose'
+						THEN COALESCE(parent_u.name, u.name)
+					ELSE u.name
+				END AS unit_name
+			";
+
+			$tables = PRODUCT_VARIANTS . " pv
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
+			LEFT JOIN " . UNITS . " parent_u ON parent_u.id = u.parent_id";
+
+			$where = "
+			WHERE pv.product_id = :product_id
+			GROUP BY 
+				pv.type,
+				CASE 
+					WHEN pv.type = 'loose'
+						THEN COALESCE(parent_u.id, u.id)
+					ELSE u.id
+				END
+			";
+
+			$params = [
+				':product_id' => $_POST['pid']
+			];
+
+			$sqlQuery = $general_cls_call->select_query($fields, $tables, $where, $params, 2);
+
+			$varianrArr = [];
+			if($sqlQuery[0] != '')
+			{
+				foreach($sqlQuery as $arr)
+				{
+					$varianrArr[] = [
+						'id' => $arr->id,
+						'measurement' => $arr->measurement,
+						'type' => $arr->type,
+						'unitname' => $arr->unit_name,
+						'ptype' => $arr->type
+					];
+				}
+			}
+			
+			// get all the variant 
+			$product_variant_id = 132;
+			$fieldsVariant = "pv.product_id, pv.id as pvid, pv.measurement, pv.type, pv.price, pv.discounted_price, u.*";
+			$tablesVariant = PRODUCT_VARIANTS . " pv
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			
+			$whereVariant  = "WHERE pv.product_id = :product_id AND pv.id=:id";
+			$paramsVariant = [
+				':product_id' => $_POST['pid'],
+				':id' => $product_variant_id
+			];
+			
+			$sqlQueryVariant = $general_cls_call->select_query($fieldsVariant, $tablesVariant, $whereVariant, $paramsVariant, 1);
+			//echo "<pre>";print_r($sqlQueryVariant);die;
+			
+			echo json_encode($varianrArr); 
+		break;
     }
 ?>

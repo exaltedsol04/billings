@@ -282,7 +282,8 @@ function product_stock_show(product)
 			}
 		}
 	});*/
-	var datapost = 'action=getMaxProductVariant&pid='+pid;
+	//var datapost = 'action=getMaxProductVariant&pid='+pid;
+	var datapost = 'action=getProductVariantOnlineTransfer&pid='+pid;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
