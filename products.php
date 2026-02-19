@@ -182,7 +182,7 @@
 		$params = [];
 		$sqlQueryP = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);*/
 		
-		$fields = "asp.id, asp.product_id, asp.product_variant_id, asp.status, SUM(asp.stock) as total_stock, asp.created_at, u.name as stock_unit_name, pv.measurement, p.name, p.barcode, v.name as vendor";
+		$fields = "asp.id, asp.product_id, asp.product_variant_id, asp.status, SUM(asp.stock) as total_stock, asp.created_at, u.name as stock_unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.type";
 									
 		$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 		INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
@@ -262,6 +262,7 @@
 										<td><input type="text" class="form-control" id="search-two" placeholder="Search by product name"></td>
 										<td></td>
 										<td></td>
+										<td></td>
 										
 									</tr>
 								  <tr class="text-center">
@@ -270,6 +271,7 @@
 									<th>Barcode</th>
 									<th>Name</th>
 									<th>Available Stock</th>
+									<th>Unit</th>
 									<th>Measurement</th>
 									</tr>
 								</thead>
@@ -457,6 +459,7 @@
 												<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 												<!--<td><?PHP echo $total_stock ?></td>-->
 												<td><?PHP echo $available_stock; ?></td>
+												<td><span class="badge bg-grd-primary dash-lable"><?php echo $arr->type ;?></span></td>
 												<td><?PHP echo $arr->measurement. ' ' .$arr->stock_unit_name; ?></td>
 											</tr>
 									<?PHP
