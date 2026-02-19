@@ -91,7 +91,8 @@ class FCM
 				"token" => $user->fcm_token,
 				"notification" => [
 					"title" => $title,
-					"body" => $body
+					"body" => $body,
+					// "image" => 'https://retail.ecoleaf.store/assets/images/logo-icon.png'
 				],
 				"data" => array_merge(
 					[
