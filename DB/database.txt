@@ -143,6 +143,17 @@ ALTER TABLE `2026_pos_orders` ADD `razorpay_order_id` VARCHAR(225) NULL DEFAULT 
 
 ALTER TABLE `2026_pos_orders` ADD `qr_url` TEXT NULL DEFAULT NULL AFTER `status`, ADD `machine_id` VARCHAR(50) NULL DEFAULT NULL AFTER `qr_url`, ADD `qr_date` TIMESTAMP NOT NULL AFTER `machine_id`;
 
+CREATE TABLE `2026_pos_machines` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `machine_id` varchar(50) DEFAULT NULL,
+  `machine_name` varchar(100) DEFAULT NULL,
+  `ip_address` varchar(50) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `machine_id` (`machine_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
+
 
 
 
