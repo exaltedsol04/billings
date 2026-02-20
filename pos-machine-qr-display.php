@@ -7,7 +7,7 @@ $pageParam = [
 		'pageAccessRoleIds' => [3]
 	];
 
-$machine = $general_cls_call->select_query("id,machine_id", POS_MACHINE, "WHERE 1", array(), 2);
+$machine = $general_cls_call->select_query("id,machine_id", POS_MACHINE, "WHERE status=:status", array(':status'=>1), 2);
 //echo "<pre>";print_r($machine);die;
 ?>
 
