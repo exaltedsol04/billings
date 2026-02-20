@@ -137,7 +137,9 @@ ALTER TABLE `notifications` CHANGE `message` `message` BLOB NOT NULL;
 ============ 18-02-2026==============
 ALTER TABLE `orders` ADD `payment_status` INT(11) NULL DEFAULT NULL COMMENT '1=initiated; 2= paid; 3=refunded' AFTER `active_status`; 
 
+============ 20-02-2026================
 
+ALTER TABLE `2026_pos_orders` ADD `razorpay_order_id` VARCHAR(225) NULL DEFAULT NULL AFTER `payment_method`, ADD `payment_status` VARCHAR(225) NULL DEFAULT NULL AFTER `razorpay_order_id`, ADD `transaction_id` VARCHAR(225) NULL DEFAULT NULL AFTER `payment_status`, ADD `payment_source` VARCHAR(225) NULL DEFAULT NULL AFTER `transaction_id`, ADD `status` TINYINT(1) NULL DEFAULT NULL COMMENT '1= completed, 2= initialted' AFTER `payment_source`;
 
 
 

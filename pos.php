@@ -406,6 +406,38 @@
 		  </div>
 		</div>
 		
+		<!-- online qr code show Modal -->
+			<div class="modal fade" id="onlineQrCode-modal">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header border-bottom-0 py-2 bg-grd-success">
+                        <h5 class="modal-title btn-grd">Online QR Code payment</h5>
+                        <a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+                          <i class="material-icons-outlined">close</i>
+                        </a>
+                      </div>
+                      <div class="modal-body">
+						<div class="form-body">
+							<div class="row g-3">
+							<div class="col-lg-12 col-md-12 col-sm-12">
+									<div class="card-body text-center">
+										<span id="qrcodeshow" class="d-flex justify-content-center align-items-center"></span>
+									</div>
+							</div>
+							<div class="col-md-12">
+							<div class="d-md-flex d-grid justify-content-md-between">
+								<!--<button type="button" class="btn btn-outline-danger px-5" data-bs-dismiss="modal">Cancel</button>
+								<button type="button" class="btn btn-grd btn-grd-success px-5" onclick="pay_now()">Pay Now</button>-->
+							 </div>
+						  </div>
+						  </div>
+						</div>
+					</div>
+					
+                      
+                    </div>
+                  </div>
+                </div>
 			
 </main>
 
@@ -1018,18 +1050,38 @@ function save_post_data() // no use
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
 		data: datapost,
+		dataType: "json",
 		success: function(response){
+			//alert(response.payment_method);alert(response.order_id);
 			$('#actionstatus').val('paynow');
 			$('#supplier_id').val('');
 			$('#check-stock-pay-div').html('');
-			var order_id = JSON.parse(response);
+			//var order_id = JSON.parse(response);
+			var order_id = response.order_id;
 			clearCart();
 			$('#paymentmode-modal').modal('hide');
+			if(response.payment_method == 'online')
+			{
+				razorpayOnlineProcess(order_id);
+			}
+			
 			clearCart();
 			window.open(
 				"<?= SITE_URL ?>print_cart_invoice?order_id=" + order_id,
 				"_blank"
 			);
+		}
+	});
+}
+function razorpayOnlineProcess(id)
+{
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>api/razorpay/pos-online-payment",
+		data: {order_id:id},
+		success: function(response){
+			$('#qrcodeshow').html(response);
+			$('#onlineQrCode-modal').modal('show');
 		}
 	});
 }

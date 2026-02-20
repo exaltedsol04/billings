@@ -1,25 +1,16 @@
 <?php
-//ini_set('display_errors', 1);
-//error_reporting(0);
 include_once '../../init.php';
 include_once '../../includes/razorpay.php';
 
 $order_id = $_POST['order_id'];
 //----get order details-----------
-$order = $general_cls_call->select_query("cod_payment_status, payment_method, total, final_total", ORDERS_TESTS, "WHERE id=:id", array(':id'=>$order_id), 1);
+$order = $general_cls_call->select_query("status, payment_status, total_amount", POS_ORDERS, "WHERE id=:id", array(':id'=>$order_id), 1);
 //-------------------------------
 
-if (empty($order) || $order->cod_payment_status == 'UPI Paid') {
+if (empty($order) || $order->status == 1) {
     exit(json_encode(['error' => 'Invalid order']));
 }
-
-if($order->payment_method = 'wallet')
-{
-	$amount = $order->total;
-}
-else{
-	$amount = $order->final_total;
-}
+$amount = $order->total_amount;
 
 
 $response = razorpayRequest('POST', '/v1/orders', [
@@ -34,18 +25,19 @@ $response = razorpayRequest('POST', '/v1/orders', [
 if(!empty($response['id']))
 {
 	//global $general_cls_call;
-	$setValues = "cod_payment_status = :cod_payment_status, razorpay_transaction_id = :razorpay_transaction_id";
+	$setValues = "payment_status = :payment_status, razorpay_order_id = :razorpay_order_id, updated_at=:updated_at";
 
 	$updateExecute = array(
-		':cod_payment_status' => 'initiated',
-		':razorpay_transaction_id' => $response['id'],		
+		':payment_status' => 'initiated',
+		':razorpay_order_id' => $response['id'],		
+		':updated_at' => date("Y-m-d H:i:s"),		
 		':id' => $order_id
 	);
 
 	$whereClause = " WHERE id = :id";
 
 	$general_cls_call->update_query(
-		ORDERS_TESTS,
+		POS_ORDERS,
 		$setValues,
 		$whereClause,
 		$updateExecute
@@ -55,7 +47,7 @@ if(!empty($response['id']))
 
 	$qr = razorpayRequest('POST', '/v1/payment_links', [
 		'amount' => $amount * 100,
-		'currency' => 'INR',
+		'currency' => RAZORPAY_CURRENCY,
 		'reference_id' => $referenceId,
 		'description' => 'Order #' . $order_id,
 		'notify' => ['sms' => false, 'email' => false],
