@@ -1,10 +1,12 @@
 <?php
 include_once '../../init.php';
 include_once '../../includes/razorpay.php';
-
 $order_id = $_POST['order_id'];
 //----get order details-----------
-$order = $general_cls_call->select_query("status, payment_status, total_amount", POS_ORDERS, "WHERE id=:id", array(':id'=>$order_id), 1);
+
+
+$order = $general_cls_call->select_query("status, payment_status, total_amount, machine_id", POS_ORDERS, "WHERE id=:id", array(':id'=>$order_id), 1);
+$machine_id = $order->machine_id;
 //-------------------------------
 
 if (empty($order) || $order->status == 1) {
@@ -17,7 +19,10 @@ $response = razorpayRequest('POST', '/v1/orders', [
     'amount' => $amount * 100,
     'currency' => RAZORPAY_CURRENCY,  //from config
     'receipt' => 'order_' . $order_id,
-    'notes' => ['order_id' => $order_id]
+    'notes' => [
+		'order_id' => $order_id,
+		'machine_id' => $machine_id
+	]
 ]);
 //echo $response['id'];
 //echo "<pre>";print_r($response);die;
@@ -54,7 +59,8 @@ if(!empty($response['id']))
 		'reminder_enable' => false,
 		'notes' => [
 			'order_id' => $order_id,
-			'razorpay_order_id' => $response['id']
+			'razorpay_order_id' => $response['id'],
+			'machine_id' => $response['notes']['machine_id']
 		]
 	]);
 
@@ -62,6 +68,25 @@ if(!empty($response['id']))
 
 $short_url = $qr['short_url'];
 
+	if(!empty($short_url))
+	{
+		$setValuesUrl = "qr_url = :qr_url, qr_date=:qr_date";
+
+			$updateExecuteUrl = array(
+				':qr_url' => $short_url,
+				':qr_date' => date("Y-m-d H:i:s"),		
+				':id' => $order_id
+			);
+
+			$whereClauseUrl = " WHERE id = :id";
+
+			$general_cls_call->update_query(
+				POS_ORDERS,
+				$setValuesUrl,
+				$whereClauseUrl,
+				$updateExecuteUrl
+			);
+	}
 echo '<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='.urlencode($short_url).'">';
 
 //echo json_encode(['razorpay_order_id' => $response['id']]);

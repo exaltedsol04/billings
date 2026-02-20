@@ -24,6 +24,29 @@
 					$seller = $general_cls_call->select_query("id", SELLERS, "WHERE admin_id=:admin_id", array(':admin_id'=>$user->id), 1);
 					$_SESSION['SELLER_ID'] = $seller->id;
 					$dashboard = 'seller-dashboard';
+					//POS_MACHINE
+					$ipAddress = $general_cls_call->select_query("id,machine_id", POS_MACHINE, "WHERE ip_address=:ip_address", array(':ip_address'=>IP_ADDRESS), 1);
+					$machine_id = $ipAddress->machine_id; 
+					if(empty($ipAddress->id))
+					{
+						$machine_id = "POS_" . rand(10000,99999); 
+						$machine_name = gethostname();
+						
+						$field = " machine_id , machine_name, ip_address, status";
+						$value = " :machine_id, :machine_name, :ip_address, :status";
+						
+						$addExecute=array(
+							
+							':machine_id'		=> $machine_id,
+							':machine_name'		=> $machine_name,
+							':ip_address'		=> IP_ADDRESS,
+							':status'			=> 1
+						);
+						
+						$general_cls_call->insert_query(POS_MACHINE, $field, $value, $addExecute);
+					}
+					$_SESSION['machine_id'] = $machine_id;
+					
 				}
 				
 				if($_SESSION['ROLE_ID'] == 5) {

@@ -75,7 +75,6 @@
 	}*/
 
 	$imagePath = IMG_PATH . 'noImg.jpg';
-
 	ob_end_flush();
 	
 	
@@ -95,6 +94,7 @@
 				<input type="text" class="form-control" name="barcode" id="barcode" oninput="getProducts(this.value)" placeholder="Barcode">
 				<span id="err_empty_cart" class="text-danger"></span>
 			</div>
+			
 			<div class="col-md-4">
 				<select name="product" id="product" onchange=check_product_stock_onchange(this.value) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
@@ -343,6 +343,7 @@
 												<option value="">Select</option>
 												<option value="cod">COD</option>
 												<option value="online">Online</option>
+												<option value="machine">Machine</option>
 											</select>
 											<span class="text-danger" id="err_p_method"></span>
 										</div>
@@ -438,6 +439,39 @@
                     </div>
                   </div>
                 </div>
+				
+		<!-- machine (static) qr code show Modal -->
+		<div class="modal fade" id="machineQrCode-modal">
+			  <div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+				  <div class="modal-header border-bottom-0 py-2 bg-grd-success">
+					<h5 class="modal-title btn-grd">Online QR Code payment</h5>
+					<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+					  <i class="material-icons-outlined">close</i>
+					</a>
+				  </div>
+				  <div class="modal-body">
+					<div class="form-body">
+						<div class="row g-3">
+						<div class="col-lg-12 col-md-12 col-sm-12">
+							<div class="card-body text-center">
+								<div id="machineQrCodeShow" 
+									 class="d-flex justify-content-center align-items-center">
+								</div>
+							</div>
+						</div>
+						<div class="col-md-12">
+						<div class="d-md-flex d-grid justify-content-md-between">
+							<!--<button type="button" class="btn btn-outline-danger px-5" data-bs-dismiss="modal">Cancel</button>
+							<button type="button" class="btn btn-grd btn-grd-success px-5" onclick="pay_now()">Pay Now</button>-->
+						 </div>
+					  </div>
+					  </div>
+					</div>
+				</div>
+				</div>
+			</div>
+		</div>
 			
 </main>
 
@@ -1045,6 +1079,8 @@ function pay_now()
 
 function save_post_data() // no use
 {
+	//$('#machineQrCode-modal').modal('show');
+	
 	var datapost = $('#cart-list-form').serialize();
 	$.ajax({
 		type: "POST",
@@ -1063,6 +1099,11 @@ function save_post_data() // no use
 			if(response.payment_method == 'online')
 			{
 				razorpayOnlineProcess(order_id);
+			}
+			
+			if(response.payment_method == 'machine')
+			{
+				razorpayMachineProcess(order_id);
 			}
 			
 			clearCart();
@@ -1084,5 +1125,41 @@ function razorpayOnlineProcess(id)
 			$('#onlineQrCode-modal').modal('show');
 		}
 	});
+}
+
+function razorpayMachineProcess(id)
+{
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>api/razorpay/pos-online-payment",
+		data: {order_id:id},
+		success: function(response){
+			//$('#qrcodeshow').html(response);
+			//$('#onlineQrCode-modal').modal('show');
+		}
+	});
+}
+
+function razorpayMachineProcess_bck(id)
+{
+	$.ajax({
+        type: "POST",
+        url: "<?PHP echo SITE_URL; ?>api/razorpay/pos-online-machine-payment",
+        data: { order_id: id },
+        success: function(response){
+
+            var result = JSON.parse(response);
+			alert(result.status);alert(result.qr_image);
+            if(result.status === true){
+
+                $('#machineQrCodeShow').html(
+                    '<img src="'+ result.qr_image +'" class="img-fluid">'
+                );
+
+                $('#machineQrCode-modal').modal('show');
+            }
+        }
+    });
+	//$('#machineQrCode-modal').modal('show');
 }
 </script>

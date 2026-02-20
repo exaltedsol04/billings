@@ -8,6 +8,8 @@
 	define('RAZORPAY_WEBHOOK_SECRET', 'Eco123leaf');
 	define('RAZORPAY_CURRENCY', 'INR');
 	
+	define('IP_ADDRESS', $_SERVER['REMOTE_ADDR']);
+	
 	/* used in online-packaging-operator-orders*/
 	$operator_array[] = [
 		'id' => 4,

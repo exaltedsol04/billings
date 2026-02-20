@@ -437,8 +437,8 @@ error_reporting(0);
 			$status = $_POST['payment_method'] == 'cod' ? 1 : 0;
 			
 			
-			$field = "pos_user_id, user_id, total_amount, discount_amount, discount_percentage, payment_method, status, created_at, updated_at";
-			$value = ":pos_user_id, :user_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :status, :created_at, :updated_at";
+			$field = "pos_user_id, user_id, total_amount, discount_amount, discount_percentage, payment_method, status, created_at, updated_at, machine_id";
+			$value = ":pos_user_id, :user_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :status, :created_at, :updated_at, :machine_id";
 			
 			$addExecute=array(
 				':pos_user_id'			=> $_SESSION['SELLER_ID'],
@@ -448,6 +448,7 @@ error_reporting(0);
 				':discount_percentage'	=> '0.00',
 				':payment_method'		=> $_POST['payment_method'],
 				':status'				=> $status,
+				':machine_id'			=> $_SESSION['machine_id'],
 				':created_at'			=> date("Y-m-d H:i:s"),
 				':updated_at'			=> date("Y-m-d H:i:s")
 			);

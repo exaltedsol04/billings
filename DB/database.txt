@@ -141,6 +141,8 @@ ALTER TABLE `orders` ADD `payment_status` INT(11) NULL DEFAULT NULL COMMENT '1=i
 
 ALTER TABLE `2026_pos_orders` ADD `razorpay_order_id` VARCHAR(225) NULL DEFAULT NULL AFTER `payment_method`, ADD `payment_status` VARCHAR(225) NULL DEFAULT NULL AFTER `razorpay_order_id`, ADD `transaction_id` VARCHAR(225) NULL DEFAULT NULL AFTER `payment_status`, ADD `payment_source` VARCHAR(225) NULL DEFAULT NULL AFTER `transaction_id`, ADD `status` TINYINT(1) NULL DEFAULT NULL COMMENT '1= completed, 2= initialted' AFTER `payment_source`;
 
+ALTER TABLE `2026_pos_orders` ADD `qr_url` TEXT NULL DEFAULT NULL AFTER `status`, ADD `machine_id` VARCHAR(50) NULL DEFAULT NULL AFTER `qr_url`, ADD `qr_date` TIMESTAMP NOT NULL AFTER `machine_id`;
+
 
 
 
