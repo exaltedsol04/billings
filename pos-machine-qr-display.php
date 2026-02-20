@@ -67,13 +67,13 @@ body{
 	<div class="info-row">
 		<div class="label">Select mechine :</div>
 		<div>
-			<select class="custom-select"  tabindex="1" onchange="select_machine_id(this.value)">
+			<select class="custom-select"  tabindex="1" onchange="select_machine_id(this.value)" name="select_machine">
 				<option value="">Select machine</option>
 				<?php 
 				foreach($machine as $val)
 				{
 				?>
-					<option value="<?php echo  $val->machine_id ;?>"><?php echo  $val->machine_id ;?></option>
+					<option value="<?php echo  $val->machine_id ;?>" <?php echo isset($_POST['select_machine']) == $val->machine_id ? 'selected' : '' ?>><?php echo  $val->machine_id ;?></option>
 				<?php 
 				}
 				?>
@@ -142,7 +142,8 @@ loadQR();
 function select_machine_id(val)
 {
 	//alert(val);
-	let url = "http://localhost/billings/pos-machine-qr-display?machine_id=" + val;
+	//let url = "http://localhost/billings/pos-machine-qr-display?machine_id=" + val;
+	let url = "<?PHP echo SITE_URL; ?>pos-machine-qr-display?machine_id=" + val;
 	window.location.href = url;
 }
 </script>
