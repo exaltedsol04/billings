@@ -29,22 +29,36 @@ try {
             throw new Exception("Order ID missing in notes");
         }
 
-        $setValues = "cod_payment_status = :cod_payment_status, transaction_id = :transaction_id";
+        $setValues = "cod_payment_status = :cod_payment_status, transaction_id = :transaction_id, active_status = :active_status";
 
         $updateExecute = [
             //':payment_details' => json_encode($data),
             ':transaction_id' => $transaction_id,
             ':cod_payment_status' => 'UPI Paid',
+            ':active_status' => 6,
             ':id' => $orderId
         ];
 
         $whereClause = " WHERE id = :id";
 
         $general_cls_call->update_query(
-            ORDERS_TESTS,
+            ORDERS,
             $setValues,
             $whereClause,
             $updateExecute
+        );
+		
+		$setItemValues = "active_status = :active_status";
+		$updateItemExecute = [
+            ':active_status' => 6,
+            ':order_id' => $orderId
+        ];
+		$whereItemClause = " WHERE order_id = :order_id";
+		$general_cls_call->update_query(
+            ORDERS_ITEMS,
+            $setItemValues,
+            $whereItemClause,
+            $updateItemExecute
         );
     }
 
@@ -60,11 +74,9 @@ try {
             throw new Exception("Order ID missing in refund notes");
         }
 
-        $setValues = "cod_payment_status = :cod_payment_status,
-                      payment_details = :payment_details";
+        $setValues = "cod_payment_status = :cod_payment_status";
 
         $updateExecute = [
-            ':payment_details' => json_encode($data),
             ':cod_payment_status' => 'refunded',
             ':id' => $orderId
         ];
@@ -72,7 +84,7 @@ try {
         $whereClause = " WHERE id = :id";
 
         $general_cls_call->update_query(
-            ORDERS_TESTS,
+            ORDERS,
             $setValues,
             $whereClause,
             $updateExecute

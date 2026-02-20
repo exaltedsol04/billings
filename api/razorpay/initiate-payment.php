@@ -6,7 +6,7 @@ include_once '../../includes/razorpay.php';
 
 $order_id = $_POST['order_id'];
 //----get order details-----------
-$order = $general_cls_call->select_query("cod_payment_status, payment_method, total, final_total", ORDERS_TESTS, "WHERE id=:id", array(':id'=>$order_id), 1);
+$order = $general_cls_call->select_query("cod_payment_status, payment_method, total, final_total", ORDERS, "WHERE id=:id", array(':id'=>$order_id), 1);
 //-------------------------------
 
 if (empty($order) || $order->cod_payment_status == 'UPI Paid') {
@@ -45,7 +45,7 @@ if(!empty($response['id']))
 	$whereClause = " WHERE id = :id";
 
 	$general_cls_call->update_query(
-		ORDERS_TESTS,
+		ORDERS,
 		$setValues,
 		$whereClause,
 		$updateExecute
