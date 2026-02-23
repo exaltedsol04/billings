@@ -451,7 +451,7 @@ function unit_measurement(pvid)
 						html += '<div class="col-8 fw-bold" style="color:#A300A3">Online stock</div>';
 						html += '<div class="col-4 text-danger fw-bold text-end text-nowrap">' + variant_stock_online + '</div>';
 					html += '</div>';
-					$('#stock_limit').val(stock.variant_stock);
+					$('#stock_limit').val(variant_stock);
 				});
 				html += '</div>';
 				
