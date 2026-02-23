@@ -3,7 +3,7 @@
 	$pageParam = [
 		'dataTables' => true,
 		'select2' => true,
-		'daterangepicker' => true,
+		'daterangepicker' => false,
 		'pageAccessRoleIds' => [1,3]
 	];
 	include_once 'includes/authCheck.php';
@@ -120,11 +120,11 @@
 								<form class="row g-4" method="post" action="">
 									<div class="col-md-4">
 										<label for="input1" class="form-label">From date</label>
-										<input type="text" name="fromDate" id="fromDate" class="form-control" placeholder="Start Date" readonly>
+										<input type="date" name="fromDate" id="fromDate" class="form-control" placeholder="Start Date">
 									</div>
 									<div class="col-md-4">
 										<label for="input5" class="form-label">To date</label>
-										<input type="text" name="toDate" id="toDate" class="form-control" placeholder="End Date" readonly>
+										<input type="date" name="toDate" id="toDate" class="form-control" placeholder="End Date">
 									</div>
 									
 									<div class="col-md-4">
@@ -310,10 +310,20 @@
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
-<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>-->
 <script>
-$(function () {
+document.getElementById("fromDate").addEventListener("change", function () {
+    var fromDate = this.value;
+    // Set minimum selectable date for To Date
+    document.getElementById("toDate").setAttribute("min", fromDate);
+
+    // If already selected toDate is smaller → reset it
+    if (document.getElementById("toDate").value < fromDate) {
+        document.getElementById("toDate").value = "";
+    }
+});
+/*$(function () {
 
   let start = moment().startOf('today');
   let end   = moment().endOf('today');
@@ -349,7 +359,7 @@ $(function () {
 
   // Set default
   setDates(start, end);
-});
+});*/
 
 $(document).ready(function(){
 	if ($.fn.DataTable.isDataTable('#example2')) {
