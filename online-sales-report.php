@@ -3,7 +3,7 @@
 	$pageParam = [
 		'dataTables' => false,
 		'select2' => false,
-		'daterangepicker' => true,
+		'daterangepicker' => false,
 		'pageAccessRoleIds' => [3]
 	];
 	include_once 'includes/authCheck.php';
@@ -64,6 +64,16 @@
 			':toDate'   => $_POST['toDate']
 		];
 		
+		
+		// total Incompleted 
+		$total_orders_incompleted_where = "WHERE oi.active_status=:active_status AND oi.seller_id=:seller_id  AND ".$whereDateRange." GROUP BY o.orders_id";
+		$total_orders_incompleted_params = [
+			':seller_id'	=> $_SESSION['SELLER_ID'],
+			':active_status'	=> 1,
+			':fromDate' => $_POST['fromDate'],
+			':toDate'   => $_POST['toDate']
+		];
+		
 	}
 	else
 	{
@@ -93,6 +103,13 @@
 			$total_orders_wallet_params = [
 				':seller_id'	=> $_SESSION['SELLER_ID'],
 				':payment_method'	=> 'Wallet'
+			];
+			
+			// total Incompleted 
+			$total_orders_incompleted_where = "WHERE oi.active_status=:active_status AND oi.seller_id=:seller_id  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+			$total_orders_incompleted_params = [
+				':seller_id'	=> $_SESSION['SELLER_ID'],
+				':active_status'	=> 1
 			];
 		
 	}
@@ -154,6 +171,20 @@
 		$totalsaleswallet = $totalsaleswallet + $val->total;
 	}
 	
+	// total incompleted 
+	$fields_wallet = "o.id, o.total";
+	$tables_wallet = ORDERS . " o
+	INNER JOIN " . ORDERS_ITEMS . " oi ON oi.orders_id = o.orders_id";
+	//total orders
+	$totalIncompletedArr = $general_cls_call->select_join_query($fields_wallet, $tables_wallet, $total_orders_incompleted_where, $total_orders_incompleted_params, 2);
+	//$total_wallet = count($totalWalletArr);
+	//echo "<pre>";print_r($totalWalletArr);die;
+	$totalsalesIncomplete = 0;
+	foreach($totalIncompletedArr as $val)
+	{
+		$totalsalesIncomplete = $totalsalesIncomplete + $val->total;
+	}
+	
 	
 	
 	$received_orders = 0;
@@ -200,11 +231,11 @@
 								<form class="row g-4" method="post" action="">
 									<div class="col-md-6">
 										<label for="input1" class="form-label">From date</label>
-										<input type="text" name="fromDate" id="fromDate" class="form-control" placeholder="Start Date" readonly>
+										<input type="date" name="fromDate" id="fromDate" class="form-control" placeholder="Start Date">
 									</div>
 									<div class="col-md-6">
 										<label for="input5" class="form-label">To date</label>
-										<input type="text" name="toDate" id="toDate" class="form-control" placeholder="End Date" readonly>
+										<input type="date" name="toDate" id="toDate" class="form-control" placeholder="End Date">
 									</div>
 									
 									<div class="col-md-12">
@@ -315,7 +346,7 @@
 				</div>
 			  </div>
 			</div>
-			</a>
+			</a>-->
 			
 			<a href="<?php echo SITE_URL.'online-incomplete-orders'; ?>">
 			<div class="col d-flex">
@@ -323,14 +354,14 @@
 				<div class="card-body">
 				  <div class="d-flex align-items-start justify-content-between mb-1">
 					<div class="">
-					  <h5 class="mb-0 text-white"><?= $incompleted_orders ? $incompleted_orders : 0; ?></h5>
+					  <h5 class="mb-0 text-white">₹ <?= $totalsalesIncomplete ? $totalsalesIncomplete : 0; ?></h5>
 					  <p class="mb-0">Incompleted</p>
 					</div>
 				  </div>
 				</div>
 			  </div>
 			</div>
-			</a>-->
+			</a>
 			
        
       </div>
@@ -341,12 +372,24 @@
 	<!-- ######### FOOTER START ############### -->
 		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
-<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>-->
 
   
 <script>
-$(function () {
+document.getElementById("fromDate").addEventListener("change", function () {
+    var fromDate = this.value;
+    //alert(fromDate);
+    // Set minimum selectable date for To Date
+    document.getElementById("toDate").setAttribute("min", fromDate);
+
+    // If already selected toDate is smaller → reset it
+    if (document.getElementById("toDate").value < fromDate) {
+        document.getElementById("toDate").value = "";
+    }
+});
+
+/*$(function () {
 
   let start = moment().startOf('today');
   let end   = moment().endOf('today');
@@ -382,7 +425,7 @@ $(function () {
 
   // Set default
   setDates(start, end);
-});
+});*/
 </script>
 </body>
 

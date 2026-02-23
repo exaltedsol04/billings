@@ -15,6 +15,7 @@
 	{
 		$fromDate = $_POST['fromDate'];
 		$toDate = $_POST['toDate'];
+		//echo $fromDate.' '.$toDate; die;
 		//$whereDateRange = "AND os.created_at >= :fromDate AND os.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
 		
 		if($_SESSION['ROLE_ID'] == 1)
