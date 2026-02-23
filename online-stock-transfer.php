@@ -8,7 +8,7 @@
 	];
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
-
+//error_reporting(1);
 	ob_start();
 	/*=========== ACCOUNT SETTINGS START ===========*/
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
@@ -20,14 +20,15 @@
 			{
 				$erMsg = "Stock Quantity Greater Than Available Stock.";
 			}
-			elseif($product_variant_id == '')
+			/*elseif($product_variant_id == '')
 			{
 				$erMsg = "Please select the unit.";
-			}
+			}*/
 			else{
 				//echo "<pre>";print_r($_POST);die;
 				$explode_product = explode("@@@", $product);
-				$product_variant_id = $product_variant_id;
+				//echo "<pre>";print_r($explode_product);die;
+				$product_variant_id = $explode_product[2];
 				$product_id = $explode_product[0];
 				$stock = $stock;
 				
@@ -209,7 +210,7 @@
 							
 							<div class="col-md-12">
 								<label for="input1" class="form-label">Products</label>
-								<select name="product[]" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="product_stock_show(this.value)">
+								<select name="product" id="product" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="product_stock_show(this.value)">
 									<option value="">Select product</option>
 									<?PHP
 									$fields = "
@@ -286,23 +287,24 @@
 									?>
 								</select>
 							</div>
-							
-							<div class="col-md-6">
-								<label for="input5" class="form-label">Unit</label>
-								<!--<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1" onchange="unit_measurement(this.value)">
-									<option value="">Select...</option>
-								</select>-->
-								<span id="all_unit_name" class="text-danger d-block mt-2"></span>
-							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Stock Quantity<span class="text-danger" id="show_unit_type"></span></label>
 								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" value="<?php echo isset($_POST['stock']) ? $_POST['stock'] : '' ?>">
 								<span class="text-danger" id="err_stock"></span>
 							</div>
+							<div class="col-md-6" id="all_unit_name">
+								<!--<label for="input5" class="form-label">Unit</label>
+								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1" onchange="unit_measurement(this.value)">
+									<option value="">Select...</option>
+								</select>-->
+								
+							</div>
 							<input type="hidden" id="stock_limit" name="stock_limit" value="<?php echo isset($_POST['stock_limit']) ? $_POST['stock_limit'] : '' ?>">
 							<input type="hidden" id="hid_product_id">
 							<input type="hidden" id="hid_variant_id">
-							<span id="stock-check-div"></span>
+							<div class="col-md-6"></div>
+							<div class="col-md-6" id="stock-check-div"></div>
+					
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">
 									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
@@ -386,8 +388,8 @@ function product_stock_show(product)
 				});
 				$('#product_variant_id').html(html);*/
 				let totrec = result.length;
-				var html = 'Available product in ';
-				var comma = ',';
+				var html = '<label for="input5" class="form-label">Unit</label><span class="text-danger d-block mt-2">Available product in [';
+				var comma = ', ';
 				$.each(result, function (i, variants) {
 					
 					if(totrec == 1 + parseInt(i))
@@ -401,8 +403,9 @@ function product_stock_show(product)
 						$('#show_unit_type').html(stock_type);
 					}
 					
-					html += '<span class="me-1">['+ variants.unitname + comma + ']</span>';
+					html += variants.unitname + comma;
 				});
+				html += ']</span>';
 				$('#all_unit_name').html(html);
 				
 				
@@ -425,7 +428,7 @@ function unit_measurement(pvid)
 		success: function(response){
 			var result = JSON.parse(response);
 			if (result.length > 0) {
-				var html = '<div class="col-md-5">';
+				var html = '<div class="col-md-12">';
 				$.each(result, function (i, stock) {
 					//alert(stock.product_variant_id);
 					var unitname = stock.measurement+ ' ' +stock.variant_name;
@@ -437,16 +440,16 @@ function unit_measurement(pvid)
 						variant_stock_online = stock.variant_stock_online.toFixed(2);
 					}
 					html += '<div class="row align-items-start border-bottom py-2">';
-						html += '<span class="col-md-10 fw-bold text-break text-nowrap" style="color:#A300A3">Product name: ' +stock.product_name + '</span>';
-						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + unitname + '</span>';
+						html += '<div class="col-10 fw-bold" style="color:#A300A3">Product name: ' +stock.product_name + '</div>';
+						html += '<div class="col-2 text-danger fw-bold text-end">' + unitname + '</div>';
 					html += '</div>';
 					html += '<div class="row align-items-start border-bottom py-2">';
-						html += '<span class="col-md-10 fw-bold text-nowrap" style="color:#A300A3">POS stock</span>';
-						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + variant_stock + '</span>';
+						html += '<div class="col-8 fw-bold" style="color:#A300A3">POS stock</div>';
+						html += '<div class="col-4 text-danger fw-bold text-end">' + variant_stock + '</div>';
 					html += '</div>';
 					html += '<div class="row align-items-start border-bottom py-2">';
-						html += '<span class="col-md-10 fw-bold text-nowrap" style="color:#A300A3">Online stock</span>';
-						html += '<span class="col-md-2 text-danger fw-bold text-end text-nowrap">' + variant_stock_online + '</span>';
+						html += '<div class="col-8 fw-bold" style="color:#A300A3">Online stock</div>';
+						html += '<div class="col-4 text-danger fw-bold text-end text-nowrap">' + variant_stock_online + '</div>';
 					html += '</div>';
 					$('#stock_limit').val(stock.variant_stock);
 				});
