@@ -63,6 +63,7 @@
 				<li><a href="<?php echo SITE_URL.'online-stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>AsSign Online Stock</a></li>
 				<li><a href="<?php echo SITE_URL.'available-online-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Online Stock</a></li>
 				<li><a href="<?php echo SITE_URL.'available-stock-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Available Stock Report</a></li>
+				<li><a href="<?php echo SITE_URL.'stock-report-all-products'; ?>"><i class="material-icons-outlined">arrow_right</i>Stock (All products)</a></li>
 				<li><a href="<?php echo SITE_URL.'stock-transfer'; ?>"><i class="material-icons-outlined">arrow_right</i>Stock Transfer</a></li>
 			  </ul>
 			</li>

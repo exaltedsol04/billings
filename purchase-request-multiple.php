@@ -35,8 +35,8 @@
 				}
 				
 				
-				$field = "seller_id, product_variant_id, product_id, loose_stock_quantity, stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id";
-				$value = ":seller_id, :product_variant_id, :product_id, :loose_stock_quantity, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id";
+				$field = "seller_id, product_variant_id, product_id, loose_stock_quantity, stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id, remarks";
+				$value = ":seller_id, :product_variant_id, :product_id, :loose_stock_quantity, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id, :remarks";
 				
 				$addExecute=array(
 					':seller_id'			=> $_SESSION['SELLER_ID'],
@@ -54,6 +54,7 @@
 					':approved_by'			=> 0,
 					':approved_date'		=> '0000-00-00 00:00:00',
 					':order_id'		       => 0,
+					':remarks'		=> $general_cls_call->specialhtmlremover($remarks[$k]),
 				);
 				
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
@@ -120,7 +121,7 @@
 							
 							<div class="row item-row mt-2">
 
-								<div class="col-md-5">
+								<div class="col-md-3">
 								<label for="input1" class="form-label">Products</label>
 									<select name="product[]" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="select_product(this)">
 										<option value="">Select product</option>
@@ -228,6 +229,10 @@
 									<label for="input5" class="form-label">Total price (₹)</label>
 									<input type="text" style="border:0" name="total_price[]" placeholder="0.00" class="form-control form-control-sm total_price" readonly>
 									<span class="text-danger" id="err_stock"></span>
+								</div>
+								<div class="col-md-2">
+									<label for="input5" class="form-label">Remarks</label>
+									<input type="text" name="remarks[]" placeholder="Remarks" class="form-control form-control-sm">
 								</div>
 
 								<div class="col-md-1 text-right">
