@@ -119,6 +119,8 @@
 					</li>
 					<li><a href="<?php echo SITE_URL.'online-incomplete-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Incomplete orders</a>
 					</li>
+					<li><a href="<?php echo SITE_URL.'online-sales-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Sales Report</a>
+					</li>
 				</ul>
 				</li>
 			<li <?php if($page=='notification-add.php' || $page=='notification-list.php') { echo ('class="mm-active"');} ?>>

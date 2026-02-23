@@ -4,7 +4,7 @@
 		'dataTables' => false,
 		'select2' => false,
 		'daterangepicker' => false,
-		'pageAccessRoleIds' => [3]
+		'pageAccessRoleIds' => [1,3]
 	];
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
@@ -27,91 +27,169 @@
 		$fromDate = $_POST['fromDate'];
 		$toDate = $_POST['toDate'];
 		$whereDateRange = "o.created_at >= :fromDate AND o.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
-		
-		// total sales 
-		$total_orders_sales_where = "WHERE oi.seller_id=:seller_id AND ".$whereDateRange." GROUP BY o.orders_id";
-		$total_orders_sales_params = [
-			':seller_id'	=> $_SESSION['SELLER_ID'],
-			':fromDate' => $_POST['fromDate'],
-			':toDate'   => $_POST['toDate']
-		];
-		
-		// total cod 
-		$total_orders_cod_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND ".$whereDateRange." GROUP BY o.orders_id";
-		$total_orders_cod_params = [
-			':seller_id'	=> $_SESSION['SELLER_ID'],
-			':payment_method'	=> 'COD',
-			':fromDate' => $_POST['fromDate'],
-			':toDate'   => $_POST['toDate']
-		];
-		
-		
-		// total online 
-		$total_orders_online_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND ".$whereDateRange." GROUP BY o.orders_id";
-		$total_orders_online_params = [
-			':seller_id'	=> $_SESSION['SELLER_ID'],
-			':payment_method'	=> 'Razorpay',
-			':fromDate' => $_POST['fromDate'],
-			':toDate'   => $_POST['toDate']
-		];
-		
-		// total Wallet 
-		$total_orders_wallet_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND ".$whereDateRange." GROUP BY o.orders_id";
-		$total_orders_wallet_params = [
-			':seller_id'	=> $_SESSION['SELLER_ID'],
-			':payment_method'	=> 'Wallet',
-			':fromDate' => $_POST['fromDate'],
-			':toDate'   => $_POST['toDate']
-		];
-		
-		
-		// total Incompleted 
-		$total_orders_incompleted_where = "WHERE oi.active_status=:active_status AND oi.seller_id=:seller_id  AND ".$whereDateRange." GROUP BY o.orders_id";
-		$total_orders_incompleted_params = [
-			':seller_id'	=> $_SESSION['SELLER_ID'],
-			':active_status'	=> 1,
-			':fromDate' => $_POST['fromDate'],
-			':toDate'   => $_POST['toDate']
-		];
-		
-	}
-	else
-	{
-		// total sales 
-			$total_orders_sales_where = "WHERE oi.seller_id=:seller_id AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+		if($_SESSION['ROLE_ID'] == 1) {
+			
+			// total sales 
+			$total_orders_sales_where = "WHERE  ".$whereDateRange." GROUP BY o.orders_id";
 			$total_orders_sales_params = [
-				':seller_id'	=> $_SESSION['SELLER_ID']
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
 			];
 			
 			// total cod 
-			$total_orders_cod_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+			$total_orders_cod_where = "WHERE o.payment_method=:payment_method  AND ".$whereDateRange." GROUP BY o.orders_id";
 			$total_orders_cod_params = [
-				':seller_id'	=> $_SESSION['SELLER_ID'],
-				':payment_method'	=> 'COD'
+				':payment_method'	=> 'COD',
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
 			];
 			
 			
 			// total online 
-			$total_orders_online_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+			$total_orders_online_where = "WHERE o.payment_method=:payment_method AND ".$whereDateRange." GROUP BY o.orders_id";
 			$total_orders_online_params = [
-				':seller_id'	=> $_SESSION['SELLER_ID'],
-				':payment_method'	=> 'Razorpay'
+				':payment_method'	=> 'Razorpay',
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
 			];
 			
 			// total Wallet 
-			$total_orders_wallet_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+			$total_orders_wallet_where = "WHERE o.payment_method=:payment_method AND ".$whereDateRange." GROUP BY o.orders_id";
 			$total_orders_wallet_params = [
-				':seller_id'	=> $_SESSION['SELLER_ID'],
-				':payment_method'	=> 'Wallet'
+				':payment_method'	=> 'Wallet',
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
 			];
 			
+			
 			// total Incompleted 
-			$total_orders_incompleted_where = "WHERE oi.active_status=:active_status AND oi.seller_id=:seller_id  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+			$total_orders_incompleted_where = "WHERE oi.active_status=:active_status  AND ".$whereDateRange." GROUP BY o.orders_id";
+			$total_orders_incompleted_params = [
+				':active_status'	=> 1,
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
+			];
+		}
+		else
+		{
+			// total sales 
+			$total_orders_sales_where = "WHERE oi.seller_id=:seller_id AND ".$whereDateRange." GROUP BY o.orders_id";
+			$total_orders_sales_params = [
+				':seller_id'	=> $_SESSION['SELLER_ID'],
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
+			];
+			
+			// total cod 
+			$total_orders_cod_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND ".$whereDateRange." GROUP BY o.orders_id";
+			$total_orders_cod_params = [
+				':seller_id'	=> $_SESSION['SELLER_ID'],
+				':payment_method'	=> 'COD',
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
+			];
+			
+			
+			// total online 
+			$total_orders_online_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND ".$whereDateRange." GROUP BY o.orders_id";
+			$total_orders_online_params = [
+				':seller_id'	=> $_SESSION['SELLER_ID'],
+				':payment_method'	=> 'Razorpay',
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
+			];
+			
+			// total Wallet 
+			$total_orders_wallet_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND ".$whereDateRange." GROUP BY o.orders_id";
+			$total_orders_wallet_params = [
+				':seller_id'	=> $_SESSION['SELLER_ID'],
+				':payment_method'	=> 'Wallet',
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
+			];
+			
+			
+			// total Incompleted 
+			$total_orders_incompleted_where = "WHERE oi.active_status=:active_status AND oi.seller_id=:seller_id  AND ".$whereDateRange." GROUP BY o.orders_id";
 			$total_orders_incompleted_params = [
 				':seller_id'	=> $_SESSION['SELLER_ID'],
-				':active_status'	=> 1
+				':active_status'	=> 1,
+				':fromDate' => $_POST['fromDate'],
+				':toDate'   => $_POST['toDate']
 			];
+		}
 		
+	}
+	else
+	{
+		if($_SESSION['ROLE_ID'] == 1) 
+		{
+			// total sales 
+				$total_orders_sales_where = "WHERE  DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_sales_params = [];
+				
+				// total cod 
+				$total_orders_cod_where = "WHERE o.payment_method=:payment_method AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_cod_params = [
+					':payment_method'	=> 'COD'
+				];
+				
+				
+				// total online 
+				$total_orders_online_where = "WHERE o.payment_method=:payment_method  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_online_params = [
+					':payment_method'	=> 'Razorpay'
+				];
+				
+				// total Wallet 
+				$total_orders_wallet_where = "WHERE o.payment_method=:payment_method AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_wallet_params = [
+					':payment_method'	=> 'Wallet'
+				];
+				
+				// total Incompleted 
+				$total_orders_incompleted_where = "WHERE oi.active_status=:active_status AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_incompleted_params = [
+					':active_status'	=> 1
+				];
+		}
+		else
+		{
+			// total sales 
+				$total_orders_sales_where = "WHERE oi.seller_id=:seller_id AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_sales_params = [
+					':seller_id'	=> $_SESSION['SELLER_ID']
+				];
+				
+				// total cod 
+				$total_orders_cod_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_cod_params = [
+					':seller_id'	=> $_SESSION['SELLER_ID'],
+					':payment_method'	=> 'COD'
+				];
+				
+				
+				// total online 
+				$total_orders_online_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_online_params = [
+					':seller_id'	=> $_SESSION['SELLER_ID'],
+					':payment_method'	=> 'Razorpay'
+				];
+				
+				// total Wallet 
+				$total_orders_wallet_where = "WHERE o.payment_method=:payment_method AND oi.seller_id=:seller_id  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_wallet_params = [
+					':seller_id'	=> $_SESSION['SELLER_ID'],
+					':payment_method'	=> 'Wallet'
+				];
+				
+				// total Incompleted 
+				$total_orders_incompleted_where = "WHERE oi.active_status=:active_status AND oi.seller_id=:seller_id  AND DATE(o.created_at) = CURDATE() GROUP BY o.orders_id";
+				$total_orders_incompleted_params = [
+					':seller_id'	=> $_SESSION['SELLER_ID'],
+					':active_status'	=> 1
+				];
+		}
 	}
 	
 	$fields_sales = "o.id, o.final_total";
