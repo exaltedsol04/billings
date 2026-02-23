@@ -34,6 +34,7 @@
 							<td></td>
 							<td></td>
 							<td></td>
+							<td></td>
 						</tr>
                       <tr  class="text-center">
 						<th>Sl. No.</th>
@@ -105,8 +106,9 @@
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
 						<td><?PHP echo $arr->total_stock; //$arr->total_stock - $qty_used ?></td>
-						<td><?PHP echo $arr->type == 'loose' ? $arr->measurement.' ('. $arr->unit_name .')' : $arr->measurement.' ('. $arr->unit_name .')'; ?></td>
 						<td><?php echo $general_cls_call->change_date_format($arr->created_date, 'j M Y g:i A') ?></td>
+						<td><?PHP echo $arr->type == 'loose' ? $arr->measurement.' ('. $arr->unit_name .')' : $arr->measurement.' ('. $arr->unit_name .')'; ?></td>
+						
 						<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
 					</tr>
 						<?PHP
