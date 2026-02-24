@@ -131,11 +131,11 @@
 
 			/* ================= FILTER ================= */
 			$where = "
-			WHERE
-			(
+			WHERE 1
+			/*(
 				(COALESCE(online.online_stock,0) - COALESCE(oi.used_qty,0)) > 0
 				OR COALESCE(pos.pos_stock,0) > 0
-			)
+			)*/
 			";
 
 			/* ⭐ ADD THIS PART ONLY */
