@@ -179,7 +179,7 @@
 								<tbody>
 								<?php
 									if($_SESSION['ROLE_ID'] == 1) {
-										$where = "WHERE oi.active_status=:active_status
+										$where = "WHERE o.active_status=:active_status
 										". $whereDateRange ."
 											  GROUP BY oi.order_id
 											  ORDER BY 
@@ -190,7 +190,7 @@
 										//$params = [':active_status'=> 3];	
 									} else {
 										$where = "WHERE oi.seller_id=:seller_id 
-											  AND oi.active_status=:active_status
+											  AND o.active_status=:active_status
 											  ". $whereDateRange ."
 											  GROUP BY oi.order_id
 											  ORDER BY 

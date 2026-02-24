@@ -23,89 +23,91 @@
 	
 	if($_SESSION['ROLE_ID'] == 1) {
 		//total orders
-		$total_orders_where = "WHERE 1 GROUP BY o.orders_id";
+		//$total_orders_where = "WHERE 1 GROUP BY o.orders_id";
+		$total_orders_where = "WHERE 1 GROUP BY oi.order_id";
 		$total_orders_params = [];
 		//received orders
-		$received_orders_where = "WHERE oi.active_status = :active_status GROUP BY o.orders_id";
+		$received_orders_where = "WHERE o.active_status = :active_status GROUP BY oi.order_id";
 		$received_orders_params = [
 			':active_status'	=> 2
 		];
 		//processed orders
-		$processed_orders_where = "WHERE oi.active_status = :active_status GROUP BY o.orders_id";
+		$processed_orders_where = "WHERE o.active_status = :active_status GROUP BY oi.order_id";
 		$processed_orders_params = [
 			':active_status'	=> 3
 		];	
 		//out for delivery orders
-		$out_for_delivery_orders_where = "WHERE oi.active_status = :active_status GROUP BY o.orders_id";
+		$out_for_delivery_orders_where = "WHERE o.active_status = :active_status GROUP BY oi.order_id";
 		$out_for_delivery_orders_params = [
 			':active_status'	=> 5
 		];	
 		//delivered orders
-		$delivered_orders_where = "WHERE oi.active_status = :active_status GROUP BY o.orders_id";
+		$delivered_orders_where = "WHERE o.active_status = :active_status GROUP BY oi.order_id";
 		$delivered_orders_params = [
 			':active_status'	=> 6
 		];	
 		//cancelled orders
-		$cancelled_orders_where = "WHERE oi.active_status = :active_status GROUP BY o.orders_id";
+		$cancelled_orders_where = "WHERE o.active_status = :active_status GROUP BY oi.order_id";
 		$cancelled_orders_params = [
 			':active_status'	=> 7
 		];	
 		//returned orders
-		$returned_orders_where = "WHERE oi.active_status = :active_status GROUP BY o.orders_id";
+		$returned_orders_where = "WHERE o.active_status = :active_status GROUP BY oi.order_id";
 		$returned_orders_params = [
 			':active_status'	=> 8
 		];		
 		
 		//incomplete orders
-		$incompleted_orders_where = "WHERE oi.active_status = :active_status GROUP BY o.id";
+		$incompleted_orders_where = "WHERE o.active_status = :active_status GROUP BY oi.order_id";
 		$incompleted_orders_params = [
 			':active_status'	=> 1
 		];
 	} else{
 		//total orders
-		$total_orders_where = "WHERE oi.seller_id=:seller_id GROUP BY o.orders_id";
+		//$total_orders_where = "WHERE oi.seller_id=:seller_id GROUP BY o.orders_id";
+		$total_orders_where = "WHERE oi.seller_id=:seller_id GROUP BY oi.order_id";
 		$total_orders_params = [
 			':seller_id'	=> $_SESSION['SELLER_ID']
 		];
 		//received orders
-		$received_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
+		$received_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
 		$received_orders_params = [
 			':active_status'	=> 2,
 			':seller_id'		=> $_SESSION['SELLER_ID']
 		];	
 		//received orders
-		$processed_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
+		$processed_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
 		$processed_orders_params = [
 			':active_status'	=> 3,
 			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 		//out for delivery orders
-		$out_for_delivery_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
+		$out_for_delivery_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
 		$out_for_delivery_orders_params = [
 			':active_status'	=> 5,
 			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 		//delivered orders
-		$delivered_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
+		$delivered_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
 		$delivered_orders_params = [
 			':active_status'	=> 6,
 			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 		//cancelled orders
-		$cancelled_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
+		$cancelled_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
 		$cancelled_orders_params = [
 			':active_status'	=> 7,
 			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 		//returned orders
-		$returned_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.orders_id";
+		$returned_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
 		$returned_orders_params = [
 			':active_status'	=> 8,
 			':seller_id'		=> $_SESSION['SELLER_ID']
 		];
 		
 		//incomplete orders
-		$incompleted_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.id";
+		$incompleted_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
 		$incompleted_orders_params = [
 			':active_status'	=> 1,
 			':seller_id'		=> $_SESSION['SELLER_ID']
@@ -113,10 +115,16 @@
 	}
 	$fields = "o.id";
 	$tables = ORDERS . " o
-	INNER JOIN " . ORDERS_ITEMS . " oi ON oi.orders_id = o.orders_id";
+	INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
+	LEFT JOIN " . USERS . " u ON u.id = o.user_id
+	INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = o.active_status
+	LEFT JOIN " . ORDERS_STATUSES . " os ON os.order_id = o.id AND os.status = o.active_status";
 	//total orders
+	
 	$totalOrdersArr = $general_cls_call->select_join_query($fields, $tables, $total_orders_where, $total_orders_params, 2);
-	$total_orders = count($totalOrdersArr);
+	//echo "<pre>"; print_r($totalOrdersArr);die;
+	//$total_orders = count($totalOrdersArr);
+	
 	//received orders
 	$receivedOrdersArr = $general_cls_call->select_join_query($fields, $tables, $received_orders_where, $received_orders_params, 2);
 	$received_orders = count($receivedOrdersArr);
@@ -139,7 +147,8 @@
 	// incomplete order
 	$incompletedOrdersArr = $general_cls_call->select_join_query($fields, $tables, $incompleted_orders_where, $incompleted_orders_params, 2);
 	$incompleted_orders = count($incompletedOrdersArr);
-
+	
+	$total_orders = $received_orders + $processed_orders + $out_for_delivery_orders + $delivered_orders + $cancelled_orders + $returned_orders + $incompleted_orders;
 	ob_end_flush();
 	//echo $total_orders;die;
 ?>

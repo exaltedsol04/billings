@@ -15,7 +15,7 @@
 		{
 			$fromDate = $_POST['fromDate'];
 			$toDate = $_POST['toDate'];
-			$whereDateRange = "o.created_at >= :fromDate AND o.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+			$whereDateRange = "os.created_at >= :fromDate AND os.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
 			
 			if($_SESSION['ROLE_ID'] == 1)
 			{
@@ -34,7 +34,8 @@
 		}
 		else
 		{
-			$whereDateRange = 'DATE(o.created_at) = CURDATE()';
+			$whereDateRange = 'DATE(os.created_at) = CURDATE()';
+			//$whereDateRange = '';
 			if($_SESSION['ROLE_ID'] == 1)
 			{
 				$params = [];
