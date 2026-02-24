@@ -11,14 +11,16 @@
 
 	ob_start();
 	//total orders
-	$incompleted_orders_where = "WHERE oi.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY o.id";
+	$incompleted_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
 	$incompleted_orders_params = [
 		':active_status'	=> 1,
 		':seller_id'		=> $_SESSION['SELLER_ID']
 	];
 	$fields = "o.id";
 	$tables = ORDERS . " o
-	INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id";
+	INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
+	INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = o.active_status
+	LEFT JOIN " . ORDERS_STATUSES . " os ON os.order_id = o.id AND os.status = o.active_status";
 	//total orders
 	$incompletedOrdersArr = $general_cls_call->select_join_query($fields, $tables, $incompleted_orders_where, $incompleted_orders_params, 2);
 	$incompleted_orders = count($incompletedOrdersArr);
@@ -183,7 +185,7 @@
 								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $to_be_delivered; ?></span></td>
 								<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>
 								
-								<td class="<?php echo $arr->payment_method == 'Razorpay' ? 'text-success' : '' ; ?> text-center"><?php echo $arr->payment_method == 'Razorpay' ? 'Online': $arr->payment_method; ?></td>
+								<td class="<?php echo $arr->payment_method == 'Razorpay' ? 'text-success' : '' ; ?> text-center"><?php echo $arr->payment_method == 'Razorpay' ? 'Online'. '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>': $arr->payment_method; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
 								<td class="d-flex align-items-center gap-3">
 									<!--<a href="javascript:void(0)" class="text-success font-text2" onclick="assignOperator(<?php echo($arr->id);?>)">
