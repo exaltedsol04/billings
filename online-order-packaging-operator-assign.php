@@ -28,7 +28,7 @@
 			];
 		}
 		
-		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, o.total, o.delivery_charge, o.payment_method, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status, o.address_id";
+		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, o.total, o.delivery_charge, o.payment_method, o.razorpay_transaction_id, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status, o.address_id";
 		$tables = ORDERS . " o
 		INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
 		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id
@@ -62,7 +62,7 @@
 		$discount = 0;
 		$total_amount = 0;
 		
-		if($orderArr->payment_method=='wallet')
+		if($orderArr[0]->payment_method=='wallet')
 		{
 			$sub_total = $orderArr[0]->total;
 			$packing_charge = $orderArr[0]->packing_charge;
@@ -78,6 +78,13 @@
 			$final_total = $orderArr[0]->order_total;
 			$discount  = ($orderArr[0]->total + $packing_charge + $delivery_charge) - $final_total;
 			$total_amount = $final_total;
+		}
+		
+		// check for paid or unpaid
+		$paid = 'Unpaid';
+		if($orderArr[0]->razorpay_transaction_id!=null && $orderArr[0]->payment_method == 'Razorpay')
+		{
+			$paid = 'Paid';
 		}
 	}
 
@@ -235,17 +242,35 @@
                   </div>
 				  <div class="d-flex justify-content-between border-top pt-4">
                     <h5 class="fw-semi-bold">Payment Method :</h5>
-                    <h5 class="fw-semi-bold"><?php echo $orderData->payment_method; ?></h5>
+                    <h5 class="fw-semi-bold"><?php echo $orderData->payment_method == 'Razorpay' ? 'Online' : $orderData->payment_method; ?></h5>
+                  </div>
+				  
+				   <div class="d-flex justify-content-between border-top">
+                    <h6 class="fw-semi-bold text-danger"><?php echo ($paid == 'Unpaid' && $orderArr[0]->payment_method == 'Razorpay') ? $paid : '' ; ?></h6>
                   </div>
 				   <?php if($orderData->active_status == 2) { ?>
-					<div class="col-12 mt-4">
-						<a href="javascript:;" onclick="assignOperator(<?php echo($orderData->id);?>)">
+				   
+						<?php if($paid == 'Paid' || $orderArr[0]->payment_method=='COD') {
+						?>
+						<div class="col-12 mt-4">
+							<a href="javascript:;" onclick="assignOperator(<?php echo($orderData->id);?>)">
+								<div class="d-grid">
+									<button type="button" class="btn btn-primary">Assign Operator</button>
+								</div>
+							</a>
+						</div>
+						<?php 
+						}
+						else{
+						?>
+						<div class="col-12 mt-4">
 							<div class="d-grid">
-								<button type="button" class="btn btn-primary">Assign Operator</button>
+								<button type="button" class="btn btn-secondary">Assign Operator</button>
 							</div>
-						</a>
-					</div>
+							
+						</div>
 					<?php 
+						}
 					}
 				  ?>
                 </div>
@@ -526,6 +551,7 @@ function assignOperator(orderId)
 			}
 		}
 	});
+	
 }
 $(document).on('click', '#assignOperatorSave', function (e) {
   e.preventDefault();

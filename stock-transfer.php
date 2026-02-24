@@ -248,6 +248,7 @@
 </html>
 <script>
 $(document).ready(function(){
+	clearCart();
 	//Start Increase and Decrease
 	Object.keys(localStorage).forEach(key => {
 

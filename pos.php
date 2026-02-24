@@ -490,6 +490,8 @@
 
 <script>
 $(document).ready(function(){
+	clearCart();
+	
 	<?php if (!empty($last_insert_id)) { ?>
         var order_id = <?= (int)$last_insert_id ?>;
 		clearCart();
