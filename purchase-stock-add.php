@@ -10,7 +10,7 @@
 	/*******End Auth Section*******/
 	ob_start();
 	/*=========== CODE START ===========*/
-	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	if($_SERVER['REQUEST_METHOD'] == "POST")
 	{	
 		extract($_POST);
 		if($product != '' && $stock !='' && $purchase_price !='' && $vendor_id !='')
@@ -72,18 +72,22 @@
 				//header('location:admin-print-purchase-order-details.php');
 				$id = $group_id;
 				$location  = SITE_URL.'admin-print-purchase-order-details?group_id=' .$id;
-				//header('location:' . $location);
 				
-				echo "<script>window.open('$location', '_blank');</script>";
-				
-				$sucMsg = "Stock Inserted Successfully";
+				$redirect  = SITE_URL.'purchase-stock-add?m=1';
+				echo "<script>
+						window.open('$location', '_blank');
+						window.location.href = '$redirect';
+					  </script>";
+				exit();
 			}
 			else{
+				header("Location: ".SITE_URL.'purchase-stock-add?m=2');
 				$erMsg = "Purchase price always less than selling price";
 			}
 			
 		}
 		else{
+			header("Location: ".SITE_URL.'purchase-stock-add?m=3');
 			$erMsg = "Please Fill All Fields";
 		}
 		
@@ -117,26 +121,26 @@
 					  
 					</div>
 					<?PHP
-						if(isset($erMsg) && $erMsg != '')
+						if(isset($_GET['m']) && ($_GET['m']== '2' || $_GET['m']== '3'))
 						{
 					?>
 						<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
-							<div class="text-white"><strong><?PHP echo $Error_mesg; ?></strong> <?PHP echo $erMsg; ?></div>
+							<div class="text-white"><strong><?PHP echo $_GET['m'] == 2 ? 'Purchase price always less than selling price.' : 'Please Fill All Fields.'; ?></div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
 						}
-						if(isset($sucMsg) && $sucMsg != '')
+						if(isset($_GET['m']) && $_GET['m']== '1')
 						{
 					?>
 						<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
-							<div class="text-white"><strong>Success</strong> <?PHP echo $sucMsg; ?></div>
+							<div class="text-white"><strong>Success</strong> Stock Inserted Successfully.</div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
 						}
 					?>
-						<form class="row g-4" action="" method="post">
+						<form class="row g-4" action="" method="post" id="frmAdminPur">
 							<div class="col-md-12">
 								<label for="input1" class="form-label">Products</label>
 									<select name="product" id="product" class="form-select select2-dropdown" tabindex="1" onchange="select_product(this.value)">
@@ -263,7 +267,7 @@
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">
 									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
-									<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5">Purchase Stock</button>
+									<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit"  onclick="load_submit('frmAdminPur')">Purchase Stock</button>
 								</div>
 							</div>
 						</form>

@@ -44,7 +44,11 @@
 			$general_cls_call->insert_query(PACKAGING_OPERATORS, $field, $value, $addExecute);
 			$sucMsg = "Data Inserted Successfully";
 			
+			header("Location: ".SITE_URL.'packaging-operator-add?m=1');
+			exit();
+			
 		} else {
+			header("Location: ".SITE_URL.'packaging-operator-add?m=2');
 			$erMsg = "Please Fill All Fields";
 		}
 		
@@ -77,20 +81,20 @@
 					  
 					</div>
 					<?PHP
-						if(isset($erMsg) && $erMsg != '')
+						if(isset($_GET['m']) && $_GET['m']== '2')
 						{
 					?>
 						<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
-							<div class="text-white"><strong><?PHP echo $Error_mesg; ?></strong> <?PHP echo $erMsg; ?></div>
+							<div class="text-white"><strong> Please Fill All Fields.</strong></div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
 						}
-						if(isset($sucMsg) && $sucMsg != '')
+						if(isset($_GET['m']) && $_GET['m']== '1')
 						{
 					?>
 						<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
-							<div class="text-white"><strong>Success</strong> <?PHP echo $sucMsg; ?></div>
+							<div class="text-white"><strong>Success</strong> Data Inserted Successfully.</div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP

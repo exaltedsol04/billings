@@ -86,7 +86,16 @@
 			$id = $group_id;
 			$location  = SITE_URL.'admin-print-purchase-order-details?group_id=' .$id;
 			//header('location:' . $location);
-			echo "<script>window.open('$location', '_blank');</script>";
+			//echo "<script>window.open('$location', '_blank');</script>";
+			
+			$redirect  = SITE_URL.'purchase-stock-multiple-add?m=1';
+			echo "<script>
+					window.open('$location', '_blank');
+					window.location.href = '$redirect';
+				  </script>";
+			exit();
+			
+			
 		//}
 		//else{
 			//$erMsg = "Please Fill All Fields";
@@ -131,11 +140,11 @@
 						</div>
 					<?PHP
 						}
-						if(isset($sucMsg) && $sucMsg != '')
+						if(isset($_GET['m']) && $_GET['m']== '1')
 						{
 					?>
 						<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
-							<div class="text-white"><strong>Success</strong> <?PHP echo $sucMsg; ?></div>
+							<div class="text-white"><strong>Success</strong> Stock Inserted Successfully.</div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
@@ -290,7 +299,7 @@
 						<div class="col-md-12">
 							<div class="d-md-flex d-grid justify-content-md-between">
 								<button type="button" id="addMore" class="btn btn-primary">+ Add More</button>
-								<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success save-purchase-stock">Purchase Stock</button>
+								<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success save-purchase-stock load-submit">Purchase Stock</button>
 							</div>
 						</div>
 						</div>
@@ -588,8 +597,9 @@ $(document).on('click', '.save-purchase-stock', function (e) {
 
         return;
     }
-
-   $('#save_stock')[0].submit();
+	
+   load_submit('save_stock');
+   //$('#save_stock')[0].submit();
     
 });
 $(document).on('change', 'select', function () {
