@@ -194,7 +194,7 @@
 								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $to_be_delivered; ?></span></td>
 								<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>
 								
-								<td class="<?php echo $arr->payment_method == 'Razorpay' ? 'text-success' : '' ; ?> text-center"><?php echo $arr->payment_method == 'Razorpay' ? 'Online'. '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $paid . '</div>': $arr->payment_method; ?></td>
+								<td class="text-center"><?php echo $arr->payment_method == 'Razorpay' ? '<span class="text-success">Online</span>'. '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $paid . '</div>': $arr->payment_method; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
 								<td class="d-flex align-items-center gap-3">
 									<!--<a href="javascript:void(0)" class="text-success font-text2" onclick="assignOperator(<?php echo($arr->id);?>)">
