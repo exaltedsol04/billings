@@ -1227,7 +1227,7 @@ error_reporting(0);
 					
 					// available online stock
 					// decide which column to sum
-					$column = ($product_variant_dtls->type === 'loose')
+					/*$column = ($product_variant_dtls->type === 'loose')
 						? 'loose_stock_quantity'
 						: 'stock';
 
@@ -1256,7 +1256,9 @@ error_reporting(0);
 						$whereOnline,
 						$paramsOnline,
 						$column
-					);
+					);*/
+					
+					$stock_used_online = $ruf->available_stock_report(['product_id' => $product_variant_dtls->product_id, 'product_variant_id' => $val, 'product_type' => $product_variant_dtls->type]);
 
 					
 					$fields = "
@@ -1347,7 +1349,8 @@ error_reporting(0);
 						"measurement" => $product_variant_dtls->measurement,
 						"variant_name" => $p_variant_name,
 						"variant_stock" => $availableStock == null ? 0 : $availableStock,
-						"variant_stock_online" => $stock_used_online->total == null ? 0 : $stock_used_online->total - $qty_used->total_used,
+						//"variant_stock_online" => $stock_used_online->total == null ? 0 : $stock_used_online->total - $qty_used->total_used,
+						"variant_stock_online" => $stock_used_online->available_stock == null ? 0 : $stock_used_online->available_stock,
 					];
 				}
 				//echo '<pre>'; print_r($stockArr); die;
