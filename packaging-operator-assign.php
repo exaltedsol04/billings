@@ -130,7 +130,7 @@
 								];
 							}
 							
-							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, SUM(oi.sub_total) AS orders_items_sub_total, o.payment_method, u.name AS customer_name, osl.status AS orders_status_list_status, o.address_id";
+							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, SUM(oi.sub_total) AS orders_items_sub_total, o.payment_method, o.razorpay_transaction_id, u.name AS customer_name, osl.status AS orders_status_list_status, o.address_id";
 
 							$tables = ORDERS . " o
 							INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
@@ -173,6 +173,15 @@
 									if($_SESSION['ROLE_ID'] == 1) {
 										$final_total += $arr->packing_charge;
 									}
+									
+									// check for paid or unpaid order
+									$paid = 'Unpaid';
+									if($arr->razorpay_transaction_id!=null && $arr->payment_method == 'Razorpay')
+									{
+										$paid = 'Paid';
+									}
+									
+									
 							?>
 							  <tr id="dataRow<?php echo($arr->id);?>">
 								<td><?PHP echo $arr->id; ?></td>
@@ -185,7 +194,7 @@
 								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $to_be_delivered; ?></span></td>
 								<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>
 								
-								<td class="<?php echo $arr->payment_method == 'Razorpay' ? 'text-success' : '' ; ?> text-center"><?php echo $arr->payment_method == 'Razorpay' ? 'Online'. '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>': $arr->payment_method; ?></td>
+								<td class="<?php echo $arr->payment_method == 'Razorpay' ? 'text-success' : '' ; ?> text-center"><?php echo $arr->payment_method == 'Razorpay' ? 'Online'. '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $paid . '</div>': $arr->payment_method; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
 								<td class="d-flex align-items-center gap-3">
 									<!--<a href="javascript:void(0)" class="text-success font-text2" onclick="assignOperator(<?php echo($arr->id);?>)">
