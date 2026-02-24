@@ -200,7 +200,7 @@
 								
 								//$pv_stocks = $general_cls_call->select_query("stock", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $arr->product_variant_id), 1);
 								
-								$sql = "
+								/*$sql = "
 								SUM(
 									CASE
 										WHEN u.parent_id = 0
@@ -244,13 +244,13 @@
 								}
 								else {
 									$total_stock = $arr->stock;
-								}	
+								}	*/
 					?>
                      <tr class="text-center" id="dataRow<?php echo($arr->id);?>">
 						<td><?PHP echo $k+1 ?></td>
 						<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 						<td><?PHP echo $general_cls_call->cart_product_name($arr->name); ?></td>
-						<td><?PHP echo round($total_stock, 2); ?></td>
+						<td><?PHP echo round($arr->stock, 2); ?></td>
 						<td><?PHP echo (round($arr->pos_stock, 2) == 0) ? 0 : round($arr->pos_stock, 2); ?></td>
 						<td><?PHP echo round($arr->available_stock, 2); ?></td>
 						<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>

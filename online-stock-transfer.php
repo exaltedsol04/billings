@@ -8,7 +8,8 @@
 	];
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
-//error_reporting(1);
+
+error_reporting(1);
 	ob_start();
 	/*=========== ACCOUNT SETTINGS START ===========*/
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
@@ -87,25 +88,40 @@
 				);
 				$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 				
+				$product_variant_stock_exists = $ruf->available_stock_report(['product_id' => $product_id, 'product_variant_id' => $product_variant_id, 'product_type' => $product_variant_dtls->type]);
+				
+				//echo '--'.$product_variant_stock_exists->available_stock;
+				//echo '<pre>'; print_r($product_variant_stock_exists); die;
 				//------- add stock to product variant table-----
-				$product_variant_stock_exists = $product_variant_dtls->stock;
-				$product_variant_stock = $product_variant_stock_exists + $stock;
+				//$product_variant_stock_exists = $product_variant_dtls->stock;
+				//$product_variant_stock = $product_variant_stock_exists->available_stock + $stock;
+				$product_variant_stock = $product_variant_stock_exists->available_stock ?? 0;
 				if($product_variant_dtls->type == 'loose'){
 					$get_data = $general_cls_call->select_query("*", UNITS, "WHERE id=:id", array(':id'=>$product_variant_dtls->stock_unit_id), 1);
 					if($get_data->parent_id != 0){
 						$loose_stock_quantity = ($loose_stock_quantity * $get_data->conversion) / $product_variant_dtls->measurement;
 					}
-					$product_variant_stock = $product_variant_stock_exists + $loose_stock_quantity;
+					//$product_variant_stock = $product_variant_stock_exists->available_stock + $loose_stock_quantity;
+					$product_variant_stock = $product_variant_stock_exists->available_stock ?? 0;
+				}
+				//echo $product_variant_stock; die;
+				if ($product_variant_dtls->type === 'loose') {
+					$whereClausePv = "WHERE product_id = :product_id";
+				} else {
+					$whereClausePv = "WHERE id = :product_variant_id";
 				}
 				$setValuesPv = "stock=:stock, status=:status";
 				$updateExecutePv=array(
 					':stock' => $product_variant_stock,
-					':status' => 1,
-					':product_id'	=> $product_id,
-					':id'	=> $product_variant_id
+					':status' => 1
 				);
+				if ($product_variant_dtls->type === 'loose') {
+					$updateExecutePv[':product_id'] = $product_id;
+				} else {
+					$updateExecutePv[':product_variant_id'] = $product_variant_id;
+				}
 				//echo '<pre>'; print_r($updateExecutePv);die;
-				$whereClausePv=" WHERE  product_id=:product_id AND id=:id";
+				//$whereClausePv=" WHERE  product_id=:product_id AND id=:id";
 				$general_cls_call->update_query(PRODUCT_VARIANTS, $setValuesPv, $whereClausePv, $updateExecutePv);
 				
 				

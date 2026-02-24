@@ -12,9 +12,11 @@
 	include_once("includes/databaseTable.php");			/* This is for includeing the all query function */
 	include_once("includes/config.php");
     include_once("includes/fcm.php"); 	
+    include_once("includes/reuseable-functions.php"); 	
 	
 
 	$general_cls_call=new general($db);
 	//$fcm = new FCM($db);
 	$fcm = new FCM($db, $general_cls_call);
+	$ruf = new RUF($db, $general_cls_call);
 ?>
