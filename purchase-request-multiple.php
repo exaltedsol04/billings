@@ -63,6 +63,9 @@
 				$_SESSION['call_js'] = true;
 			}
 			
+			header("Location: ".SITE_URL.'purchase-request-multiple?m=1');
+			exit();
+			
 		}
 		else
 		{
@@ -105,11 +108,11 @@
 						</div>
 					<?PHP
 						}
-						if(isset($sucMsg) && $sucMsg != '')
+						if(isset($_GET['m']) && $_GET['m']== '1')
 						{
 					?>
 						<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
-							<div class="text-white"><strong>Success</strong> <?PHP echo $sucMsg; ?></div>
+							<div class="text-white"><strong>Success</strong>Data has been submitted successfully</div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
@@ -247,7 +250,7 @@
 						<div class="col-md-12">
 							<div class="d-md-flex d-grid justify-content-md-between">
 								<button type="button" id="addMore" class="btn btn-primary">+ Add More</button>
-								<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success save-purchase-stock">Request Stock</button>
+								<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success save-purchase-stock  load-submit">Request Stock</button>
 							</div>
 						</div>
 						</div>
@@ -555,8 +558,9 @@ $(document).on('click', '.save-purchase-stock', function (e) {
 
         return;
     }
-
-   $('#save_stock')[0].submit();
+	
+	load_submit('save_stock');
+	//$('#save_stock')[0].submit();
     
 });
 $(document).on('change', 'select', function () {

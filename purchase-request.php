@@ -11,7 +11,7 @@
 	ob_start();
 
 /*=========== ACCOUNT SETTINGS START ===========*/
-	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnSubmit'])) && $_POST['btnSubmit'] === "SAVE")
+	if($_SERVER['REQUEST_METHOD'] == "POST")
 	{	
 		extract($_POST);
 		//echo "<pre>";print_r($product_variant_id);die;
@@ -67,9 +67,12 @@
 				$_SESSION['call_js'] = true;
 			}
 			
+			header("Location: ".SITE_URL.'purchase-request?m=1');
+			exit();
 		}
 		else
 		{
+			header("Location: ".SITE_URL.'purchase-request?m=2');
 			$erMsg = "Please choose product.";
 		}
 	}
@@ -89,17 +92,17 @@
 <main class="main-wrapper">
     <div class="main-content">
 		<?PHP
-		if(isset($erMsg) && $erMsg != '')
+		if(isset($_GET['m']) && $_GET['m']== '2')
 		{
 	?>
 		<div class="alert alert-danger fade in">
 		  <button class="close" data-dismiss="alert">X</button>
-		  <i class="fa-fw fa fa-times"></i><strong>Error!</strong> <?PHP echo $erMsg; ?>
+		  <i class="fa-fw fa fa-times"></i><strong>Error!</strong> Please choose product.
 		</div>
 	<?PHP
 		}
 		
-		if(isset($sucMsg) && $sucMsg != '')
+		if(isset($_GET['m']) && $_GET['m']== '1')
 		{
 	?>
 	
@@ -152,7 +155,7 @@
     </div>
 	<div class="card">
 		<div class="card-body">	
-			<form name="frm" action="" method="post">
+			<form name="frm" action="" method="post" id="frmPurchase">
 			<div class="table-responsive">
 				<table class="table table-striped table-bordered">
 					  <thead>
@@ -176,7 +179,7 @@
 			<div class="box-footer text-center">
 					<div class="loader" id="loader1" style="display:none"></div>
 
-                    <button type="submit" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5 submit-request" style="display:none">Submit Request</button>
+                    <button type="button" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5 submit-request load-submit" style="display:none" onclick="load_submit('frmPurchase')">Submit Request</button>
 					
 					
                   </div>

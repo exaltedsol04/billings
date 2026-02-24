@@ -329,7 +329,7 @@ error_reporting(1);
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">
 									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
-									<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit" onclick="load_submit('frmSubmit')" >Assign
+									<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit" onclick="load_submit('frmSubmit')">Assign
 									</button>
 								</div>
 							</div>
