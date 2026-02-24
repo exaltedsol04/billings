@@ -12,7 +12,7 @@
 error_reporting(1);
 	ob_start();
 	/*=========== ACCOUNT SETTINGS START ===========*/
-	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	if($_SERVER['REQUEST_METHOD'] == "POST")
 	{	
 		extract($_POST);
 		if($product != '' && $stock !='')
@@ -20,12 +20,14 @@ error_reporting(1);
 			if($stock > $stock_limit)
 			{
 				$erMsg = "Stock Quantity Greater Than Available Stock.";
+				header("Location: ".SITE_URL.'online-stock-transfer?m=2');
 			}
 			/*elseif($product_variant_id == '')
 			{
 				$erMsg = "Please select the unit.";
 			}*/
 			else{
+				//echo '<script>window.onload = function() {load_submit();}</script>';
 				//echo "<pre>";print_r($_POST);die;
 				$explode_product = explode("@@@", $product);
 				//echo "<pre>";print_r($explode_product);die;
@@ -134,9 +136,12 @@ error_reporting(1);
 				$general_cls_call->update_query(PRODUCTS, $setValuesPr, $whereClausePr, $updateExecutePr);
 				
 				$sucMsg = "Stock Inserted Successfully";
+				header("Location: ".SITE_URL.'online-stock-transfer?m=1');
+				exit();
 			}
 		}
 		else{
+			header("Location: ".SITE_URL.'online-stock-transfer?m=3');
 			$erMsg = "Please Fill All Fields";
 		}
 		
@@ -177,26 +182,26 @@ error_reporting(1);
 					  
 					</div>
 					<?PHP
-						if(isset($erMsg) && $erMsg != '')
+						if(isset($_GET['m']) && ($_GET['m']== '2' || $_GET['m']== '3'))
 						{
 					?>
 						<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
-							<div class="text-white"><strong><?PHP echo $Error_mesg; ?></strong> <?PHP echo $erMsg; ?></div>
+							<div class="text-white"><strong><?PHP echo $Error_mesg; ?></strong> <?PHP echo $_GET['m'] == 2 ? 'Stock Quantity Greater Than Available Stock.' : 'Please Fill All Fields.'; ?></div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
 						}
-						if(isset($sucMsg) && $sucMsg != '')
+						if(isset($_GET['m']) && $_GET['m']== '1')
 						{
 					?>
 						<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
-							<div class="text-white"><strong>Success</strong> <?PHP echo $sucMsg; ?></div>
+							<div class="text-white"><strong>Success</strong> Stock Inserted Successfully</div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
 						}
 					?>
-						<form class="row g-4" action="" method="post">
+						<form class="row g-4" action="" method="post" id="frmSubmit">
 							<!--<div class="col-md-12">
 								<label for="input1" class="form-label">Products</label>
 								<select name="product" id="product" onchange=product_stock_show(this.value) class="form-select select2-dropdown" tabindex="1">
@@ -324,7 +329,8 @@ error_reporting(1);
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">
 									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
-									<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5">Assign</button>
+									<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit" onclick="load_submit('frmSubmit')" >Assign
+									</button>
 								</div>
 							</div>
 						</form>

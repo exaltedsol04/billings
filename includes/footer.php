@@ -49,6 +49,7 @@
 	<!--plugins-->
 	<script src="assets/js/jquery.min.js"></script>
 	<!--plugins-->
+
 	<!--<script src="assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>-->
 	<script src="assets/plugins/metismenu/metisMenu.min.js"></script>
 	<?php if (!empty($pageParam['dataTables'])) {  ?>
@@ -63,6 +64,21 @@
 	<script src="assets/js/main.js"></script>
 
     <script>
+	function load_submit(frmId)
+		{
+			$('.load-submit').prop('disabled', true);
+			
+			$('.load-submit').html(
+				'<span class="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true"></span>Loading...'
+			);
+			
+			setTimeout(function() {
+				$('#' + frmId).submit();
+			}, 1000);
+			
+			
+		}
+
 	$(function () {
 		$('[data-bs-toggle="tooltip"]').tooltip();
 		<?php if (!empty($pageParam['dataTables'])) {  ?>
@@ -87,6 +103,10 @@
 				.appendTo( '#example2_wrapper .col-md-6:eq(0)' );
 		<?php } ?>
 	});
+	
+	
+		
+	
 	
 	function deleteData(TABLE, ID) {
 		$('#confirmDelete').modal("show");
