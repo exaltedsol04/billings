@@ -13,7 +13,7 @@
 	if($_SERVER['REQUEST_METHOD'] == "POST")
 	{	
 		extract($_POST);
-		if($product != '' && $stock !='')
+		if($product != '' && $stock !='' && $stock_type!='')
 		{
 			//echo "<pre>";print_r($_POST);die;
 			//if($_POST['selling_price'] > $_POST['purchase_price'])
@@ -219,7 +219,7 @@
 								</select>
 							</div>-->
 							<div class="col-md-6">
-								<label for="input1" class="form-label">Products</label>
+								<label for="input1" class="form-label">Products <span class="text-danger">*</span></label>
 								<select name="product" id="product" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="product_stock_show(this.value)">
 									<option value="">Select product</option>
 									<?PHP
@@ -304,7 +304,7 @@
 								</select>
 							</div>-->
 							<div class="col-md-3">
-								<label for="input5" class="form-label">Stock Type</label>
+								<label for="input5" class="form-label">Stock Type <span class="text-danger">*</span></label>
 								<select name="stock_type" id="stock_type" class="form-select select2-dropdown" tabindex="1" required onchange="get_stock_type(this.value)">
 									<option value="">Select...</option>
 									<option value="1">POS</option>
@@ -313,7 +313,7 @@
 							</div>
 
 							<div class="col-md-3">
-								<label for="input5" class="form-label">Deduct Quantity</label>
+								<label for="input5" class="form-label">Deduct Quantity <span class="text-danger">*</span></label>
 								<input type="text" class="form-control deduct-qty" name="stock" id="stock" placeholder="Deduct quantity" required>
 								<span class="text-danger" id="err_stock"></span>
 							</div>
@@ -354,7 +354,9 @@
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">
 									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
-									<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit"  onclick="load_submit('frmdeductstock')">Deduct Stock</button>
+									<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit success-button-show"  onclick="load_submit('frmdeductstock')">Deduct Stock</button> 
+									<button type="button" name="btnUser" value="SAVE" class="btn btn-secondary px-5 secondary-button-show" style="display:none">Deduct Stock</button>
+									
 								</div>
 							</div>
 						</form>
@@ -514,6 +516,8 @@ function product_stock_show(product)
 	$('.deduct-qty').prop('disabled', false);
 	$('#stock_type').val('').trigger('change');
 	$('.load-submit').prop('disabled', false);
+	$('.success-button-show').show();
+	$('.secondary-button-show').hide();
 	
 	$('#stock-check-div').html('');
 	$('#check-stock-div').html('');
@@ -529,6 +533,7 @@ function get_stock_type(type)
 {
 	$('#err_stock').html('');
 	$('#hid_deduct_qty').val('');
+	$('.deduct-qty').val('');
 	$('.deduct-qty').prop('disabled', false);
 	$('.load-submit').prop('disabled', false);
 	
@@ -557,21 +562,29 @@ function get_stock_type(type)
 					
 					//$('#stock_limit').val(variant_stock);
 					$('#hid_deduct_qty').val(variant_stock);
+					
 					if(variant_stock > 0)
 					{
-					$('#err_stock').html('<div class="text-danger">Stock not exceed: ' + variant_stock + '</div>');
+						$('.success-button-show').show();
+						$('.secondary-button-show').hide();
+						$('#err_stock').html('<div class="text-danger">Stock not exceed: ' + variant_stock + '</div>');
 					}
 					else if(variant_stock == 0)
 					{
 						$('.deduct-qty').prop('disabled', true);
 						$('#err_stock').html('<div class="text-danger">You have no stock</div>');
 						$('.load-submit').prop('disabled', true);
+						$('.success-button-show').hide();
+						$('.secondary-button-show').show();
 					}
 					else if(variant_stock < 0)
 					{
 						$('.deduct-qty').prop('disabled', true);
 						$('#err_stock').html('<div class="text-danger">Cannot deduct -ve stock' + variant_stock + '</div>');
 						$('.load-submit').prop('disabled', true);
+						$('.success-button-show').hide();
+						$('.secondary-button-show').show();
+       
 					}
 					
 					

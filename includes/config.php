@@ -29,7 +29,8 @@
 	$deductreason = [
 		'1'=> 'Processing',
 		'2'=> 'Damage',
-		'3'=> 'Wrong entry'
+		'3'=> 'Wrong entry',
+		'4'=> 'Others'
 	];
  
 ?>
