@@ -308,8 +308,8 @@
 								<label for="input5" class="form-label">Stock Type <span class="text-danger">*</span></label>
 								<select name="stock_type" id="stock_type" class="form-select select2-dropdown" tabindex="1" required onchange="get_stock_type(this.value)">
 									<option value="">Select...</option>
-									<option value="1">POS</option>
-									<option value="2">Online</option>
+									<!--<option value="1">POS</option>
+									<option value="2">Online</option>-->
 								</select>
 							</div>
 
@@ -512,7 +512,12 @@ function product_stock_show(product)
 	$('#err_stock').html('');
 	$('#hid_deduct_qty').val('');
 	$('.deduct-qty').prop('disabled', false);
-	$('#stock_type').val('');
+	$('#stock_type').val('').trigger('');
+	let optionHtml = '<option value="">Select..</option>';
+	optionHtml += '<option value="1">POS</option>';
+	optionHtml += '<option value="2">Online</option>';
+	$('#stock_type').html(optionHtml);
+	
 	$('.load-submit').prop('disabled', false);
 	$('.success-button-show').show();
 	$('.secondary-button-show').hide();

@@ -170,7 +170,6 @@
 		
 		function order_status_time($order_id)
 		{
-			//return $order_id;
 			$fields = 'status, created_at';
 			$tables = ORDERS_STATUSES;
 			$where = 'WHERE order_id=:order_id';

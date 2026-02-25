@@ -36,8 +36,8 @@
 		}
 		else
 		{
-			//$whereDateRange = 'AND DATE(os.created_at) = CURDATE()';
-			$whereDateRange = '';
+			$whereDateRange = 'AND DATE(os.created_at) = CURDATE()';
+			//$whereDateRange = '';
 			if($_SESSION['ROLE_ID'] == 1)
 			{
 				$params = [
@@ -226,38 +226,39 @@
 												$action_time = $general_cls_call->time_diff_format_two($arr->created_at, $status_list[3]);
 											}
 											
+											// packaging time
 											$packaging_time = $general_cls_call->time_diff_format_two($status_list[3], $status_list[5]);
 											
+											// travel time
 											$travel_time = $general_cls_call->time_diff_format_two($status_list[5], $status_list[6]);
 											
 											
 												
+											$overall_delivery_time = '';
+											$overall_delivery_class = '';
+											if($arr->order_type == 'instant')
+											{
+												$instant_delivery_time = $general_cls_call->time_diff_format_two($arr->created_at, $status_list[6]);
+											
+												$instant_delivery_time_in_min = $ruf->time_diff_format_in_minute($arr->created_at, $status_list[6]);
 												
-												$overall_delivery_time = '';
-												$overall_delivery_class = '';
-												if($arr->order_type == 'instant')
+												$overall_delivery_time = $instant_delivery_time;
+												
+												if($instant_delivery_time_in_min<=0)
 												{
-													$instant_delivery_time = $general_cls_call->time_diff_format_two($arr->created_at, $status_list[6]);
-												
-													$instant_delivery_time_in_min = $ruf->time_diff_format_in_minute($arr->created_at, $status_list[6]);
-													
-													$overall_delivery_time = $instant_delivery_time;
-													
-													if($instant_delivery_time_in_min<=0)
-													{
-														$overall_delivery_time = 'Invalid date';
-													}
-													elseif($instant_delivery_time_in_min > $arr->instant_delivery_time)
-													{
-														$overall_delivery_class= 'text-danger';
-													}
+													$overall_delivery_time = 'NA';
 												}
-												
-												if($arr->order_type == 'slot')
+												elseif($instant_delivery_time_in_min > $arr->instant_delivery_time)
 												{
-													$instant_delivery_time = $general_cls_call->time_diff_format_two($arr->from_time, $status_list[6]);
-													$overall_delivery_time = $instant_delivery_time;
+													$overall_delivery_class= 'text-danger';
 												}
+											}
+											
+											if($arr->order_type == 'slot')
+											{
+												$instant_delivery_time = $general_cls_call->time_diff_format_two($arr->from_time, $status_list[6]);
+												$overall_delivery_time = $instant_delivery_time;
+											}
 										?>
 										  <tr id="dataRow<?php echo($arr->id);?>">
 											<td><?PHP echo $arr->id; ?></td>
