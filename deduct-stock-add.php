@@ -7,6 +7,7 @@
 		'pageAccessRoleIds' => [3]
 	];
 	include_once 'includes/authCheck.php';
+	error_reporting(1);
 	/*******End Auth Section*******/
 	ob_start();
 	/*=========== CODE START ===========*/
@@ -45,9 +46,9 @@
 					':loose_stock_quantity'	=> -($loose_stock_quantity),
 					':status'				=> 1,
 					':transaction_type'		=> 6,
-					':reason'		=> $general_cls_call->specialhtmlremover($reason),
-					':processing_user_id'		=> $general_cls_call->specialhtmlremover($processing_user_id),
-					':remarks'				=> $remarks,
+					':reason'		=> !empty($reason) ? $general_cls_call->specialhtmlremover($reason) : 0,
+					':processing_user_id'		=> !empty($processing_user_id) ? $general_cls_call->specialhtmlremover($processing_user_id) : 0,
+					':remarks'				=> !empty($remarks) ? $remarks : null,
 					':created_date' 			=> date('Y-m-d H:i:s')
 				);
 				
@@ -511,7 +512,7 @@ function product_stock_show(product)
 	$('#err_stock').html('');
 	$('#hid_deduct_qty').val('');
 	$('.deduct-qty').prop('disabled', false);
-	$('#stock_type').val('').trigger('change');
+	$('#stock_type').val('');
 	$('.load-submit').prop('disabled', false);
 	$('.success-button-show').show();
 	$('.secondary-button-show').hide();
@@ -523,9 +524,12 @@ function product_stock_show(product)
 	let pid = parseInt(myArray[0]);
 	let pvid = parseInt(myArray[2]);
 	let ptype = myArray[3];
+	//alert(pid);alert(pvid);alert(ptype);
 	$('#product_variant_id').val(pvid);
 	$('#product_id').val(pid);
 }
+
+
 function get_stock_type(type)
 {
 	$('#err_stock').html('');
@@ -550,11 +554,12 @@ function get_stock_type(type)
 					//alert(stock.product_variant_id);
 					var unitname = stock.measurement+ ' ' +stock.variant_name;
 					var variant_stock = stock.variant_stock;
-					var variant_stock_online = stock.variant_stock_online;
+					//var variant_stock_online = stock.variant_stock_online;
 					if(stock.product_type == 'loose') {
 						unitname = stock.variant_name;
-						variant_stock = stock.variant_stock.toFixed(2);
-						variant_stock_online = stock.variant_stock_online.toFixed(2);
+						//variant_stock = stock.variant_stock.toFixed(2);
+						variant_stock = variant_stock.toFixed(2);
+						//variant_stock_online = stock.variant_stock_online.toFixed(2);
 					}
 					
 					//$('#stock_limit').val(variant_stock);

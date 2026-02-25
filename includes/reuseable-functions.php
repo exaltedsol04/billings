@@ -167,5 +167,44 @@
 
 			return $sqlQuery;
 		}
+		
+		function order_status_time($order_id)
+		{
+			//return $order_id;
+			$fields = 'status, created_at';
+			$tables = ORDERS_STATUSES;
+			$where = 'WHERE order_id=:order_id';
+			$params = [
+				':order_id' => $order_id
+			];
+			$sqlQuery = $this->general->select_join_query(
+				$fields,
+				$tables,
+				$where,
+				$params,
+				2
+			);
+			$starusArr = [];
+			foreach($sqlQuery as $val)
+			{
+				$starusArr[$val->status] = $val->created_at;
+			}
+			
+			return $starusArr;
+		}
+		
+		function time_diff_format_in_minute($from_time, $to_time)
+		{
+			if (empty($from_time) || empty($to_time)) {
+				return 0;
+			}
+
+			$from = new DateTime($from_time);
+			$to   = new DateTime($to_time);
+
+			$diffInSeconds = $to->getTimestamp() - $from->getTimestamp();
+
+			return floor($diffInSeconds / 60); // return total minutes
+		}
 	}
 ?>

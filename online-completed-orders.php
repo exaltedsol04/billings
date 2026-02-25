@@ -120,6 +120,10 @@
 										<td></td>
 										<td></td>
 										<td></td>
+										<td></td>
+										<td></td>
+										<td></td>
+										<td></td>
 									</tr>
 								  <tr>
 									<th style="width:100px">Order Id</th>
@@ -128,6 +132,10 @@
 									<th class="text-center">Order Date</th>
 									<th class="text-center">Delivery</th>
 									<th>Delivery Type</th>
+									<th>Action time</th>
+									<th>Packaging time</th>
+									<th>Travel Time</th>
+									<th>Overall delivery time</th>
 									<th>To be delivered</th>
 									<th>Deliver min/hrs</th>
 									<th>Order Status</th>
@@ -208,7 +216,48 @@
 													$delivered_time = $arr->orders_statuses_created_at;
 													$deliver_in = $general_cls_call->time_diff_format_two($order_start_time, $delivered_time). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->orders_statuses_created_at, 'j M Y g:i A') . '</div>';
 												}
+											
+											// get order statuses
+											$status_list = $ruf->order_status_time($arr->id);											
+											// action time 
+											$action_time = '--';
+											if($arr->order_type == 'instant')
+											{
+												$action_time = $general_cls_call->time_diff_format_two($arr->created_at, $status_list[3]);
+											}
+											
+											$packaging_time = $general_cls_call->time_diff_format_two($status_list[3], $status_list[5]);
+											
+											$travel_time = $general_cls_call->time_diff_format_two($status_list[5], $status_list[6]);
+											
+											
 												
+												
+												$overall_delivery_time = '';
+												$overall_delivery_class = '';
+												if($arr->order_type == 'instant')
+												{
+													$instant_delivery_time = $general_cls_call->time_diff_format_two($arr->created_at, $status_list[6]);
+												
+													$instant_delivery_time_in_min = $ruf->time_diff_format_in_minute($arr->created_at, $status_list[6]);
+													
+													$overall_delivery_time = $instant_delivery_time;
+													
+													if($instant_delivery_time_in_min<=0)
+													{
+														$overall_delivery_time = 'Invalid date';
+													}
+													elseif($instant_delivery_time_in_min > $arr->instant_delivery_time)
+													{
+														$overall_delivery_class= 'text-danger';
+													}
+												}
+												
+												if($arr->order_type == 'slot')
+												{
+													$instant_delivery_time = $general_cls_call->time_diff_format_two($arr->from_time, $status_list[6]);
+													$overall_delivery_time = $instant_delivery_time;
+												}
 										?>
 										  <tr id="dataRow<?php echo($arr->id);?>">
 											<td><?PHP echo $arr->id; ?></td>
@@ -219,6 +268,10 @@
 											<td class="text-center"><?PHP echo $general_cls_call->time_ago($arr->created_at). '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A') . '</div>'; ?></td>
 											<td class="text-center">--</td>
 											<td><?PHP echo  $arr->order_type; ?></td>
+											<td class="text-center"><?php echo $action_time ;?></td>
+											<td class="text-center"><?php echo $packaging_time ;?></td>
+											<td class="text-center"><?php echo $travel_time ;?></td>
+											<td class="text-center"><span class="<?php echo $overall_delivery_class ;?>"><?php echo $overall_delivery_time ;?></span></td>
 											<td><?php echo $to_be_delivered; ?></td>
 											<td><?php echo $deliver_in; ?></td>
 											<td><?php echo $arr->orders_status_list_status; ?></td>
