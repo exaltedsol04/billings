@@ -2102,5 +2102,246 @@ error_reporting(0);
 			//echo json_encode($varianrArr);
 			echo json_encode($variantUnitArr); 			
 		break;
+		
+		case "getProductVariantDeductStock";
+			
+			// get all the variant 
+			
+			$whereAs = '';
+			if($_POST['ptype'] != 'loose')
+			{
+				$whereAs = 'AND pv.id=:id';
+				$paramsVariant = [
+					':product_id' => $_POST['pid'],
+					':id' => $_POST['pvid']
+				];
+			}
+			else{
+				$paramsVariant = [
+					':product_id' => $_POST['pid']
+				];
+			}
+			
+			$fieldsVariant = "pv.product_id, pv.id as pvid, pv.measurement, pv.type, pv.price, pv.discounted_price, u.*";
+			$tablesVariant = PRODUCT_VARIANTS . " pv
+			INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+			
+			$whereVariant  = "WHERE pv.product_id = :product_id ".$whereAs;
+			/*$paramsVariant = [
+				':product_id' => $_POST['pid'],
+				':id' => $product_variant_id
+			];*/
+			
+			$sqlQueryVariant = $general_cls_call->select_query($fieldsVariant, $tablesVariant, $whereVariant, $paramsVariant, 2);
+			//echo "<pre>";print_r($sqlQueryVariant);die;
+			
+			$variantUnitArr = [];
+			if($sqlQueryVariant[0] != '')
+			{
+				foreach($sqlQueryVariant as $arr)
+				{
+					$variantUnitArr[] = [
+						'id' => $arr->id,
+						'unitname' => $arr->name,
+						'ptype' => $arr->type
+					];
+				}
+			}
+			
+			//echo json_encode($varianrArr);
+			echo json_encode($variantUnitArr); 			
+		break;
+		case "deductCheckVariant":
+				$pv_id = $_POST['pvid'];
+				$pid = $_POST['pid'];
+				$stockType = $_POST['type'];
+				$stockArr = [];
+				
+				$product_variant_id = array(0=>$pv_id);
+				$availableStock = 0;
+				foreach($product_variant_id as $k=>$val)
+				{
+					$Where = "WHERE id=:id AND product_id=:product_id";
+					$params = [
+						':id'	=>	$val,
+						':product_id'	=>	$pid
+					];
+					$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, $Where, $params, 1);
+					//echo "<pre>";print_r($product_variant_dtls);die;
+
+					$fields = "
+						SUM(
+							CASE 
+								WHEN pv.type = 'loose'
+								THEN pst.loose_stock_quantity
+								ELSE pst.stock
+							END
+						) AS total_stock
+						";
+
+						$tables = PRODUCT_STOCK_TRANSACTION . " pst
+						JOIN " . PRODUCT_VARIANTS . " pv 
+							ON pv.id = :product_variant_id";   // only to detect type
+						$where = "
+						WHERE pst.status = :status
+						AND pst.stock_type = :stock_type
+						AND pst.seller_id = :seller_id
+
+						AND (
+								-- LOOSE → check by product_id
+								(pv.type = 'loose' AND pst.product_id = :product_id)
+
+								OR
+
+								-- NORMAL → check by variant
+								(pv.type != 'loose' AND pst.product_variant_id = :product_variant_id)
+						)
+						";
+						$params = [
+							':product_id'         => $product_variant_dtls->product_id,
+							':product_variant_id' => $val,
+							':status'             => 1,
+							':stock_type'         => 1,
+							':seller_id'          => $_SESSION['SELLER_ID']
+						];
+					$stock_used = $general_cls_call->select_query($fields, $tables, $where, $params, 1);
+					$availableStock = $stock_used->total_stock;
+
+
+
+					
+					//echo "<pre>";print_r($stock_used);die;
+					
+					// available online stock
+					// decide which column to sum
+					/*$column = ($product_variant_dtls->type === 'loose')
+						? 'loose_stock_quantity'
+						: 'stock';
+
+
+					$whereOnline = "
+					WHERE product_id = :product_id
+					AND status = :status
+					AND stock_type = :stock_type
+					AND seller_id = :seller_id
+					";
+
+					$paramsOnline = [
+						':product_id'         => $product_variant_dtls->product_id,
+						':status'             => 1,
+						':stock_type'         => 2,
+						':seller_id'          => $_SESSION['SELLER_ID']
+					];
+					if ($product_variant_dtls->type !== 'loose') {
+						$whereOnline .= " AND product_variant_id = :product_variant_id";
+						$paramsOnline[':product_variant_id'] = $val;
+					}
+
+					// sum correct column
+					$stock_used_online = $general_cls_call->select_query_sum(
+						PRODUCT_STOCK_TRANSACTION,
+						$whereOnline,
+						$paramsOnline,
+						$column
+					);*/
+					
+					$stock_used_online = $ruf->available_stock_report(['product_id' => $product_variant_dtls->product_id, 'product_variant_id' => $val, 'product_type' => $product_variant_dtls->type]);
+
+					
+					$fields = "
+						SUM(
+							CASE 
+								WHEN pv.type = 'loose' THEN
+									oi.quantity * pv.measurement / 
+									COALESCE(child_u.conversion, 1)
+								ELSE
+									oi.quantity
+							END
+						) AS total_used
+						";
+
+						$tables = ORDERS_ITEMS . " oi
+						INNER JOIN " . PRODUCT_VARIANTS . " pv
+							ON pv.id = oi.product_variant_id
+
+						INNER JOIN " . UNITS . " child_u
+							ON child_u.id = pv.stock_unit_id
+
+						LEFT JOIN " . UNITS . " parent_u
+							ON parent_u.id = child_u.parent_id
+						";
+
+						$where = "
+						WHERE oi.seller_id = :seller_id
+						AND oi.active_status != :active_status
+						AND (
+								(pv.type = 'loose' AND pv.product_id = :product_id)
+							 OR (pv.type != 'loose' AND oi.product_variant_id = :product_variant_id)
+						)
+						";
+
+						$params = [
+							':seller_id'          => $_SESSION['SELLER_ID'],
+							':active_status'      => 7,
+							':product_variant_id' => $val,
+							':product_id'         => $product_variant_dtls->product_id
+						];
+
+						$qty_used = $general_cls_call->select_join_query(
+							$fields,
+							$tables,
+							$where,
+							$params,
+							1
+						);
+
+					
+					// after cart add check stock
+					
+					$product_dtls = $general_cls_call->select_query("*", PRODUCTS, "WHERE id =:id", array(':id'=> $product_variant_dtls->product_id), 1);
+					$product_name = $general_cls_call->cart_product_name($product_dtls->name);
+					
+					$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id", array(':id'=> $product_variant_dtls->stock_unit_id), 1);
+					$unitname = $unit_dtls->name;
+					
+					//$p_variant_name = $product_variant_dtls->measurement.' '.$unitname;
+					$p_variant_name = $unitname;
+					if($product_variant_dtls->type == 'loose')
+					{
+						$measurement_arr = [
+							'quantity' => 1 * $product_variant_dtls->measurement,
+							'stock_unit_id' => $product_variant_dtls->stock_unit_id,
+						];
+						$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+						$p_variant_name = $measurement_units['unit'];
+					}
+					
+					//$available_stock = $stock_used->total;
+					//$available_stock_online = $stock_used_online->total;
+					
+					if($stockType == 1)
+					{
+						$stockArr[] = [
+							"product_name" => $product_name,
+							"product_type" => $product_variant_dtls->type,
+							"measurement" => $product_variant_dtls->measurement,
+							"variant_name" => $p_variant_name,
+							"variant_stock" => $availableStock == null ? 0 : $availableStock,
+						];
+					}
+					elseif($stockType == 2)
+					{
+						$stockArr[] = [
+							"product_name" => $product_name,
+							"product_type" => $product_variant_dtls->type,
+							"measurement" => $product_variant_dtls->measurement,
+							"variant_name" => $p_variant_name,
+							"variant_stock" => $stock_used_online->available_stock == null ? 0 : $stock_used_online->available_stock,
+						];
+					}
+				}
+				//echo '<pre>'; print_r($stockArr); die;
+				echo json_encode($stockArr);
+		break;
     }
 ?>

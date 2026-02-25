@@ -32,8 +32,8 @@
 				}
 				
 				$remarks = !empty($remarks) ? $remarks : null;
-				$field = "seller_id, product_id, product_variant_id, loose_stock_quantity, stock, stock_type, status,  reason,  processing_user_id, remarks, created_date, transaction_type";
-				$value = ":seller_id, :product_id, :product_variant_id, :loose_stock_quantity, :stock, :stock_type, :status, :reason, :processing_user_id, :remarks, :created_date, :transaction_type";
+				$field = "seller_id, product_id, product_variant_id, loose_stock_quantity, stock, status,  reason,  processing_user_id, remarks, created_date, transaction_type";
+				$value = ":seller_id, :product_id, :product_variant_id, :loose_stock_quantity, :stock, :status, :reason, :processing_user_id, :remarks, :created_date, :transaction_type";
 					
 					//parent_id
 				$addExecute=array(
@@ -41,7 +41,6 @@
 					':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 					':product_variant_id'	=> $general_cls_call->specialhtmlremover($product_variant_id),
 					':stock'				=> -($stock),
-					':stock_type'			=> $general_cls_call->specialhtmlremover($stock_type),
 					':loose_stock_quantity'	=> -($loose_stock_quantity),
 					':status'				=> 1,
 					':transaction_type'		=> 6,
@@ -117,7 +116,7 @@
 						}
 					?>
 						<form class="row g-4" action="" method="post" id="frmdeductstock">
-							<!--<div class="col-md-6">
+							<div class="col-md-6">
 								<label for="input1" class="form-label">Products</label>
 									<select name="product" id="product" class="form-select select2-dropdown" tabindex="1" onchange="select_product(this.value)" required>
 									<option value="">Select...</option>
@@ -217,98 +216,11 @@
 										}
 									?>
 								</select>
-							</div>-->
-							<div class="col-md-6">
-								<label for="input1" class="form-label">Products</label>
-								<select name="product" id="product" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="product_stock_show(this.value)">
-									<option value="">Select product</option>
-									<?PHP
-									$fields = "
-										pv.id,
-										pv.product_id,
-										pv.type,
-										pv.stock,
-										pv.measurement,
-										pv.discounted_price,
-										pv.stock_unit_id,
-										p.name,
-										p.image,
-										p.barcode,
-										u.name as unit_name
-									";
-
-									$tables = PRODUCT_VARIANTS . " pv
-									INNER JOIN " . PRODUCTS . " p 
-										ON p.id = pv.product_id
-									INNER JOIN " . UNITS . " u 
-										ON u.id = pv.stock_unit_id
-
-									/* pick only ONE loose variant per product */
-									LEFT JOIN (
-										SELECT product_id, MIN(id) AS keep_variant_id
-										FROM " . PRODUCT_VARIANTS . "
-										WHERE type = 'loose'
-										GROUP BY product_id
-									) loose_pick 
-										ON loose_pick.keep_variant_id = pv.id
-									";
-
-									$where = "
-									WHERE
-									(
-											pv.type != 'loose'
-										 OR loose_pick.keep_variant_id IS NOT NULL
-									)
-									ORDER BY p.name
-									";
-
-									$params = [];
-
-									$sqlQuery = $general_cls_call->select_join_query(
-										$fields,
-										$tables,
-										$where,
-										$params,
-										2
-									);
-										//echo "<pre>"; print_r($sqlQuery);die;
-										if($sqlQuery[0] != '')
-										{
-											foreach($sqlQuery as $arr)
-											{	
-												$barcode = $arr->barcode;
-												$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
-												$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
-												$unitname = $unit_dtls->name;
-												if($arr->type == 'loose')
-												{
-													$measurement_arr = [
-														'quantity' => 1 * $arr->measurement,
-														'stock_unit_id' => $arr->stock_unit_id,
-													];
-													$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
-													$unitname = $measurement_units['unit'];
-												}
-									?>
-												<option value="<?PHP echo $arr->product_id.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->id.'@@@'.$arr->type; ?>" <?php echo ($_POST['product'] == $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name)) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name); ?> (<?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?> - <?php echo $arr->type; ?>)</option>
-									<?PHP
-											}
-										}
-									?>
-								</select>
 							</div>
-							<!--<div class="col-md-3">
+							<div class="col-md-3">
 								<label for="input5" class="form-label">Unit</label>
 								<select name="product_variant_id" id="product_variant_id" class="form-select select2-dropdown" tabindex="1" required onchange="get_qry(this.value)">
 									<option value="">Select...</option>
-								</select>
-							</div>-->
-							<div class="col-md-3">
-								<label for="input5" class="form-label">Stock Type</label>
-								<select name="stock_type" id="stock_type" class="form-select select2-dropdown" tabindex="1" required onchange="get_stock_type(this.value)">
-									<option value="">Select...</option>
-									<option value="1">POS</option>
-									<option value="2">Online</option>
 								</select>
 							</div>
 
@@ -349,8 +261,6 @@
 								
 							</div>
 							<input type="hidden" id="stock_limit" name="stock_limit" value="<?php echo isset($_POST['stock_limit']) ? $_POST['stock_limit'] : '' ?>">
-							<input type="hidden" id="product_variant_id" name="product_variant_id">
-							<input type="hidden" id="product_id" name="product_id">
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">
 									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
@@ -505,82 +415,5 @@ function get_reason(val)
 		$('.prodessing-man').hide();
 		$('#processing_user_id').prop('required', false);
 	}
-}
-
-function product_stock_show(product)
-{
-	$('#err_stock').html('');
-	$('#hid_deduct_qty').val('');
-	$('.deduct-qty').prop('disabled', false);
-	$('#stock_type').val('').trigger('change');
-	$('.load-submit').prop('disabled', false);
-	
-	$('#stock-check-div').html('');
-	$('#check-stock-div').html('');
-	$('#check-stock-pay-div').html('');
-	const myArray = product.split("@@@");
-	let pid = parseInt(myArray[0]);
-	let pvid = parseInt(myArray[2]);
-	let ptype = myArray[3];
-	$('#product_variant_id').val(pvid);
-	$('#product_id').val(pid);
-}
-function get_stock_type(type)
-{
-	$('#err_stock').html('');
-	$('#hid_deduct_qty').val('');
-	$('.deduct-qty').prop('disabled', false);
-	$('.load-submit').prop('disabled', false);
-	
-	let pvid = $('#product_variant_id').val();
-	let pid = $('#product_id').val();
-	//alert(type);alert(pid);alert(pvid);
-	var datapost = 'action=deductCheckVariant&pvid=' + pvid + '&pid=' + pid + '&type=' + type;
-	$.ajax({
-		type: "POST",
-		url: "<?PHP echo SITE_URL; ?>ajax",
-		data: datapost,
-		success: function(response){
-			var result = JSON.parse(response);
-			if (result.length > 0) {
-				
-				$.each(result, function (i, stock) {
-					//alert(stock.product_variant_id);
-					var unitname = stock.measurement+ ' ' +stock.variant_name;
-					var variant_stock = stock.variant_stock;
-					var variant_stock_online = stock.variant_stock_online;
-					if(stock.product_type == 'loose') {
-						unitname = stock.variant_name;
-						variant_stock = stock.variant_stock.toFixed(2);
-						variant_stock_online = stock.variant_stock_online.toFixed(2);
-					}
-					
-					//$('#stock_limit').val(variant_stock);
-					$('#hid_deduct_qty').val(variant_stock);
-					if(variant_stock > 0)
-					{
-					$('#err_stock').html('<div class="text-danger">Stock not exceed: ' + variant_stock + '</div>');
-					}
-					else if(variant_stock == 0)
-					{
-						$('.deduct-qty').prop('disabled', true);
-						$('#err_stock').html('<div class="text-danger">You have no stock</div>');
-						$('.load-submit').prop('disabled', true);
-					}
-					else if(variant_stock < 0)
-					{
-						$('.deduct-qty').prop('disabled', true);
-						$('#err_stock').html('<div class="text-danger">Cannot deduct -ve stock' + variant_stock + '</div>');
-						$('.load-submit').prop('disabled', true);
-					}
-					
-					
-				});
-				
-				
-				//$('#stock-check-div').html(html);
-			}
-		}
-	});
 }
 </script>
