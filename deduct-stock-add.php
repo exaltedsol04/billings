@@ -512,7 +512,7 @@ function product_stock_show(product)
 	$('#err_stock').html('');
 	$('#hid_deduct_qty').val('');
 	$('.deduct-qty').prop('disabled', false);
-	$('#stock_type').val('').trigger('');
+	//$('#stock_type').val('').trigger('');
 	let optionHtml = '<option value="">Select..</option>';
 	optionHtml += '<option value="1">POS</option>';
 	optionHtml += '<option value="2">Online</option>';
