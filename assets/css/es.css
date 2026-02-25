@@ -1,3 +1,10 @@
+.table-striped {
+  --bs-table-striped-bg: #eff1f3;
+}
+table.table-bordered.dataTable td:first-child,
+table.table-bordered.dataTable th:first-child {
+	border-left-width: 1px;
+}
 .time-wrapper{
     display:flex;
     gap:5px;
