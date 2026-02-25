@@ -10,19 +10,29 @@
 	/*******End Auth Section*******/
 	ob_start();
 	/*=========== CODE START ===========*/
-	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	if($_SERVER['REQUEST_METHOD'] == "POST")
 	{	
 		extract($_POST);
 		//echo "<pre>";print_r($_POST);die;
 		
 		if(empty($vendor_id) && $vendor_id == '')
 		{
+			// check same mobile no. in vendor
 			$whereMobile = "WHERE mobile=:mobile";
 			$paramsMobile = [
 				':mobile' => $mobile
 			];
 			$unique_mobile = $general_cls_call->select_query_count(VENDORS, $whereMobile, $paramsMobile);
-			if($unique_mobile == 0)
+			
+			// check same mobile no. in admin for role_id=6 only
+			$whereMobileAdmin = "WHERE email=:email AND role_id=:role_id";
+			$paramsMobileAdmin = [
+				':email' => $mobile,
+				':role_id' => 6
+			];
+			$unique_mobile_admin = $general_cls_call->select_query_count(ADMIN_MASTER, $whereMobileAdmin, $paramsMobileAdmin);
+			
+			if($unique_mobile == 0 && $unique_mobile_admin==0)
 			{
 				$fieldAdmin = "username, email, password, role_id, status, created_by, created_at, updated_at";
 				$valueAdmin = ":username, :email, :password, :role_id, :status, :created_by, :created_at, :updated_at";
@@ -62,20 +72,42 @@
 					$general_cls_call->insert_query(VENDORS, $field, $value, $addExecute);
 					$sucMsg = "Vendor Created Successfully";
 				}
+				
+				header("Location: ".SITE_URL.'vendor-add?m=1');
+				exit();
 			}
 			else{
+				header("Location: ".SITE_URL.'vendor-add?m=2');
 				$erMsg = "Mobile number should be unique";
 			}
 		}
 		else
 		{
+			// check same mobile no. in vendor
 			$whereMobile = "WHERE mobile=:mobile AND id!=:id";
 			$paramsMobile = [
 				':mobile' => $mobile,
 				':id' => $vendor_id
 			];
 			$unique_mobile = $general_cls_call->select_query_count(VENDORS, $whereMobile, $paramsMobile);
-			if($unique_mobile == 0)
+			
+			// check same mobile no. in admin for role_id=6 only
+			
+			$fieldsVen = "admin_id";
+			$tablesVen = VENDORS;
+			$whereVen = "WHERE id=:id";
+			$paramsVen = [':id'=>$vendor_id];
+			$sqlQueryVen = $general_cls_call->select_query($fieldsVen, $tablesVen, $whereVen, $paramsVen, 1);
+			
+			$whereMobileAdmin = "WHERE email=:email AND role_id=:role_id AND id!=:id";
+			$paramsMobileAdmin = [
+				':email' => $mobile,
+				':role_id' => 6,
+				':id' => $sqlQueryVen->admin_id
+			];
+			$unique_mobile_admin = $general_cls_call->select_query_count(ADMIN_MASTER, $whereMobileAdmin, $paramsMobileAdmin);
+			
+			if($unique_mobile == 0 && $unique_mobile_admin==0)
 			{
 				$fieldsVen = "admin_id";
 				$tablesVen = VENDORS;
@@ -113,8 +145,11 @@
 				$whereClause=" WHERE id = :id";
 				$general_cls_call->update_query(VENDORS, $setValues, $whereClause, $updateExecute);
 				$sucMsg = "Vendor Updated Successfully";
+				header("Location: ".SITE_URL.'vendor-add?m=3');
+				exit();
 			}
 			else{
+				header("Location: ".SITE_URL.'vendor-add?vendor_id='. $vendor_id .'&m=4');
 				$erMsg = "Mobile number should be unique";
 			}
 		}
@@ -165,26 +200,36 @@
 					  
 					</div>
 					<?PHP
-						if(isset($erMsg) && $erMsg != '')
+						if(isset($_GET['m']) && $_GET['m']== '2')
 						{
 					?>
 						<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
-							<div class="text-white"><strong><?PHP echo $Error_mesg; ?></strong> <?PHP echo $erMsg; ?></div>
+							<div class="text-white">Mobile number should be unique</div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
 						}
-						if(isset($sucMsg) && $sucMsg != '')
+						if(isset($_GET['m']) && $_GET['m']== '4')
+						{
+						?>
+						<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
+							<div class="text-white">Mobile number should be unique</div>
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+						
+					    <?php
+						}
+						if(isset($_GET['m']) && ($_GET['m']== '1' || $_GET['m']== '3'))
 						{
 					?>
 						<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
-							<div class="text-white"><strong>Success</strong> <?PHP echo $sucMsg; ?></div>
+							<div class="text-white"><strong>Success</strong> <?PHP echo $_GET['m'] == '1' ? 'Vendor Created Successfully' : 'Vendor Updated Successfully'; ?></div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
 						}
 					?>
-						<form class="row g-4" action="" method="post">
+						<form class="row g-4" action="" method="post" id="frmVendor">
 							
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Name</label>
@@ -247,7 +292,7 @@
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">
 									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
-									<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5">Add vendor</button>
+									<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit"  onclick="load_submit('frmVendor')">Add vendor</button>
 								</div>
 							</div>
 						</form>

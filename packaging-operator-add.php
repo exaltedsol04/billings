@@ -11,7 +11,7 @@
 
 	ob_start();
 	/*=========== START ===========*/
-	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnSubmit'])) && $_POST['btnSubmit'] === "SAVE")
+	if($_SERVER['REQUEST_METHOD'] == "POST")
 	{	
 		extract($_POST);
 		$field = "username, email, password, role_id, status, created_by, created_at, updated_at";
@@ -100,7 +100,7 @@
 					<?PHP
 						}
 					?>
-						<form class="row g-4" action="" method="post">
+						<form class="row g-4" action="" method="post" id="frmpacOperator">
 							<div class="col-md-12">
 								<label for="input1" class="form-label">Name</label>
 								<input type="text" class="form-control" name="name" placeholder="Name" required>	
@@ -122,7 +122,8 @@
 								<input type="hidden" id="order_id" name="order_id">
 								
 								<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
-								<button type="submit" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-primary px-5">Add Packaging Operator</button>
+								<button type="submit" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit" onclick="load_submit('frmpacOperator')">Add operator</button>
+								<!--<button type="button" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-primary px-5 load-submit" onclick="load_submit('frmpacOperator')">Add Packaging Operator</button>-->
 							  </div>
 							</div>
 						</form>
