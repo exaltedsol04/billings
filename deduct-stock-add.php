@@ -377,36 +377,33 @@
 <script>
 $(document).on('input', '.deduct-qty', function () {
 
-    //let row = $(this).closest('.item-row');
-    //row.find('.selling_price_div').html('');
-
     let max = $('#hid_deduct_qty').val();
 
     let value = this.value;
-    
-    // allow only numbers + decimal
-    //value = value.replace(/[^0-9]/g, '');
-
-    // prevent multiple decimals
-    //value = value.replace(/(\..*?)\..*/g, '$1');
-
-    // limit 2 digits after decimal
+    //alert(value);
+	value = value.replace('-', '');
+	value = value.replace(/[^0-9.]/g, '');
+	if ((value.match(/\./g) || []).length > 1) {
+        value = value.substring(0, value.length - 1);
+    }
     //alert(max);
 
     let num = parseFloat(value);
+	
+	if (num === 0) {
+        $(this).val('');
+        $('#err_stock').html('<div class="text-danger">Stock must be greater than 0</div>');
+        return;
+    }
 
     // max check
     if (parseFloat(value) > parseFloat(max)) {
 		$('.deduct-qty').val(max);
 		$('#err_stock').html('<div class="text-danger">Stock not exceed: ' + max + '</div>');
+    } else {
+        $(this).val(value);
+        $('#err_stock').html('');
     }
-	else if(value == '0')
-	{
-		$('.deduct-qty').val(max);
-	}
-	else{
-		$('#err_stock').html('');
-	}
 });
 function select_product(product)
 {
