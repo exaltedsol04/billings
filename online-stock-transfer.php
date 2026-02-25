@@ -230,7 +230,7 @@ error_reporting(1);
 							</div>-->
 							
 							<div class="col-md-12">
-								<label for="input1" class="form-label">Products</label>
+								<label for="input1" class="form-label">Products <span class="text-danger">*</span></label>
 								<select name="product" id="product" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="product_stock_show(this.value)">
 									<option value="">Select product</option>
 									<?PHP
@@ -309,7 +309,7 @@ error_reporting(1);
 								</select>
 							</div>
 							<div class="col-md-6">
-								<label for="input5" class="form-label">Stock Quantity<span class="text-danger" id="show_unit_type"></span></label>
+								<label for="input5" class="form-label">Stock Quantity <span class="text-danger">*</span><span class="text-danger" id="show_unit_type"></span></label>
 								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" value="<?php echo isset($_POST['stock']) ? $_POST['stock'] : '' ?>">
 								<span class="text-danger" id="err_stock"></span>
 							</div>

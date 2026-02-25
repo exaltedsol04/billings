@@ -14,42 +14,48 @@
 	if($_SERVER['REQUEST_METHOD'] == "POST")
 	{	
 		extract($_POST);
-		$field = "username, email, password, role_id, status, created_by, created_at, updated_at";
-		$value = ":username, :email, :password, :role_id, :status, :created_by, :created_at, :updated_at";
-		$newHashPassword = password_hash(stripslashes(trim($password)), PASSWORD_BCRYPT);
-		$addExecute=array(
-			':username'		=> $general_cls_call->specialhtmlremover($name),
-			':email'		=> $general_cls_call->specialhtmlremover($mobile),
-			':password'		=> $general_cls_call->specialhtmlremover($newHashPassword),
-			':role_id'		=> 5,
-			':status'		=> 1,
-			':created_by'	=> $_SESSION['SELLER_ID'],
-			':created_at' 	=> date('Y-m-d H:i:s'),
-			':updated_at'	=> date('Y-m-d H:i:s')
-		);
-		$current_insert_id = $general_cls_call->insert_query(ADMIN_MASTER, $field, $value, $addExecute);
-		
-		if($current_insert_id !='') {
-			$field = "admin_id, name, mobile, street, status, created_at, updated_at";
-			$value = ":admin_id, :name, :mobile, :street, :status, :created_at, :updated_at";
+		if(!empty($name) && !empty($mobile) &&!empty($password))
+		{
+			$field = "username, email, password, role_id, status, created_by, created_at, updated_at";
+			$value = ":username, :email, :password, :role_id, :status, :created_by, :created_at, :updated_at";
+			$newHashPassword = password_hash(stripslashes(trim($password)), PASSWORD_BCRYPT);
 			$addExecute=array(
-				':admin_id'		=> $current_insert_id,
-				':name'			=> $general_cls_call->specialhtmlremover($name),
-				':mobile'		=> $general_cls_call->specialhtmlremover($mobile),
-				':street'		=> $general_cls_call->specialhtmlremover($street),
+				':username'		=> $general_cls_call->specialhtmlremover($name),
+				':email'		=> $general_cls_call->specialhtmlremover($mobile),
+				':password'		=> $general_cls_call->specialhtmlremover($newHashPassword),
+				':role_id'		=> 5,
 				':status'		=> 1,
+				':created_by'	=> $_SESSION['SELLER_ID'],
 				':created_at' 	=> date('Y-m-d H:i:s'),
 				':updated_at'	=> date('Y-m-d H:i:s')
 			);
-			$general_cls_call->insert_query(PACKAGING_OPERATORS, $field, $value, $addExecute);
-			$sucMsg = "Data Inserted Successfully";
+			$current_insert_id = $general_cls_call->insert_query(ADMIN_MASTER, $field, $value, $addExecute);
 			
-			header("Location: ".SITE_URL.'packaging-operator-add?m=1');
-			exit();
-			
-		} else {
+			if($current_insert_id !='') {
+				$field = "admin_id, name, mobile, street, status, created_at, updated_at";
+				$value = ":admin_id, :name, :mobile, :street, :status, :created_at, :updated_at";
+				$addExecute=array(
+					':admin_id'		=> $current_insert_id,
+					':name'			=> $general_cls_call->specialhtmlremover($name),
+					':mobile'		=> $general_cls_call->specialhtmlremover($mobile),
+					':street'		=> $general_cls_call->specialhtmlremover($street),
+					':status'		=> 1,
+					':created_at' 	=> date('Y-m-d H:i:s'),
+					':updated_at'	=> date('Y-m-d H:i:s')
+				);
+				$general_cls_call->insert_query(PACKAGING_OPERATORS, $field, $value, $addExecute);
+				$sucMsg = "Data Inserted Successfully";
+				
+				header("Location: ".SITE_URL.'packaging-operator-add?m=1');
+				exit();
+				
+			} else {
+				header("Location: ".SITE_URL.'packaging-operator-add?m=2');
+				$erMsg = "Please Fill All Fields";
+			}
+		}
+		else{
 			header("Location: ".SITE_URL.'packaging-operator-add?m=2');
-			$erMsg = "Please Fill All Fields";
 		}
 		
 	}
@@ -102,15 +108,15 @@
 					?>
 						<form class="row g-4" action="" method="post" id="frmpacOperator">
 							<div class="col-md-12">
-								<label for="input1" class="form-label">Name</label>
+								<label for="input1" class="form-label">Name <span class="text-danger">*</span></label>
 								<input type="text" class="form-control" name="name" placeholder="Name" required>	
 							</div>
 							<div class="col-md-6">
-								<label for="input5" class="form-label">Mobile</label>
+								<label for="input5" class="form-label">Mobile <span class="text-danger">*</span></label>
 								<input type="text" class="form-control" name="mobile" placeholder="Mobile/Username" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required maxlength="10">
 							</div>
 							<div class="col-md-6">
-								<label for="input5" class="form-label">Password</label>
+								<label for="input5" class="form-label">Password <span class="text-danger">*</span></label>
 								<input type="password" class="form-control" name="password" placeholder="Password" required>
 							</div>							
 							<div class="col-md-12">

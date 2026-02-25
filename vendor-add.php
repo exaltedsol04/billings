@@ -7,6 +7,7 @@
 		'pageAccessRoleIds' => [1]
 	];
 	include_once 'includes/authCheck.php';
+	//error_reporting(1);
 	/*******End Auth Section*******/
 	ob_start();
 	/*=========== CODE START ===========*/
@@ -17,140 +18,154 @@
 		
 		if(empty($vendor_id) && $vendor_id == '')
 		{
-			// check same mobile no. in vendor
-			$whereMobile = "WHERE mobile=:mobile";
-			$paramsMobile = [
-				':mobile' => $mobile
-			];
-			$unique_mobile = $general_cls_call->select_query_count(VENDORS, $whereMobile, $paramsMobile);
-			
-			// check same mobile no. in admin for role_id=6 only
-			$whereMobileAdmin = "WHERE email=:email AND role_id=:role_id";
-			$paramsMobileAdmin = [
-				':email' => $mobile,
-				':role_id' => 6
-			];
-			$unique_mobile_admin = $general_cls_call->select_query_count(ADMIN_MASTER, $whereMobileAdmin, $paramsMobileAdmin);
-			
-			if($unique_mobile == 0 && $unique_mobile_admin==0)
+			if(!empty($name) && !empty($email) &&!empty($mobile) &&!empty($password))
 			{
-				$fieldAdmin = "username, email, password, role_id, status, created_by, created_at, updated_at";
-				$valueAdmin = ":username, :email, :password, :role_id, :status, :created_by, :created_at, :updated_at";
-				$newHashPassword = password_hash(stripslashes(trim($password)), PASSWORD_BCRYPT);
-				$addExecuteAdmin=array(
-					':username'		=> $general_cls_call->specialhtmlremover($name),
-					':email'		=> $general_cls_call->specialhtmlremover($mobile),
-					':password'		=> $general_cls_call->specialhtmlremover($newHashPassword),
-					':role_id'		=> 6,
-					':status'		=> 1,
-					':created_by'	=> $_SESSION['USER_ID'],
-					':created_at' 	=> date('Y-m-d H:i:s'),
-					':updated_at'	=> date('Y-m-d H:i:s')
-				);
-				$current_insert_id = $general_cls_call->insert_query(ADMIN_MASTER, $fieldAdmin, $valueAdmin, $addExecuteAdmin);
+				// check same mobile no. in vendor
+				$whereMobile = "WHERE mobile=:mobile";
+				$paramsMobile = [
+					':mobile' => $mobile
+				];
+				$unique_mobile = $general_cls_call->select_query_count(VENDORS, $whereMobile, $paramsMobile);
 				
-				// add vendor table
-				if($current_insert_id !='') {
-					$field = "admin_id, name, email, mobile,  status, city, pincode, address, product_ids, created_at, updated_at";
-					$value = ":admin_id, :name, :email, :mobile, :status, :city, :pincode, :address, :product_ids, :created_at, :updated_at";
-							
-					$addExecute=array(
-						':admin_id'		=> $current_insert_id,
-						':name'			=> $general_cls_call->specialhtmlremover($name),
-						':email'		=> $general_cls_call->specialhtmlremover($email),
-						':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
-						':city'	=> $general_cls_call->specialhtmlremover($city),
-						':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
-						':address'	=> $general_cls_call->specialhtmlremover($address),
-						':product_ids'	=> $general_cls_call->specialhtmlremover(implode(",", $products)),
-						':status'				=> 1,
-						':created_at' 			=> date('Y-m-d H:i:s'),
-						':updated_at'		    => date('Y-m-d H:i:s')
+				// check same mobile no. in admin for role_id=6 only
+				$whereMobileAdmin = "WHERE email=:email AND role_id=:role_id";
+				$paramsMobileAdmin = [
+					':email' => $mobile,
+					':role_id' => 6
+				];
+				$unique_mobile_admin = $general_cls_call->select_query_count(ADMIN_MASTER, $whereMobileAdmin, $paramsMobileAdmin);
+				
+				if($unique_mobile == 0 && $unique_mobile_admin==0)
+				{
+					$fieldAdmin = "username, email, password, role_id, status, created_by, created_at, updated_at";
+					$valueAdmin = ":username, :email, :password, :role_id, :status, :created_by, :created_at, :updated_at";
+					$newHashPassword = password_hash(stripslashes(trim($password)), PASSWORD_BCRYPT);
+					$addExecuteAdmin=array(
+						':username'		=> $general_cls_call->specialhtmlremover($name),
+						':email'		=> $general_cls_call->specialhtmlremover($mobile),
+						':password'		=> $general_cls_call->specialhtmlremover($newHashPassword),
+						':role_id'		=> 6,
+						':status'		=> 1,
+						':created_by'	=> $_SESSION['USER_ID'],
+						':created_at' 	=> date('Y-m-d H:i:s'),
+						':updated_at'	=> date('Y-m-d H:i:s')
 					);
-				
-				
-					$general_cls_call->insert_query(VENDORS, $field, $value, $addExecute);
-					$sucMsg = "Vendor Created Successfully";
+					$current_insert_id = $general_cls_call->insert_query(ADMIN_MASTER, $fieldAdmin, $valueAdmin, $addExecuteAdmin);
+					//echo $current_insert_id; die;
+					// add vendor table
+					//if($current_insert_id !='') {
+						//echo 'hellow';die;
+						$field = "admin_id, name, email, mobile,  status, city, pincode, address, product_ids, created_at, updated_at";
+						$value = ":admin_id, :name, :email, :mobile, :status, :city, :pincode, :address, :product_ids, :created_at, :updated_at";
+								
+						$addExecute=array(
+							':admin_id'		=> $current_insert_id,
+							':name'			=> $general_cls_call->specialhtmlremover($name),
+							':email'		=> $general_cls_call->specialhtmlremover($email),
+							':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
+							':city'	=> $general_cls_call->specialhtmlremover($city),
+							':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
+							':address'	=> $general_cls_call->specialhtmlremover($address),
+							':product_ids'	=> !empty($products) ? $general_cls_call->specialhtmlremover(implode(",", $products)) : null,
+							':status'				=> 1,
+							':created_at' 			=> date('Y-m-d H:i:s'),
+							':updated_at'		    => date('Y-m-d H:i:s')
+						);
+					
+					
+						$general_cls_call->insert_query(VENDORS, $field, $value, $addExecute);
+						$sucMsg = "Vendor Created Successfully";
+					//}
+					
+					header("Location: ".SITE_URL.'vendor-add?m=1');
+					exit();
 				}
-				
-				header("Location: ".SITE_URL.'vendor-add?m=1');
-				exit();
+				else{
+					header("Location: ".SITE_URL.'vendor-add?m=2');
+					$erMsg = "Mobile number should be unique";
+					exit();
+				}
 			}
 			else{
-				header("Location: ".SITE_URL.'vendor-add?m=2');
-				$erMsg = "Mobile number should be unique";
+				header("Location: ".SITE_URL.'vendor-add?m=5');
 			}
 		}
 		else
 		{
-			// check same mobile no. in vendor
-			$whereMobile = "WHERE mobile=:mobile AND id!=:id";
-			$paramsMobile = [
-				':mobile' => $mobile,
-				':id' => $vendor_id
-			];
-			$unique_mobile = $general_cls_call->select_query_count(VENDORS, $whereMobile, $paramsMobile);
-			
-			// check same mobile no. in admin for role_id=6 only
-			
-			$fieldsVen = "admin_id";
-			$tablesVen = VENDORS;
-			$whereVen = "WHERE id=:id";
-			$paramsVen = [':id'=>$vendor_id];
-			$sqlQueryVen = $general_cls_call->select_query($fieldsVen, $tablesVen, $whereVen, $paramsVen, 1);
-			
-			$whereMobileAdmin = "WHERE email=:email AND role_id=:role_id AND id!=:id";
-			$paramsMobileAdmin = [
-				':email' => $mobile,
-				':role_id' => 6,
-				':id' => $sqlQueryVen->admin_id
-			];
-			$unique_mobile_admin = $general_cls_call->select_query_count(ADMIN_MASTER, $whereMobileAdmin, $paramsMobileAdmin);
-			
-			if($unique_mobile == 0 && $unique_mobile_admin==0)
+			if(!empty($name) && !empty($email) &&!empty($mobile))
 			{
+				// check same mobile no. in vendor
+				$whereMobile = "WHERE mobile=:mobile AND id!=:id";
+				$paramsMobile = [
+					':mobile' => $mobile,
+					':id' => $vendor_id
+				];
+				$unique_mobile = $general_cls_call->select_query_count(VENDORS, $whereMobile, $paramsMobile);
+				
+				// check same mobile no. in admin for role_id=6 only
+				
 				$fieldsVen = "admin_id";
 				$tablesVen = VENDORS;
 				$whereVen = "WHERE id=:id";
 				$paramsVen = [':id'=>$vendor_id];
 				$sqlQueryVen = $general_cls_call->select_query($fieldsVen, $tablesVen, $whereVen, $paramsVen, 1);
 				
-				// update admin table 
-				$setValuesAdmin="username=:username, email=:email,password=:password,updated_at=:updated_at";
+				$whereMobileAdmin = "WHERE email=:email AND role_id=:role_id AND id!=:id";
+				$paramsMobileAdmin = [
+					':email' => $mobile,
+					':role_id' => 6,
+					':id' => $sqlQueryVen->admin_id
+				];
+				$unique_mobile_admin = $general_cls_call->select_query_count(ADMIN_MASTER, $whereMobileAdmin, $paramsMobileAdmin);
 				
-				$newHashPassword = password_hash(stripslashes(trim($password)), PASSWORD_BCRYPT);
-				$updateExecuteAdmin=array(
-					':username'		=> $general_cls_call->specialhtmlremover($name),
-					':email'		=> $general_cls_call->specialhtmlremover($mobile),
-					':password'		=> $general_cls_call->specialhtmlremover($newHashPassword),
-					':updated_at'	=> date('Y-m-d H:i:s'),
-					':id'		=> $sqlQueryVen->admin_id
-				);
-				$whereClauseAdmin=" WHERE id = :id";
-				$general_cls_call->update_query(ADMIN_MASTER, $setValuesAdmin, $whereClauseAdmin, $updateExecuteAdmin);
-				
-				// update vendor table 
-				$setValues=" name=:name, email=:email, mobile=:mobile, city=:city, pincode=:pincode, address=:address, product_ids=:product_ids, updated_at=:updated_at";
-				$updateExecute=array(
-					':name'		=> $general_cls_call->specialhtmlremover($name),
-					':email'	=> $general_cls_call->specialhtmlremover($email),
-					':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
-					':city'	=> $general_cls_call->specialhtmlremover($city),
-					':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
-					':address'	=> $general_cls_call->specialhtmlremover($address),
-					':product_ids'	=> $general_cls_call->specialhtmlremover(implode(",", $products)),
-					':updated_at'  => date('Y-m-d H:i:s'),
-					':id'	    => $vendor_id
-				);
-				$whereClause=" WHERE id = :id";
-				$general_cls_call->update_query(VENDORS, $setValues, $whereClause, $updateExecute);
-				$sucMsg = "Vendor Updated Successfully";
-				header("Location: ".SITE_URL.'vendor-add?m=3');
-				exit();
+				if($unique_mobile == 0 && $unique_mobile_admin==0)
+				{
+					$fieldsVen = "admin_id";
+					$tablesVen = VENDORS;
+					$whereVen = "WHERE id=:id";
+					$paramsVen = [':id'=>$vendor_id];
+					$sqlQueryVen = $general_cls_call->select_query($fieldsVen, $tablesVen, $whereVen, $paramsVen, 1);
+					
+					// update admin table 
+					$setValuesAdmin="username=:username, email=:email,password=:password,updated_at=:updated_at";
+					
+					$newHashPassword = password_hash(stripslashes(trim($password)), PASSWORD_BCRYPT);
+					$updateExecuteAdmin=array(
+						':username'		=> $general_cls_call->specialhtmlremover($name),
+						':email'		=> $general_cls_call->specialhtmlremover($mobile),
+						':password'		=> $general_cls_call->specialhtmlremover($newHashPassword),
+						':updated_at'	=> date('Y-m-d H:i:s'),
+						':id'		=> $sqlQueryVen->admin_id
+					);
+					$whereClauseAdmin=" WHERE id = :id";
+					$general_cls_call->update_query(ADMIN_MASTER, $setValuesAdmin, $whereClauseAdmin, $updateExecuteAdmin);
+					
+					// update vendor table 
+					$setValues=" name=:name, email=:email, mobile=:mobile, city=:city, pincode=:pincode, address=:address, product_ids=:product_ids, updated_at=:updated_at";
+					$updateExecute=array(
+						':name'		=> $general_cls_call->specialhtmlremover($name),
+						':email'	=> $general_cls_call->specialhtmlremover($email),
+						':mobile'	=> $general_cls_call->specialhtmlremover($mobile),
+						':city'	=> $general_cls_call->specialhtmlremover($city),
+						':pincode'	=> $general_cls_call->specialhtmlremover($pincode),
+						':address'	=> $general_cls_call->specialhtmlremover($address),
+						':product_ids'	=> !empty($products) ? $general_cls_call->specialhtmlremover(implode(",", $products)) : null,
+						':updated_at'  => date('Y-m-d H:i:s'),
+						':id'	    => $vendor_id
+					);
+					$whereClause=" WHERE id = :id";
+					$general_cls_call->update_query(VENDORS, $setValues, $whereClause, $updateExecute);
+					$sucMsg = "Vendor Updated Successfully";
+					header("Location: ".SITE_URL.'vendor-add?m=3');
+					exit();
+				}
+				else{
+					header("Location: ".SITE_URL.'vendor-add?vendor_id='. $vendor_id .'&m=4');
+					$erMsg = "Mobile number should be unique";
+				}
 			}
 			else{
-				header("Location: ".SITE_URL.'vendor-add?vendor_id='. $vendor_id .'&m=4');
-				$erMsg = "Mobile number should be unique";
+				header("Location: ".SITE_URL.'vendor-add?m=5');
 			}
 		}
 			
@@ -200,11 +215,11 @@
 					  
 					</div>
 					<?PHP
-						if(isset($_GET['m']) && $_GET['m']== '2')
+						if(isset($_GET['m']) && ($_GET['m']== '2' || $_GET['m']== '5'))
 						{
 					?>
 						<div class="alert alert-danger border-0 bg-danger alert-dismissible fade show">
-							<div class="text-white">Mobile number should be unique</div>
+							<div class="text-white"><?php echo $_GET['m']== '2' ? 'Mobile number should be unique' : 'Please Fill All Fields.'; ?></div>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 						</div>
 					<?PHP
@@ -232,19 +247,19 @@
 						<form class="row g-4" action="" method="post" id="frmVendor">
 							
 							<div class="col-md-6">
-								<label for="input5" class="form-label">Name</label>
+								<label for="input5" class="form-label">Name <span class="text-danger">*</span></label>
 								<input type="text" class="form-control" name="name" id="name" placeholder="Name" required value="<?php echo isset($sqlQueryVen->name) ? $sqlQueryVen->name : $_POST['name'] ?>">
 							</div>
 							<div class="col-md-6">
-								<label for="input5" class="form-label">Email</label>
+								<label for="input5" class="form-label">Email <span class="text-danger">*</span></label>
 								<input type="email" class="form-control" name="email" id="email" placeholder="Email" required value="<?php echo isset($sqlQueryVen->email) ? $sqlQueryVen->email : $_POST['email'] ?>">
 							</div>
 							<div class="col-md-6">
-								<label for="input5" class="form-label">Mobile</label>
+								<label for="input5" class="form-label">Mobile <span class="text-danger">*</span></label>
 								<input type="text" class="form-control" name="mobile" id="mobile" placeholder="Mobile" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" required value="<?php echo isset($sqlQueryVen->mobile) ? $sqlQueryVen->mobile : $_POST['mobile'] ?>">
 							</div>
 							<div class="col-md-6">
-								<label for="input5" class="form-label">Password</label>
+								<label for="input5" class="form-label">Password <span class="text-danger">*</span></label>
 								<input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
 							</div>
 							<div class="col-md-6">
