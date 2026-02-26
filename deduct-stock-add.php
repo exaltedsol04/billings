@@ -379,69 +379,7 @@
 <script>
 $(document).on('input', '.deduct-qty', function () {
 	let product_type = $('#hid_product_type').val();
-	/*if(product_type == 'loose')
-	{
-		this.value = this.value.replace(/[^0-9.]/g, '');
-
-		// Prevent multiple dots
-		if ((this.value.match(/\./g) || []).length > 1) {
-			this.value = this.value.slice(0, -1);
-		}
-
-		let value = this.value;
-
-		// If decimal exists
-		if (value.includes('.')) {
-
-			let parts = value.split('.');
-			let integerPart = parts[0];
-			let decimalPart = parts[1];
-
-			// Limit to max 3 decimal digits
-			if (decimalPart.length > 3) {
-				decimalPart = decimalPart.substring(0, 3);
-				this.value = integerPart + '.' + decimalPart;
-				return;
-			}
-
-			let fullNumber = parseFloat(this.value);
-
-			if (!isNaN(fullNumber)) {
-				let decimalValue = parseFloat((fullNumber % 1).toFixed(3));
-
-				if (decimalValue !== 0 && !allowedDecimals.includes(decimalValue)) {
-					//alert('10');
-					$('#err_stock').html('<div class="text-danger">Invalid loose quantity</div>'
-					);
-					$('.success-button-show').hide();
-					$('.secondary-button-show').show();
-				} else {
-					//alert('20');
-					$('.success-button-show').show();
-					$('.secondary-button-show').hide();
-					$('#err_stock').html('');
-				}
-			}
-		} else {
-			//alert('30');
-			$('.success-button-show').show();
-			$('.secondary-button-show').hide();
-			$('#err_stock').html('');
-		}
-	}
-	else
-	{
-		this.value = this.value.replace(/[^0-9]/g, '');
-		// Remove leading zero
-		if (this.value.length > 1) {
-			this.value = this.value.replace(/^0+/, '');
-		}
-
-		// If first digit is 0 and only one digit, clear it
-		if (this.value === '0') {
-			this.value = '';
-		}
-	}*/
+	
 	//alert(product_type);
     let max = $('#hid_deduct_qty').val();
 
