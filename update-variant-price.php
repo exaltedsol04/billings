@@ -46,12 +46,12 @@
 						':product_id'	=> $general_cls_call->specialhtmlremover($products->product_id),
 						
 						':product_variant_id'	=> $general_cls_call->specialhtmlremover($key),
-						':seller_id'	=> '',
+						':seller_id'	=> 0,
 						':price'		=> $price_value,
 						':discounted_price'	=> $discount_value,
 						':created_at' => date('Y-m-d H:i:s')
 					);
-					$general_cls_call->insert_query(NEW_PRODUCT_VARIANT_PRICE, $field, $value, $addExecute);
+					//$general_cls_call->insert_query(NEW_PRODUCT_VARIANT_PRICE, $field, $value, $addExecute);
 					
 					// update product variant table 
 					
@@ -62,7 +62,7 @@
 						':id'		=> $key
 					);
 					$whereClause=" WHERE id = :id";
-					$general_cls_call->update_query(PRODUCT_VARIANTS, $setValues, $whereClause, $updateExecute);
+					//$general_cls_call->update_query(PRODUCT_VARIANTS, $setValues, $whereClause, $updateExecute);
 					
 					$i++;
 				}
@@ -107,7 +107,7 @@
 						
 					</div>
 					<div class="ms-auto">
-						<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit"  onclick="submit_vatiant_price('frmUpdatePrice')">Update Price</button>
+						<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit"  onclick="save_price()">Update Price</button>
 					</div>
 				</div>
 				<!--end breadcrumb-->
@@ -197,7 +197,7 @@
 										<td><input type="text" class="form-control form-control-sm price-input"  placeholder="0.00" name="price[<?php echo $arr->id; ?>]" data-id="<?php echo $arr->id; ?>"></td>
 										<td>₹<?PHP echo $arr->discounted_price ?></td>
 										<td><input type="text" class="form-control form-control-sm discount-price-input"  placeholder="0.00" name="discounted_price[<?php echo $arr->id; ?>]" data-id="<?php echo $arr->id; ?>"></td>
-										<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
+										<td><?PHP echo $arr->measurement.' '.$unitname; ?></td>
 										<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
 									</tr>
 										<?PHP
@@ -214,24 +214,82 @@
 				</div>
 
     </div>
-  </main>
-  <!--end main wrapper-->
-  <div class="modal fade" id="barcodeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="modal-title" style="display:inline-block">Product Barcode</h4>
-				<button type="button" class="close" data-dismiss="modal">&times;</button>
-			</div>
-			<div class="modal-body text-center">
-				<svg id="barcode"></svg>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	
+	<!-- update price show Modal -->
+		<div class="modal fade" id="updatePrice-modal">
+			  <div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+				  <div class="modal-header border-bottom-0 py-2 bg-grd-warning">
+					<h5 class="modal-title btn-grd">Confirmation</h5>
+					<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+					  <i class="material-icons-outlined">close</i>
+					</a>
+				  </div>
+				  <div class="modal-body">
+					<div class="form-body">
+						<div class="row g-3">
+						<div class="col-lg-12 col-md-12 col-sm-12">
+							<div class="card-body">
+							 <h5>Are you sure want to update prices?</h5>
+								<!--<div id="machineQrCodeShow" 
+									 class="d-flex justify-content-center align-items-center">
+								</div>-->
+							</div>
+						</div>
+						<div class="col-md-12">
+							<div class="d-flex justify-content-md-between">
+							<button type="button" class="btn btn-outline-danger px-5" data-bs-dismiss="modal">No</button>
+								<button type="button"
+									class="btn btn-grd btn-grd-success px-5"
+									onclick="submit_variant_price('frmUpdatePrice')">
+									Yes
+								</button>
+							</div>
+						  </div>
+						
+					  </div>
+					</div>
+				</div>
+				</div>
 			</div>
 		</div>
-	</div>
-</div>
+		
+		<!-- no select price show Modal -->
+		<div class="modal fade" id="emptyPrice-modal">
+			  <div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+				  <div class="modal-header border-bottom-0 py-2 bg-grd-danger">
+					<h5 class="modal-title btn-grd">Alert</h5>
+					<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+					  <i class="material-icons-outlined">close</i>
+					</a>
+				  </div>
+				  <div class="modal-body">
+					<div class="form-body">
+						<div class="row g-3">
+						<div class="col-lg-12 col-md-12 col-sm-12">
+							<div class="card-body">
+							 <h5>Please entry any one price and discount price</h5>
+								<!--<div id="machineQrCodeShow" 
+									 class="d-flex justify-content-center align-items-center">
+								</div>-->
+							</div>
+						</div>
+						<div class="col-md-12">
+							<div class="d-flex justify-content-end">
+							<button type="button" class="btn btn-outline-danger px-5" data-bs-dismiss="modal">Close</button>
+							</div>
+						 </div>
+						
+					  </div>
+					</div>
+				</div>
+				</div>
+			</div>
+		</div>
+  </main>
+  <!--end main wrapper-->
+  
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/footer.php"); ?>
@@ -256,7 +314,30 @@ $(document).on('input', '.discount-price-input', function () {
 
 });
 
-function submit_vatiant_price(frmId) {
+function save_price()
+{
+	let hasprice = false;
+	$.each(priceData, function (key, value) {
+
+        if (value !== '') {  
+            hasprice = true;
+        }
+
+    });
+	
+	//alert(hasprice);
+	if(hasprice)
+	{
+		$('#emptyPrice-modal').modal('hide');
+		$('#updatePrice-modal').modal('show');
+	}
+	else{
+		$('#updatePrice-modal').modal('hide');
+		$('#emptyPrice-modal').modal('show');
+	}
+}
+
+function submit_variant_price(frmId) {
 
     let form = $('#' + frmId);
 

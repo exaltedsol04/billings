@@ -44,7 +44,7 @@
 			  </ul>
 			</li>
 			
-			<li <?php if($page=='update-variant-price.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='update-variant-price.php' || $page=='updated-variant-price-list') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">apps</i>
 				</div>
@@ -53,7 +53,7 @@
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'update-variant-price'; ?>"><i class="material-icons-outlined">arrow_right</i>Update price</a>
 				</li>
-				<li><a href="<?php echo SITE_URL.'products'; ?>"><i class="material-icons-outlined">arrow_right</i>Update price report</a>
+				<li><a href="<?php echo SITE_URL.'updated-variant-price-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Update price report</a>
 				</li>
 			  </ul>
 			</li>
