@@ -310,7 +310,9 @@ error_reporting(1);
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Stock Quantity <span class="text-danger">*</span><span class="text-danger" id="show_unit_type"></span></label>
-								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" value="<?php echo isset($_POST['stock']) ? $_POST['stock'] : '' ?>">
+								<input type="text" class="form-control stock_quantity" name="stock" id="stock" placeholder="Stock quantity" value="<?php echo isset($_POST['stock']) ? $_POST['stock'] : '' ?>">
+								<input type="hidden" id="hid_product_type">
+								<!--<input type="text" class="form-control stock_quantity" name="stock" id="stock" placeholder="Stock quantity" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" value="<?php echo isset($_POST['stock']) ? $_POST['stock'] : '' ?>">-->
 								<span class="text-danger" id="err_stock"></span>
 							</div>
 							<div class="col-md-6" id="all_unit_name">
@@ -329,8 +331,9 @@ error_reporting(1);
 							<div class="col-md-12">
 								<div class="d-md-flex d-grid justify-content-md-between">
 									<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
-									<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit" onclick="load_submit('frmSubmit')">Assign
+									<button type="button" name="btnUser" value="SAVE" class="btn btn-grd btn-grd-success px-5 load-submit success-button-show" onclick="load_submit('frmSubmit')">Assign
 									</button>
+									<button type="button" name="btnUser" value="SAVE" class="btn btn-secondary px-5 secondary-button-show" style="display:none">Assign</button>
 								</div>
 							</div>
 						</form>
@@ -349,6 +352,79 @@ error_reporting(1);
 
 </html>
 <script>
+$(document).on('input', '.stock_quantity', function () {
+	
+	$('.success-button-show').show();
+	$('.secondary-button-show').hide();
+    let product_type  = $('#hid_product_type').val();
+	//alert(product_type);
+	
+	/*let allowedDecimals = [
+		0.01, 0.02, 0.025, 0.05,
+		0.1, 0.2, 0.25, 0.5, 0.75
+	];*/
+	
+	if (product_type === 'loose') {
+
+        this.value = this.value.replace(/[^0-9.]/g, '');
+
+        // Prevent multiple dots
+        if ((this.value.match(/\./g) || []).length > 1) {
+            this.value = this.value.slice(0, -1);
+        }
+
+        let value = this.value;
+
+        // If decimal exists
+        if (value.includes('.')) {
+
+            let parts = value.split('.');
+            let integerPart = parts[0];
+            let decimalPart = parts[1];
+
+            // Limit to max 3 decimal digits
+            if (decimalPart.length > 3) {
+                decimalPart = decimalPart.substring(0, 3);
+                this.value = integerPart + '.' + decimalPart;
+                return;
+            }
+
+            let fullNumber = parseFloat(this.value);
+
+            if (!isNaN(fullNumber)) {
+                let decimalValue = parseFloat((fullNumber % 1).toFixed(3));
+
+                if (decimalValue !== 0 && !allowedDecimals.includes(decimalValue)) {
+                    $('#err_stock').html(
+                        '<div class="text-danger">Invalid loose quantity</div>'
+                    );
+					$('.success-button-show').hide();
+					$('.secondary-button-show').show();
+                } else {
+                    $('#err_stock').html('');
+                }
+            }
+        } else {
+            $('#err_stock').html('');
+        }
+    }
+	else{
+		//this.value = this.value.replace(/[^0-9]/g, '') .replace(/(\..*)\./g, '$1');
+		this.value = this.value.replace(/[^0-9]/g, '');
+		// Remove leading zero
+        if (this.value.length > 1) {
+            this.value = this.value.replace(/^0+/, '');
+        }
+
+        // If first digit is 0 and only one digit, clear it
+        if (this.value === '0') {
+            this.value = '';
+        }
+		
+	}
+	
+});
+
 $(document).ready(function() {
 	let product = $('#product').val();
 	if(product !='')
@@ -360,6 +436,10 @@ $(document).ready(function() {
 
 function product_stock_show(product)
 {
+	$('.success-button-show').show();
+	$('.secondary-button-show').hide();
+	$('#err_stock').html('');
+	
 	$('#stock-check-div').html('');
 	$('#check-stock-div').html('');
 	$('#check-stock-pay-div').html('');
@@ -368,6 +448,10 @@ function product_stock_show(product)
 	let pvid = parseInt(myArray[2]);
 	let ptype = myArray[3];
 	//alert(ptype);
+	$('#hid_product_type').val(ptype);
+	$('.stock_quantity').val('');
+	
+	
 	//alert(pid);alert(pvid);
 	$('#hid_product_id').val(pid);
 	$('#hid_variant_id').val(pvid);

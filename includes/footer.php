@@ -64,6 +64,11 @@
 	<script src="assets/js/main.js"></script>
 
     <script>
+	let allowedDecimals = [
+		0.01, 0.02, 0.025, 0.05,
+		0.1, 0.2, 0.25, 0.5, 0.75
+	];
+	
 	function load_submit(frmId)
 		{
 			$('.load-submit').prop('disabled', true);
