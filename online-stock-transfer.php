@@ -375,7 +375,6 @@ $(document).on('input', '.stock_quantity', function () {
         if (value === '' || value === '.') return;
 		
 		let allowedZeroDecimals = <?php echo json_encode($allowedZeroDecimals); ?>;
-		//let allowedZeroDecimals = "<?php echo $allowedZeroDecimals; ?>";
 		//alert(allowedZeroDecimals);
         let num = parseFloat(value);
 
