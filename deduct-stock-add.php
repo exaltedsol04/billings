@@ -422,6 +422,86 @@ $(document).on('input', '.deduct-qty', function () {
 			let value = this.value;
 
 			if (value === '' || value === '.') return;
+
+			let allowedZeroDecimals = <?php echo json_encode($allowedZeroDecimals); ?>;
+
+			let num = parseFloat(value);
+
+			if (isNaN(num)) return;
+
+			/* -----------------------------------------
+			   CASE 1: Values like .01, .02, .1, .25
+			   ----------------------------------------- */
+			if (value.startsWith('.')) {
+
+				if (!allowedZeroDecimals.includes(num)) {
+					showError();
+					return;
+				}
+			}
+
+			/* -----------------------------------------
+			   CASE 2: Values like 0.01, 0.02 etc
+			   ----------------------------------------- */
+			else if (value.startsWith('0.')) {
+
+				if (!allowedZeroDecimals.includes(num)) {
+					showError();
+					return;
+				}
+			}
+
+			/* -----------------------------------------
+			   CASE 3: Integer before decimal
+			   Example: 1.25, 2.5, 3.75
+			   ----------------------------------------- */
+			else if (value.includes('.')) {
+
+				let decimalPart = value.split('.')[1];
+
+				// allow typing like 1.
+				if (decimalPart === '') {
+					clearError();
+					return;
+				}
+
+				if (decimalPart !== '25' &&
+					decimalPart !== '5' &&
+					decimalPart !== '75') {
+
+					showError();
+					return;
+				}
+			}
+
+			clearError();
+
+
+			function showError() {
+				$('#err_stock').html(
+					'<div class="text-danger">Invalid loose quantity</div>'
+				);
+				$('.success-button-show').hide();
+				$('.secondary-button-show').show();
+			}
+
+			function clearError() {
+				$('#err_stock').html('');
+				$('.success-button-show').show();
+				$('.secondary-button-show').hide();
+			}
+			// allow only numbers and dot
+			/*this.value = this.value.replace(/[^0-9.]/g, '');
+
+			// prevent multiple dots
+			if ((this.value.match(/\./g) || []).length > 1) {
+				this.value = this.value.slice(0, -1);
+				return;
+			}
+
+			let value = this.value;
+
+			if (value === '' || value === '.') return;
 			
 			let allowedZeroDecimals = <?php echo json_encode($allowedZeroDecimals); ?>;
 			//alert(allowedZeroDecimals);
@@ -472,7 +552,7 @@ $(document).on('input', '.deduct-qty', function () {
 				$('#err_stock').html('');
 				$('.success-button-show').show();
 				$('.secondary-button-show').hide();
-			}
+			}*/
 		}
 		else
 		{

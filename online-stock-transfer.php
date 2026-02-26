@@ -362,68 +362,85 @@ $(document).on('input', '.stock_quantity', function () {
 	if (product_type === 'loose') {
 		
 		// allow only numbers and dot
-        this.value = this.value.replace(/[^0-9.]/g, '');
+		this.value = this.value.replace(/[^0-9.]/g, '');
 
-        // prevent multiple dots
-        if ((this.value.match(/\./g) || []).length > 1) {
-            this.value = this.value.slice(0, -1);
-            return;
-        }
+		// prevent multiple dots
+		if ((this.value.match(/\./g) || []).length > 1) {
+			this.value = this.value.slice(0, -1);
+			return;
+		}
 
-        let value = this.value;
+		let value = this.value;
 
-        if (value === '' || value === '.') return;
-		
+		if (value === '' || value === '.') return;
+
 		let allowedZeroDecimals = <?php echo json_encode($allowedZeroDecimals); ?>;
-		//alert(allowedZeroDecimals);
-        let num = parseFloat(value);
 
-        if (!isNaN(num)) {
+		let num = parseFloat(value);
 
-            // Case 1: If starts with 0.
-            if (value.startsWith('0.')) {
+		if (isNaN(num)) return;
 
-                if (!allowedZeroDecimals.includes(num)) {
-                    $('#err_stock').html(
-                        '<div class="text-danger">Invalid loose quantity</div>'
-                    );
-					$('.success-button-show').hide();
-					$('.secondary-button-show').show();
-                    return;
-                }
+		/* -----------------------------------------
+		   CASE 1: Values like .01, .02, .1, .25
+		   ----------------------------------------- */
+		if (value.startsWith('.')) {
 
-            }
-            // Case 2: If integer before decimal
-            else if (value.includes('.')) {
+			if (!allowedZeroDecimals.includes(num)) {
+				showError();
+				return;
+			}
+		}
 
-                let parts = value.split('.');
-                let decimalPart = parts[1];
+		/* -----------------------------------------
+		   CASE 2: Values like 0.01, 0.02 etc
+		   ----------------------------------------- */
+		else if (value.startsWith('0.')) {
 
-                // Allow typing like 1.
-                if (decimalPart === '') {
-                    $('#err_stock').html('');
-					$('.success-button-show').show();
-					$('.secondary-button-show').hide();
-                    return;
-                }
+			if (!allowedZeroDecimals.includes(num)) {
+				showError();
+				return;
+			}
+		}
 
-                if (decimalPart !== '25' &&
-                    decimalPart !== '5' &&
-                    decimalPart !== '75') {
+		/* -----------------------------------------
+		   CASE 3: Integer before decimal
+		   Example: 1.25, 2.5, 3.75
+		   ----------------------------------------- */
+		else if (value.includes('.')) {
 
-                    $('#err_stock').html(
-                        '<div class="text-danger">Invalid loose quantity</div>'
-                    );
-					$('.success-button-show').hide();
-					$('.secondary-button-show').show();
-                    return;
-                }
-            }
+			let decimalPart = value.split('.')[1];
 
-            $('#err_stock').html('');
+			// allow typing like 1.
+			if (decimalPart === '') {
+				clearError();
+				return;
+			}
+
+			if (decimalPart !== '25' &&
+				decimalPart !== '5' &&
+				decimalPart !== '75') {
+
+				showError();
+				return;
+			}
+		}
+
+		clearError();
+
+
+		function showError() {
+			$('#err_stock').html(
+				'<div class="text-danger">Invalid loose quantity</div>'
+			);
+			$('.success-button-show').hide();
+			$('.secondary-button-show').show();
+		}
+
+		function clearError() {
+			$('#err_stock').html('');
 			$('.success-button-show').show();
 			$('.secondary-button-show').hide();
-        }
+		}
 	}
 	else{
 		//this.value = this.value.replace(/[^0-9]/g, '') .replace(/(\..*)\./g, '$1');
