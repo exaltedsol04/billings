@@ -17,11 +17,6 @@
 			$filtered = array_filter($prices, function($value) {
 				return trim($value) !== '';
 			});
-
-			/*if (empty($filtered)) {
-				echo "No prices entered.";
-				exit;
-			}*/
 			
 			if(!empty($filtered))
 			{
@@ -38,6 +33,9 @@
 
 					$price_value     = trim($price_value);
 					$discount_value  = trim($discount_value);
+					
+					// get the product_id 
+					$products = $general_cls_call->select_query("product_id", PRODUCT_VARIANTS, "WHERE id=:id", array(':id'=>$key), 1);
 
 					// insert query
 					 $field = "product_id, product_variant_id, seller_id, price, discounted_price, created_at";
@@ -45,7 +43,7 @@
 						
 						//parent_id
 					$addExecute=array(
-						':product_id'	=> $general_cls_call->specialhtmlremover($product_id),
+						':product_id'	=> $general_cls_call->specialhtmlremover($products->product_id),
 						
 						':product_variant_id'	=> $general_cls_call->specialhtmlremover($key),
 						':seller_id'	=> '',
@@ -55,11 +53,22 @@
 					);
 					$general_cls_call->insert_query(NEW_PRODUCT_VARIANT_PRICE, $field, $value, $addExecute);
 					
+					// update product variant table 
+					
+					$setValues="price=:price, discounted_price=:discounted_price";
+					$updateExecute=array(
+						':price'	=> $price_value,
+						':discounted_price'	=> $discount_value,
+						':id'		=> $key
+					);
+					$whereClause=" WHERE id = :id";
+					$general_cls_call->update_query(PRODUCT_VARIANTS, $setValues, $whereClause, $updateExecute);
+					
 					$i++;
 				}
 				
-				//header("Location: ".SITE_URL.'update-variant-price?m=1');
-				//exit();
+				header("Location: ".SITE_URL.'update-variant-price?m=1');
+				exit();
 			}
 			else{
 				header("Location: ".SITE_URL.'update-variant-price?m=2');
@@ -190,7 +199,6 @@
 										<td><input type="text" class="form-control form-control-sm discount-price-input"  placeholder="0.00" name="discounted_price[<?php echo $arr->id; ?>]" data-id="<?php echo $arr->id; ?>"></td>
 										<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 										<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
-										<input type="hidden" name="product_id[<?php echo $arr->id; ?>]" value="<?php echo $arr->product_id; ?>">
 									</tr>
 										<?PHP
 												$i++;
@@ -236,9 +244,7 @@ $(document).on('input', '.price-input', function () {
 
     let id = $(this).data('id');
     let value = $(this).val();
-
-    priceData[id] = value;
-
+	priceData[id] = value;
 });
 
 $(document).on('input', '.discount-price-input', function () {
@@ -254,13 +260,12 @@ function submit_vatiant_price(frmId) {
 
     let form = $('#' + frmId);
 
-    // 🔥 Remove old dynamic hidden inputs (avoid duplicate submit issue)
     form.find('.dynamic-field').remove();
 
-    // ✅ Append price data
+   
     $.each(priceData, function (key, value) {
 
-        if (value !== '') {   // optional: skip empty
+        if (value !== '') {  
             $('<input>').attr({
                 type: 'hidden',
                 name: 'price[' + key + ']',
@@ -271,10 +276,10 @@ function submit_vatiant_price(frmId) {
 
     });
 
-    // ✅ Append discounted price data
+   
     $.each(discountPriceData, function (key, value) {
 
-        if (value !== '') {   // optional: skip empty
+        if (value !== '') {   
             $('<input>').attr({
                 type: 'hidden',
                 name: 'discounted_price[' + key + ']',
@@ -282,8 +287,7 @@ function submit_vatiant_price(frmId) {
                 class: 'dynamic-field'
             }).appendTo(form);
         }
-
-    });
+	});
 
     // Disable button + loader (optional)
     $('.load-submit').prop('disabled', true).html(
@@ -293,44 +297,6 @@ function submit_vatiant_price(frmId) {
     // Submit form
     form.submit();
 }
-
-/*function submit_vatiant_price(frmId) {
-
-    // Append hidden inputs dynamically
-    $.each(priceData, function (key, value) {
-		alert(key);alert(value);
-        $('<input>').attr({
-            type: 'hidden',
-            name: 'price[' + key + ']',
-            value: value
-        }).appendTo('#' + frmId);
-    });
-
-    $('#' + frmId).submit();
-}*/
-/*function submit_vatiant_price(frmId)
-{
-    var table = $('#example2').DataTable();
-
-    // 🔥 Get all rows (including other pages)
-    var allRows = table.rows().nodes();
-
-    // 🔥 Enable all inputs before submit
-    $('input, select, textarea', allRows).each(function () {
-        $(this).prop('disabled', false);
-    });
-
-    // Disable button + show loader
-    $('.load-submit').prop('disabled', true);
-    $('.load-submit').html(
-        '<span class="spinner-grow spinner-grow-sm me-2" role="status"></span>Loading...'
-    );
-
-    // Submit form
-    setTimeout(function () {
-        $('#' + frmId).submit();
-    }, 500);
-}*/
 </script>
 </body>
 </html>
