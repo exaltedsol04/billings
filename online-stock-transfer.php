@@ -359,11 +359,6 @@ $(document).on('input', '.stock_quantity', function () {
     let product_type  = $('#hid_product_type').val();
 	//alert(product_type);
 	
-	/*let allowedDecimals = [
-		0.01, 0.02, 0.025, 0.05,
-		0.1, 0.2, 0.25, 0.5, 0.75
-	];*/
-	
 	if (product_type === 'loose') {
 
         this.value = this.value.replace(/[^0-9.]/g, '');
