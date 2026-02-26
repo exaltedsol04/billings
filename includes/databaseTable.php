@@ -29,4 +29,6 @@
 	define("USER_ADDRESS",  TABLE_PREFIX."user_addresses");
 	define("ORDERS_TESTS",  TABLE_PREFIX."orders_test");
 	define("POS_MACHINE", NEW_TABLE_PREFIX."pos_machines");
+	define("NEW_PRODUCT_VARIANT_PRICE", NEW_TABLE_PREFIX."new_product_variant_price");
+	
 ?>

@@ -44,6 +44,20 @@
 			  </ul>
 			</li>
 			
+			<li <?php if($page=='update-variant-price.php') { echo ('class="mm-active"');} ?>>
+			  <a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="material-icons-outlined">apps</i>
+				</div>
+				<div class="menu-title">Manage Product Price</div>
+			  </a>
+			  <ul>
+				<li><a href="<?php echo SITE_URL.'update-variant-price'; ?>"><i class="material-icons-outlined">arrow_right</i>Update price</a>
+				</li>
+				<li><a href="<?php echo SITE_URL.'products'; ?>"><i class="material-icons-outlined">arrow_right</i>Update price report</a>
+				</li>
+			  </ul>
+			</li>
+			
 			<li <?php if($page=='vendor-add.php' || $page=='vendor-list.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">storefront</i>
