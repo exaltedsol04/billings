@@ -51,7 +51,7 @@
 						':discounted_price'	=> $discount_value,
 						':created_at' => date('Y-m-d H:i:s')
 					);
-					//$general_cls_call->insert_query(NEW_PRODUCT_VARIANT_PRICE, $field, $value, $addExecute);
+					$general_cls_call->insert_query(NEW_PRODUCT_VARIANT_PRICE, $field, $value, $addExecute);
 					
 					// update product variant table 
 					
@@ -62,7 +62,7 @@
 						':id'		=> $key
 					);
 					$whereClause=" WHERE id = :id";
-					//$general_cls_call->update_query(PRODUCT_VARIANTS, $setValues, $whereClause, $updateExecute);
+					$general_cls_call->update_query(PRODUCT_VARIANTS, $setValues, $whereClause, $updateExecute);
 					
 					$i++;
 				}
@@ -317,6 +317,7 @@ $(document).on('input', '.discount-price-input', function () {
 function save_price()
 {
 	let hasprice = false;
+	let hasDiscountprice = false;
 	$.each(priceData, function (key, value) {
 
         if (value !== '') {  
@@ -325,8 +326,15 @@ function save_price()
 
     });
 	
-	//alert(hasprice);
-	if(hasprice)
+	$.each(discountPriceData, function (key, value) {
+
+        if (value !== '') {  
+            hasDiscountprice = true;
+        }
+
+    });
+	
+	if(hasprice && hasDiscountprice)
 	{
 		$('#emptyPrice-modal').modal('hide');
 		$('#updatePrice-modal').modal('show');
