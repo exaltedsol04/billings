@@ -32,5 +32,11 @@
 		'3'=> 'Wrong entry',
 		'4'=> 'Others'
 	];
+	
+	// stock quantity input validation
+	$allowedZeroDecimals = [
+		0.01, 0.02, 0.025, 0.05,
+		0.1, 0.2, 0.25, 0.5, 0.75
+	];
  
 ?>

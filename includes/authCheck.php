@@ -1,5 +1,5 @@
 <?php 
-	error_reporting(0);
+	error_reporting(1);
 	include_once 'init.php';
 	//print_r($pageParam); die;
 	$pageAccessRoleIds = $pageParam['pageAccessRoleIds'];

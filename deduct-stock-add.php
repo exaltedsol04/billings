@@ -472,52 +472,69 @@ $(document).on('input', '.deduct-qty', function () {
 		
 		if(product_type == 'loose')
 		{
+			// allow only numbers and dot
 			this.value = this.value.replace(/[^0-9.]/g, '');
 
-			// Prevent multiple dots
+			// prevent multiple dots
 			if ((this.value.match(/\./g) || []).length > 1) {
 				this.value = this.value.slice(0, -1);
+				return;
 			}
 
 			let value = this.value;
 
-			// If decimal exists
-			if (value.includes('.')) {
+			if (value === '' || value === '.') return;
+			
+			let allowedZeroDecimals = <?php echo json_encode($allowedZeroDecimals); ?>;
+			//let allowedZeroDecimals = "<?php echo $allowedZeroDecimals; ?>";
+			//alert(allowedZeroDecimals);
+			let num = parseFloat(value);
 
-				let parts = value.split('.');
-				let integerPart = parts[0];
-				let decimalPart = parts[1];
+			if (!isNaN(num)) {
 
-				// Limit to max 3 decimal digits
-				if (decimalPart.length > 3) {
-					decimalPart = decimalPart.substring(0, 3);
-					this.value = integerPart + '.' + decimalPart;
-					return;
-				}
+				// Case 1: If starts with 0.
+				if (value.startsWith('0.')) {
 
-				let fullNumber = parseFloat(this.value);
-
-				if (!isNaN(fullNumber)) {
-					let decimalValue = parseFloat((fullNumber % 1).toFixed(3));
-
-					if (decimalValue !== 0 && !allowedDecimals.includes(decimalValue)) {
-						//alert('10');
-						$('#err_stock').html('<div class="text-danger">Invalid loose quantity</div>'
+					if (!allowedZeroDecimals.includes(num)) {
+						$('#err_stock').html(
+							'<div class="text-danger">Invalid loose quantity</div>'
 						);
 						$('.success-button-show').hide();
 						$('.secondary-button-show').show();
-					} else {
-						//alert('20');
+						return;
+					}
+
+				}
+				// Case 2: If integer before decimal
+				else if (value.includes('.')) {
+
+					let parts = value.split('.');
+					let decimalPart = parts[1];
+
+					// Allow typing like 1.
+					if (decimalPart === '') {
+						$('#err_stock').html('');
 						$('.success-button-show').show();
 						$('.secondary-button-show').hide();
-						$('#err_stock').html('');
+						return;
+					}
+
+					if (decimalPart !== '25' &&
+						decimalPart !== '5' &&
+						decimalPart !== '75') {
+
+						$('#err_stock').html(
+							'<div class="text-danger">Invalid loose quantity</div>'
+						);
+						$('.success-button-show').hide();
+						$('.secondary-button-show').show();
+						return;
 					}
 				}
-			} else {
-				//alert('30');
+
+				$('#err_stock').html('');
 				$('.success-button-show').show();
 				$('.secondary-button-show').hide();
-				$('#err_stock').html('');
 			}
 		}
 		else
