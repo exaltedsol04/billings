@@ -45,6 +45,8 @@
 			$result = $general_cls_call->select_query($fields, $table, $where, $params, 1);
 			$stock_available = $result->total_stock ?? 0;
 			
+			//echo $stock_available; die;
+			
 			$product_variant_dtls = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id =:id ", array(':id'=> $product_stk_dtls->product_variant_id), 1);
 			/*$request_stock_quantity = $_GET['qty'];
 			$loose_stock_quantity = '0.00';

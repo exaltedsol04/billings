@@ -72,7 +72,7 @@
 			  </ul>
 			</li>
 			
-			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view.php' || $page=='approved-stock-list.php' || $page=='purchase-summary-list.php' || $page== 'purchase-stock-multiple-add.php' || $page=='admin-stock-puchase-list.php' || $page=='admin-puchase-order-list.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view.php' || $page=='approved-stock-list.php' || $page=='purchase-summary-list.php' || $page== 'purchase-stock-multiple-add.php' || $page=='admin-stock-puchase-list.php' || $page=='admin-puchase-order-list.php' || $page=='admin-product-wise-purchase-report.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
 				</div>
@@ -88,6 +88,7 @@
 				<li><a href="<?php echo SITE_URL.'approved-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Stock List</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-summary-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Summary</a></li>
 				<li><a href="<?php echo SITE_URL.'admin-puchase-order-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase Order</a></li>
+				<li><a href="<?php echo SITE_URL.'admin-product-wise-purchase-report'; ?>"><i class="material-icons-outlined">arrow_right</i>Product Wise Purchase Report</a></li>
 			 </ul>
 			</li>
 			

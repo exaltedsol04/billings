@@ -10,7 +10,7 @@
 	/*******End Auth Section*******/
 	ob_start();
 	//echo $_SESSION['USER_ID'];die;
-	$fields = "sum(asp.purchase_price) as tot_price , asp.id, asp.group_id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type";
+	$fields = "sum(asp.purchase_price) as tot_price , asp.id, asp.group_id, asp.product_id, asp.remarks, asp.status, asp.stock, asp.loose_stock_quantity, asp.created_at, asp.purchase_price, u.name as unit_name, pv.measurement, p.name, p.barcode, v.name as vendor, pv.id as pvid, pv.type, pv.stock_unit_id";
 	$tables = ADMIN_STOCK_PURCHASE_LIST . " asp
 	INNER JOIN " . PRODUCT_VARIANTS . " pv ON asp.product_variant_id = pv.id
 	INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
@@ -77,9 +77,19 @@
 										<td></td>
 										<td></td>
 										<td></td>
+										<td></td>
+										<td></td>
+										<td></td>
+										<td></td>
+										<td></td>
 									</tr>
 								  <tr>
 									<th class="text-center">Sl. No.</th>
+									<th>Vendor</th>
+									<th>Product Name</th>
+									<th class="text-center">Qty.</th>
+									<th>Measurement</th>
+									<th>Type</th>
 									<th class="text-center">Purchase Date</th>
 									<th class="text-center">Total Amount</th>
 									<th class="text-center">Action</th>
@@ -90,20 +100,36 @@
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
-										foreach($sqlQuery as $k=>$selectValue)
+										foreach($sqlQuery as $k=>$arr)
 										{
-											$barcode = $selectValue->barcode;
+											$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $arr->stock_unit_id), 1);
+											$unitname = $unit_dtls->name;
+											if($arr->type == 'loose')
+											{
+												$measurement_arr = [
+													'quantity' => 1 * $arr->measurement,
+													'stock_unit_id' => $arr->stock_unit_id,
+												];
+												$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
+												$unitname = $measurement_units['unit'];
+											}
+											$barcode = $arr->barcode;
 								            $barcode = !empty($barcode) ? '(' . $barcode . ') ': '';
 									?>
-									  <tr id="dataRow<?php echo($selectValue->id);?>">
+									  <tr id="dataRow<?php echo($arr->id);?>">
 										<td class="text-center"></td>
-										<td class="text-center"><?PHP echo $general_cls_call->change_date_format($selectValue->created_at, 'j M Y g:i A'); ?></td>
-										<td class="text-center">₹ <?php echo $selectValue->tot_price ?></td>
+										<td><?PHP echo $arr->vendor; ?></td>
+										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
+										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->stock ?></td>
+										<td class="text-center"><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
+										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type ;?></span></td>
+										<td class="text-center"><?PHP echo $general_cls_call->change_date_format($arr->created_at, 'j M Y g:i A'); ?></td>
+										<td class="text-center">₹ <?php echo $arr->tot_price ?></td>
 										<td class="text-center">
 											<div class="ms-auto">
 												<div class="btn-group">
 													<p class="dash-lable mb-0 bg-success bg-opacity-10 text-success rounded-2">
-													<a href="javascript:void(0)" class="wh-42 bg-grd-success text-white rounded-circle d-flex align-items-center justify-content-center" onclick="print_page(<?php echo $selectValue->group_id;?>)" title = "Click here to Print Barcode" data-bs-toggle="tooltip"><i class="material-icons-outlined">print</i></a>
+													<a href="javascript:void(0)" class="wh-42 bg-grd-success text-white rounded-circle d-flex align-items-center justify-content-center" onclick="print_page(<?php echo $arr->group_id;?>)" title = "Click here to Print Barcode" data-bs-toggle="tooltip"><i class="material-icons-outlined">print</i></a>
 													</p>
 												</div>
 											</div>
@@ -163,7 +189,7 @@ $(document).ready(function(){
 	});*/
 	
 	var table = $('#example2').DataTable({
-		order: [[1, 'desc']],
+		order: [[6, 'desc']],
 		columnDefs: [
 			{
 				targets: 0,
