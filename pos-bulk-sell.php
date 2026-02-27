@@ -589,7 +589,7 @@ function getProducts(val)
 					//End Increase and Decrease
 					
 					if (typeof add_to_cart !== 'function') {
-						$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/cart.js")
+						$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/pos-bulk-cart.js")
 							.done(function () {
 								//add_to_cart(parameter);
 								check_product_stock(data[0].id, parameter);
@@ -850,7 +850,7 @@ function check_product_stock(id,parameter)
 				{
 					//$('#dataRow' + id).find('.qty-increment').prop('disabled', false);
 					if (typeof add_to_cart !== 'function') {
-						$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/cart.js")
+						$.getScript("<?php echo SITE_URL; ?>assets/plugins/es/pos-bulk-cart.js")
 							.done(function () {
 								add_to_cart(parameter);
 							})
@@ -1010,7 +1010,8 @@ function cart_pay()
 	$('#rw').val(rw);
 	//cart-list-form
 	$('#check-stock-div').html('');
-	var items = localStorage.getItem("data", JSON.stringify(bulkBasket));
+	var items = localStorage.getItem("bulkData", JSON.stringify(bulkBasket));
+	//alert(items);
 	if (items) {
 		var data = JSON.parse(items);
 		if (data.length > 0) {
@@ -1022,7 +1023,7 @@ function cart_pay()
 	var user_hidden_id = $('#user_hidden_id').val();
 	$('#err_supplier_id').text('');
 	if(supplier_id == ''){
-		$('#err_supplier_id').text('Please enter seller mobile no.');
+		$('#err_supplier_id').text('Please enter mobile no.');
 		return false;
 	}if(user_hidden_id == ''){
 		$('#err_supplier_id').text('Please enter valid mobile no.');
