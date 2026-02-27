@@ -143,7 +143,16 @@ error_reporting(0);
 		case "userdetails":
 		
 			$mobile = $_POST['phone'];
-			$user_details = $general_cls_call->select_query("id, name, country_code, mobile", USERS, "WHERE mobile=:mobile", array(':mobile'=>$mobile), 1);
+			
+			$field = "id, name, country_code, mobile";
+			$where = "WHERE mobile=:mobile AND (user_type != :user_type OR user_type IS NULL)";
+			$params = [
+				':mobile' => $mobile,
+				':user_type' => 'corp'
+			];
+			
+			$user_details = $general_cls_call->select_query($field, USERS, $where, $params, 1);
+			
 			//echo "<pre>";print_r($user_details);die;
 			$userArray = [];
 			if(!empty($user_details))
@@ -154,6 +163,7 @@ error_reporting(0);
 					'mobile' => $user_details->mobile,
 				];
 			}
+			
 			echo json_encode($userArray);
 			
 		break;
@@ -437,8 +447,8 @@ error_reporting(0);
 			$status = $_POST['payment_method'] == 'cod' ? 1 : 0;
 			
 			
-			$field = "pos_user_id, user_id, total_amount, discount_amount, discount_percentage, payment_method, status, created_at, updated_at, machine_id";
-			$value = ":pos_user_id, :user_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :status, :created_at, :updated_at, :machine_id";
+			$field = "pos_user_id, user_id, total_amount, discount_amount, discount_percentage, payment_method, status, order_type, created_at, updated_at, machine_id";
+			$value = ":pos_user_id, :user_id, :total_amount, :discount_amount, :discount_percentage, :payment_method, :status, :order_type, :created_at, :updated_at, :machine_id";
 			
 			$addExecute=array(
 				':pos_user_id'			=> $_SESSION['SELLER_ID'],
@@ -448,6 +458,7 @@ error_reporting(0);
 				':discount_percentage'	=> '0.00',
 				':payment_method'		=> $_POST['payment_method'],
 				':status'				=> $status,
+				':order_type'			=> $_POST['order_type'],
 				':machine_id'			=> $_SESSION['machine_id'],
 				':created_at'			=> date("Y-m-d H:i:s"),
 				':updated_at'			=> date("Y-m-d H:i:s")
@@ -462,8 +473,18 @@ error_reporting(0);
 				//echo "<pre>";print_r($product_variant_dtls);die;
 				$product_id = $product_variant_dtls->product_id;
 				
-				$unit_price = $product_variant_dtls->discounted_price;
-				$total_price = $_POST['qty'][$k] * $unit_price;
+				if($_POST['order_type'] == 1)
+				{
+					$unit_price = $product_variant_dtls->discounted_price;
+					$total_price = $_POST['qty'][$k] * $unit_price;
+				}
+				
+				if($_POST['order_type'] == 2)
+				{
+					$unit_price  = $_POST['price'][$k];
+					$total_price = $_POST['qty'][$k] * $_POST['price'][$k];
+				}
+				
 				$loose_stock_quantity = 0.00;
 				if($product_variant_dtls->type == 'loose') {
 					$loose_stock_quantity = -($_POST['pid'][$product_id][$val]);
@@ -1949,14 +1970,16 @@ error_reporting(0);
 		case "savePosUser":
 			$user = $_POST['pos_user'];
 			$mobile = $_POST['pos_mobile'];
+			$user_type = $_POST['user_type'];
 			//echo $pos_user.' '.$pos_mobile;
-			$field = "name, mobile, status, created_at, updated_at";
-			$value = ":name, :mobile, :status, :created_at, :updated_at";
+			$field = "name, mobile, status, user_type, created_at, updated_at";
+			$value = ":name, :mobile, :status, :user_type, :created_at, :updated_at";
 			
 			$addExecute=array(
 				':name'			        =>  $user,
 				':mobile'				=> $mobile,
 				':status'				=> 1,
+				':user_type'			=> $user_type,
 				':created_at'			=> date("Y-m-d H:i:s"),
 				':updated_at'			=> date("Y-m-d H:i:s")
 			);
@@ -2343,5 +2366,75 @@ error_reporting(0);
 				//echo '<pre>'; print_r($stockArr); die;
 				echo json_encode($stockArr);
 		break;
+		
+		case "userPosBulkdetails":
+		
+			$mobile = $_POST['phone'];
+			
+			$field = "id, name, country_code, mobile";
+			$where = "WHERE mobile=:mobile AND user_type=:user_type";
+			$params = [
+				':mobile' => $mobile,
+				':user_type' => 'corp'
+			];
+			
+			$user_details = $general_cls_call->select_query($field, USERS, $where, $params, 1);
+			
+			//echo "<pre>";print_r($user_details);die;
+			$userArray = [];
+			if(!empty($user_details))
+			{
+				$userArray[] = [
+					'id' => $user_details->id,
+					'name' => $user_details->name,
+					'mobile' => $user_details->mobile,
+				];
+			}
+			echo json_encode($userArray);
+			
+		break;
+		
+		case "checkOtherUserMobile":
+		
+			$mobile = $_POST['phone'];
+			$user_type = $_POST['user_type'];
+			
+			if($user_type == 'noncorp')
+			{
+				$field = "id, name, country_code, mobile";
+				$where = "WHERE mobile=:mobile AND (user_type != :user_type OR user_type IS NULL)";
+				$params = [
+					':mobile' => $mobile,
+					':user_type' => 'corp'
+				];
+				
+				$user_details = $general_cls_call->select_query($field, USERS, $where, $params, 1);
+			}
+			
+			if($user_type == 'corp')
+			{
+				$field = "id, name, country_code, mobile";
+				$where = "WHERE mobile=:mobile AND user_type=:user_type";
+				$params = [
+					':mobile' => $mobile,
+					':user_type' => 'corp'
+				];
+				
+				$user_details = $general_cls_call->select_query($field, USERS, $where, $params, 1);
+			}
+			
+			//echo "<pre>";print_r($user_details);die;
+			$userArray = [];
+			if(!empty($user_details))
+			{
+				$userArray[] = [
+					'mobile' => $user_details->mobile
+				];
+			}
+			echo json_encode($userArray);
+			
+		break;
+		
     }
 ?>
+

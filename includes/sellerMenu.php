@@ -39,6 +39,12 @@
 					<div class="menu-title">POS Sell</div>
 				</a>
 			</li>
+			<li <?php if($page=='pos-bulk-sell.php') { echo ('class="mm-active"');} ?>>
+				<a href="<?php echo SITE_URL.'pos-bulk-sell'; ?>">
+					<div class="parent-icon"><i class="material-icons-outlined">shopping_bag</i></div>
+					<div class="menu-title">POS Bulk Sell</div>
+				</a>
+			</li>
 			<li <?php if($page=='purchase-request.php' || $page=='purchase-request-multiple.php' || $page=='purchase-report' || $page=='approved-purchase-report') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">inventory_2</i>

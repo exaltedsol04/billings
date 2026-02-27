@@ -194,9 +194,9 @@
 										<td><?PHP echo !empty($arr->barcode) ? $arr->barcode : 'N/A'; ?></td>
 										<td><?PHP echo $general_cls_call->explode_name($arr->name); ?></td>
 										<td>₹<?PHP echo $arr->price ?></td>
-										<td><input type="text" class="form-control form-control-sm price-input"  placeholder="0.00" name="price[<?php echo $arr->id; ?>]" data-id="<?php echo $arr->id; ?>"></td>
+										<td><input type="text" class="form-control form-control-sm price-input"  placeholder="0.00" name="price[<?php echo $arr->id; ?>]" data-id="<?php echo $arr->id; ?>" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"></td>
 										<td>₹<?PHP echo $arr->discounted_price ?></td>
-										<td><input type="text" class="form-control form-control-sm discount-price-input"  placeholder="0.00" name="discounted_price[<?php echo $arr->id; ?>]" data-id="<?php echo $arr->id; ?>"></td>
+										<td><input type="text" class="form-control form-control-sm discount-price-input"  placeholder="0.00" name="discounted_price[<?php echo $arr->id; ?>]" data-id="<?php echo $arr->id; ?>" oninput="this.value = this.value.replace(/[^0-9.]/g, '')"></td>
 										<td><?PHP echo $arr->measurement.' '.$unitname; ?></td>
 										<td><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
 									</tr>

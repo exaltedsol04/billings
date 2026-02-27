@@ -343,6 +343,8 @@
 										$unit_dtls = $general_cls_call->select_query("*", UNITS, "WHERE id =:id ", array(':id'=> $sqlUnit->stock_unit_id), 1);
 										$unitname = $unit_dtls->name;
 										$type_unit = $sqlUnit->type;
+										
+										$send_id = $arr->product_variant_id;
 										if($sqlUnit->type == 'loose')
 										{
 											$measurement_arr = [
@@ -352,19 +354,33 @@
 											$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
 											$unitname = $measurement_units['unit'];
 											$type_unit = $sqlUnit->type.'-'.$unitname;
+											
+											$send_id = $arr->product_id;
 										}
+										
+										// get the admin credit stocks
+										$credit_stock = $ruf->admin_credit_stock(['product_id'=>$arr->product_id, 'product_variant_id'=> $arr->product_variant_id]);
+										
+										// get the admin credit stocks
+										
+										$debit_stock =$ruf->admin_debit_stock(['product_id'=>$arr->product_id, 'product_variant_id'=> $arr->product_variant_id]);
+										
+										// get the admin available  stocks
+										$available_stock = $ruf->admin_credit_stock(['product_id'=>$arr->product_id, 'product_variant_id'=> $arr->product_variant_id]) - $ruf->admin_debit_stock(['product_id'=>$arr->product_id, 'product_variant_id'=> $arr->product_variant_id]);
+										
+										
 									?>
 									  <tr id="dataRow<?php echo($arr->id);?>" class="text-center">
 									    <td style="width:100px"><?php echo $i ;?></td>
 										<td><?PHP echo implode(', ', $vendors_arr); ?></td>
 										<td><?PHP echo $barcode.''.$general_cls_call->cart_product_name($arr->name); ?></td>
-										<td><?php echo $stock_credit->total_stock; ?></td>
-										<td><?php echo $admin_stock_debit; ?></td>
-										<td><?PHP echo ($stock_credit->total_stock - $admin_stock_debit); ?></td>
+										<td><?php echo  round($credit_stock,2) ;//$stock_credit->total_stock; ?></td>
+										<td><?php echo round($debit_stock,2) ;//$admin_stock_debit; ?></td>
+										<td><?PHP echo round($available_stock,2);//($stock_credit->total_stock - $admin_stock_debit); ?></td>
 										<td><span class="badge bg-grd-primary dash-lable"><?php echo $type_unit ;?></span></td>
 										<td><?php echo $pending_stock; ?></td>
 										<!--<td><?PHP echo $arr->measurement.'  '.$arr->unit_name; ?></td>-->
-										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($arr->product_id);?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
+										<td><a href="<?php echo SITE_URL.'purchase-stock-list-view'; ?>?pvid=<?php echo($send_id);?>&type=<?php echo $sqlUnit->type?>"><div class="wh-42 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" title = "View details" data-bs-toggle="tooltip">
 											<span class="material-icons-outlined fs-5">visibility</span>
 										</div></a></td>
 									</tr>

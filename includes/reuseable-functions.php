@@ -9,7 +9,7 @@
 				$this->general = $general;
 		}
 		
-		function available_stock_report ($data)
+		function available_stock_report($data)
 		{
 			$product_id         = $data['product_id'];
 			$product_variant_id = $data['product_variant_id'];
@@ -204,6 +204,118 @@
 			$diffInSeconds = $to->getTimestamp() - $from->getTimestamp();
 
 			return floor($diffInSeconds / 60); // return total minutes
+		}
+		
+		// from table admin_stock_puchase_list fields loose_stock_quantity/stock
+		 //and status=1 -sum of +ve loose_stock_quantity/stock
+		function admin_credit_stock($data)
+		{
+			$product_id         = $data['product_id'];
+			$product_variant_id = $data['product_variant_id'];
+			//return $product_id.''.$product_variant_id;
+			
+			$fieldsCredit = "
+				SUM(
+					CASE 
+						WHEN pv.type = 'loose'
+							THEN asp.loose_stock_quantity
+						ELSE asp.stock
+					END
+				) AS total_stock
+				";
+
+				$tablesCredit = ADMIN_STOCK_PURCHASE_LIST . " asp
+				INNER JOIN " . PRODUCT_VARIANTS . " pv 
+					ON pv.id = asp.product_variant_id
+				";
+
+				$whereCredit = "
+				WHERE asp.status = :status
+				AND asp.product_stock_transaction_id = :product_stock_transaction_id
+
+				AND (
+						/* LOOSE → check by product_id */
+						(pv.type = 'loose' AND asp.product_id = :product_id)
+
+						OR
+
+						/* NON LOOSE → check by variant_id */
+						(pv.type != 'loose' AND asp.product_variant_id = :product_variant_id)
+					)
+				";
+
+				$paramsCredit = [
+					':product_id' => $product_id,
+					':product_variant_id' => $product_variant_id, // required for non-loose
+					':product_stock_transaction_id' => 0,
+					':status' => 1
+				];
+
+				$stock_credit = $this->general->select_join_query(
+					$fieldsCredit,
+					$tablesCredit,
+					$whereCredit,
+					$paramsCredit,
+					1
+				);
+				
+			return $stock_credit->total_stock ? $stock_credit->total_stock : 0;
+		}
+		
+		// from table admin_stock_puchase_list fields loose_stock_quantity/stock
+		 //and status=1 -sum of -ve loose_stock_quantity/stock
+		function admin_debit_stock($data)
+		{
+			
+			$product_id         = $data['product_id'];
+			$product_variant_id = $data['product_variant_id'];
+			// dedit debit admin_stock_transaction 
+			$fieldsDebit = "
+			SUM(
+				CASE 
+					WHEN pv.type = 'loose'
+						THEN asp.loose_stock_quantity
+					ELSE asp.stock
+				END
+			) AS total_stock
+			";
+
+			$tablesDebit = ADMIN_STOCK_PURCHASE_LIST . " asp
+			INNER JOIN " . PRODUCT_VARIANTS . " pv 
+				ON pv.id = asp.product_variant_id
+			";
+
+			$whereDebit = "
+			WHERE asp.status = :status
+			AND asp.product_stock_transaction_id != :product_stock_transaction_id
+
+			AND (
+					/* LOOSE → check by product_id */
+					(pv.type = 'loose' AND asp.product_id = :product_id)
+
+					OR
+
+					/* NON LOOSE → check by variant_id */
+					(pv.type != 'loose' AND asp.product_variant_id = :product_variant_id)
+				)
+			";
+
+			$paramsDebit = [
+				':product_id' => $product_id,
+				':product_variant_id' => $product_variant_id, // required for non-loose
+				':product_stock_transaction_id' => 0,
+				':status' => 1
+			];
+
+			$admin_stock_debit = $this->general->select_join_query(
+				$fieldsDebit,
+				$tablesDebit,
+				$whereDebit,
+				$paramsDebit,
+				1
+			);
+			
+			return $admin_stock_debit->total_stock ? abs($admin_stock_debit->total_stock) : 0;
 		}
 	}
 ?>

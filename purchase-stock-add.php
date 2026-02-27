@@ -222,7 +222,7 @@
 							</div>
 							<div class="col-md-6">
 								<label for="input5" class="form-label">Stock Quantity</label>
-								<input type="text" class="form-control" name="stock" id="stock" placeholder="Stock quantity">
+								<input type="text" class="form-control stock-input" name="stock" id="stock" placeholder="Stock quantity">
 							</div>
 							<input type="hidden" id="product_variant_id" name="product_variant_id">
 							<!--<div class="col-md-6">
@@ -232,10 +232,16 @@
 								</select>
 							</div>-->
 
-							<div class="col-md-6 purchase-div"  style="display:none">
-								<label for="input5" class="form-label">Purchase price</label>
+							<div class="col-md-4 purchase-div"  style="display:none">
+								<label for="input5" class="form-label">Purchase price(₹)</label>
 								<input type="text" class="form-control" id="purchase_price" name="purchase_price" placeholder="0.00" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
 								<span class="text-danger" id="err_stock"></span>
+							</div>
+							<input type="hidden" id="hid_purchase_price">
+							<div class="col-md-2 purchase-div"  style="display:none">
+								<label for="input5" class="form-label">Total price(₹)</label>
+								<input type="text" class="form-control form-control-sm tot_price" style="border:0" readonly>
+								<!--<div class="tot_price text-danger mt-2"></div>-->
 							</div>
 							<div class="col-md-12">
 								<label for="input5" class="form-label">Vendors</label>
@@ -326,7 +332,7 @@ function select_product(product)
 			$('.selling-div').show();
 			var html = 'Selling price: ₹ ' + response.discount_price;
 			$('#err_stock').html(html);
-			
+			$('#hid_purchase_price').val(response.discount_price)
 		
 			/*$('#selling_price').val(response.discount_price);
 			$('.purchase-div').show();
@@ -382,4 +388,22 @@ function get_selling_price(val)
 		}
 	});
 }
+
+$(document).on('input', '.stock-input', function () {
+	var max = $('#purchase_price').val() || 0
+	let value = this.value;
+	let tot_price = this.value*max;
+	tot_price = tot_price.toFixed(2)
+	//$('.tot_price').html(tot_price);
+	$('.tot_price').val(tot_price);
+});
+
+$(document).on('input', '#purchase_price', function () {
+	var max = $('.stock-input').val() || 0
+	let value = this.value;
+	let tot_price = this.value*max;
+	tot_price = tot_price.toFixed(2)
+	//$('.tot_price').html(tot_price);
+	$('.tot_price').val(tot_price);
+});
 </script>

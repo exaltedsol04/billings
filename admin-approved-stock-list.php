@@ -11,6 +11,29 @@
 	ob_start();
 	//echo $_SESSION['USER_ID'];die;
 	
+	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+		{
+			$fromDate = $_POST['fromDate'];
+			$toDate = $_POST['toDate'];
+			$whereDateRange = "asp.created_at >= :fromDate AND asp.created_at < DATE_ADD(:toDate, INTERVAL 1 DAY) AND";
+			
+			$params = [
+					':fromDate' => $_POST['fromDate'],
+					':toDate'   => $_POST['toDate'],
+					':status'=>1,
+					':product_stock_transaction_id'=>0
+				];
+		}
+		else
+		{
+			$whereDateRange = 'DATE(asp.created_at) = CURDATE() AND';
+			//$whereDateRange = '';
+			$params = [
+				':status'=>1,
+				':product_stock_transaction_id'=>0
+			];
+		}
+	
 	if(isset($_GET['mode']) && ($_GET['mode'] == '1' || $_GET['mode'] == '2'))
 	{	
 //echo $_GET['id'].' '.$_GET['mode'].' '.$_GET['qty'];die;
@@ -59,11 +82,7 @@
 		INNER JOIN " . PRODUCTS . " p ON p.id = asp.product_id
 		INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id
 		LEFT JOIN " . VENDORS . " v ON v.id = asp.vendor_id";
-		$where = "WHERE asp.status=:status AND asp.product_stock_transaction_id=:product_stock_transaction_id";
-		$params = [
-				':status'=>1,
-				':product_stock_transaction_id'=>0
-			];
+		$where = "WHERE ".$whereDateRange." asp.status=:status AND asp.product_stock_transaction_id=:product_stock_transaction_id";
 		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 				
 		//echo "<pre>";print_r($sqlQuery);die;
@@ -102,6 +121,30 @@
 					</div>
 				</div>
 				<!--end breadcrumb-->
+				<h6 class="mb-0 text-uppercase">Search panel</h6>
+				<hr>
+				<div class="card rounded-4 border-top border-4 border-primary border-gradient-1">
+					<div class="card-body">
+						<form class="row g-4" method="post" action="">
+							<div class="col-md-6">
+								<label for="input1" class="form-label">From date</label>
+								<input type="date" name="fromDate" id="fromDate" class="form-control" placeholder="Start Date">
+							</div>
+							<div class="col-md-6">
+								<label for="input5" class="form-label">To date</label>
+								<input type="date" name="toDate" id="toDate" class="form-control" placeholder="End Date">
+							</div>
+							
+							<div class="col-md-12">
+							  <div class="d-md-flex d-grid justify-content-md-between">
+								<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+								<button type="submit" class="btn btn-grd btn-grd-success px-4" name="btnUser" value="SAVE">Search</button>
+							  </div>
+							</div>
+						</form>
+					</div>
+				</div>
+				
 				<?PHP 
 				if(isset($sucMsg) && $sucMsg != '')
 				{
@@ -221,6 +264,17 @@
 </body>
 </html>
 <script>
+document.getElementById("fromDate").addEventListener("change", function () {
+    var fromDate = this.value;
+    // Set minimum selectable date for To Date
+    document.getElementById("toDate").setAttribute("min", fromDate);
+
+    // If already selected toDate is smaller → reset it
+    if (document.getElementById("toDate").value < fromDate) {
+        document.getElementById("toDate").value = "";
+    }
+});
+
 $(document).ready(function(){
 	if ($.fn.DataTable.isDataTable('#example2')) {
 		$('#example2').DataTable().destroy();

@@ -269,12 +269,12 @@
 					  <th class="text-center">Type</th>
 					  <th class="text-center" style="width:160px">Qty</th>
 					  <th class="text-center">Measurement</th>
-					  <th class="text-center">Price</th>
-					  <th class="text-center">Total Price</th>
+					  <th class="text-center" style="width:160px">Price (₹)</th>
+					  <th class="text-center">Total Price (₹)</th>
 					  <th class="text-center">Remove</th>
 					</tr>
 				  </thead>
-				  <tbody id="shopping-cart">
+				  <tbody id="bulk-shopping-cart">
 					</tbody>
 				  <tfoot id="total_amount_show" style="font-weight:bold; font-size:20px">
 				  </tfoot>
@@ -282,8 +282,8 @@
 				  
 			</div>
 			
-			<input type="hidden" name="payment_method" id="payment_method">
-			<input type="hidden" name="order_type" id="order_type" value="1">
+			<input type="hidden" name="payment_method" id="payment_method" value="cod">
+			<input type="hidden" name="order_type" id="order_type" value="2">
 			<div class="col-md-12">
 				<span id="check-stock-pay-div"></span>
 			</div>
@@ -341,10 +341,9 @@
 										<div class="mb-3 text-center">
 											<select onchange="pay_method(this.value)" class="form-select select2-dropdown mx-auto"
 													style="max-width: 250px;">
-												<option value="">Select</option>
 												<option value="cod">COD</option>
-												<option value="online">Online</option>
-												<option value="machine">Machine</option>
+												<!--<option value="online">Online</option>
+												<option value="machine">Machine</option>-->
 											</select>
 											<span class="text-danger" id="err_p_method"></span>
 										</div>
@@ -480,7 +479,7 @@
 	<!-- ######### FOOTER START ############### -->
 		<?PHP include_once("includes/footer.php"); ?>
 	<!-- ######### FOOTER END ############### -->
-	<script src="assets/plugins/es/cart.js"></script>
+	<script src="assets/plugins/es/pos-bulk-cart.js"></script>
 
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
@@ -905,7 +904,7 @@ function user_details(val)
 {
 	//alert(val);
 	$('#err_user').html('');
-	var datapost = 'action=userdetails&phone='+val;
+	var datapost = 'action=userPosBulkdetails&phone='+val;
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
@@ -940,10 +939,9 @@ function user_details(val)
 		}
 	});
 }
-
 function check_non_corp_mobile(val)
 {
-	var user_type = 'corp';
+	var user_type = 'noncorp';
 	var datapost = 'action=checkOtherUserMobile&phone='+val+'&user_type=' + user_type;
 	$.ajax({
 		type: "POST",
@@ -968,7 +966,7 @@ function save_users()
 	$('#err_user').html('');
 	let pos_user = $('#pos_user').val();
 	let pos_mobile  = $('#pos_mobile').val();
-	let user_type = null;
+	let user_type = 'corp';
 
 	if(pos_user == '')
 	{
@@ -1012,13 +1010,14 @@ function cart_pay()
 	$('#rw').val(rw);
 	//cart-list-form
 	$('#check-stock-div').html('');
-	var items = localStorage.getItem("data", JSON.stringify(basket));
+	var items = localStorage.getItem("data", JSON.stringify(bulkBasket));
 	if (items) {
 		var data = JSON.parse(items);
 		if (data.length > 0) {
 			var cartData = data[0].id;
 		}
 	}
+	//alert(cartData);
 	var supplier_id = $('#supplier_id').val();
 	var user_hidden_id = $('#user_hidden_id').val();
 	$('#err_supplier_id').text('');
@@ -1074,10 +1073,10 @@ function pay_method(val)
 function pay_now()
 {
 	var p_method =  $('#payment_method').val();
-	if(p_method == ''){
+	/*if(p_method == ''){
 		$('#err_p_method').text('Please select payment type');
 		return false;
-	}
+	}*/
 	var datapost = $('#cart-list-form').serialize();
 	$.ajax({
 		type: "POST",

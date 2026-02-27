@@ -180,7 +180,7 @@
 							<hr>
 							<div class="row item-row mt-2">
 
-								<div class="col-md-5">
+								<div class="col-md-4">
 								<label for="input1" class="form-label">Products</label>
 									<select name="product[]" class="form-select form-select-sm select2-dropdown"  tabindex="1" onchange="select_product(this)">
 										<option value="">Select product</option>
@@ -281,6 +281,11 @@
 									<span id="selling_price_div" class="w-100 selling_price_div error_purchase text-danger"></span>
 								</div>
 								
+								<div class="col-md-1">
+									<label for="input5" class="form-label">Total&nbsp;(₹)</label>
+									<input type="text" class="form-control form-control-sm tot_price" style="border:0" readonly>
+									<!--<span class="tot_price text-danger" style="font-size:12px;"></span>-->
+								</div>
 								<div class="col-md-2">
 									<label for="input5" class="form-label">Remarks</label>
 									<input type="text" name="remarks[]" id="remarks" class="form-control form-control-sm">
@@ -469,6 +474,12 @@ $(document).on('input', '.purchase_price', function () {
     }
 
     this.value = value;
+	
+	let stockinput =parseFloat(row.find('.stock-input').val()) || 0;
+	//let value = this.value;
+	let tot_price = this.value*stockinput;
+	tot_price = tot_price.toFixed(2);
+	row.find('.tot_price').val(tot_price);
 });
 /*$(document).on('input', '.purchase_price', function () {
 	let row = $(this).closest('.item-row');
@@ -495,6 +506,7 @@ $('#addMore').click(function () {
     newRow.find('select').val(null);
     newRow.find('.selling_price_div').html('');
     newRow.find('.is-invalid').removeClass('is-invalid');
+	//newRow.find('.tot_price').html('');
 
     $('#rows-wrapper').append(newRow);
 
@@ -612,6 +624,17 @@ $(document).on('change', 'select', function () {
                 .removeClass('is-invalid');
         }
     }
+});
+
+$(document).on('input', '.stock-input', function () {
+	let row = $(this).closest('.item-row');
+    row.find('.tot_price').val('');
+
+    let max = parseFloat(row.find('.purchase_price').val()) || 0;
+	let value = this.value;
+	let tot_price = this.value*max;
+	tot_price = tot_price.toFixed(2)
+	row.find('.tot_price').val(tot_price);
 });
 
 function initSelect2(rows) {
