@@ -1023,7 +1023,7 @@ function cart_pay()
 	var user_hidden_id = $('#user_hidden_id').val();
 	$('#err_supplier_id').text('');
 	if(supplier_id == ''){
-		$('#err_supplier_id').text('Please enter seller mobile no.');
+		$('#err_supplier_id').text('Please enter mobile no.');
 		return false;
 	}if(user_hidden_id == ''){
 		$('#err_supplier_id').text('Please enter valid mobile no.');

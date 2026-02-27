@@ -154,6 +154,11 @@ CREATE TABLE `2026_pos_machines` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
 
 
+================27-02-2026==============
+ALTER TABLE `2026_pos_orders` ADD `order_type` TINYINT(1) NULL DEFAULT '1' COMMENT '1=pos sell, 2=pos bulk sell' AFTER `status`;
+ALTER TABLE `users` ADD `user_type` VARCHAR(225) NULL DEFAULT NULL AFTER `profile`
+
+
 
 
 
