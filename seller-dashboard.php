@@ -79,6 +79,19 @@
 	$sqlQueryRec = $general_cls_call->select_join_query($fields, $tables, $whereReceive, $paramsReceive, 2);
 	
 	$count_received = count($sqlQueryRec);
+	
+	// pos sell  
+	$wherePosSell = "WHERE pos_user_id=:pos_user_id";
+							 
+	$paramsPosSell = [
+		':pos_user_id' => $_SESSION['SELLER_ID']
+	];
+	$pos_sell_total = $general_cls_call->select_query_sum( POS_ORDERS, $wherePosSell, $paramsPosSell, 'total_amount');
+	
+	// pending purchase request 
+	$wherePendingRqst = "WHERE status=:status";
+	$paramsPendingRqst = ['status'=>0];
+	$total_pending_reqst = $general_cls_call->select_query_count(PRODUCT_STOCK_TRANSACTION, $wherePendingRqst, $paramsPendingRqst);
 	ob_end_flush();
 ?>
 
@@ -119,14 +132,14 @@
             <div class="card-body">
               <div class="">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                  <h5 class="mb-0">Available Stock</h5>
+                  <h5 class="mb-0">Pos Sell</h5>
                 </div>
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo"><?= $pos_stock->total ? $pos_stock->total : 0; ?></h3>
+                    <h3 class="mb-0 text-indigo">₹ <?= $pos_sell_total->total ? $pos_sell_total->total : 0; ?></h3>
                     <p class="mb-3"></p>
-                    <a href="<?php echo SITE_URL.'stock-transfer'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
+                    <a href="<?php echo SITE_URL.'invoices'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>
                 </div>
               </div>
@@ -138,12 +151,12 @@
             <div class="card-body">
               <div class="">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                  <h5 class="mb-0">Purchase Request</h5>
+                  <h5 class="mb-0">Pending Purchase Request</h5>
                 </div>
                 <p class="mb-4">You are the best seller of this monnth</p>
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="">
-                    <h3 class="mb-0 text-indigo"><?php echo $user_purchase_stock ? $user_purchase_stock : 0; ?></h3>
+                    <h3 class="mb-0 text-indigo"><?php echo $total_pending_reqst ? $total_pending_reqst : 0; ?></h3>
                     <p class="mb-3"></p>
                     <a href="<?php echo SITE_URL.'purchase-request'; ?>"><button class="btn btn-grd btn-grd-primary rounded-5 border-0 px-4">View Details</button></a>
                   </div>

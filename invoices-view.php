@@ -111,6 +111,7 @@
 								</thead>
 								<tbody>
 									<?php
+									$total_price = 0;
 									if($sqlQuery[0] != '')
 									{
 										$i = 1;
@@ -128,11 +129,18 @@
 										
 									  </tr>
 										<?PHP
+											$total_price = $total_price + $selectValue->total_price;
 												$i++;
 											}
 										}
 									?>
 								</tbody>
+								<tfoot>
+									<tr>
+										<td colspan="6" style="text-align:right"><h6>Total Price</h6></td>
+										<td><h5>₹ <?PHP echo $total_price; ?></h5></td>
+									</tr>
+								</tfoot>
 							</table>
 						</div>
 					</div>

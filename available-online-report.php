@@ -165,6 +165,7 @@
 							2
 						);
 						//echo "<pre>";print_r($sqlQuery);die;
+						//echo count($sqlQuery);die;
 						if($sqlQuery[0] != '')
 						{
 							$i = 1;
