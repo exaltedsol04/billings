@@ -87,7 +87,7 @@
 		{
 			$query_string="SELECT ".$fields." FROM ".$tables." ".$where." ";
 			$query = $this->db->prepare($query_string);
-		//	echo $query_string;print_r($data_array);
+		    //echo $query_string;print_r($data_array);
 			foreach($data_array As $key=>$value)
 			{
 				$data_array[$key] = stripslashes($value);

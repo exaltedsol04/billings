@@ -11,12 +11,14 @@
 
 	ob_start();
 	//echo $_SESSION['USER_ID'];die;
+	
+	
 	$order_id = '';
 	if(isset($_GET['order_id']))
 	{
 		$order_id = $_GET['order_id'];
 		
-		$fields = "po.pos_user_id, poi.quantity, poi.unit_price, poi.total_price, pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode, u.name as unit_name";
+		$fields = "po.pos_user_id, po.created_at, poi.quantity, poi.unit_price, poi.total_price, pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id ,p.name, p.image, p.barcode, u.name as unit_name";
 		
 		$tables = POS_ORDERS_ITEMS . " poi INNER JOIN " . PRODUCT_VARIANTS . " pv ON poi.product_variant_id = pv.id
 		INNER JOIN " . POS_ORDERS . " po ON po.id = poi.pos_order_id
@@ -26,18 +28,24 @@
 		
 		if($_SESSION['ROLE_ID'] == 1)
 		{
-			$where = "WHERE poi.pos_order_id=:pos_order_id ORDER BY poi.id";
-				$params = [
+			$where = "WHERE poi.pos_order_id=:pos_order_id  ORDER BY poi.id";
+			$params = [
 				':pos_order_id'	=>	$order_id
 			];
 		}
-		else{
-			$where = "WHERE po.pos_user_id=:pos_user_id AND poi.pos_order_id=:pos_order_id ORDER BY poi.id";
-				$params = [
+		else
+		{
+			
+			$params = [
 				':pos_order_id'	=>	$order_id,
 				':pos_user_id'	=>	$_SESSION['SELLER_ID']
 			];
+			
+			
+			$where = "WHERE po.pos_user_id=:pos_user_id AND poi.pos_order_id=:pos_order_id ORDER BY poi.id";
+				
 		}
+		
 		
 		
 		$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
@@ -78,7 +86,6 @@
 					</div>
 				</div>
 				<!--end breadcrumb-->
-     
 				<div class="card">
 					<div class="card-body">
 						<div class="table-responsive">
@@ -154,5 +161,17 @@
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
+<script>
+document.getElementById("fromDate").addEventListener("change", function () {
+    var fromDate = this.value;
+    // Set minimum selectable date for To Date
+    document.getElementById("toDate").setAttribute("min", fromDate);
+
+    // If already selected toDate is smaller → reset it
+    if (document.getElementById("toDate").value < fromDate) {
+        document.getElementById("toDate").value = "";
+    }
+});
+</script>
 </body>
 </html>

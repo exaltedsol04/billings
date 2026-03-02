@@ -10,6 +10,24 @@
 	/*******End Auth Section*******/
 
 	ob_start();
+	
+	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	{
+		//echo "<pre>";print_r($_POST);die;
+		$fromDate = $_POST['fromDate'];
+		$toDate = $_POST['toDate'];
+		$whereDateRange = "created_at >= :fromDate AND created_at < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+		
+		/*$params = [
+			':fromDate' => $fromDate,
+			':toDate'   => $toDate
+		];*/
+	}
+	else
+	{
+		$whereDateRange = 'DATE(created_at) = CURDATE()';
+		
+	}
 
 	ob_end_flush();
 ?>
@@ -44,6 +62,29 @@
 					</div>
 				</div>
 				<!--end breadcrumb-->
+				<h6 class="mb-0 text-uppercase">Search panel</h6>
+						<hr>
+						<div class="card rounded-4 border-top border-4 border-primary border-gradient-1">
+							<div class="card-body">
+								<form class="row g-4" method="post" action="">
+									<div class="col-md-6">
+										<label for="input1" class="form-label">From date</label>
+										<input type="date" name="fromDate" id="fromDate" class="form-control" placeholder="Start Date">
+									</div>
+									<div class="col-md-6">
+										<label for="input5" class="form-label">To date</label>
+										<input type="date" name="toDate" id="toDate" class="form-control" placeholder="End Date">
+									</div>
+									
+									<div class="col-md-12">
+									  <div class="d-md-flex d-grid justify-content-md-between">
+										<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+										<button type="submit" class="btn btn-grd btn-grd-success px-4" name="btnUser" value="SAVE">Search</button>
+									  </div>
+									</div>
+								</form>
+							</div>
+						</div>
      
 				<div class="card">
 					<div class="card-body">
@@ -70,15 +111,37 @@
 									<?php
 									if($_SESSION['ROLE_ID'] == 1)
 									{
-										$where = "WHERE 1 ORDER BY created_at DESC";
-										$params = [];
+										$where = "WHERE ".$whereDateRange." ORDER BY created_at DESC";
+										
+										if(!empty($fromDate) && !empty($toDate))
+										{
+											$params = [
+												':fromDate' => $fromDate,
+												':toDate'   => $toDate
+												];
+										}
+										else{
+											$params = [];
+										}
 									}
 									else{
-										$where = "WHERE pos_user_id=:pos_user_id  ORDER BY created_at DESC";
-										$params = [
-											':pos_user_id'	=>	$_SESSION['SELLER_ID']
-										];
+										$where = "WHERE pos_user_id=:pos_user_id AND ".$whereDateRange."  ORDER BY created_at DESC";
+										
+										if(!empty($fromDate) && !empty($toDate))
+										{
+											$params = [
+												':fromDate' => $fromDate,
+												':toDate'   => $toDate,
+												':pos_user_id'	=>	$_SESSION['SELLER_ID']
+											];
+										}
+										else{
+											$params = [
+												':pos_user_id'	=>	$_SESSION['SELLER_ID']
+											];
+										}
 									}
+									
 									
 									$sqlQuery = $general_cls_call->select_query("*", POS_ORDERS, $where, $params, 2);
 									//echo "<pre>";print_r($sqlQuery);die;
@@ -139,6 +202,17 @@
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
+document.getElementById("fromDate").addEventListener("change", function () {
+    var fromDate = this.value;
+    // Set minimum selectable date for To Date
+    document.getElementById("toDate").setAttribute("min", fromDate);
+
+    // If already selected toDate is smaller → reset it
+    if (document.getElementById("toDate").value < fromDate) {
+        document.getElementById("toDate").value = "";
+    }
+});
+
 $(document).ready(function(){
 	if ($.fn.DataTable.isDataTable('#example2')) {
 		$('#example2').DataTable().destroy();
