@@ -222,7 +222,7 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urle
                 <td colspan="6">CGST 0.00% &nbsp; SGST 0.00%</td>
             </tr>
 			<?php 
-				$sl =1;
+				$sl =0;
 				$tot_amt = 0;
 				$count_qty = 0;
 				if($sqlQuery[0] != '')
