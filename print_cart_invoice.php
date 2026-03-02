@@ -169,9 +169,9 @@ $barcode = 	$product_variant_data->barcode;
         <strong><?php echo SITE_TITLE; ?></strong><br>
         Near Shushma Petrol Pump Wadhe Phata,<br>
         Highway, Bangalore, Satara, Maharashtra 415001<br>
-        Satara - Maharashtra - 415001<br><br>
+        <br>
 
-        Customer Care: 18008910001<br>
+        Customer Care: +91 76663 77587<br>
         FSSAI Lic No: 11525039000226
     </div>
 
@@ -183,7 +183,6 @@ $barcode = 	$product_variant_data->barcode;
     <div class="divider"></div>
 
     <div class="small">
-        Place of Supply & State Code: 27 MH<br>
         Customer: <?php echo $customer->name.' (M. '.$customer->mobile.')'; ?><br>
         Date: <?php echo date('d/m/Y H:i');?><br>
         Bill No: #<?php echo $order_id; ?><br>
@@ -205,11 +204,11 @@ $barcode = 	$product_variant_data->barcode;
             </tr>
         </thead>
         <tbody class="bb">
-            <tr>
-                <td colspan="6">CGST 0.00% &nbsp; SGST 0.00%</td>
-            </tr>
+            <!--<tr>-->
+            <!--    <td colspan="6">CGST 0.00% &nbsp; SGST 0.00%</td>-->
+            <!--</tr>-->
 			<?php 
-				$sl =1;
+				$sl =0;
 				$tot_amt = 0;
 				$count_qty = 0;
 				if($sqlQuery[0] != '')
@@ -269,40 +268,19 @@ $barcode = 	$product_variant_data->barcode;
     <div class="divider"></div>
 
     <div class="small">
-        ITO PAY UPI ID: rx-7738-10112600<br>
-        Amount Inclusive of Applicable Taxes
+       
     </div>
 
-    <div class="divider"></div>
 
-    <div class="small">
-        Payment Ref No: TMX1100616507012026<br>
-        Bill of Supply: TMX110626100071<br>
-        ROne Card No: 935XXXX061 ROne Bal (Amount): 6.33<br>
-        Terms & Conditions Apply
-    </div>
 
     <div class="qr">
         <!-- Replace src with real QR image -->
         <img src="<?php echo IMG_PATH . 'qr.png'?>">
+      <center> Download app for free home delivery</center> 
     </div>
 
     <div class="footer">
-        I/we hereby certify that food/foods mentioned in this<br>
-        invoice is/are warranted to be of the nature<br>
-        and quality which it/these purports/supported to be.<br><br>
-
         ★ Thank You for Shopping With Us ★<br><br>
-
-        Website: www.relianceretail.com<br>
-        Customer Care email: customerservice@ril.com<br><br>
-
-        Please refer our Website link<br>
-        https://www.relianceretail.com/privacy-policy.html<br>
-        for Privacy Policy<br><br>
-
-        Dynamic Quick Response (QR) code is made<br>
-        available to the Recipient through a digital display
     </div>
 
 </div>
