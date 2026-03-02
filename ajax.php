@@ -478,7 +478,10 @@ error_reporting(0);
 				
 				if($_POST['order_type'] == 1)
 				{
-					$unit_price = $product_variant_dtls->discounted_price;
+					$price = ($product_variant_dtls->discounted_price == 0.00 || $product_variant_dtls->discounted_price == '') ? $product_variant_dtls->price : $product_variant_dtls->discounted_price;
+					
+					//$unit_price = $product_variant_dtls->discounted_price;
+					$unit_price = $price;
 					$total_price = $_POST['qty'][$k] * $unit_price;
 				}
 				
