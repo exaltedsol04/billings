@@ -111,6 +111,7 @@
 							pv.type,
 							pv.discounted_price,
 							pv.stock_unit_id,
+							pv.price,
 
 							u.name as stock_unit_name,
 							u.parent_id,
@@ -213,8 +214,10 @@
 								$barcode = $arr->barcode;
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
+								
+								$price = ($arr->discounted_price == 0.00 || $arr->discounted_price == '') ? $arr->price : $arr->discounted_price;
 					?>
-								<option value="<?PHP echo $arr->variant_id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$measurement.'@@@'.$unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id.'@@@'.$arr->measurement.' '.$arr->stock_unit_name; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->variant_id.'@@@'.$price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$imagePath.'@@@'.$barcode.'@@@'.$measurement.'@@@'.$unit_name.'@@@'.$arr->type.'@@@'.$arr->product_id.'@@@'.$arr->measurement.' '.$arr->stock_unit_name; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->stock_unit_name.')'; ?></option>
 					<?PHP
 							}
 						}

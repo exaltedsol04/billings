@@ -24,7 +24,13 @@
 				$product_id = $product_variant_dtls->product_id;
 				//echo $val.'-> '.$product_id; die;
 				$unit_price = $product_variant_dtls->discounted_price;
-				$total_price = $_POST['qty'][$k] * $unit_price;
+				
+				$price = ($product_variant_dtls->discounted_price == 0.00 || $product_variant_dtls->discounted_price == '') ? $product_variant_dtls->price : $product_variant_dtls->discounted_price;
+				
+				//$total_price = $_POST['qty'][$k] * $unit_price;
+				$total_price = $_POST['qty'][$k] * $price;
+				
+				
 				
 				$loose_stock_quantity = 0.00;
 				$variant_type = $product_variant_dtls->type;
@@ -51,7 +57,8 @@
 					':stock'				=> ($_POST['qty'][$k]),
 					':created_date'			=> date("Y-m-d H:i:s"),
 					':status'				=> 0,
-					':selling_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->discounted_price),
+					//':selling_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->discounted_price),
+					':selling_price'		=> $general_cls_call->specialhtmlremover($price),
 					':purchase_price'		=> $general_cls_call->specialhtmlremover($product_variant_dtls->price),
 					':transaction_type'		=> 1,
 					':received_selled_id'	=> 0,
@@ -119,7 +126,7 @@
 				<select name="product" id="product" onchange=add_to_cart(this) class="form-select select2-dropdown" tabindex="1">
 					<option value="">Select...</option>
 					<?PHP
-						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.stock_unit_id, p.name, p.image, p.barcode, u.name as unit_name";
+						$fields = "pv.id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price, pv.price, pv.stock_unit_id, p.name, p.image, p.barcode, u.name as unit_name";
 						$tables = PRODUCT_VARIANTS . " pv
 						INNER JOIN " . PRODUCTS . " p ON p.id = pv.product_id
 						INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
@@ -140,8 +147,10 @@
 								$barcode = $arr->barcode;
 								
 								$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
+								
+								$price = ($arr->discounted_price == 0.00 || $arr->discounted_price == '') ? $arr->price : $arr->discounted_price;
 					?>
-								<option value="<?PHP echo $arr->id.'@@@'.$arr->discounted_price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->unit_name.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
+								<option value="<?PHP echo $arr->id.'@@@'.$price.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->product_id.'@@@'.$barcode.'@@@'.$arr->measurement.' '.$arr->unit_name.'@@@'.$arr->type; ?>"><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name).' ('.$arr->measurement.' '.$arr->unit_name.')'; ?></option>
 					<?PHP
 							}
 						}

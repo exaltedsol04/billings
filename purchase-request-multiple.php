@@ -136,6 +136,7 @@
 											pv.stock,
 											pv.measurement,
 											pv.discounted_price,
+											pv.price,
 											pv.stock_unit_id,
 											p.name,
 											p.image,
@@ -195,6 +196,7 @@
 													$measurement_units = $general_cls_call->convert_measurement($measurement_arr);			
 													$unitname = $measurement_units['unit'];
 												}
+												
 									?>
 												<option value="<?PHP echo $arr->product_id.'@@@'.$general_cls_call->cart_product_name($arr->name).'@@@'.$arr->id.'@@@'.$arr->type; ?>" <?php echo ($_POST['product'] == $arr->id.'@@@'.$general_cls_call->cart_product_name($arr->name)) ? 'selected' : '' ?>><?PHP echo $barcode.' '.$general_cls_call->cart_product_name($arr->name); ?> (<?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?> - <?php echo $arr->type; ?>)</option>
 									<?PHP

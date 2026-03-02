@@ -37,7 +37,7 @@ error_reporting(0);
 		
 		case "productbarcord":
 			$barcode = $_POST['barcode'];
-			$fields = "pr.id, pr.product_id, pr.product_variant_id, pv.id as variant_id, pr.status, SUM(pr.stock) as total_stock, pv.discounted_price, u.name as stock_unit_name, pv.measurement, pv.type, p.type as product_type, p.name, p.image, p.barcode, pv.stock_unit_id";
+			$fields = "pr.id, pr.product_id, pr.product_variant_id, pv.id as variant_id, pr.status, SUM(pr.stock) as total_stock, pv.discounted_price, pv.price, u.name as stock_unit_name, pv.measurement, pv.type, p.type as product_type, p.name, p.image, p.barcode, pv.stock_unit_id";
 
 			$tables = PRODUCT_STOCK_TRANSACTION . " pr
 			INNER JOIN " . PRODUCTS . " p 
@@ -119,10 +119,13 @@ error_reporting(0);
 				{
 					$barcode = $val->barcode;
 					$barcode = !empty($barcode) ?  '(' . $barcode .') ' : '';
+					
+					$price = ($val->discounted_price == 0.00 || $val->discounted_price == '') ? $val->price : $val->discounted_price;
 								
 					$productArr[] = [
 						'id'               => $val->variant_id,
-						'discounted_price' => $val->discounted_price,
+						//'discounted_price' => $val->discounted_price,
+						'discounted_price' => $price,
 						'name'             => $general_cls_call->cart_product_name($val->name),
 						'imagePath'        => $imagePath,
 						'barcode'          => $barcode,
@@ -2008,16 +2011,21 @@ error_reporting(0);
 			$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
 			
 			//echo "<pre>";print_r($sqlQuery);die;
+			
+			$price = ($sqlQuery->discounted_price == 0.00 || $sqlQuery->discounted_price == '') ? $sqlQuery->price : $sqlQuery->discounted_price;
+			
 			$data['status'] = 200;
 			if($sqlQuery->parent_id !=0)
 			{
 				$conversion = $sqlQuery->conversion;
 				$multiply_by = $conversion/$sqlQuery->measurement;
-				$data['discount_price'] = $sqlQuery->discounted_price * $multiply_by;
+				//$data['discount_price'] = $sqlQuery->discounted_price * $multiply_by;
+				$data['discount_price'] = $price * $multiply_by;
 				$data['price'] = $sqlQuery->price * $multiply_by;
 			}
 			else{
-				$data['discount_price'] = $sqlQuery->discounted_price;
+				//$data['discount_price'] = $sqlQuery->discounted_price;
+				$data['discount_price'] = $price;
 				$data['price'] = $sqlQuery->price;
 			}
 			echo json_encode($data);
