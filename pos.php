@@ -558,7 +558,7 @@ function getProducts(val)
 				let totData = data.length;
 				//alert(totData);
 				if(totData == 1)
-				{
+				{					
 					var parameter =
 					data[0].id + '@@@' +
 					data[0].discounted_price + '@@@' +
@@ -568,7 +568,8 @@ function getProducts(val)
 					data[0].measurement + '@@@' + 
 					data[0].stock_unit_id + '@@@' + 
 					data[0].product_type + '@@@' + 
-					data[0].product_id;
+					data[0].product_id + '@@@' +
+					data[0].measurement + ' ' + data[0].stock_unit_id;
 					//Start Increase and Decrease
 					let pvqty = $('#qty_' + data[0].id).val();
 					if(typeof pvqty === 'undefined'){
@@ -639,7 +640,8 @@ function getProducts(val)
 					item.measurement + '@@@' + 
 					item.stock_unit_id + '@@@' +
 					item.product_type + '@@@' +
-					item.product_id;
+					item.product_id + '@@@' +
+					item.measurement +' '+ item.stock_unit_id;
 					
 					//alert(parameter);
 					var images = item.imagePath;

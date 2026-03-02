@@ -567,7 +567,8 @@ function getProducts(val)
 					data[0].measurement + '@@@' + 
 					data[0].stock_unit_id + '@@@' + 
 					data[0].product_type + '@@@' + 
-					data[0].product_id;
+					data[0].product_id + '@@@' +
+					data[0].measurement + ' ' + data[0].stock_unit_id;
 					//Start Increase and Decrease
 					let pvqty = $('#qty_' + data[0].id).val();
 					if(typeof pvqty === 'undefined'){
@@ -638,7 +639,8 @@ function getProducts(val)
 					item.measurement + '@@@' + 
 					item.stock_unit_id + '@@@' +
 					item.product_type + '@@@' +
-					item.product_id;
+					item.product_id + '@@@' +
+					item.measurement +' '+ item.stock_unit_id;
 					
 					//alert(parameter);
 					var images = item.imagePath;
