@@ -28,7 +28,7 @@
 			];
 		}
 		
-		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, o.total, o.delivery_charge, o.payment_method, o.razorpay_transaction_id, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status, o.address_id";
+		$fields = "o.id, o.final_total as order_total, o.address, o.mobile, o.packing_charge, o.created_at, o.active_status, o.order_type, o.total, o.delivery_charge, o.payment_method, o.razorpay_transaction_id, s.name as seller_name, s.store_name, s.email AS seller_email, s.mobile AS seller_mobile, s.street AS seller_address, u.id AS customer_id, u.name AS customer_name, u.email AS customer_email, db.name AS delivery_boy_name, db.mobile AS delivery_boy_mobile, db.address AS delivery_boy_address, osl.status AS orders_status_list_status, o.address_id, oi.product_variant_id";
 		$tables = ORDERS . " o
 		INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
 		INNER JOIN " . SELLERS . " s ON s.id = oi.seller_id
@@ -186,12 +186,12 @@
                        <tr>
 								  <td><?php echo $k+1; ?></td>
 								  <td><?php echo $general_cls_call->cart_product_name($arr->product_name);  ?></td>
-								  <td class="text-center"><?php echo $arr->variant_name; ?></td>
+								  <td class="text-center"><?php echo $arr->variant_name.' ('.$arr->product_variant_id.')'; ?></td>
 								  <td class="text-center"><?php echo $arr->quantity; ?></td>
 								  <td class="text-center">₹<?php echo $arr->discounted_price; ?></td>
 								  <td class="text-center">₹<?php echo $arr->quantity * $arr->discounted_price ?></td>
 								 
-								  
+								  <input type="hidden" class="list_data" value="<?php echo $arr->product_variant_id.'-'.$arr->quantity ?>">
 							   </tr>
 							<?php 
 							      $subtotal = $subtotal + $arr->quantity * $arr->discounted_price;
@@ -522,13 +522,24 @@
 <script>
 function assignOperator(orderId)
 {
+	//alert(orderId);
+	
+	var listData = [];
+
+    document.querySelectorAll('.list_data').forEach(function(el){
+        listData.push(el.value);
+    });
+	//alert(listData);
+	// operatorList
+	
 	$('#no_operator').html('');
 	$.ajax({
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
 		data: {
-		  action: 'operatorList',
-		  order_id: orderId
+		  action: 'checkPosOnlineStock',
+		  order_id: orderId,
+		  listData: listData
 		},
 		dataType: "json",
 		success: function(response){
