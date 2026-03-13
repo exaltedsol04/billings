@@ -2446,6 +2446,39 @@ error_reporting(0);
 			
 		break;
 		
+		case "checkPosOnlineStock":
+			 $listData = $_POST['listData'];
+			 //echo "<pre>" ;print_r($listData);die;
+			 $stockArr = [];
+			 foreach($listData as $val)
+			 {
+				 $product_details = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id=:id", array(':id'=>$val['variant_id']), 1);
+				 $data = [
+					'product_id' => $product_details->product_id,
+					'product_variant_id' => $product_details->id,
+					'product_type' => $product_details->type,
+				 ];
+				 
+				$result = $ruf->available_stock_report($data);
+				$total_stock_available = $result->pos_stock + $result->available_stock;
+				 
+				 if($val['quantity'] > $total_stock_available)
+				 {
+					 $stockArr[] = [
+						'name' => $val['product_name'],
+						'variant_name' => $val['product_variant_name']
+					 ];
+				 }
+				 
+				 //echo "<pre>";print_r($stockArr);die;
+				 header('Content-Type: application/json');
+				 echo json_encode($stockArr);
+				 exit;
+				 
+			 }
+			 
+		break;
+		
     }
 ?>
 

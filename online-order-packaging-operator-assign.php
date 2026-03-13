@@ -186,12 +186,12 @@
                        <tr>
 								  <td><?php echo $k+1; ?></td>
 								  <td><?php echo $general_cls_call->cart_product_name($arr->product_name);  ?></td>
-								  <td class="text-center"><?php echo $arr->variant_name.' ('.$arr->product_variant_id.')'; ?></td>
+								  <td class="text-center"><?php echo $arr->variant_name; ?></td>
 								  <td class="text-center"><?php echo $arr->quantity; ?></td>
 								  <td class="text-center">₹<?php echo $arr->discounted_price; ?></td>
 								  <td class="text-center">₹<?php echo $arr->quantity * $arr->discounted_price ?></td>
 								 
-								  <input type="hidden" class="list_data" value="<?php echo $arr->product_variant_id.'-'.$arr->quantity ?>">
+								  <input type="hidden" class="list_data" value="<?php echo $arr->product_variant_id ?>" data-qty="<?php echo $arr->quantity; ?>" data-pvnm="<?php echo $arr->variant_name; ?>" data-pnm="<?php echo $general_cls_call->cart_product_name($arr->product_name); ?>">
 							   </tr>
 							<?php 
 							      $subtotal = $subtotal + $arr->quantity * $arr->discounted_price;
@@ -516,6 +516,27 @@
 		</div>
 	  </div>
 	</div>
+
+<!--- stock available modal-->
+<div class="modal fade" id="product-modal">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header border-bottom-0 py-2 bg-grd-primary">
+                        <h5 class="modal-title btn-grd">Products Unavailable Stock</h5>
+                        <a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+                          <i class="material-icons-outlined">close</i>
+                        </a>
+                      </div>
+                      <div class="modal-body">
+							<span id="show-products"></span>
+                      </div>
+                      <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-grd btn-grd-danger rounded-0"
+                          data-bs-dismiss="modal">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
@@ -523,12 +544,85 @@
 function assignOperator(orderId)
 {
 	//alert(orderId);
-	
 	var listData = [];
+	$('.list_data').each(function(){
+		listData.push({
+			product_name: $(this).data('pnm'),
+			product_variant_name: $(this).data('pvnm'),
+			variant_id: $(this).val(),
+			quantity: $(this).data('qty')
+		});
+	});
+	//alert(listData);
+	// operatorList
+	
+	//$('#no_operator').html('');
+	$.ajax({
+		type: "POST",
+		url: "<?PHP echo SITE_URL; ?>ajax",
+		data: {
+		  action: 'checkPosOnlineStock',
+		  order_id: orderId,
+		  listData: listData
+		},
+		dataType: "json",
+		success: function(response){
+			//var data = JSON.parse(response);
+			//alert(data);assignOperator
+			//alert(response.length);
+			if(response.length > 0)
+			{
+				var html = '<div class="row">';
+				$.each(response, function (index, item) {
+					
+					
+					html += '<div class="col-8 mt-3 fw-bold product-short-title">' + item.name + '</div>';
+							html += '<div class="col-4 mt-3 product-short-name">' + item.variant_name +  '</div>';
+					
+					
+					/*html += '<div class="col">';
+							html += '<div class="card rounded-4">';
+                              html += '<div class="card-body">';
+                               
+                                html += '<div class="mt-3">';
+								 html += '<h5 class="mb-0 fw-bold product-short-title">' + item.name + '</h5>';
+                                  html += ' <p class="mb-0 product-short-name">' + item.variant_name +'</p>';
+                                   
+                                 html += '</div>';
+                                 html += '<div class="d-grid mt-2">';
+                                   
+                                 html += '</div>';
+                               html += '</div>';
+                        html += '</div>';
+                        html += '</div>';*/
+				});
+				html += '</div>';
 
-    document.querySelectorAll('.list_data').forEach(function(el){
-        listData.push(el.value);
-    });
+				$('#show-products').html(html);
+				$('#product-modal').modal('show');
+			}
+			else
+			{
+				getOperator(orderId);
+			}
+			
+		}
+	});
+	
+}
+
+function getOperator(orderId)
+{
+	//alert(orderId);
+	var listData = [];
+	$('.list_data').each(function(){
+		listData.push({
+			product_name: $(this).data('pnm'),
+			product_variant_name: $(this).data('pvnm'),
+			variant_id: $(this).val(),
+			quantity: $(this).data('qty')
+		});
+	});
 	//alert(listData);
 	// operatorList
 	
@@ -537,9 +631,8 @@ function assignOperator(orderId)
 		type: "POST",
 		url: "<?PHP echo SITE_URL; ?>ajax",
 		data: {
-		  action: 'checkPosOnlineStock',
-		  order_id: orderId,
-		  listData: listData
+		  action: 'operatorList',
+		  order_id: orderId
 		},
 		dataType: "json",
 		success: function(response){
@@ -564,6 +657,8 @@ function assignOperator(orderId)
 	});
 	
 }
+
+
 $(document).on('click', '#assignOperatorSave', function (e) {
   e.preventDefault();
 
