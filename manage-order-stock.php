@@ -8,23 +8,9 @@
 	];
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
-
+error_reporting(1);
 	ob_start();
-	//total orders
-	$incompleted_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
-	$incompleted_orders_params = [
-		':active_status'	=> 1,
-		':seller_id'		=> $_SESSION['SELLER_ID']
-	];
-	$fields = "o.id";
-	$tables = ORDERS . " o
-	INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
-	INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = o.active_status
-	LEFT JOIN " . ORDERS_STATUSES . " os ON os.order_id = o.id AND os.status = o.active_status";
-	//total orders
-	$incompletedOrdersArr = $general_cls_call->select_join_query($fields, $tables, $incompleted_orders_where, $incompleted_orders_params, 2);
-	$incompleted_orders = count($incompletedOrdersArr);
-	
+	//total orders	
 	$today_date = date('Y-m-d');
 	ob_end_flush();
 ?>
@@ -55,22 +41,6 @@
 		<div class="row">
 			<div class="col-md-12" id="msg"></div>
 		</div>
-		<!--<div class="row row-cols-1 row-cols-xl-6">
-			<a href="<?php echo SITE_URL.'online-incomplete-orders'; ?>">
-			<div class="col d-flex">
-			  <div class="card rounded-4 w-100 bg-grd-primary bg-gradient text-white">
-				<div class="card-body">
-				  <div class="d-flex align-items-start justify-content-between mb-1">
-					<div class="">
-					  <h5 class="mb-0 text-white"><?= $incompleted_orders ? $incompleted_orders : 0; ?></h5>
-					  <p class="mb-0">Incompleted orders</p>
-					</div>
-				  </div>
-				</div>
-			  </div>
-			</div>
-			</a>
-		</div>-->
 		<div class="card">
 			<div class="card-body">
 				<div class="table-responsive">
@@ -103,99 +73,62 @@
 						<tbody>
 						<?php
 						
-						
-						$tables = PRODUCTS . " p
+						$fields = "o.id, oi.product_variant_id,
+							p.id AS product_id,
+							p.name AS product_name,
+							CASE 
+								WHEN pv.type = 'loose' THEN pv.product_id
+								ELSE oi.product_variant_id
+							END AS item_key,
+
+							pv.type,
+
+							SUM(
+								CASE
+									/* LOOSE PRODUCT */
+									WHEN pv.type = 'loose'
+										THEN (oi.quantity * pv.measurement) / u.conversion
+
+									/* NORMAL PRODUCT */
+									ELSE oi.quantity
+								END
+							) AS total_used_stock";
+			
+						$tables = ORDERS_ITEMS . " oi
+
+						INNER JOIN " . ORDERS . " o
+							ON o.id = oi.order_id
 
 						INNER JOIN " . PRODUCT_VARIANTS . " pv
-							ON pv.product_id = p.id
+							ON pv.id = oi.product_variant_id
+						
+						INNER JOIN " . PRODUCTS . " p
+							ON p.id = pv.product_id
+	
+						INNER JOIN " . UNITS . " u
+							ON u.id = pv.stock_unit_id";
+					
 
-						LEFT JOIN " . UNITS . " u
-							ON u.id = pv.stock_unit_id
-
-						LEFT JOIN (
-							SELECT
-								CASE WHEN pv2.type='loose' THEN pv2.product_id ELSE NULL END AS loose_product_id,
-								CASE WHEN pv2.type!='loose' THEN oi.product_variant_id ELSE NULL END AS normal_variant_id,
-
-								SUM(
-									CASE
-										WHEN pv2.type='loose'
-											THEN (oi.quantity * pv2.measurement)/u2.conversion
-										ELSE oi.quantity
-									END
-								) AS used_qty
-
-							FROM " . ORDERS_ITEMS . " oi
-
-							INNER JOIN " . ORDERS . " o
-								ON o.id = oi.order_id
-
-							INNER JOIN " . PRODUCT_VARIANTS . " pv2
-								ON pv2.id = oi.product_variant_id
-
-							INNER JOIN " . UNITS . " u2
-								ON u2.id = pv2.stock_unit_id
-
-							WHERE o.active_status = :active_status
+					$where = "WHERE
+							DATE(o.created_at) = CURDATE()
+							AND o.active_status = :active_status
 							AND oi.seller_id = :seller_id
 
-							GROUP BY loose_product_id, normal_variant_id
-
-						) oi ON (
-								(pv.type='loose' AND oi.loose_product_id = p.id)
-							 OR (pv.type!='loose' AND oi.normal_variant_id = pv.id)
-						)
-						";
-
-
-					$where = " WHERE 1";
+						GROUP BY
+							CASE
+								WHEN pv.type = 'loose' THEN pv.product_id
+								ELSE oi.product_variant_id
+							END";
 
 
 					$params = [
-								':seller_id'=>$_SESSION['SELLER_ID'],
-								':active_status'=>2
-							];
-						
-						
-						
-						
-						
-							/*if($_SESSION['ROLE_ID'] == 1)
-							{
-								//$where = "WHERE oi.active_status=:active_status
-								$where = "WHERE o.active_status=:active_status AND DATE(o.from_time)=:from_time  GROUP BY oi.product_variant_id
-									  ORDER BY  o.created_at DESC";
-								$params = [
-									':active_status'=> 2,
-									':from_time' => $today_date
-								];	
-							}
-							else{
-								//$where = "WHERE oi.active_status=:active_status 
-								
-								// AND DATE(o.from_time)=:from_time 
-								
-								$where = "WHERE o.active_status=:active_status 
-									  AND oi.seller_id=:seller_id GROUP BY oi.product_variant_id
-									  ORDER BY o.created_at DESC";
-								$params = [
-									':seller_id'=> $_SESSION['SELLER_ID'],
-									':active_status'=> 2,
-									//':from_time' => $today_date
-								];
-								
-							}
-							
-							$fields = "o.id, o.orders_id, o.final_total, o.user_id, o.delivery_time, o.status, o.packing_charge, o.created_at, o.order_type, o.from_time, o.to_time, o.instant_delivery_time, SUM(oi.sub_total) AS orders_items_sub_total, o.payment_method, o.razorpay_transaction_id, u.name AS customer_name, osl.status AS orders_status_list_status, o.address_id, oi.product_name, oi.variant_name, oi.quantity, oi.product_variant_id, sum(oi.quantity) as sum_qty, oi.active_status, oi.seller_id";
-
-							$tables = ORDERS . " o
-							INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
-							LEFT JOIN " . USERS . " u ON u.id = o.user_id
-							INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = o.active_status";*/
+						':seller_id'=>$_SESSION['SELLER_ID'],
+						':active_status'=>2
+					];
 							
 							$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 								
-							echo "<pre>";print_r($sqlQuery);die;
+							//echo "<pre>";print_r($sqlQuery);die;
 							
 							if(!empty($sqlQuery[0]))
 							{
@@ -237,8 +170,13 @@
 									
 									$tot_product_stock = $result->pos_stock + $result->available_stock;
 									
-									$remaining_stock = $result->used_stock - abs($tot_product_stock);
-									$used_stock = $result->used_stock;
+									$used_stock = $arr->total_used_stock;
+									
+									$to_be_purchase_stock = $tot_product_stock > $used_stock ? 0 : abs($tot_product_stock - $used_stock);
+									//$to_be_purchase_stock = abs($used_stock - $tot_product_stock);
+									
+									//$used_stock = $result->used_stock;
+									
 									
 							?>
 							<tr id="dataRow<?php echo($arr->id);?>">
@@ -248,7 +186,7 @@
 								<td class="text-center"><?php echo $result->pos_stock ; ?></td>
 								<td class="text-center"><?php echo $result->available_stock ; ?></td>
 								<td class="text-center"><?php echo $tot_product_stock ; ?></td>
-								<td class="text-center"><?PHP echo $remaining_stock; ?></td>
+								<td class="text-center"><?PHP echo $to_be_purchase_stock; ?></td>
 								<td class="text-center"><?PHP echo $product_variant_details->unit_name; ?></td>
 								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $product_variant_details->type; ?></span></td>
 							</tr>
