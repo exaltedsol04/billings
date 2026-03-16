@@ -2469,7 +2469,7 @@ error_reporting(0);
 					$total_stock_available = 0;
 				}
 				
-				if($val['quantity'] > $total_stock_available)
+				if($val['quantity'] >= $total_stock_available)
 				{
 					$stockArr[] = [
 						'name' => $val['product_name'],
