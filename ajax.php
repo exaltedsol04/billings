@@ -2452,6 +2452,7 @@ error_reporting(0);
 			 $stockArr = [];
 			 foreach($listData as $val)
 			 {
+				 
 				 $product_details = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id=:id", array(':id'=>$val['variant_id']), 1);
 				 $data = [
 					'product_id' => $product_details->product_id,
@@ -2460,22 +2461,29 @@ error_reporting(0);
 				 ];
 				 
 				$result = $ruf->available_stock_report($data);
+				
 				$total_stock_available = $result->pos_stock + $result->available_stock;
-				 
-				 if($val['quantity'] > $total_stock_available)
-				 {
-					 $stockArr[] = [
+				
+				if(empty($total_stock_available))
+				{
+					$total_stock_available = 0;
+				}
+				
+				if($val['quantity'] > $total_stock_available)
+				{
+					$stockArr[] = [
 						'name' => $val['product_name'],
 						'variant_name' => $val['product_variant_name']
-					 ];
-				 }
+					];
+				}
 				 
-				 //echo "<pre>";print_r($stockArr);die;
-				 header('Content-Type: application/json');
-				 echo json_encode($stockArr);
-				 exit;
-				 
-			 }
+			}
+			 
+			//echo "<pre>";print_r($stockArr);die;
+			 
+			header('Content-Type: application/json');
+			echo json_encode($stockArr);
+			exit;
 			 
 		break;
 		
