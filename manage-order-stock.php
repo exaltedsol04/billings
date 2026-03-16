@@ -181,7 +181,7 @@ error_reporting(1);
 							?>
 							<tr id="dataRow<?php echo($arr->id);?>">
 								<td><?PHP echo $k+1; ?></td>
-								 <td><?php echo $general_cls_call->cart_product_name($arr->product_name).'  ('.$arr->product_variant_id.')';  ?></td>
+								 <td><?php echo $general_cls_call->cart_product_name($arr->product_name);  ?></td>
 								<td class="text-center"><?PHP echo $used_stock; ?></td>
 								<td class="text-center"><?php echo $result->pos_stock ; ?></td>
 								<td class="text-center"><?php echo $result->available_stock ; ?></td>
