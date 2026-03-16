@@ -83,6 +83,8 @@
 								<td></td>
 								<td></td>
 								<td></td>
+								<td></td>
+								<td></td>
 								
 							</tr>
 						  <tr>
@@ -93,13 +95,72 @@
 							<th class="text-center">Online available stock</th>
 							<th>Total available stock</th>
 							<th>To be purchase</th>
+							<th>Measurement</th>
+							<th>Type</th>
 							
 						  </tr>
 						</thead>
 						<tbody>
 						<?php
-						echo $_SESSION['SELLER_ID'];
-							if($_SESSION['ROLE_ID'] == 1)
+						
+						
+						$tables = PRODUCTS . " p
+
+						INNER JOIN " . PRODUCT_VARIANTS . " pv
+							ON pv.product_id = p.id
+
+						LEFT JOIN " . UNITS . " u
+							ON u.id = pv.stock_unit_id
+
+						LEFT JOIN (
+							SELECT
+								CASE WHEN pv2.type='loose' THEN pv2.product_id ELSE NULL END AS loose_product_id,
+								CASE WHEN pv2.type!='loose' THEN oi.product_variant_id ELSE NULL END AS normal_variant_id,
+
+								SUM(
+									CASE
+										WHEN pv2.type='loose'
+											THEN (oi.quantity * pv2.measurement)/u2.conversion
+										ELSE oi.quantity
+									END
+								) AS used_qty
+
+							FROM " . ORDERS_ITEMS . " oi
+
+							INNER JOIN " . ORDERS . " o
+								ON o.id = oi.order_id
+
+							INNER JOIN " . PRODUCT_VARIANTS . " pv2
+								ON pv2.id = oi.product_variant_id
+
+							INNER JOIN " . UNITS . " u2
+								ON u2.id = pv2.stock_unit_id
+
+							WHERE o.active_status = :active_status
+							AND oi.seller_id = :seller_id
+
+							GROUP BY loose_product_id, normal_variant_id
+
+						) oi ON (
+								(pv.type='loose' AND oi.loose_product_id = p.id)
+							 OR (pv.type!='loose' AND oi.normal_variant_id = pv.id)
+						)
+						";
+
+
+					$where = " WHERE 1";
+
+
+					$params = [
+								':seller_id'=>$_SESSION['SELLER_ID'],
+								':active_status'=>2
+							];
+						
+						
+						
+						
+						
+							/*if($_SESSION['ROLE_ID'] == 1)
 							{
 								//$where = "WHERE oi.active_status=:active_status
 								$where = "WHERE o.active_status=:active_status AND DATE(o.from_time)=:from_time  GROUP BY oi.product_variant_id
@@ -111,15 +172,7 @@
 							}
 							else{
 								//$where = "WHERE oi.active_status=:active_status 
-								/*$where = "WHERE o.active_status=:active_status 
-									  AND oi.seller_id=:seller_id  AND o.order_type=:order_type AND DATE(o.from_time)=:from_time GROUP BY oi.order_id
-									  ORDER BY o.created_at DESC";
-								$params = [
-									':seller_id'=> $_SESSION['SELLER_ID'],
-									':active_status'=> 2,
-									':order_type'=> 'slot',
-									':from_time' => $tomorrow_date
-								];*/
+								
 								// AND DATE(o.from_time)=:from_time 
 								
 								$where = "WHERE o.active_status=:active_status 
@@ -138,11 +191,11 @@
 							$tables = ORDERS . " o
 							INNER JOIN " . ORDERS_ITEMS . " oi ON oi.order_id = o.id
 							LEFT JOIN " . USERS . " u ON u.id = o.user_id
-							INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = o.active_status";
+							INNER JOIN " . ORDERS_STATUS_LISTS . " osl ON osl.id = o.active_status";*/
 							
 							$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 								
-							//echo "<pre>";print_r($sqlQuery);die;
+							echo "<pre>";print_r($sqlQuery);die;
 							
 							if(!empty($sqlQuery[0]))
 							{
@@ -151,18 +204,31 @@
 								foreach($sqlQuery as $k=>$arr)
 								{
 																			
-									 $product_variant_details = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id=:id", array(':id'=>$arr->product_variant_id), 1);
+									 //$product_variant_details = $general_cls_call->select_query("*", PRODUCT_VARIANTS, "WHERE id=:id", array(':id'=>$arr->product_variant_id), 1);
+									 
+									 
+									$fields = "pv.id as product_variant_id, pv.product_id, pv.type, pv.stock, pv.measurement, pv.discounted_price , u.name as unit_name";
+									$tables = PRODUCT_VARIANTS . " pv
+									INNER JOIN " . UNITS . " u ON u.id = pv.stock_unit_id";
+									$where = "WHERE  pv.id=:id";
+									$params = [
+										'id' => $arr->product_variant_id
+									];
+									$product_variant_details = $general_cls_call->select_join_query($fields, $tables, $where, $params, 1);
+									
 									 
 									 /*$variant_type = $product_variant_details->type;
 									 $product_id  = $product_variant_details->product_id;
 									 $product_variant_id = $arr->product_variant_id;*/
-									 
+									//echo "<pre>";print_r($product_variant_details);die;
 									 
 									$data = [
 										'product_id' => $product_variant_details->product_id,
 										'product_variant_id' => $arr->product_variant_id,
-										'product_type' => $product_variant_details->type,
+										'product_type' => $product_variant_details->type
 									];
+									
+									//echo "<pre>";print_r($data);die;
 									 
 									$result = $ruf->available_stock_report($data);
 									 
@@ -171,17 +237,20 @@
 									
 									$tot_product_stock = $result->pos_stock + $result->available_stock;
 									
-									$remaining_stock = $order_qty->tot_qty - abs($tot_product_stock);
+									$remaining_stock = $result->used_stock - abs($tot_product_stock);
+									$used_stock = $result->used_stock;
 									
 							?>
 							<tr id="dataRow<?php echo($arr->id);?>">
-								<td><?PHP echo $arr->id; ?></td>
-								 <td><?php echo $general_cls_call->cart_product_name($arr->product_name).'  ('.$arr->variant_name.')';  ?></td>
-								<td class="text-center"><?PHP echo $order_qty->tot_qty; ?></td>
+								<td><?PHP echo $k+1; ?></td>
+								 <td><?php echo $general_cls_call->cart_product_name($arr->product_name).'  ('.$arr->product_variant_id.')';  ?></td>
+								<td class="text-center"><?PHP echo $used_stock; ?></td>
 								<td class="text-center"><?php echo $result->pos_stock ; ?></td>
 								<td class="text-center"><?php echo $result->available_stock ; ?></td>
 								<td class="text-center"><?php echo $tot_product_stock ; ?></td>
 								<td class="text-center"><?PHP echo $remaining_stock; ?></td>
+								<td class="text-center"><?PHP echo $product_variant_details->unit_name; ?></td>
+								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $product_variant_details->type; ?></span></td>
 							</tr>
 								<?PHP
 									$i++;
