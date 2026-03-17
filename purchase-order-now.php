@@ -20,6 +20,7 @@ error_reporting(1);
 		//echo "<pre>";print_r($product_variant_id);die;
 		if(!empty($product_variant_id))
 		{
+			$sucMsg = '';
 			foreach($product_variant_id as $k=>$val) {
 				
 				
@@ -76,10 +77,12 @@ error_reporting(1);
 					
 					$general_cls_call->insert_query(PRODUCT_STOCK_TRANSACTION, $field, $value, $addExecute);
 					
-					$sucMsg="Data has been submitted successfully";
+					$sucMsg = "Data has been submitted successfully";
 					$_SESSION['call_js'] = true;
 				}
 			}
+			
+			
 			
 			header("Location: ".SITE_URL.'purchase-order-now?m=1');
 			exit();
@@ -121,9 +124,21 @@ error_reporting(1);
 		<div class="row">
 			<div class="col-md-12" id="msg"></div>
 		</div>
+		<?PHP 
+			//if(isset($sucMsg) && $sucMsg != '')
+			if(isset($_GET['m']) && $_GET['m']== '1')
+			{
+			?>
+				<div class="alert alert-success border-0 bg-success alert-dismissible fade show">
+					<div class="text-white"><strong>Success</strong> <?PHP echo "Data has been submitted successfully"; ?></div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			<?PHP
+			}
+		?>
 		<div class="card">
 			<div class="card-body">
-			<form name="frm" action="" method="post" id="">
+			<form name="frm" action="" method="post" id="submit_purchase">
 				<div class="table-responsive">
 					<table id="example2" class="table table-striped table-bordered dataTable">
 						<thead>
@@ -213,8 +228,8 @@ error_reporting(1);
 							
 							if(!empty($sqlQuery[0]))
 							{
-								$i = 1;
-								
+								$i = 0;
+								$tot_count = 0;
 								foreach($sqlQuery as $k=>$arr)
 								{
 																			
@@ -290,15 +305,13 @@ error_reporting(1);
 									$loose_stock_quantity = $count_record->loose_stock_quantity;
 									$stocks = $count_record->stock;
 									
-									if($loose_stock_quantity != 0)
-									{
+									if($arr->type == 'loose') {
 										$to_be_purchase_stock = $loose_stock_quantity;
-									}
-									
-									if($stocks != 0)
-									{
+									}else{
 										$to_be_purchase_stock = $stocks;
 									}
+									
+									$tot_count++;
 								}
 							?>
 							<tr id="dataRow<?php echo($arr->id);?>">
@@ -328,9 +341,14 @@ error_reporting(1);
 				</div>
 				<div class="box-footer text-center">
 					
-
-                    <button type="submit" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5 submit-request load-submit">Submit Request</button>
-					
+					<?php 
+					if($tot_count != $i)
+					{
+					?>
+						<button type="button" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5 submit-purchase">Submit purchase</button>
+					<?php 
+					}
+					?>
 					
                   </div>
 			</form>
@@ -341,49 +359,53 @@ error_reporting(1);
   </main>
   <!--end main wrapper-->
   <!-- Modal -->
-	<div class="modal fade" id="assignModal">
-	  <div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-		  <div class="modal-header border-bottom-0 py-2 bg-grd-info">
-			<h5 class="modal-title btn-grd">Assign Packaging Operator</h5>
-			<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
-			  <i class="material-icons-outlined">close</i>
-			</a>
-		  </div>
-		  <div class="modal-body">
-			<div class="form-body">
-			  <form name="frm" action="" method="post" class="row g-3">
-				<div class="col-md-12">
-				  <label for="operator_id" class="form-label">Choose operator</label>
-				  <select id="operator_id" class="form-select select2-dropdown mx-auto">
-				  </select>
-				</div>
-				<div class="col-md-12" id="no_operator"></div>
-				<div class="col-md-12">
-				  <div class="d-md-flex d-grid justify-content-md-between">
-					<input type="hidden" id="order_id" name="order_id">
-					
-					<button type="reset" class="btn btn-grd btn-grd-info px-4">Reset</button>
-					<button type="button" id="assignOperatorSave" class="btn btn-grd btn-grd-danger px-4">Assign Operator</button>
-				  </div>
-				</div>
-			  </form>
-			</div>
-		  </div>
-		</div>
-	  </div>
-	</div>
+	<!--- stock available modal-->
+<div class="modal fade" id="purchase-qty-modal">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header border-bottom-0 py-2 bg-grd-primary">
+                        <h5 class="modal-title btn-grd">Confirmation</h5>
+                        <a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+                          <i class="material-icons-outlined">close</i>
+                        </a>
+                      </div>
+                      <div class="modal-body">
+							<span class="text-center"><strong>Are you want to update the purchase stock!</strong></span>
+                      </div>
+                      <div class="modal-footer border-top-0">
+                        <!--<button type="button" class="btn btn-grd btn-grd-danger rounded-0"
+                          data-bs-dismiss="modal">Cancel</button>-->
+						  <div class="col-md-12">
+							<div class="d-md-flex d-grid justify-content-md-between">
+								<button type="button" class="btn btn-outline-danger px-5" data-bs-dismiss="modal">Cancel</button>
+								<button type="button" class="btn btn-grd btn-grd-success px-5" onclick="purchase_now()">Puschase</button>
+							 </div>
+						  </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 <!--end main wrapper-->
 <!-- ######### FOOTER START ############### -->
 	<?PHP include_once("includes/footer.php"); ?>
 <!-- ######### FOOTER END ############### -->
 <script>
 
-/*$(document).ready(function () {
-    setTimeout(function () {
-		$(".table-responsive").load(location.href + " .table-responsive>*");
-    }, 5000);
-});*/
+$(document).ready(function () {
+    
+});
+
+$(document).on('click', '.submit-purchase', function(){
+	$('#purchase-qty-modal').modal('show');
+		
+})
+function purchase_now()
+{
+	$('#purchase-qty-modal').modal('hide');
+	$('#submit_purchase').submit();
+}
+
+
 function assignOperator(orderId)
 {
 	$('#no_operator').html('');
