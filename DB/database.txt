@@ -158,6 +158,9 @@ CREATE TABLE `2026_pos_machines` (
 ALTER TABLE `2026_pos_orders` ADD `order_type` TINYINT(1) NULL DEFAULT '1' COMMENT '1=pos sell, 2=pos bulk sell' AFTER `status`;
 ALTER TABLE `users` ADD `user_type` VARCHAR(225) NULL DEFAULT NULL AFTER `profile`
 
+======== 17-03-2026========================
+ALTER TABLE `2026_product_stock_transaction` CHANGE `transaction_type` `transaction_type` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '1=Purchase Request, 2=Sell POS, 3=Sell APP, 4=Transfer stock, 5=online stock, 6=deduct stock, 7=Purchase order now';
+
 
 
 
