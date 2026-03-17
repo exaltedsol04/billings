@@ -122,6 +122,7 @@
 				    <li><a href="<?php echo SITE_URL.'packaging-operator-assign'; ?>"><i class="material-icons-outlined">arrow_right</i>Assign to pack</a></li>
 				    <li><a href="<?php echo SITE_URL.'packaging-operator-assign-tomorrow'; ?>"><i class="material-icons-outlined">arrow_right</i>Assign to pack tomorrow</a></li>
 					 <li><a href="<?php echo SITE_URL.'manage-order-stock'; ?>"><i class="material-icons-outlined">arrow_right</i>Manage order stock</a></li>
+					 <li><a href="<?php echo SITE_URL.'purchase-order-now'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase order now</a></li>
 					<li><a href="<?php echo SITE_URL.'online-assigned-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Assigned order</a></li>
 					</li>
 				  </ul>
