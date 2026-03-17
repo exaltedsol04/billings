@@ -265,6 +265,10 @@ error_reporting(1);
 							if($to_be_purchase_stock >0)	
 							{
 								$approve_status = '';
+								$loose_stock_quantity = '';
+								$stocks  = '';
+								
+								$fields = "loose_stock_quantity, stock";
 								$whereCheck = "WHERE seller_id=:seller_id AND status=:status AND  transaction_type=:transaction_type AND product_id=:product_id AND product_variant_id=:product_variant_id";
 								$paramCheck = [
 									':seller_id' => $_SESSION['SELLER_ID'],
@@ -273,11 +277,28 @@ error_reporting(1);
 									':product_id' => $arr->product_id,
 									':product_variant_id' => $arr->product_variant_id
 								];
-								$count_record = $general_cls_call->select_query_count(PRODUCT_STOCK_TRANSACTION, $whereCheck, $paramCheck);
+								
+								$count_record = $general_cls_call->select_query($fields, PRODUCT_STOCK_TRANSACTION, $whereCheck, $paramCheck, 1);
+								
+								
+								//echo "<pre>";print_r($count_record);die;
+								//$count_record = $general_cls_call->select_query_count(PRODUCT_STOCK_TRANSACTION, $whereCheck, $paramCheck);
 								//echo $count_record;die;
-								if($count_record == 1)
+								if(!empty($count_record))
 								{
 									$approve_status = 'Pending';
+									$loose_stock_quantity = $count_record->loose_stock_quantity;
+									$stocks = $count_record->stock;
+									
+									if($loose_stock_quantity != 0)
+									{
+										$to_be_purchase_stock = $loose_stock_quantity;
+									}
+									
+									if($stocks != 0)
+									{
+										$to_be_purchase_stock = $stocks;
+									}
 								}
 							?>
 							<tr id="dataRow<?php echo($arr->id);?>">
