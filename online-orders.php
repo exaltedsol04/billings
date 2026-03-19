@@ -271,44 +271,6 @@ document.getElementById("fromDate").addEventListener("change", function () {
         document.getElementById("toDate").value = "";
     }
 });
-/*$(function () {
-
-
-  let start = moment().startOf('today');
-  let end   = moment().endOf('today');
-
-  function setDates(start, end) {
-    $('#fromDate').val(start.format('YYYY-MM-DD'));
-    $('#toDate').val(end.format('YYYY-MM-DD'));
-  }
-
-	// Apply picker on FROM field (controls both)
-	$('#fromDate').daterangepicker({
-		startDate: start,
-		endDate: end,
-		autoUpdateInput: false,
-		parentEl: 'body',          // ⭐ FIX POSITION
-		opens: 'right',            // open next to input
-		drops: 'down',             // force downward
-		locale: {
-			cancelLabel: 'Clear'
-		}
-	});
-
-
-  // When range selected
-  $('#fromDate').on('apply.daterangepicker', function (ev, picker) {
-      setDates(picker.startDate, picker.endDate);
-  });
-
-  // Clear
-  $('#fromDate').on('cancel.daterangepicker', function () {
-      $('#fromDate, #toDate').val('');
-  });
-
-  // Set default
-  setDates(start, end);
-});*/
 function startCountdowns() {
 
     document.querySelectorAll('.countdown').forEach(function(el) {
