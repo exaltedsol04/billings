@@ -192,7 +192,9 @@
 								<td class="text-center">--</td>
 								<td class="<?php echo $arr->order_type == 'instant' ? 'text-success' : '' ; ?> text-center"><?PHP echo $arr->order_type; ?><?php echo $arr->order_type == 'slot' ? '<div style="font-size:10px; border-top:1px solid #5b6166;">'. date("g:i A", strtotime($arr->from_time)) . ' to '.date("g:i A", strtotime($arr->to_time)).'</div>' : ''; ?></td>
 								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $to_be_delivered; ?></span></td>
-								<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>
+								<!--<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>-->
+								
+								<td class="countdown" data-time="<?= $delivery_max_time ?>"><?= $delivery_max_time ?></td>
 								
 								<td class="text-center"><?php echo $arr->payment_method == 'Razorpay' ? '<span class="text-success">Online</span>'. '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $paid . '</div>': $arr->payment_method; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
@@ -356,26 +358,63 @@ $(document).on('click', '#assignOperatorSave', function (e) {
 
 });
 
-$(document).ready(function(){
-	if ($.fn.DataTable.isDataTable('#example2')) {
-		$('#example2').DataTable().destroy();
-	}
+function startCountdowns() {
+
+    document.querySelectorAll('.countdown').forEach(function(el) {
+
+        let endTime = new Date(el.dataset.time.replace(' ', 'T')).getTime();
+
+        function updateTimer() {
+            let now = new Date().getTime();
+            let diff = endTime - now;
+
+            if (diff <= 0) {
+                el.innerHTML = '<span class="badge bg-grd-info dash-lable">Timeout</span>';
+                return;
+            }
+
+            let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            let hrs  = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            let mins = Math.floor((diff / (1000 * 60)) % 60);
+            let secs = Math.floor((diff / 1000) % 60);
+
+            let text = '<span class="badge bg-grd-danger dash-lable"><div class="time-wrapper">';
+            if (days > 0) text += '<div class="time-box"><span class="num">' + days + '</span><span class="label">Days</span></div>';
+            if (hrs > 0) text += '<div class="time-box"><span class="num">' + hrs + '</span><span class="label">Hr</span></div>';
+            if (mins > 0) text += '<div class="time-box"><span class="num">' + mins + '</span><span class="label">Min</span></div>';
+            text += '<div class="time-box"><span class="num">' + secs + '</span><span class="label">Sec</span></div>';
+			text += '</div></span>';
+
+            el.innerHTML = text;
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    });
 	
 	/*$('#example2').DataTable({
+		destroy: true,
+		pageLength: 50,
 		order: [[4, 'asc']],
-		columnDefs: [
-        {
-            targets: 0,      
-            orderable: true,  
-            orderSequence: ['asc', 'desc'] 
-        }
-    ]
+		columnDefs: [{
+			targets: 0,
+			orderable: true,
+			orderSequence: ['asc', 'desc']
+		}]
 	});*/
+}
+
+$(document).ready(function(){
+	if ($.fn.DataTable.isDataTable('#example2')) {
+		//$('#example2').DataTable().destroy();
+	}
 	
-	function loadTable() {
+	
+	
+	function loadTable_bck() {
         $(".table-responsive").load(location.href + " .table-responsive>*", function () {
 
-            $('#example2').DataTable({
+            /*$('#example2').DataTable({
                 destroy: true,
 				pageLength: 50,
                 order: [[4, 'asc']],
@@ -384,14 +423,14 @@ $(document).ready(function(){
                     orderable: true,
                     orderSequence: ['asc', 'desc']
                 }]
-            });
+            });*/
 
         });
     }
 
-    loadTable(); 
+    //loadTable(); 
 
-    setInterval(loadTable, 1000);
+    //setInterval(loadTable, 1000);
 	<?php 
 	if($auto_update == 1)
 	{
@@ -400,6 +439,11 @@ $(document).ready(function(){
 	<?php 
 	}
 	?>
+	
+	startCountdowns();
+	$('#example2').on('draw.dt', function () {
+		startCountdowns();
+	});
 });
 function insertPackageOperator()
 {

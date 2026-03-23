@@ -2,7 +2,7 @@
 	/*******Start Auth Section*******/
 	$pageParam = [
 		'dataTables' => true,
-		'select2' => false,
+		'select2' => true,
 		'daterangepicker' => false,
 		'pageAccessRoleIds' => [3]
 	];
@@ -11,7 +11,7 @@
 
 	ob_start();
 	//total orders
-	$incompleted_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
+	/*$incompleted_orders_where = "WHERE o.active_status = :active_status AND oi.seller_id=:seller_id GROUP BY oi.order_id";
 	$incompleted_orders_params = [
 		':active_status'	=> 1,
 		':seller_id'		=> $_SESSION['SELLER_ID']
@@ -23,9 +23,62 @@
 	LEFT JOIN " . ORDERS_STATUSES . " os ON os.order_id = o.id AND os.status = o.active_status";
 	//total orders
 	$incompletedOrdersArr = $general_cls_call->select_join_query($fields, $tables, $incompleted_orders_where, $incompleted_orders_params, 2);
-	$incompleted_orders = count($incompletedOrdersArr);
+	$incompleted_orders = count($incompletedOrdersArr);*/
 	
-	$tomorrow_date = date('Y-m-d', strtotime('+1 day'));
+	//$select_date = date('Y-m-d', strtotime('+1 day'));
+	//$select_date = date('Y-m-d');
+	
+	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
+	{
+		$src_type  = $_POST['src_type'];
+		if($src_type  == 'yesturday')
+		{
+			$from_time = date('Y-m-d', strtotime('-1 day'));
+		}
+		
+		if($src_type == 'today')
+		{
+			$from_time = date('Y-m-d');
+			//echo $select_date; die;
+		}
+		
+		if($src_type == 'tomorrow')
+		{
+			$from_time = date('Y-m-d', strtotime('+1 day'));
+		}
+
+		if($src_type == 'select_date')
+		{
+			$from_time = date('Y-m-d', strtotime($_POST['toDate']));
+			//echo $select_date; die;
+		}
+
+		$where = "WHERE o.active_status=:active_status 
+			  AND oi.seller_id=:seller_id  AND o.order_type=:order_type AND DATE(o.from_time)=:from_time GROUP BY oi.order_id
+			  ORDER BY o.created_at DESC";
+		$params = [
+			':seller_id'=> $_SESSION['SELLER_ID'],
+			':active_status'=> 2,
+			':order_type'=> 'slot',
+			':from_time' => $from_time
+		];		
+	}
+	else{
+		$from_time = date('Y-m-d', strtotime('+1 day'));
+		$where = "WHERE o.active_status=:active_status 
+			  AND oi.seller_id=:seller_id  AND o.order_type=:order_type AND DATE(o.from_time)=:from_time GROUP BY oi.order_id
+			  ORDER BY o.created_at DESC";
+		$params = [
+			':seller_id'=> $_SESSION['SELLER_ID'],
+			':active_status'=> 2,
+			':order_type'=> 'slot',
+			':from_time' => $from_time
+		];
+	}
+		
+	
+	//$tomorrow_date = date('Y-m-d', strtotime('+1 day'));
+	
 	ob_end_flush();
 ?>
 	<!-- ######### HEADER START ############### -->
@@ -55,7 +108,7 @@
 		<div class="row">
 			<div class="col-md-12" id="msg"></div>
 		</div>
-		<div class="row row-cols-1 row-cols-xl-6">
+		<!--<div class="row row-cols-1 row-cols-xl-6">
 			<a href="<?php echo SITE_URL.'online-incomplete-orders'; ?>">
 			<div class="col d-flex">
 			  <div class="card rounded-4 w-100 bg-grd-primary bg-gradient text-white">
@@ -70,6 +123,36 @@
 			  </div>
 			</div>
 			</a>
+		</div>-->
+		
+		<h6 class="mb-0 text-uppercase">Search panel</h6>
+		<hr>
+		<div class="card rounded-4 border-top border-4 border-primary border-gradient-1">
+			<div class="card-body">
+				<form class="row g-4" method="post" action="">
+					<div class="col-md-6">
+						<label for="input1" class="form-label">Search type</label>
+						<select name="src_type" class="form-select select2-dropdown" onchange="selectdate(this.value)">
+							<option value="">Select</option>
+							<option value="today" <?php echo $_POST['src_type'] == 'today' ? 'selected' : '' ;?>>Today</option>
+							<option value="yesturday" <?php echo $_POST['src_type'] == 'yesturday' ? 'selected' : '' ;?>>Yesturday</option>
+							<option value="tomorrow" <?php echo ($_POST['src_type'] == 'tomorrow' || empty($_POST)) ? 'selected' : '' ;?>>Tomorrow</option>
+							<option value="select_date" <?php echo $_POST['src_type'] == 'select_date' ? 'selected' : '' ;?>>Select date</option>
+						</select>
+					</div>
+					<div class="col-md-6 date_div" style="display:none;">
+						<label for="input5" class="form-label">To date</label>
+						<input type="date" name="toDate" id="toDate" class="form-control" placeholder="End Date">
+					</div>
+					
+					<div class="col-md-12">
+					  <div class="d-md-flex d-grid justify-content-md-between">
+						<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+						<button type="submit" class="btn btn-grd btn-grd-success px-4" name="btnUser" value="SAVE">Search</button>
+					  </div>
+					</div>
+				</form>
+			</div>
 		</div>
 		<div class="card">
 			<div class="card-body">
@@ -113,18 +196,19 @@
 									':active_status'=> 2,
 									':order_type'=> 'slot'
 								];	
+								echo 'hello';die;
 							}
 							else{
 								//$where = "WHERE oi.active_status=:active_status 
-								$where = "WHERE o.active_status=:active_status 
+								/*$where = "WHERE o.active_status=:active_status 
 									  AND oi.seller_id=:seller_id  AND o.order_type=:order_type AND DATE(o.from_time)=:from_time GROUP BY oi.order_id
 									  ORDER BY o.created_at DESC";
 								$params = [
 									':seller_id'=> $_SESSION['SELLER_ID'],
 									':active_status'=> 2,
 									':order_type'=> 'slot',
-									':from_time' => $tomorrow_date
-								];
+									':from_time' => $from_time
+								];*/
 								
 							}
 							
@@ -190,7 +274,8 @@
 								<td class="text-center">--</td>
 								<td class="<?php echo $arr->order_type == 'instant' ? 'text-success' : '' ; ?> text-center"><?PHP echo $arr->order_type; ?><?php echo $arr->order_type == 'slot' ? '<div style="font-size:10px; border-top:1px solid #5b6166;">'. date("g:i A", strtotime($arr->from_time)) . ' to '.date("g:i A", strtotime($arr->to_time)).'</div>' : ''; ?></td>
 								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $to_be_delivered; ?></span></td>
-								<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>
+								<!--<td class="text-center"><span class="badge bg-grd-<?php echo $remaining_delivery_time == 'Timeout' ? 'info' : 'danger' ; ?> dash-lable"><?php echo $remaining_delivery_time; ?></span></td>-->
+								<td class="countdown" data-time="<?= $delivery_max_time ?>"><?= $delivery_max_time ?></td>
 								
 								<td class="text-center"><?php echo $arr->payment_method == 'Razorpay' ? '<span class="text-success">Online</span>'. '<div style="font-size:10px; border-top:1px solid #5b6166;">'. $paid . '</div>': $arr->payment_method; ?></td>
 								<td><?php echo $arr->orders_status_list_status; ?></td>
@@ -263,11 +348,6 @@
 <!-- ######### FOOTER END ############### -->
 <script>
 
-/*$(document).ready(function () {
-    setTimeout(function () {
-		$(".table-responsive").load(location.href + " .table-responsive>*");
-    }, 5000);
-});*/
 function assignOperator(orderId)
 {
 	$('#no_operator').html('');
@@ -354,9 +434,43 @@ $(document).on('click', '#assignOperatorSave', function (e) {
 
 });
 
+function startCountdowns() {
+
+    document.querySelectorAll('.countdown').forEach(function(el) {
+
+        let endTime = new Date(el.dataset.time.replace(' ', 'T')).getTime();
+
+        function updateTimer() {
+            let now = new Date().getTime();
+            let diff = endTime - now;
+
+            if (diff <= 0) {
+                el.innerHTML = '<span class="badge bg-grd-info dash-lable">Timeout</span>';
+                return;
+            }
+
+            let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            let hrs  = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            let mins = Math.floor((diff / (1000 * 60)) % 60);
+            let secs = Math.floor((diff / 1000) % 60);
+
+            let text = '<span class="badge bg-grd-danger dash-lable"><div class="time-wrapper">';
+            if (days > 0) text += '<div class="time-box"><span class="num">' + days + '</span><span class="label">Days</span></div>';
+            if (hrs > 0) text += '<div class="time-box"><span class="num">' + hrs + '</span><span class="label">Hr</span></div>';
+            if (mins > 0) text += '<div class="time-box"><span class="num">' + mins + '</span><span class="label">Min</span></div>';
+            text += '<div class="time-box"><span class="num">' + secs + '</span><span class="label">Sec</span></div>';
+			text += '</div></span>';
+
+            el.innerHTML = text;
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    });
+}
 $(document).ready(function(){
 	if ($.fn.DataTable.isDataTable('#example2')) {
-		$('#example2').DataTable().destroy();
+		//$('#example2').DataTable().destroy();
 	}
 	
 	/*$('#example2').DataTable({
@@ -369,27 +483,7 @@ $(document).ready(function(){
         }
     ]
 	});*/
-	
-	function loadTable() {
-        $(".table-responsive").load(location.href + " .table-responsive>*", function () {
 
-            $('#example2').DataTable({
-                destroy: true,
-				pageLength: 50,
-                order: [[4, 'asc']],
-                columnDefs: [{
-                    targets: 0,
-                    orderable: true,
-                    orderSequence: ['asc', 'desc']
-                }]
-            });
-
-        });
-    }
-
-    loadTable(); 
-
-    setInterval(loadTable, 1000);
 	<?php 
 	if($auto_update == 1)
 	{
@@ -398,6 +492,11 @@ $(document).ready(function(){
 	<?php 
 	}
 	?>
+	
+	startCountdowns();
+	$('#example2').on('draw.dt', function () {
+		startCountdowns();
+	});
 });
 function insertPackageOperator()
 {
@@ -423,8 +522,16 @@ function insertPackageOperator()
 		}
 	});
 }
-
-
+function selectdate(val)
+{
+	if(val == 'select_date')
+	{
+		$('.date_div').show();
+	}
+	else{
+		$('.date_div').hide();
+	}
+}
 
 
 </script>
