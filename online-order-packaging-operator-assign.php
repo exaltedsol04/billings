@@ -253,11 +253,19 @@
 						<?php if($paid == 'Paid' || $orderArr[0]->payment_method=='COD') {
 						?>
 						<div class="col-12 mt-4">
+							<?php if($orderData->order_type == 'slot') { ?>
 							<a href="javascript:;" onclick="assignOperator(<?php echo($orderData->id);?>)">
 								<div class="d-grid">
 									<button type="button" class="btn btn-primary">Assign Operator</button>
 								</div>
 							</a>
+							<?php } else { ?>
+							<a href="javascript:;" onclick="assignOperator(<?php echo($orderData->id);?>)">
+								<div class="d-grid">
+									<button type="button" class="btn btn-primary">Assign Operator</button>
+								</div>
+							</a>
+							<?php } ?>
 						</div>
 						<?php 
 						}

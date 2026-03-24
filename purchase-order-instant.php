@@ -28,7 +28,7 @@ error_reporting(1);
 				//echo "<pre>";print_r($product_variant_dtls);die;
 				$product_id = $product_variant_dtls->product_id;
 				
-				$whereCheck = "WHERE seller_id=:seller_id AND status=:status AND  transaction_type=:transaction_type AND product_id=:product_id AND product_variant_id=:product_variant_id";
+				/*$whereCheck = "WHERE seller_id=:seller_id AND status=:status AND  transaction_type=:transaction_type AND product_id=:product_id AND product_variant_id=:product_variant_id";
 				$paramCheck = [
 					':seller_id' => $_SESSION['SELLER_ID'],
 					':status' => 0,
@@ -38,7 +38,7 @@ error_reporting(1);
 				];
 				$count_record = $general_cls_call->select_query_count(PRODUCT_STOCK_TRANSACTION, $whereCheck, $paramCheck);
 				if($count_record == 0)
-				{					
+				{*/					
 					//echo $val.'-> '.$product_id; die;
 					$unit_price = $product_variant_dtls->discounted_price;
 					$total_price = $stock[$k] * $unit_price;
@@ -79,12 +79,12 @@ error_reporting(1);
 					
 					$sucMsg = "Data has been submitted successfully";
 					$_SESSION['call_js'] = true;
-				}
+				//}
 			}
 			
 			
 			
-			header("Location: ".SITE_URL.'purchase-order-now?m=1');
+			header("Location: ".SITE_URL.'purchase-order-instant?m=1');
 			exit();
 			
 		}
@@ -97,6 +97,7 @@ error_reporting(1);
 	$today_date = date('Y-m-d');
 	ob_end_flush();
 ?>
+
 	<!-- ######### HEADER START ############### -->
 		<?PHP include_once("includes/header.php"); ?>
 	<!-- ######### HEADER END ############### -->
@@ -104,7 +105,16 @@ error_reporting(1);
 	<!-- ######### MENU START ############### -->
 		<?PHP include_once("includes/sellerMenu.php"); ?>
 	<!-- ######### MENU END ############### -->
-	
+	<style>
+/* Target column */
+.table-striped tbody tr td:nth-child(6),
+.table-striped thead tr th:nth-child(6) {
+    background-color: yellow !important;
+}
+.table-striped>tbody>tr:nth-of-type(odd) td:nth-child(6) { 
+	--bs-table-bg-type: yellow !important;
+}
+</style>
   <!--start main wrapper-->
   <main class="main-wrapper">
     <div class="main-content">
@@ -157,12 +167,11 @@ error_reporting(1);
 						  <tr>
 							<th style="width:100px">Sr. no</th>
 							<th>product name</th>
-							<th class="text-center">Order stock</th>
 							<th class="text-center">Pos stock</th>
 							<th class="text-center">Online available stock</th>
 							<th>Total available stock</th>
 							<th>To be purchase</th>
-							<th>Approve status</th>
+							<th class="text-center">Order stock</th>
 							<th>Measurement</th>
 							<th>Type</th>
 							
@@ -261,50 +270,15 @@ error_reporting(1);
 									
 							if($to_be_purchase_stock >0)	
 							{
-								$approve_status = '';
-								$loose_stock_quantity = '';
-								$stocks  = '';
-								
-								$fields = "loose_stock_quantity, stock";
-								$whereCheck = "WHERE seller_id=:seller_id AND status=:status AND  transaction_type=:transaction_type AND product_id=:product_id AND product_variant_id=:product_variant_id";
-								$paramCheck = [
-									':seller_id' => $_SESSION['SELLER_ID'],
-									':status' => 0,
-									':transaction_type' => 7,
-									':product_id' => $arr->product_id,
-									':product_variant_id' => $arr->product_variant_id
-								];
-								
-								$count_record = $general_cls_call->select_query($fields, PRODUCT_STOCK_TRANSACTION, $whereCheck, $paramCheck, 1);
-								
-								
-								//echo "<pre>";print_r($count_record);die;
-								//$count_record = $general_cls_call->select_query_count(PRODUCT_STOCK_TRANSACTION, $whereCheck, $paramCheck);
-								//echo $count_record;die;
-								if(!empty($count_record))
-								{
-									$approve_status = 'Pending';
-									$loose_stock_quantity = $count_record->loose_stock_quantity;
-									$stocks = $count_record->stock;
-									
-									if($arr->type == 'loose') {
-										$to_be_purchase_stock = $loose_stock_quantity;
-									}else{
-										$to_be_purchase_stock = $stocks;
-									}
-									
-									$tot_count++;
-								}
 							?>
 							<tr id="dataRow<?php echo($arr->id);?>">
 								<td><?PHP echo $k+1; ?></td>
 								 <td><?php echo $general_cls_call->cart_product_name($arr->product_name);  ?></td>
-								<td class="text-center"><?PHP echo $used_stock; ?></td>
 								<td class="text-center"><?php echo $result->pos_stock ; ?></td>
 								<td class="text-center"><?php echo $result->available_stock ; ?></td>
 								<td class="text-center"><?php echo $tot_product_stock ; ?></td>
-								<td class="text-center"><input type="text" class="form-control form-control-sm" value="<?PHP echo $to_be_purchase_stock; ?>" name="stock[]" <?php echo $count_record == 1 ? 'readonly' : ''; ?>></td>
-								<td><span class="badge bg-grd-voilet"><?php echo $approve_status; ?></span></td>
+								<td class="text-center"><?PHP echo $to_be_purchase_stock; ?></td>
+								<td class="text-center"><input type="text" class="form-control form-control-sm" value="<?PHP echo $used_stock; ?>" name="stock[]"></td>
 								<td class="text-center"><?PHP echo $measurement['unit']; ?></td>
 								<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?PHP echo $arr->type; ?></span></td>
 								
@@ -322,15 +296,8 @@ error_reporting(1);
 					</table>
 				</div>
 				<div class="box-footer text-center">
-					
-					<?php 
-					if($tot_count != $i)
-					{
-					?>
-						<button type="button" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5 submit-purchase">Submit purchase</button>
-					<?php 
-					}
-					?>
+
+						<button type="button" name="btnSubmit" value="SAVE" class="btn btn-grd btn-grd-success px-5 submit-purchase">Purchase Now</button>
 					
                   </div>
 			</form>
@@ -478,38 +445,7 @@ $(document).ready(function(){
 	if ($.fn.DataTable.isDataTable('#example2')) {
 		//$('#example2').DataTable().destroy();
 	}
-	
-	/*$('#example2').DataTable({
-		order: [[4, 'asc']],
-		columnDefs: [
-        {
-            targets: 0,      
-            orderable: true,  
-            orderSequence: ['asc', 'desc'] 
-        }
-    ]
-	});*/
-	
-	/*function loadTable() {
-        $(".table-responsive").load(location.href + " .table-responsive>*", function () {
 
-            $('#example2').DataTable({
-                destroy: true,
-				pageLength: 50,
-                order: [[4, 'asc']],
-                columnDefs: [{
-                    targets: 0,
-                    orderable: true,
-                    orderSequence: ['asc', 'desc']
-                }]
-            });
-
-        });
-    }*/
-
-    //loadTable(); 
-
-    setInterval(loadTable, 1000);
 	<?php 
 	if($auto_update == 1)
 	{

@@ -112,7 +112,7 @@
 			  </ul>
 			</li>
 
-			<li <?php if($page=='online-assigned-orders.php' || $page=='packaging-operator-assign.php' || $page=='online-order-assign.php' ||  $page=='online-order-packaging-operator-assign.php' || $page == 'packaging-operator-assign-tomorrow') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='online-assigned-orders.php' || $page=='packaging-operator-assign.php' || $page=='online-order-assign.php' ||  $page=='online-order-packaging-operator-assign.php' || $page == 'packaging-operator-assign-tomorrow' || $page == 'purchase-order-instant') { echo ('class="mm-active"');} ?>>
 				  <a href="javascript:;" class="has-arrow">
 					<div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
 					</div>
@@ -122,6 +122,7 @@
 				    <li><a href="<?php echo SITE_URL.'packaging-operator-assign'; ?>"><i class="material-icons-outlined">arrow_right</i>Assign to pack</a></li>
 				    <li><a href="<?php echo SITE_URL.'packaging-operator-assign-tomorrow'; ?>"><i class="material-icons-outlined">arrow_right</i>Assign to pack tomorrow</a></li>
 					 <li><a href="<?php echo SITE_URL.'manage-order-stock'; ?>"><i class="material-icons-outlined">arrow_right</i>Manage order stock</a></li>
+					 <li><a href="<?php echo SITE_URL.'purchase-order-instant'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase order Instant</a></li>
 					 <li><a href="<?php echo SITE_URL.'purchase-order-now'; ?>"><i class="material-icons-outlined">arrow_right</i>Purchase order now</a></li>
 					<li><a href="<?php echo SITE_URL.'online-assigned-orders'; ?>"><i class="material-icons-outlined">arrow_right</i>Assigned order</a></li>
 					</li>
