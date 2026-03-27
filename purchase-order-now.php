@@ -53,8 +53,8 @@ error_reporting(1);
 					}
 					
 					
-					$field = "seller_id, product_variant_id, product_id, loose_stock_quantity, stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id, remarks";
-					$value = ":seller_id, :product_variant_id, :product_id, :loose_stock_quantity, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id, :remarks";
+					$field = "seller_id, product_variant_id, product_id, loose_stock_quantity, stock, stock_type, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id, remarks";
+					$value = ":seller_id, :product_variant_id, :product_id, :loose_stock_quantity, :stock, :stock_type, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id, :remarks";
 					
 					$addExecute=array(
 						':seller_id'			=> $_SESSION['SELLER_ID'],
@@ -62,6 +62,7 @@ error_reporting(1);
 						':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 						':loose_stock_quantity'			=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
 						':stock'				=> $stock_qty,
+						':stock_type'			=> $general_cls_call->specialhtmlremover($stock_type),
 						':created_date'			=> date("Y-m-d H:i:s"),
 						':status'				=> 0,
 						':selling_price'		=> $general_cls_call->specialhtmlremover($hid_purchase_price[$k]),
@@ -139,6 +140,7 @@ error_reporting(1);
 		<div class="card">
 			<div class="card-body">
 			<form name="frm" action="" method="post" id="submit_purchase">
+				<input type="hidden" value="2" name="stock_type" id="stock_type">
 				<div class="table-responsive">
 					<table id="example2" class="table table-striped table-bordered dataTable">
 						<thead>
@@ -254,8 +256,8 @@ error_reporting(1);
 									
 									$used_stock = $arr->total_used_stock;
 									
-									$to_be_purchase_stock = $tot_product_stock > $used_stock ? 0 : abs($tot_product_stock - $used_stock);
-									//$to_be_purchase_stock = abs($used_stock - $tot_product_stock);
+									//$to_be_purchase_stock = $tot_product_stock > $used_stock ? 0 : abs($tot_product_stock - $used_stock);
+									$to_be_purchase_stock = abs($result->available_stock);
 									
 									//$used_stock = $result->used_stock;
 									
@@ -352,7 +354,13 @@ error_reporting(1);
                         </a>
                       </div>
                       <div class="modal-body">
-							<span class="text-center"><strong>Are you want to update the purchase stock!</strong></span>
+						<div class="col-md-12 mb-2"><strong>Do you want to update the purchase stock? please choose stock type.</strong></div>
+						<div class="col-md-12">
+							<select name="stock_type" class="form-select select2-dropdown" onchange="chooseStockType(this.value)">
+								<option value="2">Online</option>
+								<option value="1">POS</option>
+							</select>
+						</div>
                       </div>
                       <div class="modal-footer border-top-0">
                         <!--<button type="button" class="btn btn-grd btn-grd-danger rounded-0"
@@ -374,7 +382,13 @@ error_reporting(1);
 <script>
 
 $(document).ready(function () {
-    
+	if ($.fn.DataTable.isDataTable('#example2')) {
+		$('#example2').DataTable().destroy();
+	}
+
+	$('#example2').DataTable({
+		paging: false
+	});
 });
 
 $(document).on('click', '.submit-purchase', function(){
@@ -475,41 +489,6 @@ $(document).on('click', '#assignOperatorSave', function (e) {
 });
 
 $(document).ready(function(){
-	if ($.fn.DataTable.isDataTable('#example2')) {
-		//$('#example2').DataTable().destroy();
-	}
-	
-	/*$('#example2').DataTable({
-		order: [[4, 'asc']],
-		columnDefs: [
-        {
-            targets: 0,      
-            orderable: true,  
-            orderSequence: ['asc', 'desc'] 
-        }
-    ]
-	});*/
-	
-	/*function loadTable() {
-        $(".table-responsive").load(location.href + " .table-responsive>*", function () {
-
-            $('#example2').DataTable({
-                destroy: true,
-				pageLength: 50,
-                order: [[4, 'asc']],
-                columnDefs: [{
-                    targets: 0,
-                    orderable: true,
-                    orderSequence: ['asc', 'desc']
-                }]
-            });
-
-        });
-    }*/
-
-    //loadTable(); 
-
-    setInterval(loadTable, 1000);
 	<?php 
 	if($auto_update == 1)
 	{
@@ -543,10 +522,9 @@ function insertPackageOperator()
 		}
 	});
 }
-
-
-
-
+function chooseStockType(val) {
+	$('#stock_type').val(val);
+}
 </script>
 </body>
 </html>

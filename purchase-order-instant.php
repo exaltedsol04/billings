@@ -8,7 +8,7 @@
 	];
 	include_once 'includes/authCheck.php';
 	/*******End Auth Section*******/
-error_reporting(1);
+//error_reporting(1);
 	ob_start();
 	
 	if($_SERVER['REQUEST_METHOD'] == "POST")
@@ -53,8 +53,8 @@ error_reporting(1);
 					}
 					
 					
-					$field = "seller_id, product_variant_id, product_id, loose_stock_quantity, stock, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id, remarks";
-					$value = ":seller_id, :product_variant_id, :product_id, :loose_stock_quantity, :stock, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id, :remarks";
+					$field = "seller_id, product_variant_id, product_id, loose_stock_quantity, stock, stock_type, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id, remarks";
+					$value = ":seller_id, :product_variant_id, :product_id, :loose_stock_quantity, :stock, :stock_type, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id, :remarks";
 					
 					$addExecute=array(
 						':seller_id'			=> $_SESSION['SELLER_ID'],
@@ -62,6 +62,7 @@ error_reporting(1);
 						':product_id'			=> $general_cls_call->specialhtmlremover($product_id),
 						':loose_stock_quantity'			=> $general_cls_call->specialhtmlremover($loose_stock_quantity),
 						':stock'				=> $stock_qty,
+						':stock_type'			=> $general_cls_call->specialhtmlremover($stock_type),
 						':created_date'			=> date("Y-m-d H:i:s"),
 						':status'				=> 0,
 						':selling_price'		=> $general_cls_call->specialhtmlremover($hid_purchase_price[$k]),
@@ -146,9 +147,39 @@ error_reporting(1);
 			<?PHP
 			}
 		?>
+		<h6 class="mb-0 text-uppercase">Search panel</h6>
+		<hr>
+		<div class="card rounded-4 border-top border-4 border-primary border-gradient-1">
+			<div class="card-body">
+				<form class="row g-4" method="post" action="">
+					<div class="col-md-6">
+						<label for="input1" class="form-label">Search type</label>
+						<select name="src_type" class="form-select select2-dropdown" onchange="selectdate(this.value)">
+							<option value="">Select</option>
+							<option value="today" <?php echo ($_POST['src_type'] == 'today' || empty($_POST)) ? 'selected' : '' ;?>>Today</option>
+							<option value="yesterday" <?php echo $_POST['src_type'] == 'yesterday' ? 'selected' : '' ;?>>Yesterday</option>
+							<option value="tomorrow" <?php echo $_POST['src_type'] == 'tomorrow' ? 'selected' : '' ;?>>Tomorrow</option>
+							<option value="select_date" <?php echo $_POST['src_type'] == 'select_date' ? 'selected' : '' ;?>>Select date</option>
+						</select>
+					</div>
+					<div class="col-md-6 date_div" style="display:none;">
+						<label for="input5" class="form-label">To date</label>
+						<input type="date" name="toDate" id="toDate" class="form-control" placeholder="End Date">
+					</div>
+					
+					<div class="col-md-12">
+					  <div class="d-md-flex d-grid justify-content-md-between">
+						<button type="reset" class="btn btn-outline-danger px-5">Reset</button>
+						<button type="submit" class="btn btn-grd btn-grd-success px-4" name="btnUser" value="SAVE">Search</button>
+					  </div>
+					</div>
+				</form>
+			</div>
+		</div>
 		<div class="card">
 			<div class="card-body">
 			<form name="frm" action="" method="post" id="submit_purchase">
+				<input type="hidden" value="2" name="stock_type" id="stock_type">
 				<div class="table-responsive">
 					<table id="example2" class="table table-striped table-bordered dataTable">
 						<thead>
@@ -179,15 +210,18 @@ error_reporting(1);
 						</thead>
 						<tbody>
 						<?php
+								
+					/*$where = "WHERE
+							DATE(o.created_at) = CURDATE()
+							AND o.active_status = :active_status
+							AND oi.seller_id = :seller_id*/
 						
 						$fields = "o.id, oi.product_variant_id, p.id AS product_id, p.name AS product_name, pv.discounted_price, pv.price, pv.stock_unit_id, 
 							CASE 
 								WHEN pv.type = 'loose' THEN pv.product_id
 								ELSE oi.product_variant_id
 							END AS item_key,
-
 							pv.type,
-
 							SUM(
 								CASE
 									/* LOOSE PRODUCT */
@@ -213,30 +247,53 @@ error_reporting(1);
 						INNER JOIN " . UNITS . " u
 							ON u.id = pv.stock_unit_id";
 					
-
-					/*$where = "WHERE
-							DATE(o.created_at) = CURDATE()
-							AND o.active_status = :active_status
-							AND oi.seller_id = :seller_id*/
-						$where = "WHERE
-							o.active_status = :active_status
-							AND oi.seller_id = :seller_id
-							
-						GROUP BY
+					$where = "WHERE
+						o.active_status = :active_status
+						AND oi.seller_id = :seller_id
+						AND (
+							(o.order_type = 'instant' 
+								AND DATE(o.created_at) = :date
+							) OR
+							(o.order_type != 'instant' 
+								AND DATE(o.from_time) = :date
+							)
+						) GROUP BY
 							CASE
 								WHEN pv.type = 'loose' THEN pv.product_id
 								ELSE oi.product_variant_id
 							END";
+					/* ================= DATE DEFAULT ================= */
 
+					$from_time = date('Y-m-d'); // default = today
 
+					if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['src_type'])) {
+
+						$src_type = $_POST['src_type'];
+
+						if ($src_type == 'yesterday') {
+							$from_time = date('Y-m-d', strtotime('-1 day'));
+						} 
+						elseif ($src_type == 'today') {
+							$from_time = date('Y-m-d');
+						} 
+						elseif ($src_type == 'tomorrow') {
+							$from_time = date('Y-m-d', strtotime('+1 day'));
+						} 
+						elseif ($src_type == 'select_date' && !empty($_POST['toDate'])) {
+							$from_time = date('Y-m-d', strtotime($_POST['toDate']));
+						}
+					}
 					$params = [
 						':seller_id'=>$_SESSION['SELLER_ID'],
-						':active_status'=>2
+						':active_status'=>2,
+						':date'=> $from_time
 					];
+					
+					//echo $from_time; 
 							
-							$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
+					$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 								
-							//echo "<pre>";print_r($sqlQuery);die;
+							//echo "<pre>";print_r($params);die;
 							
 							if(!empty($sqlQuery[0]))
 							{
@@ -263,8 +320,8 @@ error_reporting(1);
 									
 									$used_stock = $arr->total_used_stock;
 									
-									$to_be_purchase_stock = $tot_product_stock > $used_stock ? 0 : abs($tot_product_stock - $used_stock);
-									//$to_be_purchase_stock = abs($used_stock - $tot_product_stock);
+									//$to_be_purchase_stock = $tot_product_stock > $used_stock ? 0 : abs($tot_product_stock - $used_stock);
+									$to_be_purchase_stock = abs($result->available_stock);
 									
 									//$used_stock = $result->used_stock;
 									
@@ -285,6 +342,7 @@ error_reporting(1);
 								<input type="hidden" value="<?php echo $arr->product_variant_id ;?>" name="product_variant_id[]">
 								<input type="hidden" value="<?php echo $arr->discounted_price ;?>" name="hid_purchase_price[]">
 								<input type="hidden" value="<?php echo $arr->price ;?>" name="hid_price[]">
+								
 							</tr>
 								<?PHP
 									$i++;
@@ -308,6 +366,38 @@ error_reporting(1);
   </main>
   <!--end main wrapper-->
   <!-- Modal -->
+  <!--- Auro load modal-->
+	<div class="modal fade" id="timeframeModal">
+	  <div class="modal-dialog modal-dialog-centered">
+		<form method="post" action="" id="timeframeModalSubmit">
+		<div class="modal-content">
+		  <div class="modal-header border-bottom-0 py-2 bg-grd-primary">
+			<h5 class="modal-title btn-grd">Choose</h5>
+			<a href="javascript:;" class="primaery-menu-close" data-bs-dismiss="modal">
+			  <i class="material-icons-outlined">close</i>
+			</a>
+		  </div>
+		  <div class="modal-body">
+				<select name="src_type" class="form-select select2-dropdown" onchange="selectdate(this.value)">
+					<option value="">Select</option>
+					<option value="today" <?php echo ($_POST['src_type'] == 'today' || empty($_POST)) ? 'selected' : '' ;?>>Today</option>
+					<option value="tomorrow" <?php echo $_POST['src_type'] == 'tomorrow' ? 'selected' : '' ;?>>Tomorrow</option>
+				</select>
+		  </div>
+		  <div class="modal-footer border-top-0">
+			<!--<button type="button" class="btn btn-grd btn-grd-danger rounded-0"
+			  data-bs-dismiss="modal">Cancel</button>-->
+			  <div class="col-md-12">
+				<div class="d-md-flex d-grid justify-content-md-between">
+					<button type="button" class="btn btn-outline-danger px-5" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" class="btn btn-grd btn-grd-success px-5">Choose to Search</button>
+				 </div>
+			  </div>
+		  </div>
+		</div>
+		</form>
+	  </div>
+	</div>
 	<!--- stock available modal-->
 <div class="modal fade" id="purchase-qty-modal">
                   <div class="modal-dialog modal-dialog-centered">
@@ -319,7 +409,13 @@ error_reporting(1);
                         </a>
                       </div>
                       <div class="modal-body">
-							<span class="text-center"><strong>Are you want to update the purchase stock!</strong></span>
+						<div class="col-md-12 mb-2"><strong>Do you want to update the purchase stock? please choose stock type.</strong></div>
+						<div class="col-md-12">
+							<select name="stock_type" class="form-select select2-dropdown" onchange="chooseStockType(this.value)">
+								<option value="2">Online</option>
+								<option value="1">POS</option>
+							</select>
+						</div>
                       </div>
                       <div class="modal-footer border-top-0">
                         <!--<button type="button" class="btn btn-grd btn-grd-danger rounded-0"
@@ -341,7 +437,23 @@ error_reporting(1);
 <script>
 
 $(document).ready(function () {
-    
+	if ($.fn.DataTable.isDataTable('#example2')) {
+		$('#example2').DataTable().destroy();
+	}
+
+	$('#example2').DataTable({
+		paging: false
+	});
+	
+    // Check if already submitted
+    if (!localStorage.getItem("modalSubmitted")) {
+        $('#timeframeModal').modal('show');
+    }
+
+    // On form submit
+    $('#timeframeModalSubmit').on('submit', function () {
+        localStorage.setItem("modalSubmitted", "true");
+    });
 });
 
 $(document).on('click', '.submit-purchase', function(){
@@ -442,10 +554,7 @@ $(document).on('click', '#assignOperatorSave', function (e) {
 });
 
 $(document).ready(function(){
-	if ($.fn.DataTable.isDataTable('#example2')) {
-		//$('#example2').DataTable().destroy();
-	}
-
+	
 	<?php 
 	if($auto_update == 1)
 	{
@@ -479,7 +588,19 @@ function insertPackageOperator()
 		}
 	});
 }
-
+function selectdate(val)
+{
+	if(val == 'select_date')
+	{
+		$('.date_div').show();
+	}
+	else{
+		$('.date_div').hide();
+	}
+}
+function chooseStockType(val) {
+	$('#stock_type').val(val);
+}
 
 
 

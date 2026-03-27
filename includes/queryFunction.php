@@ -142,11 +142,50 @@
 			}
 		}
 
-		public function select_join_query($fields, $tables, $where = '', $data_array = [], $mode = 2)
+		/*public function select_join_query($fields, $tables, $where = '', $data_array = [], $mode = 2)
 		{
 			$query_string = "SELECT $fields FROM $tables $where";
 			$query = $this->db->prepare($query_string);
 			//echo $query;print_r($data_array);die;
+			foreach ($data_array as $key => $value) {
+				$data_array[$key] = stripslashes($value);
+			}
+
+			try {
+				$query->execute($data_array);
+
+				if ($mode == 1) {
+					return $query->fetch(PDO::FETCH_OBJ);
+				} else {
+					return $query->fetchAll(PDO::FETCH_OBJ);
+				}
+
+			} catch (PDOException $e) {
+				die($e->getMessage());
+			}
+		}*/
+		public function select_join_query($fields, $tables, $where = '', $data_array = [], $mode = 2, $debug = false)
+		{
+			$query_string = "SELECT $fields FROM $tables $where";
+
+			/* ================= DEBUG OUTPUT ================= */
+			if ($debug) {
+				$debug_query = $query_string;
+
+				foreach ($data_array as $key => $value) {
+					$debug_query = str_replace($key, "'" . addslashes($value) . "'", $debug_query);
+				}
+
+				echo "<pre>";
+				echo $debug_query;
+				echo "\n\nPARAMS:\n";
+				print_r($data_array);
+				echo "</pre>";
+				die;
+			}
+
+			$query = $this->db->prepare($query_string);
+
 			foreach ($data_array as $key => $value) {
 				$data_array[$key] = stripslashes($value);
 			}

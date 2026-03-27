@@ -160,3 +160,11 @@
       </div>
     </aside>
   <!--end sidebar-->
+  
+	<?php 
+	if($page != 'purchase-order-instant.php') { ?>
+	<script>
+		localStorage.removeItem("modalSubmitted"); //used this in purchase-order-instant.php
+	</script>
+	<?php } ?>
+  

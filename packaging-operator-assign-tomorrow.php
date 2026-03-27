@@ -31,7 +31,7 @@
 	if($_SERVER['REQUEST_METHOD'] == "POST" && (isset($_POST['btnUser'])) && $_POST['btnUser'] === "SAVE")
 	{
 		$src_type  = $_POST['src_type'];
-		if($src_type  == 'yesturday')
+		if($src_type  == 'yesterday')
 		{
 			$from_time = date('Y-m-d', strtotime('-1 day'));
 		}
@@ -135,7 +135,7 @@
 						<select name="src_type" class="form-select select2-dropdown" onchange="selectdate(this.value)">
 							<option value="">Select</option>
 							<option value="today" <?php echo $_POST['src_type'] == 'today' ? 'selected' : '' ;?>>Today</option>
-							<option value="yesturday" <?php echo $_POST['src_type'] == 'yesturday' ? 'selected' : '' ;?>>Yesturday</option>
+							<option value="yesterday" <?php echo $_POST['src_type'] == 'yesterday' ? 'selected' : '' ;?>>Yesterday</option>
 							<option value="tomorrow" <?php echo ($_POST['src_type'] == 'tomorrow' || empty($_POST)) ? 'selected' : '' ;?>>Tomorrow</option>
 							<option value="select_date" <?php echo $_POST['src_type'] == 'select_date' ? 'selected' : '' ;?>>Select date</option>
 						</select>

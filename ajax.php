@@ -2462,18 +2462,22 @@ error_reporting(0);
 				 
 				$result = $ruf->available_stock_report($data);
 				
-				$total_stock_available = $result->pos_stock + $result->available_stock;
+				//$total_stock_available = $result->pos_stock + $result->available_stock;
+				$total_stock_available = $result->available_stock;
 				
 				if(empty($total_stock_available))
 				{
 					$total_stock_available = 0;
 				}
 				
-				if($val['quantity'] >= $total_stock_available)
+				//if($val['quantity'] >= $total_stock_available)
+				if($total_stock_available < 0)
 				{
 					$stockArr[] = [
 						'name' => $val['product_name'],
-						'variant_name' => $val['product_variant_name']
+						'variant_name' => $val['product_variant_name'],
+						'total_stock_available' => $total_stock_available,
+						'quantity' => $val['quantity']
 					];
 				}
 				 
