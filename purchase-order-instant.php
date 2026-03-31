@@ -21,6 +21,7 @@
 		if(!empty($product_variant_id))
 		{
 			$sucMsg = '';
+			$purchase_order_id = $ruf->generate_order_id(PRODUCT_STOCK_TRANSACTION, 'purchase_order_id');
 			foreach($product_variant_id as $k=>$val) {
 				
 				
@@ -53,10 +54,11 @@
 					}
 					
 					
-					$field = "seller_id, product_variant_id, product_id, loose_stock_quantity, stock, stock_type, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id, remarks";
-					$value = ":seller_id, :product_variant_id, :product_id, :loose_stock_quantity, :stock, :stock_type, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id, :remarks";
+					$field = "purchase_order_id, seller_id, product_variant_id, product_id, loose_stock_quantity, stock, stock_type, created_date, status, selling_price, purchase_price, transaction_type, received_selled_id, parent_id,approved_by, approved_date, order_id, remarks";
+					$value = ":purchase_order_id, :seller_id, :product_variant_id, :product_id, :loose_stock_quantity, :stock, :stock_type, :created_date, :status, :selling_price, :purchase_price, :transaction_type, :received_selled_id, :parent_id, :approved_by, :approved_date, :order_id, :remarks";
 					
 					$addExecute=array(
+						':purchase_order_id'	=> $purchase_order_id,
 						':seller_id'			=> $_SESSION['SELLER_ID'],
 						':product_variant_id'	=> $general_cls_call->specialhtmlremover($val),
 						':product_id'			=> $general_cls_call->specialhtmlremover($product_id),

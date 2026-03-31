@@ -317,5 +317,19 @@
 			
 			return $admin_stock_debit->total_stock ? abs($admin_stock_debit->total_stock) : 0;
 		}
+		function generate_order_id($table, $field)
+		{
+			$fields = "MAX(CAST($field AS UNSIGNED)) as max_id";
+			$result = $this->general->select_query($fields, $table, '', [], 1);
+			$next = 1;
+
+			if (!empty($result) && !empty($result->max_id)) {
+				$next = $result->max_id + 1;
+			}
+
+			$order_id = str_pad($next, 4, '0', STR_PAD_LEFT);
+			
+			return $order_id;
+		}
 	}
 ?>

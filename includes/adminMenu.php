@@ -72,7 +72,7 @@
 			  </ul>
 			</li>
 			
-			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view.php' || $page=='approved-stock-list.php' || $page=='purchase-summary-list.php' || $page== 'purchase-stock-multiple-add.php' || $page=='admin-stock-puchase-list.php' || $page=='admin-puchase-order-list.php' || $page=='admin-product-wise-purchase-report.php') { echo ('class="mm-active"');} ?>>
+			<li <?php if($page=='purchase-stock-add.php' || $page=='purchase-stock-list.php'  || $page=='purchase-stock-list-view.php' || $page=='approved-stock-list.php' || $page=='purchase-summary-list.php' || $page== 'purchase-stock-multiple-add.php' || $page=='admin-stock-puchase-list.php' || $page=='admin-puchase-order-list.php' || $page=='admin-product-wise-purchase-report.php' || $page=='instant-purchase-list.php' || $page=='instant-purchase-list-view.php') { echo ('class="mm-active"');} ?>>
 			  <a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="material-icons-outlined">card_giftcard</i>
 				</div>
@@ -81,6 +81,7 @@
 			  <ul>
 				<li><a href="<?php echo SITE_URL.'purchase-stock-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Add</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-stock-multiple-add'; ?>"><i class="material-icons-outlined">arrow_right</i>Add Multiple</a></li>
+				<li <?php if($page=='instant-purchase-list.php' || $page=='instant-purchase-list-view.php') { echo ('class="mm-active"');} ?>><a href="<?php echo SITE_URL.'instant-purchase-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Instant Purchase</a></li>
 				<li><a href="<?php echo SITE_URL.'purchase-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>List</a></li>
 				<li><a href="<?php echo SITE_URL.'admin-pending-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Pending Stock</a></li>
 				<li><a href="<?php echo SITE_URL.'admin-approved-stock-list'; ?>"><i class="material-icons-outlined">arrow_right</i>Approved Stock</a></li>
