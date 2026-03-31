@@ -26,13 +26,20 @@
 
 				u.name AS stock_unit_name,
 
-				COALESCE(online.online_stock,0) AS online_total_stock,
-				COALESCE(oi.used_qty,0) AS used_stock,
+				ROUND(COALESCE(online.online_stock,0), 3) AS online_total_stock,
+				ROUND(COALESCE(oi.used_qty,0), 3) AS used_stock,
 
-				(COALESCE(online.online_stock,0) - COALESCE(oi.used_qty,0))
-					AS available_stock,
+				CASE 
+					WHEN ABS(
+						COALESCE(online.online_stock,0) - COALESCE(oi.used_qty,0)
+					) < 0.0001 
+					THEN 0
+					ELSE ROUND(
+						COALESCE(online.online_stock,0) - COALESCE(oi.used_qty,0)
+					, 3)
+				END AS available_stock,
 
-				COALESCE(pos.pos_stock,0) AS pos_stock
+				ROUND(COALESCE(pos.pos_stock,0), 3) AS pos_stock
 			";
 
 			$tables = PRODUCTS . " p
