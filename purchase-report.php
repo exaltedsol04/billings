@@ -14,16 +14,18 @@
 		{
 			$fromDate = $_POST['fromDate'];
 			$toDate = $_POST['toDate'];
-			$whereDateRange = "AND pr.created_date >= :fromDate AND pr.created_date < DATE_ADD(:toDate, INTERVAL 1 DAY)";
+			$whereDateRange = "AND DATE(pr.created_date) >= :fromDate AND DATE(pr.created_date) < DATE_ADD(:toDate, INTERVAL 1 DAY)";
 			
 			
 			$params = [
 				':status' => 0,
-				':transaction_type' => 1,
+				':t1' => 1,
+				':t2' => 7,
 				':seller_id'=> $_SESSION['SELLER_ID'],
 				':fromDate' => $_POST['fromDate'],
 				':toDate'   => $_POST['toDate']
 			];
+			
 		}
 		else
 		{
@@ -33,7 +35,8 @@
 			
 			$params = [
 				':status'=> 0,
-				':transaction_type' => 1,
+				':t1' => 1,
+				':t2' => 7,
 				':seller_id'=> $_SESSION['SELLER_ID']
 			];
 			
@@ -107,7 +110,7 @@
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id";
 						
-						$where = "WHERE pr.status = :status AND pr.transaction_type = :transaction_type AND pr.seller_id =:seller_id " . $whereDateRange;
+						$where = "WHERE pr.status = :status AND pr.transaction_type IN (:t1, :t2) AND pr.seller_id =:seller_id " . $whereDateRange. " ORDER BY pr.created_date DESC";
 						
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 

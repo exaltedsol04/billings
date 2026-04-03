@@ -151,6 +151,7 @@
 						<th>Product Name</th>
 						<th>Vendor</th>
 						<th>Qty.</th>
+						<th>Price</th>
 						<th>Measurement</th>
 						<th>Type</th>
 						<th>Requested By</th>
@@ -216,6 +217,7 @@
 											</select>
 											<small class="text-danger vendor-error" style="display:none;"></small></td>
 										<td><input type="text" name="stock[]" value="<?PHP echo $arr->type == 'loose' ? $arr->loose_stock_quantity : $arr->pqty; ?>" class="form-control form-control-sm qty" oninput="this.value = this.value.replace(<?php echo $arr->type == 'loose' ? '/[^0-9.]/g' : '/[^0-9]/g'; ?>, '')"><small class="text-danger qty-error" style="display:none;"></small></td>
+										<td><input type="text" value="" name="purchase_price[]" oninput="this.value = this.value.replace('/[^0-9.]/g')" class="form-control form-control-sm price"><small class="text-danger price-error" style="display:none;"></small></td>
 										<td><?PHP echo $arr->type == 'loose' ? $unitname : $arr->measurement.' '.$unitname; ?></td>
 										<td class="text-center"><span class="badge bg-grd-primary dash-lable"><?php echo $arr->type ?></span></td>
 										<td><?PHP echo $arr->store_name; ?></td>
@@ -223,7 +225,7 @@
 										
 										<input type="hidden" value="<?php echo $arr->product_id ;?>" name="product_id[]">
 										<input type="hidden" value="<?php echo $arr->product_variant_id ;?>" name="product_variant_id[]">
-										<input type="hidden" value="<?php echo $arr->purchase_price ;?>" name="purchase_price[]">
+										
 									  </tr>
 										<?PHP
 												$i++;
@@ -310,26 +312,34 @@ $(document).on('click', '.submit-purchase', function(){
 
         let qtyInput = row.find('.qty');
         let vendorInput = row.find('.vendor');
+        let priceInput = row.find('.price');
 
         let qty = qtyInput.val();
         let vendor = vendorInput.val();
+        let price = priceInput.val();
 
         let qerrorBox = row.find('.qty-error');
         let verrorBox = row.find('.vendor-error');
+        let perrorBox = row.find('.price-error');
 
         // reset errors
         qerrorBox.hide().text('');
         verrorBox.hide().text('');
+        perrorBox.hide().text('');
 
         // Qty validation
         if(qty == '' || qty == 0){
             qerrorBox.text('Stock required').show();
             isValid = false;
         }
-
         // Vendor validation
         if(vendor == '' || vendor == 0){
             verrorBox.text('Vendor required').show();
+            isValid = false;
+        }
+		// price validation
+        if(price == '' || price == 0){
+            perrorBox.text('Price required').show();
             isValid = false;
         }
 
