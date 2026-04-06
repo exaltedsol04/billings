@@ -95,10 +95,11 @@
 						INNER JOIN " . PRODUCT_VARIANTS . " pv ON pr.product_variant_id = pv.id
 						INNER JOIN " . PRODUCTS . " p ON p.id = pr.product_id
 						INNER JOIN " . SELLERS . " s ON s.id = pr.seller_id";
-						$where = "WHERE pr.status = :status AND pr.transaction_type = :transaction_type ORDER BY pr.created_date DESC";
+						$where = "WHERE pr.status = :status AND pr.transaction_type IN (:t1, :t2) ORDER BY pr.created_date DESC";
 						$params = [
 							':status' => 1,
-							':transaction_type' => 1	
+							':t1' => 1,	
+							':t2' => 7	
 						];
 						$sqlQuery = $general_cls_call->select_join_query($fields, $tables, $where, $params, 2);
 						

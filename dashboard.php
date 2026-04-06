@@ -34,7 +34,7 @@
 	
 	$user_available_stock = $available_stock_data->total;
 	
-	$parchase_stock_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE transaction_type=:transaction_type AND status=:status AND seller_id=:seller_id", array(':transaction_type'=> 1, ':status'=>0, ':seller_id'=> $_SESSION['SELLER_ID']), 'stock');
+	$parchase_stock_data = $general_cls_call->select_query_sum(PRODUCT_STOCK_TRANSACTION, "WHERE transaction_type IN (:t1, :t2) AND status=:status AND seller_id=:seller_id", array(':t1'=> 1,':t2'=> 7, ':status'=>0, ':seller_id'=> $_SESSION['SELLER_ID']), 'stock');
 	
 	$user_purchase_stock = $parchase_stock_data->total;
 	
