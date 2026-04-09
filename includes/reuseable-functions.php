@@ -109,7 +109,8 @@
 					(pv.type='loose' AND oi.loose_product_id = p.id)
 				 OR (pv.type!='loose' AND oi.normal_variant_id = pv.id)
 			)
-
+			
+			/*oi.active_status=4*/
 
 			/* ================= POS STOCK ================= */
 			LEFT JOIN (
